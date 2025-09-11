@@ -14,6 +14,8 @@ return new class extends Migration
             $table->string('file_path');
             $table->string('caption')->default('general');
             $table->integer('sort_order')->default(0);
+            $table->boolean('is_main')->default(false);
+            $table->unsignedInteger('file_size')->comment('File size in bytes, max 512KB');
             $table->timestamps();
         });
     }
