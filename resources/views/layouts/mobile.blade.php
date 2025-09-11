@@ -94,6 +94,24 @@
                         Properties
                     </a>
                 </li>
+                <li>
+                    <a href="{{ route('bookings.index') }}" @click="sidebarOpen = false"
+                       class="flex items-center gap-3 p-3 rounded-xl hover:bg-emerald-100 text-gray-700 transition-colors {{ request()->routeIs('bookings.*') ? 'bg-emerald-100 text-emerald-700' : '' }}">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        Bookings
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('b2b.dashboard') }}" @click="sidebarOpen = false"
+                       class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-100 text-gray-700 transition-colors {{ request()->routeIs('b2b.*') ? 'bg-blue-100 text-blue-700' : '' }}">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                        B2B Partners
+                    </a>
+                </li>
                 @if(auth()->user()->is_admin)
                 <li>
                     <a href="{{ route('admin.dashboard') }}" @click="sidebarOpen = false"
@@ -135,10 +153,16 @@
                     <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
                 </svg>
             </a>
-            <a href="{{ route('properties.index') }}" 
-               class="text-gray-600 hover:text-purple-600 mx-2 transition-all duration-200 ease-in-out hover:rotate-12 focus:outline-none focus:ring-2 focus:ring-purple-500 rounded-full {{ request()->routeIs('properties.*') ? 'text-purple-600' : '' }}">
-                <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M19 7h-3V6a4 4 0 0 0-8 0v1H5a1 1 0 0 0-1 1v11a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V8a1 1 0 0 0-1-1zM10 6a2 2 0 0 1 4 0v1h-4V6zm8 13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V9h2v1a1 1 0 0 0 2 0V9h4v1a1 1 0 0 0 2 0V9h2v10z"/>
+            <a href="{{ route('bookings.index') }}" 
+               class="text-gray-600 hover:text-emerald-600 mx-2 transition-all duration-200 ease-in-out hover:scale-110 focus:outline-none focus:ring-2 focus:ring-emerald-500 rounded-full {{ request()->routeIs('bookings.*') ? 'text-emerald-600' : '' }}">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+            </a>
+            <a href="{{ route('b2b.dashboard') }}" 
+               class="text-gray-600 hover:text-blue-600 mx-2 transition-all duration-200 ease-in-out hover:rotate-12 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-full {{ request()->routeIs('b2b.*') ? 'text-blue-600' : '' }}">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                 </svg>
             </a>
             <a href="{{ route('properties.create') }}" 

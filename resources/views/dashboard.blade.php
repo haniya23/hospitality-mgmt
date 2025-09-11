@@ -29,7 +29,7 @@
             </div>
         @else
             <!-- Quick Actions -->
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <a href="{{ route('properties.create') }}" 
                    class="bg-white bg-opacity-80 backdrop-blur-md rounded-2xl p-4 shadow-lg hover:shadow-xl transition-all duration-200">
                     <div class="text-center">
@@ -41,15 +41,37 @@
                         <p class="text-sm font-medium text-gray-900">Add Property</p>
                     </div>
                 </a>
-                <a href="{{ route('properties.index') }}" 
+                <a href="{{ route('bookings.index') }}" 
+                   class="bg-white bg-opacity-80 backdrop-blur-md rounded-2xl p-4 shadow-lg hover:shadow-xl transition-all duration-200">
+                    <div class="text-center">
+                        <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                            <svg class="h-6 w-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                        <p class="text-sm font-medium text-gray-900">Bookings</p>
+                    </div>
+                </a>
+                <a href="{{ route('b2b.dashboard') }}" 
                    class="bg-white bg-opacity-80 backdrop-blur-md rounded-2xl p-4 shadow-lg hover:shadow-xl transition-all duration-200">
                     <div class="text-center">
                         <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                            <svg class="h-6 w-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                            <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                        </div>
+                        <p class="text-sm font-medium text-gray-900">B2B Partners</p>
+                    </div>
+                </a>
+                <a href="{{ route('properties.index') }}" 
+                   class="bg-white bg-opacity-80 backdrop-blur-md rounded-2xl p-4 shadow-lg hover:shadow-xl transition-all duration-200">
+                    <div class="text-center">
+                        <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                            <svg class="h-6 w-6 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M19 7h-3V6a4 4 0 0 0-8 0v1H5a1 1 0 0 0-1 1v11a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V8a1 1 0 0 0-1-1zM10 6a2 2 0 0 1 4 0v1h-4V6zm8 13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V9h2v1a1 1 0 0 0 2 0V9h4v1a1 1 0 0 0 2 0V9h2v10z"/>
                             </svg>
                         </div>
-                        <p class="text-sm font-medium text-gray-900">View All</p>
+                        <p class="text-sm font-medium text-gray-900">Properties</p>
                     </div>
                 </a>
             </div>
