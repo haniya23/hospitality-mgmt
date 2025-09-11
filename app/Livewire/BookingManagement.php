@@ -9,7 +9,6 @@ use App\Models\Reservation;
 class BookingManagement extends Component
 {
     public $selectedProperty = null;
-    public $showBookingModal = false;
     public $selectedBooking = null;
     public $view = 'calendar'; // 'calendar' or 'list'
 
@@ -34,14 +33,8 @@ class BookingManagement extends Component
         $this->dispatch('open-booking-modal');
     }
 
-    public function closeBookingModal()
-    {
-        $this->showBookingModal = false;
-    }
-
     public function handleBookingCreated()
     {
-        $this->closeBookingModal();
         $this->dispatch('$refresh');
     }
 

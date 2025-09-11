@@ -1,39 +1,46 @@
 <div class="space-y-6">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div class="space-y-4">
+        <!-- Title -->
         <div>
             <h2 class="text-2xl font-bold text-gray-900">Booking Management</h2>
             <p class="text-gray-600">Manage your property bookings and calendar</p>
         </div>
         
-        <div class="flex items-center space-x-3">
-            <!-- Property Selector -->
-            <select wire:model.live="selectedProperty" class="px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
-                <option value="">All Properties</option>
-                @foreach($properties as $property)
-                    <option value="{{ $property->id }}">{{ $property->name }}</option>
-                @endforeach
-            </select>
+        <!-- Controls - Mobile Responsive -->
+        <div class="flex flex-col space-y-3 sm:space-y-0">
+            <!-- Property Selector - Full width on mobile -->
+            <div class="w-full">
+                <select wire:model.live="selectedProperty" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm">
+                    <option value="">All Properties</option>
+                    @foreach($properties as $property)
+                        <option value="{{ $property->id }}">{{ $property->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            
+            <!-- View Toggle and New Booking Button -->
+            <div class="flex items-center justify-between gap-3">
+                <!-- View Toggle -->
+                <div class="flex bg-gray-100 rounded-lg p-1 flex-1 sm:flex-none">
+                    <button wire:click="switchView('calendar')" 
+                            class="flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-md transition-colors
+                            {{ $view === 'calendar' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600' }}">
+                        Calendar
+                    </button>
+                    <button wire:click="switchView('list')" 
+                            class="flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-md transition-colors
+                            {{ $view === 'list' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600' }}">
+                        List
+                    </button>
+                </div>
 
-            <!-- View Toggle -->
-            <div class="flex bg-gray-100 rounded-lg p-1">
-                <button wire:click="switchView('calendar')" 
-                        class="px-3 py-1 text-sm font-medium rounded-md transition-colors
-                        {{ $view === 'calendar' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600' }}">
-                    Calendar
-                </button>
-                <button wire:click="switchView('list')" 
-                        class="px-3 py-1 text-sm font-medium rounded-md transition-colors
-                        {{ $view === 'list' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600' }}">
-                    List
+                <!-- New Booking Button -->
+                <button wire:click="openBookingModal" 
+                        class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-4 py-3 rounded-xl hover:from-emerald-600 hover:to-emerald-700 transition-all duration-200 text-sm font-medium whitespace-nowrap">
+                    + New
                 </button>
             </div>
-
-            <!-- New Booking Button -->
-            <button wire:click="openBookingModal" 
-                    class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-4 py-2 rounded-xl hover:from-emerald-600 hover:to-emerald-700 transition-all duration-200">
-                + New Booking
-            </button>
         </div>
     </div>
 
@@ -144,8 +151,6 @@
     </div>
 
     <!-- Booking Modal -->
-    @if($showBookingModal)
-        <livewire:booking-modal :property-id="$selectedProperty" />
-    @endif
+    <livewire:booking-modal :property-id="$selectedProperty" key="booking-modal" />
 </div>
 
