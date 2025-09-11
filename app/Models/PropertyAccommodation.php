@@ -33,6 +33,11 @@ class PropertyAccommodation extends Model
         return $this->belongsTo(PredefinedAccommodationType::class, 'predefined_accommodation_type_id');
     }
 
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class, 'property_accommodation_id');
+    }
+
     public function getDisplayNameAttribute()
     {
         if ($this->predefinedType && $this->predefinedType->name === 'Custom') {
