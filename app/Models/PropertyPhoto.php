@@ -11,6 +11,8 @@ class PropertyPhoto extends Model
         'file_path',
         'caption',
         'sort_order',
+        'is_main',
+        'file_size',
     ];
 
     public function property()
