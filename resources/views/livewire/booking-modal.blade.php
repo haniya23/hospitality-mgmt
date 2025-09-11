@@ -1,44 +1,77 @@
-<div>
-    @if($isOpen)
-        <div class="fixed inset-0 z-50 overflow-y-auto" x-data="{ mode: @entangle('mode') }">
-            <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-                <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" wire:click="close"></div>
-
-                <div class="inline-block w-full max-w-2xl p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl">
-                    <!-- Header -->
-                    <div class="flex items-center justify-between mb-6">
-                        <div>
-                            <h3 class="text-xl font-bold text-gray-900">New Booking</h3>
-                            <p class="text-sm text-gray-600">Create a new reservation</p>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <!-- Mode Toggle -->
-                            <div class="flex bg-gray-100 rounded-lg p-1">
-                                <button wire:click="$set('mode', 'quick')" 
-                                        class="px-3 py-1 text-xs font-medium rounded-md transition-colors"
-                                        :class="mode === 'quick' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'">
-                                    Quick
-                                </button>
-                                <button wire:click="$set('mode', 'full')" 
-                                        class="px-3 py-1 text-xs font-medium rounded-md transition-colors"
-                                        :class="mode === 'full' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'">
-                                    Full
-                                </button>
-                            </div>
-                            <button wire:click="close" class="text-gray-400 hover:text-gray-600">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                </svg>
-                            </button>
-                        </div>
+<div
+    x-data="{ show: @entangle('isOpen'), mode: @entangle('mode') }"
+    x-show="show"
+    x-on:keydown.escape.window="show = false"
+    style="display: none;"
+    class="fixed inset-0 z-50 overflow-y-auto backdrop-blur-sm bg-black/40"
+    aria-labelledby="modal-title"
+    role="dialog"
+    aria-modal="true"
+>
+    <!-- Mobile & Desktop Overlay -->
+    <div class="flex items-center justify-center min-h-screen p-4 sm:p-6">
+        
+        <!-- Modal Container -->
+        <div
+            x-show="show"
+            x-transition:enter="ease-out duration-300"
+            x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+            x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+            x-transition:leave="ease-in duration-200"
+            x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+            x-transition:leave-end="opacity-0 scale-95 translate-y-4"
+            class="relative w-full max-w-md sm:max-w-lg lg:max-w-xl xl:max-w-2xl mx-auto bg-white rounded-2xl shadow-2xl ring-1 ring-black/5 max-h-[95vh] flex flex-col"
+        >
+            <!-- Header with Gradient Background -->
+            <div class="flex items-center justify-between p-6 pb-4 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-t-2xl border-b border-emerald-100">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
                     </div>
+                    <div>
+                        <h3 class="text-lg sm:text-xl font-bold text-gray-900 leading-tight" id="modal-title">
+                            New Booking
+                        </h3>
+                        <p class="text-sm text-emerald-600 font-medium mt-1">
+                            Create a new reservation
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <!-- Mode Toggle -->
+                    <div class="flex bg-white/80 rounded-lg p-1 shadow-sm">
+                        <button wire:click="$set('mode', 'quick')" 
+                                class="px-3 py-1 text-xs font-medium rounded-md transition-colors"
+                                :class="mode === 'quick' ? 'bg-emerald-100 text-emerald-700 shadow-sm' : 'text-gray-600'">
+                            Quick
+                        </button>
+                        <button wire:click="$set('mode', 'full')" 
+                                class="px-3 py-1 text-xs font-medium rounded-md transition-colors"
+                                :class="mode === 'full' ? 'bg-emerald-100 text-emerald-700 shadow-sm' : 'text-gray-600'">
+                            Full
+                        </button>
+                    </div>
+                    <button 
+                        wire:click="close" 
+                        class="p-2 text-gray-400 hover:text-gray-600 hover:bg-white/80 rounded-xl transition-all duration-200 shadow-sm"
+                    >
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
 
-                    <form wire:submit="save" class="space-y-6">
+            <!-- Scrollable Content -->
+            <div class="flex-1 overflow-y-auto">
+                <form wire:submit.prevent="save" class="p-6 space-y-6">
                         <!-- Property & Accommodation -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Property</label>
-                                <select wire:model.live="property_id" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Property</label>
+                                <select wire:model.live="property_id" class="w-full border border-gray-200 rounded-xl shadow-sm py-3 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200">
                                     <option value="">Select Property</option>
                                     @foreach($properties as $property)
                                         <option value="{{ $property->id }}">{{ $property->name }}</option>
@@ -48,8 +81,8 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Accommodation</label>
-                                <select wire:model.live="accommodation_id" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Accommodation</label>
+                                <select wire:model.live="accommodation_id" class="w-full border border-gray-200 rounded-xl shadow-sm py-3 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200">
                                     <option value="">Select Accommodation</option>
                                     @foreach($accommodations as $accommodation)
                                         <option value="{{ $accommodation->id }}">{{ $accommodation->display_name }} (₹{{ number_format($accommodation->base_rate ?? 0) }}/night)</option>
@@ -60,32 +93,32 @@
                         </div>
 
                         <!-- Dates & Guests -->
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Check-in</label>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Check-in</label>
                                 <input type="date" wire:model.live="check_in_date" 
-                                       class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                                       class="w-full border border-gray-200 rounded-xl shadow-sm py-3 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200">
                                 @error('check_in_date') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Check-out</label>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Check-out</label>
                                 <input type="date" wire:model.live="check_out_date" 
-                                       class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                                       class="w-full border border-gray-200 rounded-xl shadow-sm py-3 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200">
                                 @error('check_out_date') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Adults</label>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Adults</label>
                                 <input type="number" wire:model.live="adults" min="1" 
-                                       class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                                       class="w-full border border-gray-200 rounded-xl shadow-sm py-3 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200">
                                 @error('adults') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Children</label>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Children</label>
                                 <input type="number" wire:model.live="children" min="0" 
-                                       class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                                       class="w-full border border-gray-200 rounded-xl shadow-sm py-3 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200">
                                 @error('children') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                             </div>
                         </div>
@@ -104,7 +137,7 @@
                         <!-- Customer Selection -->
                         <div class="space-y-4">
                             <div class="flex items-center justify-between">
-                                <label class="block text-sm font-medium text-gray-700">Customer</label>
+                                <label class="block text-sm font-semibold text-gray-700">Customer</label>
                                 <button type="button" wire:click="$toggle('create_new_guest')" 
                                         class="text-sm text-emerald-600 hover:text-emerald-700">
                                     {{ $create_new_guest ? 'Select Existing' : 'Create New' }}
@@ -115,22 +148,22 @@
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-xl">
                                     <div>
                                         <input type="text" wire:model.live="guest_name" placeholder="Full Name" 
-                                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                                               class="w-full border border-gray-200 rounded-xl shadow-sm py-3 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200">
                                         @error('guest_name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                                     </div>
                                     <div>
                                         <input type="tel" wire:model.live="guest_mobile" placeholder="Mobile Number" 
-                                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                                               class="w-full border border-gray-200 rounded-xl shadow-sm py-3 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200">
                                         @error('guest_mobile') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                                     </div>
                                     <div>
                                         <input type="email" wire:model="guest_email" placeholder="Email (Optional)" 
-                                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                                               class="w-full border border-gray-200 rounded-xl shadow-sm py-3 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200">
                                     </div>
                                 </div>
                             @else
                                 <div>
-                                    <select wire:model="guest_id" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                                    <select wire:model="guest_id" class="w-full border border-gray-200 rounded-xl shadow-sm py-3 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200">
                                         <option value="">Select Customer</option>
                                         @foreach($guests as $guest)
                                             <option value="{{ $guest->id }}">{{ $guest->name }} ({{ $guest->mobile_number ?? $guest->phone }})</option>
@@ -176,7 +209,7 @@
 
                         <!-- Pricing -->
                         <div class="space-y-4">
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Total Amount</label>
                                     <input type="number" wire:model.live="total_amount" step="0.01" 
@@ -243,20 +276,34 @@
                             </div>
                         </div>
 
-                        <!-- Actions -->
-                        <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
-                            <button type="button" wire:click="close" 
-                                    class="px-6 py-3 text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors">
-                                Cancel
-                            </button>
-                            <button type="submit" 
-                                    class="px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-xl hover:from-emerald-600 hover:to-emerald-700 transition-all duration-200">
-                                Create Booking
-                            </button>
-                        </div>
-                    </form>
+                </form>
+            </div>
+
+            <!-- Enhanced Footer with Better Actions -->
+            <div class="border-t border-gray-100 bg-gray-50/80 backdrop-blur-sm px-6 py-4 rounded-b-2xl">
+                <div class="flex flex-col-reverse sm:flex-row gap-3">
+                    <button 
+                        type="button" 
+                        wire:click="close" 
+                        class="flex-1 sm:flex-none sm:px-6 py-3 bg-white border border-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all duration-200 shadow-sm"
+                    >
+                        Cancel
+                    </button>
+                    
+                    <button 
+                        type="submit" 
+                        wire:click="save"
+                        class="flex-1 sm:flex-none sm:px-8 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-xl hover:from-emerald-700 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                    >
+                        <span class="flex items-center justify-center space-x-2">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            <span>Create Booking</span>
+                        </span>
+                    </button>
                 </div>
             </div>
         </div>
-    @endif
+    </div>
 </div>

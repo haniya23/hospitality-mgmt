@@ -149,11 +149,3 @@
     @endif
 </div>
 
-@script
-<script>
-    $wire.on('booking-created', () => {
-        $wire.closeBookingModal();
-        $wire.refreshData();
-    });
-</script>
-@endscript

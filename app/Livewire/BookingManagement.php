@@ -14,7 +14,7 @@ class BookingManagement extends Component
     public $view = 'calendar'; // 'calendar' or 'list'
 
     protected $listeners = [
-        'booking-created' => 'refreshData',
+        'booking-created' => 'handleBookingCreated',
         'date-selected' => 'handleDateSelection',
         'open-booking' => 'openBookingDetails',
     ];
@@ -31,12 +31,18 @@ class BookingManagement extends Component
 
     public function openBookingModal()
     {
-        $this->showBookingModal = true;
+        $this->dispatch('open-booking-modal');
     }
 
     public function closeBookingModal()
     {
         $this->showBookingModal = false;
+    }
+
+    public function handleBookingCreated()
+    {
+        $this->closeBookingModal();
+        $this->dispatch('$refresh');
     }
 
     public function refreshData()

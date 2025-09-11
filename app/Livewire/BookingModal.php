@@ -18,6 +18,10 @@ class BookingModal extends Component
     public $isOpen = false;
     public $mode = 'quick'; // 'quick' or 'full'
     
+    protected $listeners = [
+        'open-booking-modal' => 'open',
+    ];
+    
     // Booking data
     public $property_id;
     public $accommodation_id;
@@ -93,6 +97,7 @@ class BookingModal extends Component
     {
         $this->isOpen = false;
         $this->resetForm();
+        $this->dispatch('modal-closed');
     }
 
     public function resetForm()
@@ -308,9 +313,8 @@ class BookingModal extends Component
             }
 
             $this->dispatch('booking-created', ['booking' => $booking->id]);
-            $this->close();
-            
             session()->flash('success', 'Booking created successfully!');
+            $this->close();
 
         } catch (\Exception $e) {
             session()->flash('error', 'Error creating booking: ' . $e->getMessage());
