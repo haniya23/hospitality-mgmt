@@ -292,46 +292,7 @@
                             </div>
                         </div>
                         
-                    @elseif($section === 'photos')
-                        <div class="space-y-6">
-                            <div>
-                                <label for="photo_caption" class="block text-sm font-semibold text-gray-700 mb-2">Photo Category</label>
-                                <select wire:model="photo_caption" class="w-full border border-gray-200 rounded-xl shadow-sm py-3 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200">
-                                    @foreach($photoCaptions as $caption)
-                                        <option value="{{ $caption }}">{{ ucfirst(str_replace('_', ' ', $caption)) }}</option>
-                                    @endforeach
-                                </select>
-                                @error('photo_caption') <span class="text-red-500 text-xs mt-1 block font-medium">{{ $message }}</span> @enderror
-                            </div>
-                            
-                            @if($existingPhotos->count() < 3)
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Upload Photos (Max 3)</label>
-                                    <input type="file" wire:model="photos" multiple accept="image/*" class="w-full border border-gray-200 rounded-xl shadow-sm py-3 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200">
-                                    @error('photos.*') <span class="text-red-500 text-xs mt-1 block font-medium">{{ $message }}</span> @enderror
-                                    <p class="text-xs text-gray-500 mt-1">Images will be automatically resized to under 512KB</p>
-                                </div>
-                            @endif
-                            
-                            @if($existingPhotos->count() > 0)
-                                <div>
-                                    <h4 class="text-sm font-semibold text-gray-700 mb-3">Current Photos ({{ $existingPhotos->count() }}/3)</h4>
-                                    <div class="grid grid-cols-2 gap-4">
-                                        @foreach($existingPhotos as $photo)
-                                            <div class="relative group">
-                                                <img src="{{ Storage::url($photo->file_path) }}" alt="{{ $photo->caption }}" class="w-full h-32 object-cover rounded-lg">
-                                                <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
-                                                    <button wire:click="deletePhoto({{ $photo->id }})" class="bg-red-500 text-white px-3 py-1 rounded-lg text-sm hover:bg-red-600">
-                                                        Delete
-                                                    </button>
-                                                </div>
-                                                <span class="absolute bottom-2 left-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded">{{ ucfirst(str_replace('_', ' ', $photo->caption)) }}</span>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @endif
-                        </div>
+
                         
                     @else
                         <div class="text-center py-12">
@@ -358,7 +319,7 @@
                         Cancel
                     </button>
                     
-                    @if(in_array($section, ['basic', 'location', 'amenities', 'policies', 'photos']))
+                    @if(in_array($section, ['basic', 'location', 'amenities', 'policies']))
                         <button 
                             type="submit" 
                             wire:click="save"

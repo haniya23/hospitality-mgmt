@@ -10,16 +10,11 @@ use App\Models\District;
 use App\Models\City;
 use App\Models\Pincode;
 use App\Models\Amenity;
-use App\Models\PropertyPhoto;
 use Livewire\Component;
 use Livewire\Attributes\On;
-use Livewire\WithFileUploads;
-use Intervention\Image\ImageManager;
-use Intervention\Image\Drivers\Gd\Driver;
 
 class PropertyModal extends Component
 {
-    use WithFileUploads;
     public $showModal = false;
     public $propertyId = null;
     public $section = 'basic';
@@ -55,10 +50,7 @@ class PropertyModal extends Component
     public $cancellation_policy = '';
     public $house_rules = '';
     
-    // Photos
-    public $photo_caption = 'general';
-    public $photos = [];
-    public $existingPhotos = [];
+
 
     protected function rules()
     {
@@ -92,10 +84,7 @@ class PropertyModal extends Component
                 'cancellation_policy' => 'nullable|string',
                 'house_rules' => 'nullable|string',
             ],
-            'photos' => [
-                'photo_caption' => 'required|string|max:255',
-                'photos.*' => 'image|max:2048',
-            ],
+            'photos' => [],
             default => []
         };
     }
@@ -137,8 +126,6 @@ class PropertyModal extends Component
             $this->check_out_time = $policy->check_out_time ?? '';
             $this->cancellation_policy = $policy->cancellation_policy ?? '';
             $this->house_rules = $policy->house_rules ?? '';
-        } elseif ($section === 'photos') {
-            $this->existingPhotos = $property->photos;
         }
         
         $this->showModal = true;
@@ -219,60 +206,13 @@ class PropertyModal extends Component
                 'cancellation_policy' => $this->cancellation_policy,
                 'house_rules' => $this->house_rules,
             ]);
-        } elseif ($this->section === 'photos') {
-            $this->uploadPhotos($property);
         }
 
         $this->closeModal();
         $this->dispatch('property-updated');
     }
 
-    public function uploadPhotos($property)
-    {
-        if ($property->photos()->count() >= 3) {
-            $this->addError('photos', 'Maximum 3 photos allowed per property.');
-            return;
-        }
 
-        foreach ($this->photos as $photo) {
-            if ($property->photos()->count() >= 3) break;
-            $this->processAndSavePhoto($photo, $property);
-        }
-        $this->photos = [];
-    }
-
-    private function processAndSavePhoto($photo, $property)
-    {
-        $manager = new ImageManager(new Driver());
-        $image = $manager->read($photo->getRealPath());
-        $image->scaleDown(1200, 800);
-        $imageData = $image->toJpeg(85);
-        
-        if (strlen($imageData) > 512 * 1024) {
-            $image->scaleDown(800, 600);
-            $imageData = $image->toJpeg(75);
-        }
-        
-        $filename = uniqid() . '.jpg';
-        $path = 'property-photos/' . $filename;
-        \Storage::disk('public')->put($path, $imageData);
-        
-        PropertyPhoto::create([
-            'property_id' => $property->id,
-            'file_path' => $path,
-            'caption' => $this->photo_caption,
-        ]);
-    }
-
-    public function deletePhoto($photoId)
-    {
-        $photo = PropertyPhoto::find($photoId);
-        if ($photo) {
-            \Storage::disk('public')->delete($photo->file_path);
-            $photo->delete();
-            $this->existingPhotos = $this->existingPhotos->reject(fn($p) => $p->id === $photoId);
-        }
-    }
 
 
 

@@ -27,7 +27,17 @@
                 </span>
             </div>
             
-            <div class="flex justify-between items-center text-xs text-gray-500 bg-white/50 rounded-lg p-2">
+            <div class="flex justify-between items-center gap-4">
+                <button 
+                    x-data
+                    @click="$dispatch('openPhotoModal')"
+                    class="group flex items-center gap-2 bg-gradient-to-r from-pink-500 to-pink-600 text-white px-4 py-2 rounded-xl font-medium text-sm hover:from-pink-600 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                    <svg class="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    Manage Photos
+                </button>
+                <div class="flex justify-between items-center text-xs text-gray-500 bg-white/50 rounded-lg p-2 flex-1">
                 <span class="flex items-center space-x-1">
                     <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
@@ -191,26 +201,7 @@
                 </div>
             </div>
 
-            <!-- Photos Section -->
-            <div x-data class="group bg-gradient-to-br from-white/90 to-pink-50/80 backdrop-blur-xl rounded-xl p-4 cursor-pointer hover:shadow-xl transition-all duration-300 border border-white/20 hover:border-emerald-200 hover:scale-[1.02]"
-                 @click="$dispatch('open-property-modal', { propertyId: {{ $property->id }}, section: 'photos' })">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-3 flex-1">
-                        <div class="w-10 h-10 bg-gradient-to-r from-pink-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300">
-                            <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                            </svg>
-                        </div>
-                        <div class="min-w-0 flex-1">
-                            <h4 class="font-semibold text-gray-900 text-sm sm:text-base truncate">Photos & Gallery</h4>
-                            <p class="text-xs sm:text-sm text-gray-600 truncate">Upload property images</p>
-                        </div>
-                    </div>
-                    <svg class="h-5 w-5 text-gray-400 group-hover:text-emerald-500 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </div>
-            </div>
+
         </div>
 
         <!-- Property Details Summary -->
@@ -407,4 +398,6 @@
 
     @livewire('property-modal')
     @livewire('property-accommodation-modal')
+    <!-- Photo Management Modal -->
+    <livewire:property-photo-modal :property="$property" />
 @endsection

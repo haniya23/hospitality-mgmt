@@ -32,6 +32,17 @@
             <div class="space-y-4">
                 @foreach($properties as $property)
                     <div class="bg-white bg-opacity-80 backdrop-blur-md rounded-2xl shadow-lg overflow-hidden">
+                        @php
+                            $mainImage = $property->photos()->where('is_main', true)->first();
+                        @endphp
+                        @if($mainImage)
+                            <div class="relative h-48 w-full">
+                                <img src="{{ asset($mainImage->file_path) }}" 
+                                     alt="{{ $property->name }}" 
+                                     class="w-full h-full object-cover"
+                                >
+                            </div>
+                        @endif
                         <div class="p-6">
                             <div class="flex justify-between items-start mb-3">
                                 <div class="flex-1">
