@@ -37,6 +37,16 @@ Route::middleware('auth')->group(function () {
         return view('b2b.dashboard');
     })->name('b2b.dashboard');
     
+    // Pricing Management Routes
+    Route::get('/pricing', function () {
+        return view('pricing.calendar');
+    })->name('pricing.calendar');
+    
+    // Reports & Analytics Routes
+    Route::get('/reports', function () {
+        return view('reports.analytics');
+    })->name('reports.analytics');
+    
     // Admin Routes
     Route::get('/admin', [App\Http\Controllers\AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::patch('/admin/properties/{property}/approve', [App\Http\Controllers\AdminController::class, 'approveProperty'])->name('admin.properties.approve');
