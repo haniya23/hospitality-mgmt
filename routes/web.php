@@ -27,8 +27,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/properties/{property}/edit', [App\Http\Controllers\PropertyController::class, 'edit'])->name('properties.edit');
     Route::patch('/properties/{property}/update-section', [App\Http\Controllers\PropertyController::class, 'updateSection'])->name('properties.update-section');
     
-
-
+    // Booking Management Routes
+    Route::get('/bookings', function () {
+        return view('bookings.index');
+    })->name('bookings.index');
+    
+    // B2B Management Routes
+    Route::get('/b2b', function () {
+        return view('b2b.dashboard');
+    })->name('b2b.dashboard');
     
     // Admin Routes
     Route::get('/admin', [App\Http\Controllers\AdminController::class, 'dashboard'])->name('admin.dashboard');
