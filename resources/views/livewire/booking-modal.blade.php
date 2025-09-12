@@ -69,27 +69,79 @@
                 <form wire:submit.prevent="save" class="p-6 space-y-6">
                         <!-- Property & Accommodation -->
                         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            <div>
+                            <div class="relative" x-data="{ open: false }">
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Property</label>
-                                <select wire:model.live="property_id" class="w-full border border-gray-200 rounded-xl shadow-sm py-3 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200">
-                                    <option value="">Select Property</option>
+                                <button @click="open = !open" type="button" class="w-full border border-gray-200 rounded-xl shadow-sm py-3 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 bg-white text-left flex items-center justify-between">
+                                    <span>
+                                        @if($property_id)
+                                            {{ $properties->find($property_id)?->name ?? 'Select Property' }}
+                                        @else
+                                            Select Property
+                                        @endif
+                                    </span>
+                                    <svg class="w-5 h-5 text-gray-400 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+                                <div x-show="open" @click.away="open = false" x-transition class="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-auto">
+                                    <button wire:click="$set('property_id', null)" @click="open = false" type="button" class="w-full px-4 py-3 text-left hover:bg-gray-50 text-sm text-gray-900">
+                                        Select Property
+                                    </button>
                                     @foreach($properties as $property)
-                                        <option value="{{ $property->id }}">{{ $property->name }}</option>
+                                        <button wire:click="$set('property_id', {{ $property->id }})" @click="open = false" type="button" class="w-full px-4 py-3 text-left hover:bg-gray-50 text-sm text-gray-900 {{ $property_id == $property->id ? 'bg-emerald-50 text-emerald-700' : '' }}">
+                                            {{ $property->name }}
+                                        </button>
                                     @endforeach
-                                </select>
+                                </div>
                                 @error('property_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                             </div>
 
-                            <div>
+                            <div class="relative" x-data="{ open: false }">
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Accommodation</label>
-                                <select wire:model.live="accommodation_id" class="w-full border border-gray-200 rounded-xl shadow-sm py-3 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200">
-                                    <option value="">Select Accommodation</option>
+                                <button @click="open = !open" type="button" class="w-full border border-gray-200 rounded-xl shadow-sm py-3 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 bg-white text-left flex items-center justify-between">
+                                    <span>
+                                        @if($accommodation_id)
+                                            {{ $accommodations->find($accommodation_id)?->display_name ?? 'Select Accommodation' }}
+                                        @else
+                                            Select Accommodation
+                                        @endif
+                                    </span>
+                                    <svg class="w-5 h-5 text-gray-400 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+                                <div x-show="open" @click.away="open = false" x-transition class="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-auto">
+                                    <button wire:click="$set('accommodation_id', null)" @click="open = false" type="button" class="w-full px-4 py-3 text-left hover:bg-gray-50 text-sm text-gray-900">
+                                        Select Accommodation
+                                    </button>
                                     @foreach($accommodations as $accommodation)
-                                        <option value="{{ $accommodation->id }}">{{ $accommodation->display_name }} (₹{{ number_format($accommodation->base_rate ?? 0) }}/night)</option>
+                                        <button wire:click="$set('accommodation_id', {{ $accommodation->id }})" @click="open = false" type="button" class="w-full px-4 py-3 text-left hover:bg-gray-50 text-sm text-gray-900 {{ $accommodation_id == $accommodation->id ? 'bg-emerald-50 text-emerald-700' : '' }}">
+                                            {{ $accommodation->display_name }} (₹{{ number_format($accommodation->base_rate ?? 0) }}/night)
+                                        </button>
                                     @endforeach
-                                </select>
+                                </div>
                                 @error('accommodation_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                             </div>
+                        </div>
+
+                        <!-- Past Dates Toggle -->
+                        <div class="flex items-center gap-3 p-3 rounded-xl border transition-colors" :class="$wire.allow_past_dates ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'" x-data="{ showTooltip: false }">
+                            <label class="flex items-center cursor-pointer">
+                                <input type="checkbox" wire:model.live="allow_past_dates" class="sr-only">
+                                <div class="relative">
+                                    <div class="w-8 h-4 bg-gray-300 rounded-full shadow-inner transition-colors" :class="$wire.allow_past_dates ? 'bg-green-500' : 'bg-gray-300'"></div>
+                                    <div class="absolute w-3 h-3 bg-white rounded-full shadow top-0.5 transition-transform" :class="$wire.allow_past_dates ? 'translate-x-4' : 'translate-x-0.5'"></div>
+                                </div>
+                            </label>
+                            <span class="text-sm font-medium transition-colors" :class="$wire.allow_past_dates ? 'text-green-800' : 'text-gray-700'">Allow past dates</span>
+                            <button @mouseenter="showTooltip = true" @mouseleave="showTooltip = false" type="button" class="transition-colors relative" :class="$wire.allow_past_dates ? 'text-green-600 hover:text-green-700' : 'text-gray-400 hover:text-gray-600'">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                                </svg>
+                                <div x-show="showTooltip" x-transition class="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-50 px-2 py-1 text-xs text-white bg-gray-800 rounded shadow-lg whitespace-nowrap">
+                                    Record booking - past dates
+                                </div>
+                            </button>
                         </div>
 
                         <!-- Dates & Guests -->
@@ -97,6 +149,7 @@
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Check-in</label>
                                 <input type="date" wire:model.live="check_in_date" 
+                                       @if(!$allow_past_dates) min="{{ date('Y-m-d') }}" @endif
                                        class="w-full border border-gray-200 rounded-xl shadow-sm py-3 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200">
                                 @error('check_in_date') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                             </div>
@@ -104,6 +157,7 @@
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Check-out</label>
                                 <input type="date" wire:model.live="check_out_date" 
+                                       @if(!$allow_past_dates) min="{{ date('Y-m-d') }}" @endif
                                        class="w-full border border-gray-200 rounded-xl shadow-sm py-3 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200">
                                 @error('check_out_date') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                             </div>
@@ -162,13 +216,29 @@
                                     </div>
                                 </div>
                             @else
-                                <div>
-                                    <select wire:model="guest_id" class="w-full border border-gray-200 rounded-xl shadow-sm py-3 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200">
-                                        <option value="">Select Customer</option>
+                                <div class="relative" x-data="{ open: false }">
+                                    <button @click="open = !open" type="button" class="w-full border border-gray-200 rounded-xl shadow-sm py-3 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 bg-white text-left flex items-center justify-between">
+                                        <span>
+                                            @if($guest_id)
+                                                {{ $guests->find($guest_id)?->name ?? 'Select Customer' }}
+                                            @else
+                                                Select Customer
+                                            @endif
+                                        </span>
+                                        <svg class="w-5 h-5 text-gray-400 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                        </svg>
+                                    </button>
+                                    <div x-show="open" @click.away="open = false" x-transition class="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-auto">
+                                        <button wire:click="$set('guest_id', null)" @click="open = false" type="button" class="w-full px-4 py-3 text-left hover:bg-gray-50 text-sm text-gray-900">
+                                            Select Customer
+                                        </button>
                                         @foreach($guests as $guest)
-                                            <option value="{{ $guest->id }}">{{ $guest->name }} ({{ $guest->mobile_number ?? $guest->phone }})</option>
+                                            <button wire:click="$set('guest_id', {{ $guest->id }})" @click="open = false" type="button" class="w-full px-4 py-3 text-left hover:bg-gray-50 text-sm text-gray-900 {{ $guest_id == $guest->id ? 'bg-emerald-50 text-emerald-700' : '' }}">
+                                                {{ $guest->name }} ({{ $guest->mobile_number ?? $guest->phone }})
+                                            </button>
                                         @endforeach
-                                    </select>
+                                    </div>
                                     @error('guest_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                                 </div>
                             @endif
@@ -196,13 +266,29 @@
                                     </div>
                                 </div>
                             @else
-                                <div>
-                                    <select wire:model.live="b2b_partner_id" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
-                                        <option value="">No B2B Partner</option>
+                                <div class="relative" x-data="{ open: false }">
+                                    <button @click="open = !open" type="button" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white text-left flex items-center justify-between">
+                                        <span>
+                                            @if($b2b_partner_id)
+                                                {{ $partners->find($b2b_partner_id)?->partner_name ?? 'No B2B Partner' }}
+                                            @else
+                                                No B2B Partner
+                                            @endif
+                                        </span>
+                                        <svg class="w-5 h-5 text-gray-400 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                        </svg>
+                                    </button>
+                                    <div x-show="open" @click.away="open = false" x-transition class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-xl shadow-lg max-h-60 overflow-auto">
+                                        <button wire:click="$set('b2b_partner_id', null)" @click="open = false" type="button" class="w-full px-4 py-3 text-left hover:bg-gray-50 text-sm text-gray-900">
+                                            No B2B Partner
+                                        </button>
                                         @foreach($partners as $partner)
-                                            <option value="{{ $partner->id }}">{{ $partner->partner_name }}</option>
+                                            <button wire:click="$set('b2b_partner_id', {{ $partner->id }})" @click="open = false" type="button" class="w-full px-4 py-3 text-left hover:bg-gray-50 text-sm text-gray-900 {{ $b2b_partner_id == $partner->id ? 'bg-emerald-50 text-emerald-700' : '' }}">
+                                                {{ $partner->partner_name }}
+                                            </button>
                                         @endforeach
-                                    </select>
+                                    </div>
                                 </div>
                             @endif
                         </div>

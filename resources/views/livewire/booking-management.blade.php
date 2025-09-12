@@ -1,4 +1,4 @@
-<div class="space-y-6">
+<div class="space-y-6" x-data>
     <!-- Header -->
     <div class="space-y-4">
         <!-- Title -->
@@ -10,47 +10,53 @@
         <!-- Controls - Mobile Responsive -->
         <div class="flex flex-col space-y-3 sm:space-y-0">
             <!-- Property Selector - Full width on mobile -->
-            <div class="w-full">
-                <select wire:model.live="selectedProperty" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm">
-                    <option value="">All Properties</option>
+            <div class="w-full relative" x-data="{ open: false }">
+                <button @click="open = !open" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white text-left flex items-center justify-between">
+                    <span class="text-gray-900">
+                        @if($selectedProperty)
+                            {{ $properties->find($selectedProperty)?->name ?? 'All Properties' }}
+                        @else
+                            All Properties
+                        @endif
+                    </span>
+                    <svg class="w-5 h-5 text-gray-400 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                
+                <div x-show="open" @click.away="open = false" x-transition class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-xl shadow-lg max-h-60 overflow-auto">
+                    <button wire:click="$set('selectedProperty', null)" @click="open = false" class="w-full px-4 py-3 text-left hover:bg-gray-50 text-sm text-gray-900 border-b border-gray-100">
+                        All Properties
+                    </button>
                     @foreach($properties as $property)
-                        <option value="{{ $property->id }}">{{ $property->name }}</option>
+                        <button wire:click="$set('selectedProperty', {{ $property->id }})" @click="open = false" class="w-full px-4 py-3 text-left hover:bg-gray-50 text-sm text-gray-900 {{ $selectedProperty == $property->id ? 'bg-emerald-50 text-emerald-700' : '' }}">
+                            {{ $property->name }}
+                        </button>
                     @endforeach
-                </select>
+                </div>
             </div>
             
-            <!-- View Toggle and New Booking Button -->
-            <div class="flex items-center justify-between gap-3">
-                <!-- View Toggle -->
-                <div class="flex bg-gray-100 rounded-lg p-1 flex-1 sm:flex-none">
-                    <button wire:click="switchView('calendar')" 
-                            class="flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-md transition-colors
-                            {{ $view === 'calendar' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600' }}">
-                        Calendar
-                    </button>
-                    <button wire:click="switchView('list')" 
-                            class="flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-md transition-colors
-                            {{ $view === 'list' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600' }}">
-                        List
+            <!-- New Booking Button -->
+            <div class="flex items-center justify-end gap-3">
+                <!-- New Booking Button -->
+                <div class="relative inline-flex items-center justify-center group">
+                    <div class="absolute inset-0 duration-1000 opacity-60 transition-all bg-gradient-to-r from-emerald-500 via-teal-500 to-green-400 rounded-xl blur-lg filter group-hover:opacity-100 group-hover:duration-200"></div>
+                    <button wire:click="openBookingModal" class="group relative inline-flex items-center justify-center text-sm sm:text-base rounded-xl bg-gray-900 px-4 sm:px-8 py-2 sm:py-3 font-semibold text-white transition-all duration-200 hover:bg-gray-800 hover:shadow-lg hover:-translate-y-0.5 hover:shadow-gray-600/30">
+                        <span class="hidden sm:inline">+ New Booking</span>
+                        <span class="sm:hidden">+ New Booking</span>
+                        <svg aria-hidden="true" viewBox="0 0 10 10" height="10" width="10" fill="none" class="mt-0.5 ml-2 -mr-1 stroke-white stroke-2">
+                            <path d="M0 5h7" class="transition opacity-0 group-hover:opacity-100"></path>
+                            <path d="M1 1l4 4-4 4" class="transition group-hover:translate-x-[3px]"></path>
+                        </svg>
                     </button>
                 </div>
-
-                <!-- New Booking Button -->
-                <button wire:click="openBookingModal" 
-                        class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-4 py-3 rounded-xl hover:from-emerald-600 hover:to-emerald-700 transition-all duration-200 text-sm font-medium whitespace-nowrap">
-                    + New
-                </button>
             </div>
         </div>
     </div>
 
     <!-- Main Content -->
-    @if($view === 'calendar')
-        <!-- Calendar View -->
-        <livewire:booking-calendar :property-id="$selectedProperty" />
-    @else
-        <!-- List View -->
-        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+    <!-- List View -->
+    <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-200">
                 <h3 class="text-lg font-semibold text-gray-900">Recent Bookings</h3>
             </div>
@@ -128,7 +134,6 @@
                 @endforelse
             </div>
         </div>
-    @endif
 
     <!-- Quick Stats -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">

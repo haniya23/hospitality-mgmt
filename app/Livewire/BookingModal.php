@@ -17,6 +17,7 @@ class BookingModal extends Component
 {
     public $isOpen = false;
     public $mode = 'quick'; // 'quick' or 'full'
+    public $allow_past_dates = false;
     
     protected $listeners = [
         'open-booking-modal' => 'open',
@@ -63,7 +64,7 @@ class BookingModal extends Component
     protected $rules = [
         'property_id' => 'required|exists:properties,id',
         'accommodation_id' => 'required|exists:property_accommodations,id',
-        'check_in_date' => 'required|date|after_or_equal:today',
+        'check_in_date' => 'required|date',
         'check_out_date' => 'required|date|after:check_in_date',
         'adults' => 'required|integer|min:1',
         'children' => 'required|integer|min:0',
@@ -225,7 +226,7 @@ class BookingModal extends Component
             return;
         }
 
-        $this->base_rate = $accommodation->base_rate ?? 0;
+        $this->base_rate = (float)($accommodation->base_rate ?? 0);
         
         // Apply pricing rules
         $pricingRules = PricingRule::getApplicableRules(
@@ -243,18 +244,18 @@ class BookingModal extends Component
             $this->applicable_discounts[] = [
                 'name' => $rule->rule_name,
                 'type' => $rule->rule_type,
-                'adjustment' => $newRate - $adjustedRate,
+                'adjustment' => (float)$newRate - (float)$adjustedRate,
             ];
             $adjustedRate = $newRate;
         }
 
-        $this->total_amount = $adjustedRate * $this->nights;
+        $this->total_amount = (float)$adjustedRate * (int)$this->nights;
         $this->calculateBalance();
     }
 
     private function calculateBalance()
     {
-        $this->balance_pending = $this->total_amount - $this->advance_paid;
+        $this->balance_pending = (float)$this->total_amount - (float)$this->advance_paid;
     }
 
     public function save()

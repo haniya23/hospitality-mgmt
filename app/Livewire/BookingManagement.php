@@ -10,22 +10,16 @@ class BookingManagement extends Component
 {
     public $selectedProperty = null;
     public $selectedBooking = null;
-    public $view = 'calendar'; // 'calendar' or 'list'
+    public $view = 'list';
 
     protected $listeners = [
         'booking-created' => 'handleBookingCreated',
-        'date-selected' => 'handleDateSelection',
         'open-booking' => 'openBookingDetails',
     ];
 
     public function mount()
     {
         $this->selectedProperty = auth()->user()->properties()->first()?->id;
-    }
-
-    public function switchView($view)
-    {
-        $this->view = $view;
     }
 
     public function openBookingModal()
@@ -43,16 +37,10 @@ class BookingManagement extends Component
         $this->dispatch('$refresh');
     }
 
-    public function handleDateSelection($data)
-    {
-        // Handle date selection from calendar
-        $this->openBookingModal();
-    }
-
     public function openBookingDetails($data)
     {
-        $this->selectedBooking = Reservation::find($data['bookingId']);
-        // Could open a booking details modal here
+        $bookingId = is_array($data) ? $data['bookingId'] : $data;
+        $this->selectedBooking = Reservation::find($bookingId);
     }
 
     public function getProperties()
