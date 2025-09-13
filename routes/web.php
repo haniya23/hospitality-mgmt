@@ -33,10 +33,14 @@ Route::middleware('auth')->group(function () {
     })->name('bookings.index');
     Route::post('/bookings', [App\Http\Controllers\BookingController::class, 'store'])->name('bookings.store');
     
+    // Customer Management Routes
+    Route::get('/customers', App\Livewire\CustomerManagement::class)->name('customers.index');
+    
     // B2B Management Routes
-    Route::get('/b2b', function () {
-        return view('b2b.dashboard');
-    })->name('b2b.dashboard');
+    Route::get('/b2b', App\Livewire\B2BManagement::class)->name('b2b.dashboard');
+    
+    // Resources Management Routes
+    Route::get('/resources', App\Livewire\ResourceManagement::class)->name('resources.index');
     
     // Pricing Management Routes
     Route::get('/pricing', function () {

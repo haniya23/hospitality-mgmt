@@ -158,4 +158,9 @@ class Reservation extends Model
     {
         return $this->hasOne(GuestFeedback::class);
     }
+
+    public function cancelledBooking()
+    {
+        return $this->hasOne(CancelledBooking::class);
+    }
 }

@@ -96,10 +96,16 @@
                             <div class="text-right space-y-1">
                                 <div class="font-semibold text-gray-900">₹{{ number_format($booking->total_amount) }}</div>
                                 @if($booking->accommodation->property->owner_id === auth()->id())
-                                    <button wire:click="toggleBookingStatus({{ $booking->id }})" 
-                                            class="px-3 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800 hover:bg-yellow-200 transition-colors">
-                                        Activate
-                                    </button>
+                                    <div class="space-y-1">
+                                        <button wire:click="toggleBookingStatus({{ $booking->id }})" 
+                                                class="px-3 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800 hover:bg-yellow-200 transition-colors">
+                                            Activate
+                                        </button>
+                                        <button wire:click="openCancelModal({{ $booking->id }})" 
+                                                class="px-3 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800 hover:bg-red-200 transition-colors">
+                                            Cancel
+                                        </button>
+                                    </div>
                                 @endif
                             </div>
                         </div>
@@ -110,6 +116,11 @@
                     </div>
                 @endforelse
             </div>
+            @if($pendingBookings->hasPages())
+                <div class="px-6 py-4 border-t border-gray-200">
+                    {{ $pendingBookings->links() }}
+                </div>
+            @endif
         </div>
 
         <!-- Active Bookings -->
@@ -145,6 +156,12 @@
                                 @if($booking->balance_pending > 0)
                                     <div class="text-xs text-orange-600">₹{{ number_format($booking->balance_pending) }} pending</div>
                                 @endif
+                                @if($booking->accommodation->property->owner_id === auth()->id())
+                                    <button wire:click="openCancelModal({{ $booking->id }})" 
+                                            class="px-3 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800 hover:bg-red-200 transition-colors">
+                                        Cancel
+                                    </button>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -154,6 +171,11 @@
                     </div>
                 @endforelse
             </div>
+            @if($activeBookings->hasPages())
+                <div class="px-6 py-4 border-t border-gray-200">
+                    {{ $activeBookings->links() }}
+                </div>
+            @endif
         </div>
     </div>
 
@@ -176,6 +198,130 @@
             <div class="text-sm text-gray-600">Total Value</div>
         </div>
     </div>
+
+    <!-- View Cancelled Bookings Button -->
+    <div class="text-center">
+        <button wire:click="$toggle('showCancelledBookings')" 
+                class="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors">
+            {{ $showCancelledBookings ? 'Hide' : 'View' }} Cancelled Bookings ({{ $cancelledBookings->count() }})
+        </button>
+    </div>
+
+    <!-- Cancelled Bookings Section -->
+    @if($showCancelledBookings)
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 bg-red-50">
+                <h3 class="text-lg font-semibold text-red-800">Cancelled Bookings</h3>
+            </div>
+            
+            <div class="divide-y divide-gray-200 max-h-96 overflow-y-auto">
+                @forelse($cancelledBookings as $booking)
+                    <div class="p-4">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <h4 class="font-medium text-gray-900">{{ $booking->guest->name }}</h4>
+                                    <span class="px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">Cancelled</span>
+                                </div>
+                                
+                                <div class="text-sm text-gray-600 space-y-1">
+                                    <div>{{ $booking->accommodation->property->name }} - {{ $booking->accommodation->display_name }}</div>
+                                    <div>{{ $booking->check_in_date->format('M d') }} - {{ $booking->check_out_date->format('M d, Y') }}</div>
+                                    @if($booking->cancelledBooking)
+                                        <div class="text-red-600">Reason: {{ $booking->cancelledBooking->reason }}</div>
+                                        @if($booking->cancelledBooking->description)
+                                            <div class="text-gray-500">{{ $booking->cancelledBooking->description }}</div>
+                                        @endif
+                                    @endif
+                                </div>
+                            </div>
+                            
+                            <div class="text-right">
+                                <div class="font-semibold text-gray-900">₹{{ number_format($booking->total_amount) }}</div>
+                                @if($booking->cancelledBooking)
+                                    <div class="text-xs text-gray-500">{{ $booking->cancelledBooking->cancelled_at->format('M d, Y') }}</div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="p-8 text-center text-gray-500">
+                        <div class="text-sm">No cancelled bookings</div>
+                    </div>
+                @endforelse
+            </div>
+            @if($cancelledBookings->hasPages())
+                <div class="px-6 py-4 border-t border-gray-200">
+                    {{ $cancelledBookings->links() }}
+                </div>
+            @endif
+        </div>
+    @endif
+
+    <!-- Cancel Modal -->
+    @if($showCancelModal)
+        <div class="fixed inset-0 z-50 overflow-y-auto bg-black/50" x-data="{ show: true }">
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Cancel Booking</h3>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Reason for Cancellation</label>
+                            <div class="relative" x-data="{ reasonOpen: false }">
+                                <button @click="reasonOpen = !reasonOpen" type="button" class="w-full border border-gray-300 rounded-xl px-3 py-2 text-left flex items-center justify-between bg-white">
+                                    <span class="{{ $cancelReason ? 'text-gray-900' : 'text-gray-500' }}">
+                                        {{ $cancelReason ?: 'Select reason' }}
+                                    </span>
+                                    <svg class="w-5 h-5 text-gray-400 transition-transform" :class="{ 'rotate-180': reasonOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+                                <div x-show="reasonOpen" @click.away="reasonOpen = false" x-transition class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-xl shadow-lg">
+                                    <button wire:click="$set('cancelReason', 'Guest Request')" @click="reasonOpen = false" type="button" class="w-full px-3 py-2 text-left hover:bg-gray-50 text-sm text-gray-900">
+                                        Guest Request
+                                    </button>
+                                    <button wire:click="$set('cancelReason', 'No Show')" @click="reasonOpen = false" type="button" class="w-full px-3 py-2 text-left hover:bg-gray-50 text-sm text-gray-900">
+                                        No Show
+                                    </button>
+                                    <button wire:click="$set('cancelReason', 'Payment Issue')" @click="reasonOpen = false" type="button" class="w-full px-3 py-2 text-left hover:bg-gray-50 text-sm text-gray-900">
+                                        Payment Issue
+                                    </button>
+                                    <button wire:click="$set('cancelReason', 'Property Issue')" @click="reasonOpen = false" type="button" class="w-full px-3 py-2 text-left hover:bg-gray-50 text-sm text-gray-900">
+                                        Property Issue
+                                    </button>
+                                    <button wire:click="$set('cancelReason', 'Overbooking')" @click="reasonOpen = false" type="button" class="w-full px-3 py-2 text-left hover:bg-gray-50 text-sm text-gray-900">
+                                        Overbooking
+                                    </button>
+                                    <button wire:click="$set('cancelReason', 'Other')" @click="reasonOpen = false" type="button" class="w-full px-3 py-2 text-left hover:bg-gray-50 text-sm text-gray-900">
+                                        Other
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
+                            <textarea wire:model="cancelDescription" rows="3" 
+                                      class="w-full border border-gray-300 rounded-xl px-3 py-2" 
+                                      placeholder="Optional description..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-3 mt-6">
+                        <button wire:click="closeCancelModal" 
+                                class="flex-1 px-4 py-2 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50">
+                            Cancel
+                        </button>
+                        <button wire:click="cancelBooking" 
+                                class="flex-1 px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700">
+                            Confirm Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 
     <!-- Booking Modal -->
     <livewire:booking-modal :property-id="$selectedProperty" key="booking-modal" />
