@@ -31,6 +31,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/bookings', function () {
         return view('bookings.index');
     })->name('bookings.index');
+    Route::post('/bookings', [App\Http\Controllers\BookingController::class, 'store'])->name('bookings.store');
     
     // B2B Management Routes
     Route::get('/b2b', function () {

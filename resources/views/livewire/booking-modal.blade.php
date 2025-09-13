@@ -74,7 +74,7 @@
                                 <button @click="open = !open" type="button" class="w-full border border-gray-200 rounded-xl shadow-sm py-3 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 bg-white text-left flex items-center justify-between">
                                     <span>
                                         @if($property_id)
-                                            {{ $properties->find($property_id)?->name ?? 'Select Property' }}
+                                            {{ $this->getProperties()->find($property_id)?->name ?? 'Select Property' }}
                                         @else
                                             Select Property
                                         @endif
@@ -87,7 +87,7 @@
                                     <button wire:click="$set('property_id', null)" @click="open = false" type="button" class="w-full px-4 py-3 text-left hover:bg-gray-50 text-sm text-gray-900">
                                         Select Property
                                     </button>
-                                    @foreach($properties as $property)
+                                    @foreach($this->getProperties() as $property)
                                         <button wire:click="$set('property_id', {{ $property->id }})" @click="open = false" type="button" class="w-full px-4 py-3 text-left hover:bg-gray-50 text-sm text-gray-900 {{ $property_id == $property->id ? 'bg-emerald-50 text-emerald-700' : '' }}">
                                             {{ $property->name }}
                                         </button>
@@ -101,7 +101,7 @@
                                 <button @click="open = !open" type="button" class="w-full border border-gray-200 rounded-xl shadow-sm py-3 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 bg-white text-left flex items-center justify-between">
                                     <span>
                                         @if($accommodation_id)
-                                            {{ $accommodations->find($accommodation_id)?->display_name ?? 'Select Accommodation' }}
+                                            {{ $this->getAccommodations()->find($accommodation_id)?->display_name ?? 'Select Accommodation' }}
                                         @else
                                             Select Accommodation
                                         @endif
@@ -114,7 +114,7 @@
                                     <button wire:click="$set('accommodation_id', null)" @click="open = false" type="button" class="w-full px-4 py-3 text-left hover:bg-gray-50 text-sm text-gray-900">
                                         Select Accommodation
                                     </button>
-                                    @foreach($accommodations as $accommodation)
+                                    @foreach($this->getAccommodations() as $accommodation)
                                         <button wire:click="$set('accommodation_id', {{ $accommodation->id }})" @click="open = false" type="button" class="w-full px-4 py-3 text-left hover:bg-gray-50 text-sm text-gray-900 {{ $accommodation_id == $accommodation->id ? 'bg-emerald-50 text-emerald-700' : '' }}">
                                             {{ $accommodation->display_name }} (₹{{ number_format($accommodation->base_rate ?? 0) }}/night)
                                         </button>
@@ -220,7 +220,7 @@
                                     <button @click="open = !open" type="button" class="w-full border border-gray-200 rounded-xl shadow-sm py-3 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 bg-white text-left flex items-center justify-between">
                                         <span>
                                             @if($guest_id)
-                                                {{ $guests->find($guest_id)?->name ?? 'Select Customer' }}
+                                                {{ $this->getGuests()->find($guest_id)?->name ?? 'Select Customer' }}
                                             @else
                                                 Select Customer
                                             @endif
@@ -233,7 +233,7 @@
                                         <button wire:click="$set('guest_id', null)" @click="open = false" type="button" class="w-full px-4 py-3 text-left hover:bg-gray-50 text-sm text-gray-900">
                                             Select Customer
                                         </button>
-                                        @foreach($guests as $guest)
+                                        @foreach($this->getGuests() as $guest)
                                             <button wire:click="$set('guest_id', {{ $guest->id }})" @click="open = false" type="button" class="w-full px-4 py-3 text-left hover:bg-gray-50 text-sm text-gray-900 {{ $guest_id == $guest->id ? 'bg-emerald-50 text-emerald-700' : '' }}">
                                                 {{ $guest->name }} ({{ $guest->mobile_number ?? $guest->phone }})
                                             </button>
@@ -270,7 +270,7 @@
                                     <button @click="open = !open" type="button" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white text-left flex items-center justify-between">
                                         <span>
                                             @if($b2b_partner_id)
-                                                {{ $partners->find($b2b_partner_id)?->partner_name ?? 'No B2B Partner' }}
+                                                {{ $this->getPartners()->find($b2b_partner_id)?->partner_name ?? 'No B2B Partner' }}
                                             @else
                                                 No B2B Partner
                                             @endif
@@ -283,7 +283,7 @@
                                         <button wire:click="$set('b2b_partner_id', null)" @click="open = false" type="button" class="w-full px-4 py-3 text-left hover:bg-gray-50 text-sm text-gray-900">
                                             No B2B Partner
                                         </button>
-                                        @foreach($partners as $partner)
+                                        @foreach($this->getPartners() as $partner)
                                             <button wire:click="$set('b2b_partner_id', {{ $partner->id }})" @click="open = false" type="button" class="w-full px-4 py-3 text-left hover:bg-gray-50 text-sm text-gray-900 {{ $b2b_partner_id == $partner->id ? 'bg-emerald-50 text-emerald-700' : '' }}">
                                                 {{ $partner->partner_name }}
                                             </button>
@@ -362,33 +362,39 @@
                             </div>
                         </div>
 
+                    <!-- Enhanced Footer with Better Actions -->
+                    <div class="border-t border-gray-100 bg-gray-50/80 backdrop-blur-sm px-6 py-4 rounded-b-2xl">
+                        <div class="flex flex-col-reverse sm:flex-row gap-3">
+                            <button 
+                                type="button" 
+                                wire:click="close" 
+                                class="flex-1 sm:flex-none sm:px-6 py-3 bg-white border border-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all duration-200 shadow-sm"
+                            >
+                                Cancel
+                            </button>
+                            
+                            <button 
+                                type="button"
+                                wire:click="save"
+                                wire:loading.attr="disabled"
+                                wire:loading.class="opacity-50 cursor-not-allowed"
+                                class="flex-1 sm:flex-none sm:px-8 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-xl hover:from-emerald-700 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                            >
+                                <span class="flex items-center justify-center space-x-2">
+                                    <svg wire:loading.remove class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    <svg wire:loading class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    <span wire:loading.remove>Create Booking</span>
+                                    <span wire:loading>Creating...</span>
+                                </span>
+                            </button>
+                        </div>
+                    </div>
                 </form>
-            </div>
-
-            <!-- Enhanced Footer with Better Actions -->
-            <div class="border-t border-gray-100 bg-gray-50/80 backdrop-blur-sm px-6 py-4 rounded-b-2xl">
-                <div class="flex flex-col-reverse sm:flex-row gap-3">
-                    <button 
-                        type="button" 
-                        wire:click="close" 
-                        class="flex-1 sm:flex-none sm:px-6 py-3 bg-white border border-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all duration-200 shadow-sm"
-                    >
-                        Cancel
-                    </button>
-                    
-                    <button 
-                        type="submit" 
-                        wire:click="save"
-                        class="flex-1 sm:flex-none sm:px-8 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-xl hover:from-emerald-700 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                    >
-                        <span class="flex items-center justify-center space-x-2">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                            </svg>
-                            <span>Create Booking</span>
-                        </span>
-                    </button>
-                </div>
             </div>
         </div>
     </div>

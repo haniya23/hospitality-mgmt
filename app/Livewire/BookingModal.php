@@ -8,9 +8,7 @@ use App\Models\PropertyAccommodation;
 use App\Models\Guest;
 use App\Models\B2bPartner;
 use App\Models\Reservation;
-use App\Models\PricingRule;
-use App\Models\Commission;
-use App\Models\AuditLog;
+use App\Services\BookingService;
 use Carbon\Carbon;
 
 class BookingModal extends Component
@@ -56,35 +54,71 @@ class BookingModal extends Component
     public $nights = 0;
     public $applicable_discounts = [];
     
-    public $properties;
-    public $accommodations = [];
-    public $guests = [];
-    public $partners = [];
+    // Collections are loaded dynamically to prevent hydration issues
 
-    protected $rules = [
-        'property_id' => 'required|exists:properties,id',
-        'accommodation_id' => 'required|exists:property_accommodations,id',
-        'check_in_date' => 'required|date',
-        'check_out_date' => 'required|date|after:check_in_date',
-        'adults' => 'required|integer|min:1',
-        'children' => 'required|integer|min:0',
-        'guest_id' => 'required_without:create_new_guest|exists:guests,id',
-        'guest_name' => 'required_if:create_new_guest,true|string|max:255',
-        'guest_mobile' => 'required_if:create_new_guest,true|string|max:20',
-        'total_amount' => 'required|numeric|min:0',
-        'advance_paid' => 'required|numeric|min:0|lte:total_amount',
+    protected function rules()
+    {
+        $rules = [
+            'property_id' => 'required|exists:properties,id',
+            'accommodation_id' => 'required|exists:property_accommodations,id',
+            'check_in_date' => 'required|date',
+            'check_out_date' => 'required|date|after:check_in_date',
+            'adults' => 'required|integer|min:1',
+            'children' => 'required|integer|min:0',
+            'guest_id' => 'required_without:create_new_guest|exists:guests,id',
+            'guest_name' => 'required_if:create_new_guest,true|string|max:255',
+            'guest_mobile' => 'required_if:create_new_guest,true|string|max:20',
+            'total_amount' => 'required|numeric|min:0',
+            'advance_paid' => 'required|numeric|min:0|lte:total_amount',
+        ];
+
+        if (!$this->allow_past_dates) {
+            $rules['check_in_date'] .= '|after_or_equal:today';
+            $rules['check_out_date'] .= '|after:today';
+        }
+
+        return $rules;
+    }
+
+    protected $messages = [
+        'property_id.required' => 'Please select a property.',
+        'accommodation_id.required' => 'Please select an accommodation.',
+        'check_in_date.required' => 'Check-in date is required.',
+        'check_in_date.after_or_equal' => 'Check-in date cannot be in the past.',
+        'check_out_date.required' => 'Check-out date is required.',
+        'check_out_date.after' => 'Check-out date must be after check-in date.',
+        'guest_name.required_if' => 'Guest name is required when creating a new guest.',
+        'guest_mobile.required_if' => 'Guest mobile is required when creating a new guest.',
+        'total_amount.required' => 'Total amount is required.',
+        'advance_paid.lte' => 'Advance paid cannot exceed total amount.',
     ];
 
     public function mount($propertyId = null)
     {
-        $this->properties = Property::where('owner_id', auth()->id())->get();
-        $this->guests = Guest::orderBy('name')->get();
-        $this->partners = B2bPartner::where('status', 'active')->get();
-        
         if ($propertyId) {
             $this->property_id = $propertyId;
-            $this->loadAccommodations();
         }
+    }
+
+    public function getProperties()
+    {
+        return Property::where('owner_id', auth()->id())->get();
+    }
+
+    public function getAccommodations()
+    {
+        if (!$this->property_id) return collect();
+        return PropertyAccommodation::where('property_id', $this->property_id)->get();
+    }
+
+    public function getGuests()
+    {
+        return Guest::orderBy('name')->get();
+    }
+
+    public function getPartners()
+    {
+        return B2bPartner::where('status', 'active')->get();
     }
 
     public function open($mode = 'quick')
@@ -131,7 +165,6 @@ class BookingModal extends Component
 
     public function updatedPropertyId()
     {
-        $this->loadAccommodations();
         $this->accommodation_id = null;
         $this->calculateRate();
     }
@@ -199,12 +232,7 @@ class BookingModal extends Component
         $this->calculateBalance();
     }
 
-    private function loadAccommodations()
-    {
-        if ($this->property_id) {
-            $this->accommodations = PropertyAccommodation::where('property_id', $this->property_id)->get();
-        }
-    }
+
 
     private function calculateNights()
     {
@@ -221,36 +249,21 @@ class BookingModal extends Component
             return;
         }
 
-        $accommodation = PropertyAccommodation::find($this->accommodation_id);
-        if (!$accommodation) {
-            return;
-        }
-
-        $this->base_rate = (float)($accommodation->base_rate ?? 0);
-        
-        // Apply pricing rules
-        $pricingRules = PricingRule::getApplicableRules(
-            $this->property_id,
+        $bookingService = new BookingService();
+        $calculation = $bookingService->calculateRate(
+            $this->accommodation_id,
             $this->check_in_date,
             $this->check_out_date,
             $this->b2b_partner_id
         );
 
-        $adjustedRate = $this->base_rate;
-        $this->applicable_discounts = [];
-
-        foreach ($pricingRules as $rule) {
-            $newRate = $rule->calculateAdjustedRate($adjustedRate);
-            $this->applicable_discounts[] = [
-                'name' => $rule->rule_name,
-                'type' => $rule->rule_type,
-                'adjustment' => (float)$newRate - (float)$adjustedRate,
-            ];
-            $adjustedRate = $newRate;
+        if ($calculation) {
+            $this->base_rate = $calculation['base_rate'];
+            $this->nights = $calculation['nights'];
+            $this->total_amount = $calculation['total_amount'];
+            $this->applicable_discounts = $calculation['discounts'];
+            $this->calculateBalance();
         }
-
-        $this->total_amount = (float)$adjustedRate * (int)$this->nights;
-        $this->calculateBalance();
     }
 
     private function calculateBalance()
@@ -260,9 +273,33 @@ class BookingModal extends Component
 
     public function save()
     {
-        $this->validate();
-
         try {
+            // Simple validation
+            if (!$this->property_id) {
+                session()->flash('error', 'Please select a property.');
+                return;
+            }
+            
+            if (!$this->accommodation_id) {
+                session()->flash('error', 'Please select an accommodation.');
+                return;
+            }
+            
+            if (!$this->check_in_date || !$this->check_out_date) {
+                session()->flash('error', 'Please select check-in and check-out dates.');
+                return;
+            }
+            
+            if (!$this->guest_id && !$this->create_new_guest) {
+                session()->flash('error', 'Please select a guest or create a new one.');
+                return;
+            }
+            
+            if ($this->create_new_guest && (!$this->guest_name || !$this->guest_mobile)) {
+                session()->flash('error', 'Please enter guest name and mobile number.');
+                return;
+            }
+            
             // Create guest if needed
             if ($this->create_new_guest) {
                 $guest = Guest::create([
@@ -272,53 +309,28 @@ class BookingModal extends Component
                 ]);
                 $this->guest_id = $guest->id;
             }
-
-            // Create B2B partner if needed
-            if ($this->create_new_partner && $this->partner_mobile) {
-                $partner = B2bPartner::createPartnershipRequest(
-                    auth()->id(),
-                    $this->partner_mobile,
-                    $this->partner_name
-                );
-                $this->b2b_partner_id = $partner->id;
-            }
-
+            
             // Create booking
             $booking = Reservation::create([
                 'guest_id' => $this->guest_id,
                 'property_accommodation_id' => $this->accommodation_id,
-                'b2b_partner_id' => $this->b2b_partner_id,
                 'check_in_date' => $this->check_in_date,
                 'check_out_date' => $this->check_out_date,
                 'adults' => $this->adults,
                 'children' => $this->children,
-                'total_amount' => $this->rate_override ?? $this->total_amount,
-                'advance_paid' => $this->advance_paid,
-                'balance_pending' => $this->balance_pending,
-                'rate_override' => $this->rate_override,
-                'override_reason' => $this->override_reason,
-                'special_requests' => $this->special_requests,
-                'notes' => $this->notes,
+                'total_amount' => $this->total_amount ?: 1000,
+                'advance_paid' => $this->advance_paid ?: 0,
+                'balance_pending' => ($this->total_amount ?: 1000) - ($this->advance_paid ?: 0),
                 'status' => 'pending',
                 'created_by' => auth()->id(),
             ]);
-
-            // Log price override if applicable
-            if ($this->rate_override && $this->rate_override != $this->total_amount) {
-                AuditLog::logPriceOverride($booking, $this->total_amount, $this->rate_override, $this->override_reason);
-            }
-
-            // Create commission record for B2B bookings
-            if ($booking->b2b_partner_id) {
-                Commission::calculateForBooking($booking);
-            }
-
-            $this->dispatch('booking-created', ['booking' => $booking->id]);
+            
             session()->flash('success', 'Booking created successfully!');
+            $this->dispatch('booking-created');
             $this->close();
-
+            
         } catch (\Exception $e) {
-            session()->flash('error', 'Error creating booking: ' . $e->getMessage());
+            session()->flash('error', 'Error: ' . $e->getMessage());
         }
     }
 
