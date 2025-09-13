@@ -54,43 +54,33 @@ class BookingModal extends Component
     public $nights = 0;
     public $applicable_discounts = [];
     
-    // Collections are loaded dynamically to prevent hydration issues
+    // Cached collections to prevent hydration issues
+    public $properties = [];
+    public $accommodations = [];
+    public $guests = [];
+    public $partners = [];
 
     protected function rules()
     {
-        $rules = [
+        return [
             'property_id' => 'required|exists:properties,id',
             'accommodation_id' => 'required|exists:property_accommodations,id',
             'check_in_date' => 'required|date',
             'check_out_date' => 'required|date|after:check_in_date',
             'adults' => 'required|integer|min:1',
             'children' => 'required|integer|min:0',
-            'guest_id' => 'required_without:create_new_guest|exists:guests,id',
-            'guest_name' => 'required_if:create_new_guest,true|string|max:255',
-            'guest_mobile' => 'required_if:create_new_guest,true|string|max:20',
             'total_amount' => 'required|numeric|min:0',
-            'advance_paid' => 'required|numeric|min:0|lte:total_amount',
+            'advance_paid' => 'required|numeric|min:0',
         ];
-
-        if (!$this->allow_past_dates) {
-            $rules['check_in_date'] .= '|after_or_equal:today';
-            $rules['check_out_date'] .= '|after:today';
-        }
-
-        return $rules;
     }
 
     protected $messages = [
         'property_id.required' => 'Please select a property.',
         'accommodation_id.required' => 'Please select an accommodation.',
         'check_in_date.required' => 'Check-in date is required.',
-        'check_in_date.after_or_equal' => 'Check-in date cannot be in the past.',
         'check_out_date.required' => 'Check-out date is required.',
         'check_out_date.after' => 'Check-out date must be after check-in date.',
-        'guest_name.required_if' => 'Guest name is required when creating a new guest.',
-        'guest_mobile.required_if' => 'Guest mobile is required when creating a new guest.',
         'total_amount.required' => 'Total amount is required.',
-        'advance_paid.lte' => 'Advance paid cannot exceed total amount.',
     ];
 
     public function mount($propertyId = null)
@@ -100,25 +90,37 @@ class BookingModal extends Component
         }
     }
 
-    public function getProperties()
+    public function loadProperties()
     {
-        return Property::where('owner_id', auth()->id())->get();
+        $this->properties = Property::where('owner_id', auth()->id())->get()->toArray();
     }
 
-    public function getAccommodations()
+    public function loadAccommodations()
     {
-        if (!$this->property_id) return collect();
-        return PropertyAccommodation::where('property_id', $this->property_id)->get();
+        if (!$this->property_id) {
+            $this->accommodations = [];
+            return;
+        }
+        $this->accommodations = PropertyAccommodation::with('predefinedType')
+            ->where('property_id', $this->property_id)
+            ->get()
+            ->map(function($acc) {
+                return [
+                    'id' => $acc->id,
+                    'display_name' => $acc->display_name,
+                    'base_rate' => $acc->base_price,
+                ];
+            })->toArray();
     }
 
-    public function getGuests()
+    public function loadGuests()
     {
-        return Guest::orderBy('name')->get();
+        $this->guests = Guest::orderBy('name')->get()->toArray();
     }
 
-    public function getPartners()
+    public function loadPartners()
     {
-        return B2bPartner::where('status', 'active')->get();
+        $this->partners = B2bPartner::where('status', 'active')->get()->toArray();
     }
 
     public function open($mode = 'quick')
@@ -126,6 +128,9 @@ class BookingModal extends Component
         $this->mode = $mode;
         $this->isOpen = true;
         $this->resetForm();
+        $this->loadProperties();
+        $this->loadGuests();
+        $this->loadPartners();
     }
 
     public function close()
@@ -166,6 +171,7 @@ class BookingModal extends Component
     public function updatedPropertyId()
     {
         $this->accommodation_id = null;
+        $this->loadAccommodations();
         $this->calculateRate();
     }
 
@@ -290,6 +296,18 @@ class BookingModal extends Component
                 return;
             }
             
+            // Simple past date check
+            if (!$this->allow_past_dates) {
+                if (Carbon::parse($this->check_in_date)->isPast()) {
+                    session()->flash('error', 'Check-in date cannot be in the past.');
+                    return;
+                }
+                if (Carbon::parse($this->check_out_date)->isPast()) {
+                    session()->flash('error', 'Check-out date cannot be in the past.');
+                    return;
+                }
+            }
+            
             if (!$this->guest_id && !$this->create_new_guest) {
                 session()->flash('error', 'Please select a guest or create a new one.');
                 return;
@@ -310,10 +328,21 @@ class BookingModal extends Component
                 $this->guest_id = $guest->id;
             }
             
+            // Create B2B partner if needed
+            if ($this->create_new_partner && $this->partner_mobile) {
+                $partner = B2bPartner::createPartnershipRequest(
+                    auth()->id(),
+                    $this->partner_mobile,
+                    $this->partner_name
+                );
+                $this->b2b_partner_id = $partner->id;
+            }
+            
             // Create booking
             $booking = Reservation::create([
                 'guest_id' => $this->guest_id,
                 'property_accommodation_id' => $this->accommodation_id,
+                'b2b_partner_id' => $this->b2b_partner_id,
                 'check_in_date' => $this->check_in_date,
                 'check_out_date' => $this->check_out_date,
                 'adults' => $this->adults,

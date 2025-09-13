@@ -74,7 +74,8 @@
                                 <button @click="open = !open" type="button" class="w-full border border-gray-200 rounded-xl shadow-sm py-3 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 bg-white text-left flex items-center justify-between">
                                     <span>
                                         @if($property_id)
-                                            {{ $this->getProperties()->find($property_id)?->name ?? 'Select Property' }}
+                                            @php $selectedProperty = collect($properties)->firstWhere('id', $property_id); @endphp
+                                            {{ $selectedProperty['name'] ?? 'Select Property' }}
                                         @else
                                             Select Property
                                         @endif
@@ -87,9 +88,9 @@
                                     <button wire:click="$set('property_id', null)" @click="open = false" type="button" class="w-full px-4 py-3 text-left hover:bg-gray-50 text-sm text-gray-900">
                                         Select Property
                                     </button>
-                                    @foreach($this->getProperties() as $property)
-                                        <button wire:click="$set('property_id', {{ $property->id }})" @click="open = false" type="button" class="w-full px-4 py-3 text-left hover:bg-gray-50 text-sm text-gray-900 {{ $property_id == $property->id ? 'bg-emerald-50 text-emerald-700' : '' }}">
-                                            {{ $property->name }}
+                                    @foreach($properties as $property)
+                                        <button wire:click="$set('property_id', {{ $property['id'] }})" @click="open = false" type="button" class="w-full px-4 py-3 text-left hover:bg-gray-50 text-sm text-gray-900 {{ $property_id == $property['id'] ? 'bg-emerald-50 text-emerald-700' : '' }}">
+                                            {{ $property['name'] }}
                                         </button>
                                     @endforeach
                                 </div>
@@ -101,7 +102,8 @@
                                 <button @click="open = !open" type="button" class="w-full border border-gray-200 rounded-xl shadow-sm py-3 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 bg-white text-left flex items-center justify-between">
                                     <span>
                                         @if($accommodation_id)
-                                            {{ $this->getAccommodations()->find($accommodation_id)?->display_name ?? 'Select Accommodation' }}
+                                            @php $selectedAccommodation = collect($accommodations)->firstWhere('id', $accommodation_id); @endphp
+                                            {{ $selectedAccommodation['display_name'] ?? 'Select Accommodation' }}
                                         @else
                                             Select Accommodation
                                         @endif
@@ -114,9 +116,9 @@
                                     <button wire:click="$set('accommodation_id', null)" @click="open = false" type="button" class="w-full px-4 py-3 text-left hover:bg-gray-50 text-sm text-gray-900">
                                         Select Accommodation
                                     </button>
-                                    @foreach($this->getAccommodations() as $accommodation)
-                                        <button wire:click="$set('accommodation_id', {{ $accommodation->id }})" @click="open = false" type="button" class="w-full px-4 py-3 text-left hover:bg-gray-50 text-sm text-gray-900 {{ $accommodation_id == $accommodation->id ? 'bg-emerald-50 text-emerald-700' : '' }}">
-                                            {{ $accommodation->display_name }} (₹{{ number_format($accommodation->base_rate ?? 0) }}/night)
+                                    @foreach($accommodations as $accommodation)
+                                        <button wire:click="$set('accommodation_id', {{ $accommodation['id'] }})" @click="open = false" type="button" class="w-full px-4 py-3 text-left hover:bg-gray-50 text-sm text-gray-900 {{ $accommodation_id == $accommodation['id'] ? 'bg-emerald-50 text-emerald-700' : '' }}">
+                                            {{ $accommodation['display_name'] }} (₹{{ number_format($accommodation['base_rate'] ?? 0) }}/night)
                                         </button>
                                     @endforeach
                                 </div>
@@ -192,10 +194,18 @@
                         <div class="space-y-4">
                             <div class="flex items-center justify-between">
                                 <label class="block text-sm font-semibold text-gray-700">Customer</label>
-                                <button type="button" wire:click="$toggle('create_new_guest')" 
-                                        class="text-sm text-emerald-600 hover:text-emerald-700">
-                                    {{ $create_new_guest ? 'Select Existing' : 'Create New' }}
-                                </button>
+                                <div class="flex bg-gray-100 rounded-lg p-1">
+                                    <button type="button" wire:click="$set('create_new_guest', false)" 
+                                            class="px-3 py-1 text-xs font-medium rounded-md transition-colors"
+                                            :class="!$wire.create_new_guest ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'">
+                                        Select
+                                    </button>
+                                    <button type="button" wire:click="$set('create_new_guest', true)" 
+                                            class="px-3 py-1 text-xs font-medium rounded-md transition-colors"
+                                            :class="$wire.create_new_guest ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'">
+                                        Create
+                                    </button>
+                                </div>
                             </div>
 
                             @if($create_new_guest)
@@ -216,26 +226,27 @@
                                     </div>
                                 </div>
                             @else
-                                <div class="relative" x-data="{ open: false }">
-                                    <button @click="open = !open" type="button" class="w-full border border-gray-200 rounded-xl shadow-sm py-3 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 bg-white text-left flex items-center justify-between">
+                                <div class="relative" x-data="{ guestOpen: false }">
+                                    <button @click="guestOpen = !guestOpen" type="button" class="w-full border border-gray-200 rounded-xl shadow-sm py-3 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 bg-white text-left flex items-center justify-between">
                                         <span>
                                             @if($guest_id)
-                                                {{ $this->getGuests()->find($guest_id)?->name ?? 'Select Customer' }}
+                                                @php $selectedGuest = collect($guests)->firstWhere('id', $guest_id); @endphp
+                                                {{ $selectedGuest['name'] ?? 'Select Customer' }}
                                             @else
                                                 Select Customer
                                             @endif
                                         </span>
-                                        <svg class="w-5 h-5 text-gray-400 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-5 h-5 text-gray-400 transition-transform" :class="{ 'rotate-180': guestOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                         </svg>
                                     </button>
-                                    <div x-show="open" @click.away="open = false" x-transition class="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-auto">
-                                        <button wire:click="$set('guest_id', null)" @click="open = false" type="button" class="w-full px-4 py-3 text-left hover:bg-gray-50 text-sm text-gray-900">
+                                    <div x-show="guestOpen" @click.away="guestOpen = false" x-transition class="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-auto">
+                                        <button wire:click="$set('guest_id', null)" @click="guestOpen = false" type="button" class="w-full px-4 py-3 text-left hover:bg-gray-50 text-sm text-gray-900">
                                             Select Customer
                                         </button>
-                                        @foreach($this->getGuests() as $guest)
-                                            <button wire:click="$set('guest_id', {{ $guest->id }})" @click="open = false" type="button" class="w-full px-4 py-3 text-left hover:bg-gray-50 text-sm text-gray-900 {{ $guest_id == $guest->id ? 'bg-emerald-50 text-emerald-700' : '' }}">
-                                                {{ $guest->name }} ({{ $guest->mobile_number ?? $guest->phone }})
+                                        @foreach($guests as $guest)
+                                            <button wire:click="$set('guest_id', {{ $guest['id'] }})" @click="guestOpen = false" type="button" class="w-full px-4 py-3 text-left hover:bg-gray-50 text-sm text-gray-900 {{ $guest_id == $guest['id'] ? 'bg-emerald-50 text-emerald-700' : '' }}">
+                                                {{ $guest['name'] }} ({{ $guest['mobile_number'] ?? $guest['phone'] }})
                                             </button>
                                         @endforeach
                                     </div>
@@ -244,14 +255,22 @@
                             @endif
                         </div>
 
-                        <!-- B2B Partner (Full Mode) -->
-                        <div x-show="mode === 'full'" class="space-y-4">
+                        <!-- B2B Partner -->
+                        <div class="space-y-4">
                             <div class="flex items-center justify-between">
                                 <label class="block text-sm font-medium text-gray-700">B2B Partner (Optional)</label>
-                                <button type="button" wire:click="$toggle('create_new_partner')" 
-                                        class="text-sm text-emerald-600 hover:text-emerald-700">
-                                    {{ $create_new_partner ? 'Select Existing' : 'Add New' }}
-                                </button>
+                                <div class="flex bg-gray-100 rounded-lg p-1">
+                                    <button type="button" wire:click="$set('create_new_partner', false)" 
+                                            class="px-3 py-1 text-xs font-medium rounded-md transition-colors"
+                                            :class="!$wire.create_new_partner ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'">
+                                        Select
+                                    </button>
+                                    <button type="button" wire:click="$set('create_new_partner', true)" 
+                                            class="px-3 py-1 text-xs font-medium rounded-md transition-colors"
+                                            :class="$wire.create_new_partner ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'">
+                                        Create
+                                    </button>
+                                </div>
                             </div>
 
                             @if($create_new_partner)
@@ -266,26 +285,27 @@
                                     </div>
                                 </div>
                             @else
-                                <div class="relative" x-data="{ open: false }">
-                                    <button @click="open = !open" type="button" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white text-left flex items-center justify-between">
+                                <div class="relative" x-data="{ partnerOpen: false }">
+                                    <button @click="partnerOpen = !partnerOpen" type="button" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white text-left flex items-center justify-between">
                                         <span>
                                             @if($b2b_partner_id)
-                                                {{ $this->getPartners()->find($b2b_partner_id)?->partner_name ?? 'No B2B Partner' }}
+                                                @php $selectedPartner = collect($partners)->firstWhere('id', $b2b_partner_id); @endphp
+                                                {{ $selectedPartner['partner_name'] ?? 'No B2B Partner' }}
                                             @else
                                                 No B2B Partner
                                             @endif
                                         </span>
-                                        <svg class="w-5 h-5 text-gray-400 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-5 h-5 text-gray-400 transition-transform" :class="{ 'rotate-180': partnerOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                         </svg>
                                     </button>
-                                    <div x-show="open" @click.away="open = false" x-transition class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-xl shadow-lg max-h-60 overflow-auto">
-                                        <button wire:click="$set('b2b_partner_id', null)" @click="open = false" type="button" class="w-full px-4 py-3 text-left hover:bg-gray-50 text-sm text-gray-900">
+                                    <div x-show="partnerOpen" @click.away="partnerOpen = false" x-transition class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-xl shadow-lg max-h-60 overflow-auto">
+                                        <button wire:click="$set('b2b_partner_id', null)" @click="partnerOpen = false" type="button" class="w-full px-4 py-3 text-left hover:bg-gray-50 text-sm text-gray-900">
                                             No B2B Partner
                                         </button>
-                                        @foreach($this->getPartners() as $partner)
-                                            <button wire:click="$set('b2b_partner_id', {{ $partner->id }})" @click="open = false" type="button" class="w-full px-4 py-3 text-left hover:bg-gray-50 text-sm text-gray-900 {{ $b2b_partner_id == $partner->id ? 'bg-emerald-50 text-emerald-700' : '' }}">
-                                                {{ $partner->partner_name }}
+                                        @foreach($partners as $partner)
+                                            <button wire:click="$set('b2b_partner_id', {{ $partner['id'] }})" @click="partnerOpen = false" type="button" class="w-full px-4 py-3 text-left hover:bg-gray-50 text-sm text-gray-900 {{ $b2b_partner_id == $partner['id'] ? 'bg-emerald-50 text-emerald-700' : '' }}">
+                                                {{ $partner['partner_name'] }}
                                             </button>
                                         @endforeach
                                     </div>
