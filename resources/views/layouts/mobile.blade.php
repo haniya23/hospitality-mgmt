@@ -7,6 +7,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="{{ asset('css/globe-loader.css') }}" rel="stylesheet" />
     @livewireStyles
     <style>
         @keyframes truck-motion {
@@ -131,7 +132,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="{{ route('pricing.calendar') }}" @click="sidebarOpen = false"
+                    <a href="{{ route('pricing.index') }}" @click="sidebarOpen = false"
                        class="flex items-center gap-3 p-3 rounded-xl hover:bg-purple-100 text-gray-700 transition-colors {{ request()->routeIs('pricing.*') ? 'bg-purple-100 text-purple-700' : '' }}">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -223,8 +224,51 @@
             </button>
         </div>
     </div>
+    <!-- Globe Loader -->
+    <x-globe-loader />
+    
     @livewireScripts
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    
+    <script>
+        // Globe loader functions
+        window.showGlobeLoader = function() {
+            document.getElementById('globe-loader').style.display = 'flex';
+        };
+        
+        window.hideGlobeLoader = function() {
+            document.getElementById('globe-loader').style.display = 'none';
+        };
+        
+        // Show loader on Livewire requests
+        document.addEventListener('livewire:init', () => {
+            Livewire.hook('morph.updating', () => {
+                showGlobeLoader();
+            });
+            
+            Livewire.hook('morph.updated', () => {
+                hideGlobeLoader();
+            });
+            
+            Livewire.hook('request', () => {
+                showGlobeLoader();
+            });
+            
+            Livewire.hook('response', () => {
+                hideGlobeLoader();
+            });
+        });
+        
+        // Show loader on page navigation
+        window.addEventListener('beforeunload', function() {
+            showGlobeLoader();
+        });
+        
+        // Hide loader when page loads
+        window.addEventListener('load', function() {
+            hideGlobeLoader();
+        });
+    </script>
 </body>
 </html>

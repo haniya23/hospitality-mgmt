@@ -44,6 +44,9 @@ Route::middleware('auth')->group(function () {
     
     // Pricing Management Routes
     Route::get('/pricing', function () {
+        return view('pricing.index');
+    })->name('pricing.index');
+    Route::get('/pricing/calendar', function () {
         return view('pricing.calendar');
     })->name('pricing.calendar');
     

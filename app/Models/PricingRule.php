@@ -13,6 +13,7 @@ class PricingRule extends Model
 
     protected $fillable = [
         'property_id',
+        'accommodation_id',
         'rule_name',
         'rule_type',
         'start_date',
@@ -57,6 +58,11 @@ class PricingRule extends Model
     public function property()
     {
         return $this->belongsTo(Property::class);
+    }
+
+    public function accommodation()
+    {
+        return $this->belongsTo(PropertyAccommodation::class, 'accommodation_id');
     }
 
     public function b2bPartner()
