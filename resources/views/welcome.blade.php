@@ -56,7 +56,7 @@
             <div class="bg-white bg-opacity-80 backdrop-blur-md rounded-2xl p-8 shadow-lg max-w-md mx-auto">
                 <h2 class="text-2xl font-bold text-gray-900 mb-6">Get Started Today</h2>
                 <div class="space-y-4">
-                    <a href="{{ route('login') }}" class="block w-full bg-green-600 text-white py-3 px-6 rounded-xl font-medium hover:bg-green-700 transition-colors">
+                    <a href="{{ route('login') }}" class="block w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 px-6 rounded-xl font-medium hover:from-green-700 hover:to-emerald-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
                         Sign In
                     </a>
                     <a href="{{ route('register') }}" class="block w-full border border-green-600 text-green-600 py-3 px-6 rounded-xl font-medium hover:bg-green-50 transition-colors">

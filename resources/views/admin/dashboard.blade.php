@@ -52,14 +52,14 @@
                                     <form method="POST" action="{{ route('admin.properties.approve', $property) }}" class="flex-1">
                                         @csrf
                                         @method('PATCH')
-                                        <button type="submit" class="w-full bg-green-600 text-white py-2 rounded-full text-sm font-medium hover:bg-green-700 transition-colors">
+                                        <button type="submit" class="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-2 rounded-xl text-sm font-medium hover:from-green-700 hover:to-emerald-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
                                             Approve
                                         </button>
                                     </form>
                                     <form method="POST" action="{{ route('admin.properties.reject', $property) }}" class="flex-1">
                                         @csrf
                                         @method('PATCH')
-                                        <button type="submit" class="w-full bg-red-600 text-white py-2 rounded-full text-sm font-medium hover:bg-red-700 transition-colors"
+                                        <button type="submit" class="w-full bg-gradient-to-r from-red-600 to-pink-600 text-white py-2 rounded-xl text-sm font-medium hover:from-red-700 hover:to-pink-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                                                 onclick="return confirm('Are you sure you want to reject this property?')">
                                             Reject
                                         </button>

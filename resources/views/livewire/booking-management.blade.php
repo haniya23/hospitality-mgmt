@@ -51,18 +51,14 @@
             
             <!-- New Booking Button -->
             <div class="flex items-center justify-end gap-3">
-                <!-- New Booking Button -->
-                <div class="relative inline-flex items-center justify-center group">
-                    <div class="absolute inset-0 duration-1000 opacity-60 transition-all bg-gradient-to-r from-emerald-500 via-teal-500 to-green-400 rounded-xl blur-lg filter group-hover:opacity-100 group-hover:duration-200"></div>
-                    <button wire:click="openBookingModal" class="group relative inline-flex items-center justify-center text-sm sm:text-base rounded-xl bg-gray-900 px-4 sm:px-8 py-2 sm:py-3 font-semibold text-white transition-all duration-200 hover:bg-gray-800 hover:shadow-lg hover:-translate-y-0.5 hover:shadow-gray-600/30">
-                        <span class="hidden sm:inline">+ New Booking</span>
-                        <span class="sm:hidden">+ New Booking</span>
-                        <svg aria-hidden="true" viewBox="0 0 10 10" height="10" width="10" fill="none" class="mt-0.5 ml-2 -mr-1 stroke-white stroke-2">
-                            <path d="M0 5h7" class="transition opacity-0 group-hover:opacity-100"></path>
-                            <path d="M1 1l4 4-4 4" class="transition group-hover:translate-x-[3px]"></path>
-                        </svg>
-                    </button>
-                </div>
+                <button wire:click="openBookingModal" 
+                        class="bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-medium hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-sm sm:text-base">
+                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    <span class="hidden sm:inline">New Booking</span>
+                    <span class="sm:hidden">New</span>
+                </button>
             </div>
         </div>
     </div>
@@ -202,7 +198,7 @@
     <!-- View Cancelled Bookings Button -->
     <div class="text-center">
         <button wire:click="$toggle('showCancelledBookings')" 
-                class="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors">
+                class="px-6 py-3 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 rounded-xl font-medium hover:from-gray-200 hover:to-gray-300 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
             {{ $showCancelledBookings ? 'Hide' : 'View' }} Cancelled Bookings ({{ $cancelledBookings->count() }})
         </button>
     </div>

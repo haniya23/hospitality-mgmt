@@ -34,6 +34,7 @@ class ReportsAnalytics extends Component
     public function switchReport($type)
     {
         $this->reportType = $type;
+        $this->dispatch('reportChanged', $type);
     }
 
     public function exportReport($format = 'csv')

@@ -6,10 +6,12 @@
     <title>@yield('title', 'Hospitality Manager')</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <link href="{{ asset('css/globe-loader.css') }}" rel="stylesheet" />
     @livewireStyles
+    <link href="{{ asset('css/globe-loader.css') }}" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
+        [x-cloak] { display: none !important; }
+        body { background: linear-gradient(135deg, #dbeafe 0%, #f3e8ff 100%); }
         @keyframes truck-motion {
             0% { transform: translateY(0px); }
             50% { transform: translateY(3px); }
@@ -23,7 +25,7 @@
         .road-line { animation: road-animation 1.4s linear infinite; }
     </style>
 </head>
-<body class="min-h-screen" x-data="{ sidebarOpen: false }">
+<body class="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50" x-data="{ sidebarOpen: false }">
     <!-- Top Bar -->
     <div class="fixed top-0 left-0 right-0 z-50 bg-white bg-opacity-80 backdrop-blur-md shadow-lg">
         <div class="flex items-center justify-between px-4 py-3">
@@ -46,6 +48,7 @@
 
     <!-- Sidebar Overlay -->
     <div x-show="sidebarOpen" 
+         x-cloak
          x-transition:enter="ease-out duration-300" 
          x-transition:enter-start="opacity-0" 
          x-transition:enter-end="opacity-100"
@@ -58,6 +61,7 @@
 
     <!-- Sidebar -->
     <div x-show="sidebarOpen" 
+         x-cloak
          x-transition:enter="ease-out duration-300" 
          x-transition:enter-start="-translate-x-full" 
          x-transition:enter-end="translate-x-0"
@@ -223,7 +227,7 @@
                         <path d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></path>
                     </svg>
                 </button>
-                <div x-show="open" @click.away="open = false" x-transition 
+                <div x-show="open" x-cloak @click.away="open = false" x-transition 
                      class="absolute bottom-12 right-0 bg-white rounded-xl shadow-lg border border-gray-200 py-2 w-48">
                     <a href="{{ route('customers.index') }}" @click="open = false" 
                        class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">

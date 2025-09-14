@@ -1,5 +1,30 @@
 @import 'tailwindcss';
 
+/* Prevent Alpine.js flash */
+[x-cloak] { display: none !important; }
+
+/* Hide scrollbars for mobile tab navigation */
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+/* Smooth transitions for tab changes */
+.tab-transition {
+    transition: all 0.2s ease-in-out;
+}
+
+/* Mobile-friendly touch targets */
+@media (max-width: 640px) {
+    button, select, input {
+        min-height: 44px;
+    }
+}
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';

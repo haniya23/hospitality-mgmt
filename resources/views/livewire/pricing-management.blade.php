@@ -7,32 +7,9 @@
         </div>
         
         <div class="flex items-center gap-3">
-            <!-- View Toggle -->
-            <div class="flex bg-gray-100 rounded-lg p-1">
-                <button wire:click="$set('view', 'list')" 
-                        class="px-4 py-2 text-sm font-medium rounded-md transition-colors"
-                        :class="$wire.view === 'list' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'">
-                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
-                    </svg>
-                    List
-                </button>
-                <button wire:click="$set('view', 'calendar')" 
-                        class="px-4 py-2 text-sm font-medium rounded-md transition-colors"
-                        :class="$wire.view === 'calendar' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'">
-                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                    Calendar
-                </button>
-            </div>
-            
             <button wire:click="openModal" 
-                    class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-xl font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
-                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                </svg>
-                New Rule
+                    class="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-4 py-2 rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all duration-200">
+                + Add Rule
             </button>
         </div>
     </div>
@@ -158,10 +135,9 @@
         </div>
     </div>
 
-    @if($view === 'list')
-        <!-- List View -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            @if($pricingRules && $pricingRules->count() > 0)
+    <!-- List View -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        @if($pricingRules && $pricingRules->count() > 0)
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
@@ -260,111 +236,22 @@
                 <div class="px-6 py-4 border-t border-gray-200">
                     {{ $pricingRules->links() }}
                 </div>
-            @else
-                <div class="text-center py-12">
-                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                    </svg>
-                    <h3 class="mt-2 text-sm font-medium text-gray-900">No pricing rules</h3>
-                    <p class="mt-1 text-sm text-gray-500">Get started by creating a new pricing rule.</p>
-                    <div class="mt-6">
-                        <button wire:click="openModal" 
-                                class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors">
-                            Create Pricing Rule
-                        </button>
-                    </div>
-                </div>
-            @endif
-        </div>
-    @else
-        <!-- Calendar View -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <!-- Calendar Header -->
-            <div class="flex items-center justify-between p-6 border-b border-gray-200">
-                <h2 class="text-lg font-semibold text-gray-900">{{ $monthName }}</h2>
-                <div class="flex items-center space-x-2">
-                    <button wire:click="previousMonth" 
-                            class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                        </svg>
-                    </button>
-                    <button wire:click="nextMonth" 
-                            class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                        </svg>
+        @else
+            <div class="text-center py-12">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">No pricing rules</h3>
+                <p class="mt-1 text-sm text-gray-500">Get started by creating a new pricing rule.</p>
+                <div class="mt-6">
+                    <button wire:click="openModal" 
+                            class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-xl font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                        Create Pricing Rule
                     </button>
                 </div>
             </div>
-
-            <!-- Calendar Grid -->
-            <div class="p-6">
-                <!-- Day Headers -->
-                <div class="grid grid-cols-7 gap-1 mb-2">
-                    @foreach(['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as $day)
-                        <div class="p-2 text-center text-xs font-medium text-gray-500 uppercase">{{ $day }}</div>
-                    @endforeach
-                </div>
-
-                <!-- Calendar Days -->
-                @foreach($calendarWeeks as $week)
-                    <div class="grid grid-cols-7 gap-1 mb-1">
-                        @foreach($week as $day)
-                            <div class="relative min-h-[80px] border border-gray-200 rounded-lg p-2 
-                                {{ $day['isCurrentMonth'] ? 'bg-white' : 'bg-gray-50' }}
-                                {{ $day['isToday'] ? 'ring-2 ring-blue-500' : '' }}
-                                hover:bg-gray-50 cursor-pointer transition-colors"
-                                wire:click="selectDate('{{ $day['date']->format('Y-m-d') }}')">
-                                
-                                <div class="text-sm font-medium {{ $day['isCurrentMonth'] ? 'text-gray-900' : 'text-gray-400' }}">
-                                    {{ $day['date']->format('j') }}
-                                </div>
-                                
-                                @if($day['ruleCount'] > 0)
-                                    <div class="mt-1 space-y-1">
-                                        @if($day['hasSeasonal'])
-                                            <div class="w-full h-1 bg-green-400 rounded-full"></div>
-                                        @endif
-                                        @if($day['hasPromo'])
-                                            <div class="w-full h-1 bg-purple-400 rounded-full"></div>
-                                        @endif
-                                        @if($day['hasB2B'])
-                                            <div class="w-full h-1 bg-blue-400 rounded-full"></div>
-                                        @endif
-                                        
-                                        @if($day['ruleCount'] > 3)
-                                            <div class="text-xs text-gray-500 text-center">+{{ $day['ruleCount'] - 3 }} more</div>
-                                        @endif
-                                    </div>
-                                @endif
-                            </div>
-                        @endforeach
-                    </div>
-                @endforeach
-
-                <!-- Legend -->
-                <div class="mt-6 flex flex-wrap items-center gap-4 text-xs">
-                    <div class="flex items-center gap-2">
-                        <div class="w-3 h-1 bg-green-400 rounded-full"></div>
-                        <span class="text-gray-600">Seasonal</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <div class="w-3 h-1 bg-purple-400 rounded-full"></div>
-                        <span class="text-gray-600">Promotional</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <div class="w-3 h-1 bg-blue-400 rounded-full"></div>
-                        <span class="text-gray-600">B2B Contract</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <div class="w-3 h-1 bg-yellow-400 rounded-full"></div>
-                        <span class="text-gray-600">Loyalty</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
+        @endif
+    </div>
 
     <!-- Pricing Modal -->
     <livewire:pricing-modal />

@@ -15,8 +15,12 @@
             <p class="text-gray-600">Manage your customer database</p>
         </div>
         <button wire:click="openCreateModal" 
-                class="bg-teal-600 text-white px-6 py-3 rounded-xl hover:bg-teal-700 transition-colors">
-            + New Customer
+                class="bg-gradient-to-r from-teal-600 to-cyan-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-medium hover:from-teal-700 hover:to-cyan-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-sm sm:text-base">
+            <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            <span class="hidden sm:inline">New Customer</span>
+            <span class="sm:hidden">New</span>
         </button>
     </div>
 
@@ -80,7 +84,7 @@
                     <h3 class="text-lg font-medium text-gray-900 mb-2">No Customers Found</h3>
                     <p class="text-gray-600 mb-4">Start by adding your first customer.</p>
                     <button wire:click="openCreateModal" 
-                            class="bg-teal-600 text-white px-6 py-3 rounded-xl hover:bg-teal-700 transition-colors">
+                            class="bg-gradient-to-r from-teal-600 to-cyan-600 text-white px-6 py-3 rounded-xl font-medium hover:from-teal-700 hover:to-cyan-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
                         Add First Customer
                     </button>
                 </div>

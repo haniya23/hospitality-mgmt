@@ -15,8 +15,12 @@
             <p class="text-gray-600">Manage your business partners</p>
         </div>
         <button wire:click="openCreateModal" 
-                class="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors">
-            + New B2B Partner
+                class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-sm sm:text-base">
+            <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            <span class="hidden sm:inline">New B2B Partner</span>
+            <span class="sm:hidden">New Partner</span>
         </button>
     </div>
 
@@ -85,7 +89,7 @@
                     <h3 class="text-lg font-medium text-gray-900 mb-2">No B2B Partners Found</h3>
                     <p class="text-gray-600 mb-4">Start by adding your first business partner.</p>
                     <button wire:click="openCreateModal" 
-                            class="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors">
+                            class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
                         Add First Partner
                     </button>
                 </div>
