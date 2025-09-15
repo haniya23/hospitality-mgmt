@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="bg-gradient-to-br from-blue-50 to-purple-50">
+<html lang="en" class="bg-gradient-to-br from-slate-900 to-blue-900">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,7 +11,7 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
         [x-cloak] { display: none !important; }
-        body { background: linear-gradient(135deg, #dbeafe 0%, #f3e8ff 100%); }
+        body { background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); }
         @keyframes truck-motion {
             0% { transform: translateY(0px); }
             50% { transform: translateY(3px); }
@@ -25,22 +25,24 @@
         .road-line { animation: road-animation 1.4s linear infinite; }
     </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50" x-data="{ sidebarOpen: false }">
+<body class="min-h-screen bg-gradient-to-br from-slate-900 to-blue-900" x-data="{ sidebarOpen: false }">
     <!-- Top Bar -->
-    <div class="fixed top-0 left-0 right-0 z-50 bg-white bg-opacity-80 backdrop-blur-md shadow-lg">
-        <div class="flex items-center justify-between px-4 py-3">
-            <button @click="sidebarOpen = !sidebarOpen" class="text-gray-600 hover:text-gray-800 transition-all duration-200">
-                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
-            </button>
-            <h1 class="text-lg font-semibold text-gray-800">@yield('page-title', 'Dashboard')</h1>
-            <div class="flex items-center space-x-2">
-                @if(auth()->user()->is_admin)
-                    <span class="bg-red-100 text-red-800 px-2 py-1 text-xs rounded-full">ADMIN</span>
-                @endif
-                <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
-                    <span class="text-white text-sm font-medium">{{ substr(auth()->user()->name, 0, 1) }}</span>
+    <div class="fixed top-4 left-4 right-4 z-50">
+        <div class="bg-slate-800 bg-opacity-90 backdrop-blur-md rounded-2xl shadow-xl border border-slate-700">
+            <div class="flex items-center justify-between px-4 py-3">
+                <button @click="sidebarOpen = !sidebarOpen" class="text-slate-300 hover:text-white transition-all duration-200">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+                <h1 class="text-lg font-semibold text-white">@yield('page-title', 'Dashboard')</h1>
+                <div class="flex items-center space-x-2">
+                    @if(auth()->user()->is_admin)
+                        <span class="bg-red-500 text-white px-2 py-1 text-xs rounded-full">ADMIN</span>
+                    @endif
+                    <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                        <span class="text-white text-sm font-medium">{{ substr(auth()->user()->name, 0, 1) }}</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -68,12 +70,12 @@
          x-transition:leave="ease-in duration-200" 
          x-transition:leave-start="translate-x-0" 
          x-transition:leave-end="-translate-x-full"
-         class="fixed left-0 top-0 h-full w-72 bg-white shadow-lg z-50 transform">
+         class="fixed left-0 top-0 h-full w-72 bg-slate-800 shadow-lg z-50 transform">
         
         <div class="p-6">
             <div class="flex items-center justify-between mb-8">
-                <h2 class="text-xl font-bold text-gray-800">Menu</h2>
-                <button @click="sidebarOpen = false" class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full">
+                <h2 class="text-xl font-bold text-white">Menu</h2>
+                <button @click="sidebarOpen = false" class="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-full">
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -181,13 +183,13 @@
     </div>
 
     <!-- Main Content -->
-    <div class="pt-16 pb-20 px-4">
+    <div class="pt-24 pb-24 px-4">
         @yield('content')
     </div>
 
     <!-- Bottom Navigation -->
     <div class="fixed bottom-4 left-4 right-4 z-40">
-        <div class="flex items-center justify-between bg-white bg-opacity-80 backdrop-blur-md rounded-full px-6 py-3 shadow-lg max-w-md mx-auto transition-all duration-300 hover:shadow-xl hover:bg-opacity-90">
+        <div class="flex items-center justify-between bg-slate-800 bg-opacity-90 backdrop-blur-md rounded-full px-6 py-3 shadow-xl border border-slate-700 max-w-md mx-auto transition-all duration-300 hover:shadow-2xl">
             <a href="{{ route('dashboard') }}" 
                class="text-gray-600 hover:text-purple-600 mx-2 transition-transform duration-200 ease-in-out hover:scale-110 focus:outline-none focus:ring-2 focus:ring-purple-500 rounded-full {{ request()->routeIs('dashboard') ? 'text-purple-600' : '' }}">
                 <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">

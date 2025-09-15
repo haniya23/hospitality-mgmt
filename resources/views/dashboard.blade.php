@@ -12,18 +12,18 @@
 
     <div class="space-y-4 sm:space-y-6">
         <!-- Welcome Section -->
-        <div class="bg-white bg-opacity-80 backdrop-blur-md rounded-2xl p-4 sm:p-6 shadow-lg">
-            <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Welcome back!</h2>
-            <p class="text-sm sm:text-base text-gray-600">{{ auth()->user()->name }}</p>
+        <div class="bg-slate-800 bg-opacity-90 backdrop-blur-md rounded-2xl p-4 sm:p-6 shadow-xl border border-slate-700">
+            <h2 class="text-xl sm:text-2xl font-bold text-white mb-2">Welcome back!</h2>
+            <p class="text-sm sm:text-base text-slate-300">{{ auth()->user()->name }}</p>
         </div>
 
         @if($properties->isEmpty())
             <!-- Get Started Card -->
-            <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl p-4 sm:p-6 text-white">
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-4 sm:p-6 text-white shadow-xl">
                 <h3 class="text-lg sm:text-xl font-bold mb-2">Get Started</h3>
                 <p class="mb-4 opacity-90 text-sm sm:text-base">Create your first property to begin managing your hospitality business.</p>
                 <a href="{{ route('properties.create') }}" 
-                   class="inline-block bg-white bg-opacity-20 backdrop-blur-md text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full font-medium hover:bg-opacity-30 transition-all duration-200 text-sm sm:text-base">
+                   class="inline-block bg-white bg-opacity-20 backdrop-blur-md text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full font-medium hover:bg-opacity-30 transition-all duration-200 text-sm sm:text-base shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
                     Create First Property
                 </a>
             </div>
@@ -31,14 +31,14 @@
             <!-- Quick Actions -->
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
                 <a href="{{ route('properties.create') }}" 
-                   class="bg-white bg-opacity-80 backdrop-blur-md rounded-2xl p-3 sm:p-4 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5">
+                   class="bg-slate-800 bg-opacity-90 backdrop-blur-md rounded-2xl p-3 sm:p-4 shadow-xl hover:shadow-2xl transition-all duration-200 transform hover:-translate-y-0.5 border border-slate-700">
                     <div class="text-center">
-                        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                            <svg class="h-5 w-5 sm:h-6 sm:w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                            <svg class="h-5 w-5 sm:h-6 sm:w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                             </svg>
                         </div>
-                        <p class="text-xs sm:text-sm font-medium text-gray-900">Add Property</p>
+                        <p class="text-xs sm:text-sm font-medium text-white">Add Property</p>
                     </div>
                 </a>
                 <a href="{{ route('bookings.index') }}" 
@@ -99,17 +99,17 @@
             </div>
 
             <!-- Properties List -->
-            <div class="bg-white bg-opacity-80 backdrop-blur-md rounded-2xl shadow-lg overflow-hidden">
-                <div class="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
-                    <h3 class="text-base sm:text-lg font-semibold text-gray-900">Your Properties</h3>
+            <div class="bg-slate-800 bg-opacity-90 backdrop-blur-md rounded-2xl shadow-xl overflow-hidden border border-slate-700">
+                <div class="px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-700">
+                    <h3 class="text-base sm:text-lg font-semibold text-white">Your Properties</h3>
                 </div>
-                <div class="divide-y divide-gray-200">
+                <div class="divide-y divide-slate-700">
                     @foreach($properties->take(3) as $property)
                         <div class="px-4 sm:px-6 py-3 sm:py-4">
                             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                                 <div class="flex-1">
-                                    <h4 class="font-medium text-gray-900 text-sm sm:text-base">{{ $property->name }}</h4>
-                                    <p class="text-xs sm:text-sm text-gray-600">{{ $property->category->name ?? 'N/A' }}</p>
+                                    <h4 class="font-medium text-white text-sm sm:text-base">{{ $property->name }}</h4>
+                                    <p class="text-xs sm:text-sm text-slate-400">{{ $property->category->name ?? 'N/A' }}</p>
                                 </div>
                                 <span class="px-2 sm:px-3 py-1 text-xs font-medium rounded-full self-start sm:self-center
                                     @if($property->status === 'pending') bg-yellow-100 text-yellow-800
@@ -122,8 +122,8 @@
                     @endforeach
                 </div>
                 @if($properties->count() > 3)
-                    <div class="px-4 sm:px-6 py-3 bg-gray-50">
-                        <a href="{{ route('properties.index') }}" class="text-xs sm:text-sm text-purple-600 font-medium">
+                    <div class="px-4 sm:px-6 py-3 bg-slate-700">
+                        <a href="{{ route('properties.index') }}" class="text-xs sm:text-sm text-blue-400 font-medium hover:text-blue-300 transition-colors">
                             View all {{ $properties->count() }} properties →
                         </a>
                     </div>
