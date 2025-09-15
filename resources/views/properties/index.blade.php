@@ -1,3 +1,7 @@
+@php
+use Illuminate\Support\Facades\Storage;
+@endphp
+
 @extends('layouts.mobile')
 
 @section('title', 'Properties - Hospitality Manager')
@@ -38,7 +42,7 @@
                         @endphp
                         @if($mainImage)
                             <div class="relative h-32 sm:h-48 w-full">
-                                <img src="{{ asset($mainImage->file_path) }}" 
+                                <img src="{{ Storage::url($mainImage->file_path) }}" 
                                      alt="{{ $property->name }}" 
                                      class="w-full h-full object-cover"
                                 >
