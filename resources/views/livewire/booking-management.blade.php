@@ -16,33 +16,33 @@
     <div class="space-y-4">
         <!-- Title -->
         <div>
-            <h2 class="text-2xl font-bold text-gray-900">Booking Management</h2>
-            <p class="text-gray-600">Manage your property bookings and calendar</p>
+            <h2 class="heading-1">Booking Management</h2>
+            <p class="body-text">Manage your property bookings and calendar</p>
         </div>
         
         <!-- Controls - Mobile Responsive -->
-        <div class="flex flex-col space-y-3 sm:space-y-0">
-            <!-- Property Selector - Full width on mobile -->
-            <div class="w-full relative" x-data="{ open: false }">
-                <button @click="open = !open" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white text-left flex items-center justify-between">
-                    <span class="text-gray-900">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+            <!-- Property Selector -->
+            <div class="flex-1 relative" x-data="{ open: false }">
+                <button @click="open = !open" class="form-select text-left flex items-center justify-between">
+                    <span class="text-primary">
                         @if($selectedProperty)
                             {{ $properties->find($selectedProperty)?->name ?? 'All Properties' }}
                         @else
                             All Properties
                         @endif
                     </span>
-                    <svg class="w-5 h-5 text-gray-400 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 text-accent transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
                 
-                <div x-show="open" @click.away="open = false" x-transition class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-xl shadow-lg max-h-60 overflow-auto">
-                    <button wire:click="$set('selectedProperty', null)" @click="open = false" class="w-full px-4 py-3 text-left hover:bg-gray-50 text-sm text-gray-900 border-b border-gray-100">
+                <div x-show="open" @click.away="open = false" x-transition class="absolute z-10 mt-1 w-full glass-card max-h-60 overflow-auto">
+                    <button wire:click="$set('selectedProperty', null)" @click="open = false" class="w-full px-4 py-3 text-left hover:bg-white hover:bg-opacity-20 small-text text-primary border-b border-glass-border">
                         All Properties
                     </button>
                     @foreach($properties as $property)
-                        <button wire:click="$set('selectedProperty', {{ $property->id }})" @click="open = false" class="w-full px-4 py-3 text-left hover:bg-gray-50 text-sm text-gray-900 {{ $selectedProperty == $property->id ? 'bg-emerald-50 text-emerald-700' : '' }}">
+                        <button wire:click="$set('selectedProperty', {{ $property->id }})" @click="open = false" class="w-full px-4 py-3 text-left hover:bg-white hover:bg-opacity-20 small-text text-primary {{ $selectedProperty == $property->id ? 'bg-white bg-opacity-20' : '' }}">
                             {{ $property->name }}
                         </button>
                     @endforeach
@@ -50,25 +50,22 @@
             </div>
             
             <!-- New Booking Button -->
-            <div class="flex items-center justify-end gap-3">
-                <button wire:click="openBookingModal" 
-                        class="bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-medium hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-sm sm:text-base">
-                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                    </svg>
-                    <span class="hidden sm:inline">New Booking</span>
-                    <span class="sm:hidden">New</span>
-                </button>
-            </div>
+            <button wire:click="openBookingModal" class="btn-primary">
+                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                <span class="hidden sm:inline">New Booking</span>
+                <span class="sm:hidden">New</span>
+            </button>
         </div>
     </div>
 
     <!-- Main Content - Two Sections -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <!-- Pending Bookings -->
-        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-200 bg-yellow-50">
-                <h3 class="text-lg font-semibold text-yellow-800">Pending Bookings ({{ $pendingBookings->count() }})</h3>
+        <div class="glass-card overflow-hidden">
+            <div class="px-4 sm:px-6 py-4 border-b border-glass-border">
+                <h3 class="heading-3 text-yellow-300">Pending Bookings ({{ $pendingBookings->count() }})</h3>
             </div>
             
             <div class="divide-y divide-gray-200 max-h-96 overflow-y-auto">
@@ -120,9 +117,9 @@
         </div>
 
         <!-- Active Bookings -->
-        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-200 bg-green-50">
-                <h3 class="text-lg font-semibold text-green-800">Active Bookings ({{ $activeBookings->count() }})</h3>
+        <div class="glass-card overflow-hidden">
+            <div class="px-4 sm:px-6 py-4 border-b border-glass-border">
+                <h3 class="heading-3 text-green-300">Active Bookings ({{ $activeBookings->count() }})</h3>
             </div>
             
             <div class="divide-y divide-gray-200 max-h-96 overflow-y-auto">
@@ -176,22 +173,22 @@
     </div>
 
     <!-- Quick Stats -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="bg-white rounded-2xl p-4 shadow-lg">
-            <div class="text-2xl font-bold text-yellow-600">{{ $pendingBookings->count() }}</div>
-            <div class="text-sm text-gray-600">Pending</div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+        <div class="glass-card p-3 sm:p-4 text-center">
+            <div class="text-xl sm:text-2xl font-bold text-yellow-300">{{ $pendingBookings->count() }}</div>
+            <div class="small-text text-secondary">Pending</div>
         </div>
-        <div class="bg-white rounded-2xl p-4 shadow-lg">
-            <div class="text-2xl font-bold text-green-600">{{ $activeBookings->where('status', 'confirmed')->count() }}</div>
-            <div class="text-sm text-gray-600">Confirmed</div>
+        <div class="glass-card p-3 sm:p-4 text-center">
+            <div class="text-xl sm:text-2xl font-bold text-green-300">{{ $activeBookings->where('status', 'confirmed')->count() }}</div>
+            <div class="small-text text-secondary">Confirmed</div>
         </div>
-        <div class="bg-white rounded-2xl p-4 shadow-lg">
-            <div class="text-2xl font-bold text-blue-600">{{ $activeBookings->where('status', 'checked_in')->count() }}</div>
-            <div class="text-sm text-gray-600">Checked In</div>
+        <div class="glass-card p-3 sm:p-4 text-center">
+            <div class="text-xl sm:text-2xl font-bold text-blue-300">{{ $activeBookings->where('status', 'checked_in')->count() }}</div>
+            <div class="small-text text-secondary">Checked In</div>
         </div>
-        <div class="bg-white rounded-2xl p-4 shadow-lg">
-            <div class="text-2xl font-bold text-gray-900">₹{{ number_format($pendingBookings->sum('total_amount') + $activeBookings->sum('total_amount')) }}</div>
-            <div class="text-sm text-gray-600">Total Value</div>
+        <div class="glass-card p-3 sm:p-4 text-center">
+            <div class="text-lg sm:text-xl font-bold text-primary">₹{{ number_format($pendingBookings->sum('total_amount') + $activeBookings->sum('total_amount')) }}</div>
+            <div class="small-text text-secondary">Total Value</div>
         </div>
     </div>
 
