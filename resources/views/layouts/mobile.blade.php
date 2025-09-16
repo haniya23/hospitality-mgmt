@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="bg-gradient-to-br from-green-900 to-emerald-800">
+<html lang="en" class="bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -30,7 +30,7 @@
                 @if(auth()->user()->is_admin)
                     <span class="status-inactive">ADMIN</span>
                 @endif
-                <div class="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
+                <div class="w-8 h-8 bg-white/30 backdrop-blur-md border border-white/40 rounded-full flex items-center justify-center shadow-lg">
                     <span class="text-white text-sm font-medium">{{ substr(auth()->user()->name, 0, 1) }}</span>
                 </div>
             </div>
@@ -74,7 +74,7 @@
             <ul class="space-y-2">
                 <li>
                     <a href="{{ route('dashboard') }}" @click="sidebarOpen = false"
-                       class="flex items-center gap-3 p-3 rounded-xl hover:bg-white hover:bg-opacity-20 text-primary transition-colors {{ request()->routeIs('dashboard') ? 'bg-olive text-white' : '' }}">
+                       class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/25 hover:backdrop-blur-md text-primary transition-all duration-300 {{ request()->routeIs('dashboard') ? 'bg-white/30 backdrop-blur-md border border-white/40 shadow-lg' : '' }}">
                         <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
                         </svg>
@@ -83,7 +83,7 @@
                 </li>
                 <li>
                     <a href="{{ route('properties.index') }}" @click="sidebarOpen = false"
-                       class="flex items-center gap-3 p-3 rounded-xl hover:bg-white hover:bg-opacity-20 text-primary transition-colors {{ request()->routeIs('properties.*') ? 'bg-olive text-white' : '' }}">
+                       class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/25 hover:backdrop-blur-md text-primary transition-all duration-300 {{ request()->routeIs('properties.*') ? 'bg-white/30 backdrop-blur-md border border-white/40 shadow-lg' : '' }}">
                         <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                         </svg>
@@ -92,7 +92,7 @@
                 </li>
                 <li>
                     <a href="{{ route('bookings.index') }}" @click="sidebarOpen = false"
-                       class="flex items-center gap-3 p-3 rounded-xl hover:bg-white hover:bg-opacity-20 text-primary transition-colors {{ request()->routeIs('bookings.*') ? 'bg-olive text-white' : '' }}">
+                       class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/25 hover:backdrop-blur-md text-primary transition-all duration-300 {{ request()->routeIs('bookings.*') ? 'bg-white/30 backdrop-blur-md border border-white/40 shadow-lg' : '' }}">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                         </svg>
@@ -101,7 +101,7 @@
                 </li>
                 <li>
                     <a href="{{ route('customers.index') }}" @click="sidebarOpen = false"
-                       class="flex items-center gap-3 p-3 rounded-xl hover:bg-white hover:bg-opacity-20 text-primary transition-colors {{ request()->routeIs('customers.*') ? 'bg-olive text-white' : '' }}">
+                       class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/25 hover:backdrop-blur-md text-primary transition-all duration-300 {{ request()->routeIs('customers.*') ? 'bg-white/30 backdrop-blur-md border border-white/40 shadow-lg' : '' }}">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                         </svg>
@@ -110,7 +110,7 @@
                 </li>
                 <li>
                     <a href="{{ route('b2b.dashboard') }}" @click="sidebarOpen = false"
-                       class="flex items-center gap-3 p-3 rounded-xl hover:bg-white hover:bg-opacity-20 text-primary transition-colors {{ request()->routeIs('b2b.*') ? 'bg-olive text-white' : '' }}">
+                       class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/25 hover:backdrop-blur-md text-primary transition-all duration-300 {{ request()->routeIs('b2b.*') ? 'bg-white/30 backdrop-blur-md border border-white/40 shadow-lg' : '' }}">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                         </svg>
@@ -119,7 +119,7 @@
                 </li>
                 <li>
                     <a href="{{ route('resources.index') }}" @click="sidebarOpen = false"
-                       class="flex items-center gap-3 p-3 rounded-xl hover:bg-white hover:bg-opacity-20 text-primary transition-colors {{ request()->routeIs('resources.*') ? 'bg-olive text-white' : '' }}">
+                       class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/25 hover:backdrop-blur-md text-primary transition-all duration-300 {{ request()->routeIs('resources.*') ? 'bg-white/30 backdrop-blur-md border border-white/40 shadow-lg' : '' }}">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
                         </svg>
@@ -128,7 +128,7 @@
                 </li>
                 <li>
                     <a href="{{ route('pricing.index') }}" @click="sidebarOpen = false"
-                       class="flex items-center gap-3 p-3 rounded-xl hover:bg-white hover:bg-opacity-20 text-primary transition-colors {{ request()->routeIs('pricing.*') ? 'bg-olive text-white' : '' }}">
+                       class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/25 hover:backdrop-blur-md text-primary transition-all duration-300 {{ request()->routeIs('pricing.*') ? 'bg-white/30 backdrop-blur-md border border-white/40 shadow-lg' : '' }}">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
@@ -137,7 +137,7 @@
                 </li>
                 <li>
                     <a href="{{ route('reports.analytics') }}" @click="sidebarOpen = false"
-                       class="flex items-center gap-3 p-3 rounded-xl hover:bg-white hover:bg-opacity-20 text-primary transition-colors {{ request()->routeIs('reports.*') ? 'bg-olive text-white' : '' }}">
+                       class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/25 hover:backdrop-blur-md text-primary transition-all duration-300 {{ request()->routeIs('reports.*') ? 'bg-white/30 backdrop-blur-md border border-white/40 shadow-lg' : '' }}">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                         </svg>
@@ -147,7 +147,7 @@
                 @if(auth()->user()->is_admin)
                 <li>
                     <a href="{{ route('admin.dashboard') }}" @click="sidebarOpen = false"
-                       class="flex items-center gap-3 p-3 rounded-xl hover:bg-white hover:bg-opacity-20 text-primary transition-colors {{ request()->routeIs('admin.*') ? 'bg-olive text-white' : '' }}">
+                       class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/25 hover:backdrop-blur-md text-primary transition-all duration-300 {{ request()->routeIs('admin.*') ? 'bg-white/30 backdrop-blur-md border border-white/40 shadow-lg' : '' }}">
                         <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                         </svg>
@@ -159,7 +159,7 @@
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit" 
-                                class="flex items-center gap-3 p-3 rounded-xl hover:bg-white hover:bg-opacity-20 text-primary transition-colors w-full text-left">
+                                class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/25 hover:backdrop-blur-md text-primary transition-all duration-300 w-full text-left">
                             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                             </svg>
@@ -209,28 +209,28 @@
                     <div x-show="open" x-cloak @click.away="open = false" x-transition 
                          class="absolute bottom-full mb-2 right-0 glass-card py-2 w-48">
                         <a href="{{ route('customers.index') }}" @click="open = false" 
-                           class="flex items-center px-4 py-2 body-text hover:bg-white hover:bg-opacity-20">
+                           class="flex items-center px-4 py-2 body-text hover:bg-white/25 hover:backdrop-blur-md transition-all duration-300">
                             <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                             </svg>
                             Customers
                         </a>
                         <a href="{{ route('resources.index') }}" @click="open = false" 
-                           class="flex items-center px-4 py-2 body-text hover:bg-white hover:bg-opacity-20">
+                           class="flex items-center px-4 py-2 body-text hover:bg-white/25 hover:backdrop-blur-md transition-all duration-300">
                             <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
                             </svg>
                             Resources
                         </a>
                         <a href="{{ route('pricing.index') }}" @click="open = false" 
-                           class="flex items-center px-4 py-2 body-text hover:bg-white hover:bg-opacity-20">
+                           class="flex items-center px-4 py-2 body-text hover:bg-white/25 hover:backdrop-blur-md transition-all duration-300">
                             <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
                             Pricing
                         </a>
                         <a href="{{ route('reports.analytics') }}" @click="open = false" 
-                           class="flex items-center px-4 py-2 body-text hover:bg-white hover:bg-opacity-20">
+                           class="flex items-center px-4 py-2 body-text hover:bg-white/25 hover:backdrop-blur-md transition-all duration-300">
                             <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                             </svg>
@@ -239,7 +239,7 @@
                         @if(auth()->user()->is_admin)
                         <div class="divider"></div>
                         <a href="{{ route('admin.dashboard') }}" @click="open = false" 
-                           class="flex items-center px-4 py-2 body-text hover:bg-white hover:bg-opacity-20">
+                           class="flex items-center px-4 py-2 body-text hover:bg-white/25 hover:backdrop-blur-md transition-all duration-300">
                             <svg class="w-4 h-4 mr-3" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.9 1 3 1.9 3 3V21C3 22.1 3.9 23 5 23H19C20.1 23 21 22.1 21 21V9M19 9H14V4H19V9Z"/>
                             </svg>
