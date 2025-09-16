@@ -2,69 +2,73 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreBookingRequest;
 use App\Models\Guest;
-use App\Models\B2bPartner;
+use App\Models\Property;
+use App\Models\PropertyAccommodation;
 use App\Models\Reservation;
-use App\Models\Commission;
-use App\Models\AuditLog;
+use App\Models\CancelledBooking;
+use Illuminate\Http\Request;
 
 class BookingController extends Controller
 {
-    public function store(StoreBookingRequest $request)
+    public function index(Request $request)
     {
+        $query = Reservation::with(['guest', 'accommodation.property', 'b2bPartner'])
+            ->whereHas('accommodation.property', function($q) {
+                $q->where('owner_id', auth()->id());
+            });
+
+        if ($request->property_id) {
+            $query->whereHas('accommodation', function($q) use ($request) {
+                $q->where('property_id', $request->property_id);
+            });
+        }
+
+        $bookings = $query->latest()->get();
+
+        return response()->json([
+            'pending' => $bookings->where('status', 'pending')->values(),
+            'active' => $bookings->whereIn('status', ['confirmed', 'checked_in'])->values()
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'property_id' => 'required|exists:properties,id',
+            'accommodation_id' => 'required|exists:property_accommodations,id',
+            'check_in_date' => 'required|date',
+            'check_out_date' => 'required|date|after:check_in_date',
+            'adults' => 'required|integer|min:1',
+            'children' => 'required|integer|min:0',
+            'guest_name' => 'required|string',
+            'guest_mobile' => 'required|string',
+            'total_amount' => 'required|numeric|min:0',
+            'advance_paid' => 'required|numeric|min:0'
+        ]);
+
         try {
-            $data = $request->validated();
-            
-            // Create guest if needed
-            if ($request->create_new_guest) {
-                $guest = Guest::create([
-                    'name' => $data['guest_name'],
-                    'mobile_number' => $data['guest_mobile'],
-                    'email' => $request->guest_email,
-                ]);
-                $data['guest_id'] = $guest->id;
-            }
+            $guest = Guest::firstOrCreate(
+                ['mobile_number' => $request->guest_mobile],
+                [
+                    'name' => $request->guest_name,
+                    'email' => $request->guest_email
+                ]
+            );
 
-            // Create B2B partner if needed
-            if ($request->create_new_partner && $request->partner_mobile) {
-                $partner = B2bPartner::createPartnershipRequest(
-                    auth()->id(),
-                    $request->partner_mobile,
-                    $request->partner_name
-                );
-                $data['b2b_partner_id'] = $partner->id;
-            }
-
-            // Create booking
             $booking = Reservation::create([
-                'guest_id' => $data['guest_id'],
-                'property_accommodation_id' => $data['accommodation_id'],
-                'b2b_partner_id' => $data['b2b_partner_id'] ?? null,
-                'check_in_date' => $data['check_in_date'],
-                'check_out_date' => $data['check_out_date'],
-                'adults' => $data['adults'],
-                'children' => $data['children'],
-                'total_amount' => $request->rate_override ?? $data['total_amount'],
-                'advance_paid' => $data['advance_paid'],
-                'balance_pending' => ($request->rate_override ?? $data['total_amount']) - $data['advance_paid'],
-                'rate_override' => $request->rate_override,
-                'override_reason' => $request->override_reason,
-                'special_requests' => $request->special_requests,
-                'notes' => $request->notes,
+                'guest_id' => $guest->id,
+                'property_accommodation_id' => $request->accommodation_id,
+                'check_in_date' => $request->check_in_date,
+                'check_out_date' => $request->check_out_date,
+                'adults' => $request->adults,
+                'children' => $request->children,
+                'total_amount' => $request->total_amount,
+                'advance_paid' => $request->advance_paid,
+                'balance_pending' => $request->total_amount - $request->advance_paid,
                 'status' => 'pending',
-                'created_by' => auth()->id(),
+                'created_by' => auth()->id()
             ]);
-
-            // Log price override if applicable
-            if ($request->rate_override && $request->rate_override != $data['total_amount']) {
-                AuditLog::logPriceOverride($booking, $data['total_amount'], $request->rate_override, $request->override_reason);
-            }
-
-            // Create commission record for B2B bookings
-            if ($booking->b2b_partner_id) {
-                Commission::calculateForBooking($booking);
-            }
 
             return response()->json([
                 'success' => true,
@@ -75,8 +79,98 @@ class BookingController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error creating booking: ' . $e->getMessage()
+                'message' => 'Error: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    public function toggleStatus($id)
+    {
+        try {
+            $booking = Reservation::with('accommodation.property')->findOrFail($id);
+            
+            if ($booking->accommodation->property->owner_id !== auth()->id()) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+            }
+            
+            $newStatus = $booking->status === 'pending' ? 'confirmed' : 'pending';
+            $booking->update(['status' => $newStatus]);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Status updated successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function cancel(Request $request, $id)
+    {
+        $request->validate(['reason' => 'required|string']);
+
+        try {
+            $booking = Reservation::with('accommodation.property')->findOrFail($id);
+            
+            if ($booking->accommodation->property->owner_id !== auth()->id()) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+            }
+
+            CancelledBooking::create([
+                'reservation_id' => $booking->id,
+                'reason' => $request->reason,
+                'description' => $request->description,
+                'refund_amount' => 0,
+                'cancelled_by' => auth()->id(),
+                'cancelled_at' => now()
+            ]);
+
+            $booking->update(['status' => 'cancelled']);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Booking cancelled successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getProperties()
+    {
+        $properties = Property::where('owner_id', auth()->id())->get(['id', 'name']);
+        return response()->json($properties);
+    }
+
+    public function getAccommodations($propertyId)
+    {
+        try {
+            $accommodations = PropertyAccommodation::with('predefinedType')
+                ->where('property_id', $propertyId)
+                ->get()
+                ->map(function($acc) {
+                    return [
+                        'id' => $acc->id,
+                        'display_name' => $acc->display_name,
+                        'base_price' => $acc->base_price
+                    ];
+                });
+            return response()->json($accommodations);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getGuests()
+    {
+        $guests = Guest::orderBy('name')->get(['id', 'name', 'mobile_number', 'email']);
+        return response()->json($guests);
+    }
+
+    public function getPartners()
+    {
+        $partners = \App\Models\B2bPartner::where('status', 'active')
+            ->get(['id', 'partner_name']);
+        return response()->json($partners);
     }
 }

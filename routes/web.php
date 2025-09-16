@@ -31,7 +31,18 @@ Route::middleware('auth')->group(function () {
     Route::get('/bookings', function () {
         return view('bookings.index');
     })->name('bookings.index');
-    Route::post('/bookings', [App\Http\Controllers\BookingController::class, 'store'])->name('bookings.store');
+    
+    // API Routes for Alpine.js
+    Route::prefix('api')->group(function () {
+        Route::get('/properties', [App\Http\Controllers\BookingController::class, 'getProperties']);
+        Route::get('/properties/{propertyId}/accommodations', [App\Http\Controllers\BookingController::class, 'getAccommodations']);
+        Route::get('/guests', [App\Http\Controllers\BookingController::class, 'getGuests']);
+        Route::get('/partners', [App\Http\Controllers\BookingController::class, 'getPartners']);
+        Route::get('/bookings', [App\Http\Controllers\BookingController::class, 'index']);
+        Route::post('/bookings', [App\Http\Controllers\BookingController::class, 'store']);
+        Route::patch('/bookings/{booking}/toggle-status', [App\Http\Controllers\BookingController::class, 'toggleStatus']);
+        Route::patch('/bookings/{booking}/cancel', [App\Http\Controllers\BookingController::class, 'cancel']);
+    });
     
     // Customer Management Routes
     Route::get('/customers', App\Livewire\CustomerManagement::class)->name('customers.index');
