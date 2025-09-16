@@ -236,8 +236,8 @@
                                 </div>
                             </div>
 
-                            <!-- Dates & Guests -->
-                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-4">
+                            <!-- Dates -->
+                            <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">Check-in</label>
                                     <input type="date" x-model="booking.check_in_date" @change="calculateRate()" class="w-full border border-gray-200 rounded-xl py-3 px-4">
@@ -246,6 +246,18 @@
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">Check-out</label>
                                     <input type="date" x-model="booking.check_out_date" @change="calculateRate()" class="w-full border border-gray-200 rounded-xl py-3 px-4">
                                 </div>
+                            </div>
+
+                            <!-- Nights Display -->
+                            <div x-show="booking.check_in_date && booking.check_out_date" class="p-4 rounded-xl" :class="isPastDate() ? 'bg-red-50' : 'bg-emerald-50'">
+                                <p class="text-sm" :class="isPastDate() ? 'text-red-700' : 'text-emerald-700'">
+                                    <span class="font-medium" x-text="calculateNights() + ' night' + (calculateNights() > 1 ? 's' : '')"></span>
+                                    <span x-show="isPastDate()" class="ml-2 text-red-600">⚠️ Past date selected</span>
+                                </p>
+                            </div>
+
+                            <!-- Guests -->
+                            <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">Adults</label>
                                     <input type="number" x-model="booking.adults" min="1" class="w-full border border-gray-200 rounded-xl py-3 px-4">
@@ -505,13 +517,30 @@
                     }
                 },
 
+                calculateNights() {
+                    if (this.booking.check_in_date && this.booking.check_out_date) {
+                        const checkIn = new Date(this.booking.check_in_date);
+                        const checkOut = new Date(this.booking.check_out_date);
+                        return Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+                    }
+                    return 0;
+                },
+
+                isPastDate() {
+                    if (this.booking.check_in_date) {
+                        const checkIn = new Date(this.booking.check_in_date);
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        return checkIn < today;
+                    }
+                    return false;
+                },
+
                 calculateRate() {
                     if (this.booking.accommodation_id && this.booking.check_in_date && this.booking.check_out_date) {
                         const acc = this.accommodations.find(a => a.id == this.booking.accommodation_id);
                         if (acc) {
-                            const checkIn = new Date(this.booking.check_in_date);
-                            const checkOut = new Date(this.booking.check_out_date);
-                            const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+                            const nights = this.calculateNights();
                             this.booking.total_amount = acc.base_price * nights;
                         }
                     }
