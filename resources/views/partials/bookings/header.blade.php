@@ -1,58 +1,108 @@
+{{-- Styles for the header --}}
 @push('styles')
 <style>
-    .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-    .glassmorphism { background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.18); }
+    /* Gradient for the header background, consistent with the soft theme */
+    .soft-header-gradient {
+        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+    }
+
+    /* Lighter glassmorphism effect for cards and buttons */
+    .soft-glass-card {
+        background: rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .glass-3d-card {
+        border-radius: 20px;
+        background: linear-gradient(40deg, #FF0080, #FF8C00 70%);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 2px 0 rgba(255,255,255,0.2);
+        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        position: relative;
+        overflow: hidden;
+    }
+    .glass-3d-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+        border-radius: 20px;
+    }
+    .glass-3d-content {
+        position: relative;
+        z-index: 2;
+        padding: 12px;
+    }
+    .glass-3d-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.4), inset 0 2px 0 rgba(255,255,255,0.3);
+    }
+    .active-filter-card {
+        background: linear-gradient(40deg, #8983F7, #A3DAFB 70%) !important;
+        box-shadow: 0 12px 40px rgba(137, 131, 247, 0.4), inset 0 2px 0 rgba(255,255,255,0.3) !important;
+    }
 </style>
 @endpush
 
-<header class="gradient-bg text-white relative overflow-hidden">
-    <div class="absolute inset-0 bg-black bg-opacity-10"></div>
+{{-- The Simplified Bookings Header --}}
+<header class="soft-header-gradient text-slate-800 relative overflow-hidden">
+    <div class="absolute inset-0 bg-white bg-opacity-10"></div>
     <div class="relative px-4 py-6">
+        {{-- Top Section: Title and New Booking Button --}}
         <div class="flex items-center justify-between mb-6">
             <div class="flex items-center space-x-3">
-                <button @click="$dispatch('toggle-sidebar')" class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-30 transition-all lg:hidden">
-                    <i class="fas fa-bars text-white"></i>
+                <button @click="$dispatch('toggle-sidebar')" class="w-10 h-10 rounded-full soft-glass-card flex items-center justify-center hover:bg-opacity-60 transition-all lg:hidden">
+                    <i class="fas fa-bars text-pink-500"></i>
                 </button>
-                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center">
-                    <i class="fas fa-calendar-alt text-white"></i>
+                <div class="w-10 h-10 rounded-full soft-glass-card flex items-center justify-center">
+                    <i class="fas fa-calendar-alt text-teal-600"></i>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold">Bookings</h1>
-                    <p class="text-sm opacity-90">Manage your reservations</p>
+                    <h1 class="text-xl font-bold text-slate-900">Bookings</h1>
+                    <p class="text-sm text-slate-700">Manage your reservations</p>
                 </div>
             </div>
-            <button @click="openBookingModal()" class="glassmorphism rounded-xl px-4 py-2 hover:bg-opacity-30 transition-all">
-                <i class="fas fa-plus mr-2"></i>
-                <span class="font-medium">New</span>
+            <button @click="openBookingModal()" class="soft-glass-card rounded-xl px-4 py-2 hover:bg-opacity-60 transition-all flex items-center">
+                <i class="fas fa-plus text-pink-500 mr-2"></i>
+                <span class="font-medium text-slate-800">New</span>
             </button>
         </div>
 
-        <!-- Flash Messages -->
-        <div x-show="message" x-transition class="mb-4 p-4 rounded-xl" :class="messageType === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'">
+        {{-- Flash Messages --}}
+        <div x-show="message" x-transition class="mb-4 p-4 rounded-xl" :class="messageType === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
             <span x-text="message"></span>
         </div>
 
-        <div class="flex space-x-2 mb-4">
-            <button @click="statusFilter = ''" :class="statusFilter === '' ? 'bg-white bg-opacity-30' : 'bg-white bg-opacity-10'" class="px-4 py-2 rounded-full text-sm font-medium transition">All</button>
-            <button @click="statusFilter = 'confirmed'" :class="statusFilter === 'confirmed' ? 'bg-white bg-opacity-30' : 'bg-white bg-opacity-10'" class="px-4 py-2 rounded-full text-sm font-medium transition">Confirmed</button>
-            <button @click="statusFilter = 'pending'" :class="statusFilter === 'pending' ? 'bg-white bg-opacity-30' : 'bg-white bg-opacity-10'" class="px-4 py-2 rounded-full text-sm font-medium transition">Pending</button>
-        </div>
+        {{-- Combined Interactive Stats & Filters --}}
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {{-- Filter: All --}}
+            <button @click="statusFilter = ''" :class="{ 'active-filter-card': statusFilter === '' }" class="soft-glass-card rounded-xl p-3 text-center transition duration-300">
+                {{-- IMPORTANT: Replace 'bookings.length' with your master array of all bookings for an accurate total count --}}
+                <div class="text-2xl font-bold text-slate-900" x-text="bookings.length"></div>
+                <div class="text-xs text-slate-600 uppercase tracking-wider">All</div>
+            </button>
 
-        <div class="glassmorphism rounded-2xl p-4">
-            <div class="grid grid-cols-3 gap-4 text-center">
-                <div>
-                    <div class="text-2xl font-bold" x-text="filteredBookings.filter(b => b.status === 'pending').length"></div>
-                    <div class="text-xs opacity-75">Pending</div>
-                </div>
-                <div>
-                    <div class="text-2xl font-bold" x-text="filteredBookings.filter(b => b.status === 'confirmed').length"></div>
-                    <div class="text-xs opacity-75">Confirmed</div>
-                </div>
-                <div>
-                    <div class="text-2xl font-bold" x-text="filteredBookings.filter(b => b.status === 'cancelled').length"></div>
-                    <div class="text-xs opacity-75">Cancelled</div>
-                </div>
-            </div>
+            {{-- Filter: Pending --}}
+            <button @click="statusFilter = 'pending'" :class="{ 'active-filter-card': statusFilter === 'pending' }" class="soft-glass-card rounded-xl p-3 text-center transition duration-300">
+                <div class="text-2xl font-bold text-slate-900" x-text="bookings.filter(b => b.status === 'pending').length"></div>
+                <div class="text-xs text-slate-600 uppercase tracking-wider">Pending</div>
+            </button>
+
+            {{-- Filter: Confirmed --}}
+            <button @click="statusFilter = 'confirmed'" :class="{ 'active-filter-card': statusFilter === 'confirmed' }" class="soft-glass-card rounded-xl p-3 text-center transition duration-300">
+                <div class="text-2xl font-bold text-slate-900" x-text="bookings.filter(b => b.status === 'confirmed').length"></div>
+                <div class="text-xs text-slate-600 uppercase tracking-wider">Confirmed</div>
+            </button>
+
+            {{-- Filter: Cancelled --}}
+            <button @click="statusFilter = 'cancelled'" :class="{ 'active-filter-card': statusFilter === 'cancelled' }" class="soft-glass-card rounded-xl p-3 text-center transition duration-300">
+                <div class="text-2xl font-bold text-slate-900" x-text="bookings.filter(b => b.status === 'cancelled').length"></div>
+                <div class="text-xs text-slate-600 uppercase tracking-wider">Cancelled</div>
+            </button>
         </div>
     </div>
 </header>

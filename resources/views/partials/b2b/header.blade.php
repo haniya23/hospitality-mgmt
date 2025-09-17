@@ -1,47 +1,52 @@
 @push('styles')
 <style>
-    .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-    .glassmorphism { background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.18); }
+    .soft-header-gradient {
+        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+    }
+    .soft-glass-card {
+        background: rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
 </style>
 @endpush
 
-<header class="gradient-bg text-white relative overflow-hidden">
-    <div class="absolute inset-0 bg-black bg-opacity-10"></div>
+<header class="soft-header-gradient text-slate-800 relative overflow-hidden">
+    <div class="absolute inset-0 bg-white bg-opacity-10"></div>
     <div class="relative px-4 py-6">
         <div class="flex items-center justify-between mb-6">
             <div class="flex items-center space-x-3">
-                <button @click="$dispatch('toggle-sidebar')" class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-30 transition-all lg:hidden">
-                    <i class="fas fa-bars text-white"></i>
+                <button @click="$dispatch('toggle-sidebar')" class="w-10 h-10 rounded-full soft-glass-card flex items-center justify-center hover:bg-opacity-60 transition-all lg:hidden">
+                    <i class="fas fa-bars text-pink-500"></i>
                 </button>
-                <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center">
-                    <i class="fas fa-handshake text-white"></i>
+                <div class="w-10 h-10 rounded-full soft-glass-card flex items-center justify-center">
+                    <i class="fas fa-handshake text-teal-600"></i>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold">B2B Partner Management</h1>
-                    <p class="text-sm opacity-90">Manage your business partners</p>
+                    <h1 class="text-xl font-bold text-slate-900">B2B Partner Management</h1>
+                    <p class="text-sm text-slate-700">Manage your business partners</p>
                 </div>
             </div>
-            <button @click="openCreateModal()" class="glassmorphism rounded-xl px-4 py-2 hover:bg-opacity-30 transition-all">
-                <i class="fas fa-plus mr-2"></i>
-                <span class="font-medium hidden sm:inline">New B2B Partner</span>
-                <span class="font-medium sm:hidden">New Partner</span>
+            <button @click="openCreateModal()" class="soft-glass-card rounded-xl px-4 py-2 hover:bg-opacity-60 transition-all flex items-center">
+                <i class="fas fa-plus text-pink-500 mr-2"></i>
+                <span class="font-medium text-slate-800 hidden sm:inline">New B2B Partner</span>
+                <span class="font-medium text-slate-800 sm:hidden">New Partner</span>
             </button>
         </div>
 
-        <div class="glassmorphism rounded-2xl p-4">
-            <div class="grid grid-cols-3 gap-4 text-center">
-                <div>
-                    <div class="text-2xl font-bold" x-text="filteredPartners.filter(p => p.status === 'active').length"></div>
-                    <div class="text-xs opacity-75">Active Partners</div>
-                </div>
-                <div>
-                    <div class="text-2xl font-bold" x-text="filteredPartners.reduce((sum, p) => sum + p.reservations_count, 0)"></div>
-                    <div class="text-xs opacity-75">Total Bookings</div>
-                </div>
-                <div>
-                    <div class="text-2xl font-bold" x-text="filteredPartners.length"></div>
-                    <div class="text-xs opacity-75">Total Partners</div>
-                </div>
+        <div class="grid grid-cols-3 gap-4">
+            <div class="soft-glass-card rounded-xl p-3 text-center">
+                <div class="text-2xl font-bold text-slate-900" x-text="filteredPartners.filter(p => p.status === 'active').length"></div>
+                <div class="text-xs text-slate-600 uppercase tracking-wider">Active Partners</div>
+            </div>
+            <div class="soft-glass-card rounded-xl p-3 text-center">
+                <div class="text-2xl font-bold text-slate-900" x-text="filteredPartners.reduce((sum, p) => sum + p.reservations_count, 0)"></div>
+                <div class="text-xs text-slate-600 uppercase tracking-wider">Total Bookings</div>
+            </div>
+            <div class="soft-glass-card rounded-xl p-3 text-center">
+                <div class="text-2xl font-bold text-slate-900" x-text="filteredPartners.length"></div>
+                <div class="text-xs text-slate-600 uppercase tracking-wider">Total Partners</div>
             </div>
         </div>
     </div>
