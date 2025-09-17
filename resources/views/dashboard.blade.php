@@ -1,192 +1,346 @@
-@extends('layouts.mobile')
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Dashboard - Hospitality Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-gradient {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        }
+        .card-gradient-2 {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+        .card-gradient-3 {
+            background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);
+        }
+        .card-gradient-4 {
+            background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+        }
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        .property-card {
+            transition: all 0.3s ease;
+        }
+        .property-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    @include('partials.sidebar')
+    
+    <div x-data="dashboardData()" x-init="init()" class="lg:ml-72">
+        <!-- Header -->
+        <header class="gradient-bg text-white relative overflow-hidden">
+            <div class="absolute inset-0 bg-black bg-opacity-10"></div>
+            <div class="relative px-4 py-6">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center space-x-3">
+                        <button @click="$dispatch('toggle-sidebar')" class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-30 transition-all lg:hidden">
+                            <i class="fas fa-bars text-white"></i>
+                        </button>
+                        <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center">
+                            <i class="fas fa-building text-white"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-lg font-bold">Hi, Manager 👋</h1>
+                            <p class="text-sm opacity-90">Welcome back to your dashboard</p>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <button class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center">
+                            <i class="fas fa-bell text-white"></i>
+                        </button>
+                        <div class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
+                            <span class="text-xs font-bold text-white" x-text="notifications"></span>
+                        </div>
+                    </div>
+                </div>
 
-@section('title', 'Dashboard - Hospitality Manager')
-@section('page-title', 'Dashboard')
+                <!-- Quick Actions -->
+                <div class="grid grid-cols-2 gap-3 mb-6">
+                    <button @click="navigateToBookings()" class="glassmorphism rounded-2xl p-4 text-left">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-xl bg-white bg-opacity-30 flex items-center justify-center">
+                                <i class="fas fa-calendar-plus text-white"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold">Bookings</div>
+                                <div class="text-sm opacity-75">Manage reservations</div>
+                            </div>
+                        </div>
+                    </button>
+                    <button @click="navigateToProperties()" class="glassmorphism rounded-2xl p-4 text-left">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-xl bg-white bg-opacity-30 flex items-center justify-center">
+                                <i class="fas fa-home text-white"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold">Properties</div>
+                                <div class="text-sm opacity-75">View & manage</div>
+                            </div>
+                        </div>
+                    </button>
+                </div>
 
-@section('content')
-    @if(session('success'))
-        <div class="bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 px-4 py-3 rounded-xl mb-6 backdrop-blur-sm">
-            {{ session('success') }}
-        </div>
-    @endif
-
-    <div class="space-y-6" x-data="{ loaded: false }" x-init="setTimeout(() => loaded = true, 100)">
-        <!-- Welcome Section -->
-        <div x-show="loaded" x-transition:enter="transition ease-out duration-700" 
-             x-transition:enter-start="opacity-0 transform translate-y-8" 
-             x-transition:enter-end="opacity-100 transform translate-y-0"
-             class="relative overflow-hidden bg-gradient-to-br from-slate-800/40 to-slate-900/60 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
-            <div class="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10"></div>
-            <div class="relative z-10">
-                <h2 class="text-2xl font-bold text-white mb-2">Welcome back!</h2>
-                <p class="text-slate-300">{{ auth()->user()->name }}</p>
-                <div class="absolute top-4 right-4 w-16 h-16 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-xl"></div>
-            </div>
-        </div>
-
-        @if($properties->isEmpty())
-            <!-- Get Started Card -->
-            <div x-show="loaded" x-transition:enter="transition ease-out duration-700 delay-200" 
-                 x-transition:enter-start="opacity-0 transform translate-y-8" 
-                 x-transition:enter-end="opacity-100 transform translate-y-0"
-                 class="relative overflow-hidden bg-gradient-to-br from-indigo-600/20 to-purple-600/20 backdrop-blur-xl border border-indigo-500/30 rounded-2xl p-6 shadow-2xl hover:shadow-indigo-500/25 transition-all duration-500 group">
-                <div class="absolute inset-0 bg-gradient-to-r from-indigo-600/5 to-purple-600/5 group-hover:from-indigo-600/10 group-hover:to-purple-600/10 transition-all duration-500"></div>
-                <div class="relative z-10">
-                    <h3 class="text-xl font-semibold text-white mb-3">Get Started</h3>
-                    <p class="text-slate-300 mb-4">Create your first property to begin managing your hospitality business.</p>
-                    <a href="{{ route('properties.create') }}" 
-                       class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-medium rounded-xl hover:from-indigo-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-indigo-500/25">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                        </svg>
-                        Create First Property
-                    </a>
+                <!-- Stats Overview -->
+                <div class="glassmorphism rounded-2xl p-4">
+                    <h3 class="font-semibold mb-3">Today's Overview</h3>
+                    <div class="grid grid-cols-3 gap-4 text-center">
+                        <div>
+                            <div class="text-2xl font-bold" x-text="todayStats.checkIns"></div>
+                            <div class="text-xs opacity-75">Check-ins</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold" x-text="todayStats.checkOuts"></div>
+                            <div class="text-xs opacity-75">Check-outs</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold" x-text="todayStats.newBookings"></div>
+                            <div class="text-xs opacity-75">New bookings</div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        @else
-            <!-- Quick Actions Grid -->
-            <div x-show="loaded" x-transition:enter="transition ease-out duration-700 delay-300" 
-                 x-transition:enter-start="opacity-0 transform translate-y-8" 
-                 x-transition:enter-end="opacity-100 transform translate-y-0"
-                 class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-                
-                <!-- Add Property Card -->
-                <a href="{{ route('properties.create') }}" 
-                   class="group relative overflow-hidden bg-gradient-to-br from-emerald-500/20 to-teal-600/20 backdrop-blur-xl border border-emerald-400/30 rounded-2xl p-4 hover:shadow-2xl hover:shadow-emerald-500/25 transform hover:scale-105 transition-all duration-500">
-                    <div class="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 group-hover:from-emerald-500/20 group-hover:to-teal-500/20 transition-all duration-500"></div>
-                    <div class="relative z-10 text-center">
-                        <div class="w-12 h-12 mx-auto mb-3 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-emerald-500/50 transition-all duration-300">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                            </svg>
-                        </div>
-                        <p class="text-sm font-medium text-white">Add Property</p>
-                    </div>
-                </a>
+        </header>
 
-                <!-- Bookings Card -->
-                <a href="{{ route('bookings.index') }}" 
-                   class="group relative overflow-hidden bg-gradient-to-br from-blue-500/20 to-cyan-600/20 backdrop-blur-xl border border-blue-400/30 rounded-2xl p-4 hover:shadow-2xl hover:shadow-blue-500/25 transform hover:scale-105 transition-all duration-500">
-                    <div class="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 group-hover:from-blue-500/20 group-hover:to-cyan-500/20 transition-all duration-500"></div>
-                    <div class="relative z-10 text-center">
-                        <div class="w-12 h-12 mx-auto mb-3 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-blue-500/50 transition-all duration-300">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
+        <!-- Content -->
+        <div class="px-4 py-6 pb-32 space-y-6">
+            <!-- Revenue Cards -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="card-gradient rounded-2xl p-4 shadow-lg">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="w-10 h-10 rounded-xl bg-white bg-opacity-30 flex items-center justify-center">
+                            <i class="fas fa-rupee-sign text-orange-600"></i>
                         </div>
-                        <p class="text-sm font-medium text-white">Bookings</p>
+                        <span class="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full font-medium">+12%</span>
                     </div>
-                </a>
+                    <div class="text-2xl font-bold text-gray-800" x-text="'₹' + formatNumber(revenue.today)"></div>
+                    <div class="text-sm text-gray-600">Today's Revenue</div>
+                </div>
 
-                <!-- B2B Partners Card -->
-                <a href="{{ route('b2b.dashboard') }}" 
-                   class="group relative overflow-hidden bg-gradient-to-br from-purple-500/20 to-pink-600/20 backdrop-blur-xl border border-purple-400/30 rounded-2xl p-4 hover:shadow-2xl hover:shadow-purple-500/25 transform hover:scale-105 transition-all duration-500">
-                    <div class="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 group-hover:from-purple-500/20 group-hover:to-pink-500/20 transition-all duration-500"></div>
-                    <div class="relative z-10 text-center">
-                        <div class="w-12 h-12 mx-auto mb-3 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-purple-500/50 transition-all duration-300">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                            </svg>
+                <div class="card-gradient-2 rounded-2xl p-4 shadow-lg">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="w-10 h-10 rounded-xl bg-white bg-opacity-30 flex items-center justify-center">
+                            <i class="fas fa-chart-line text-blue-600"></i>
                         </div>
-                        <p class="text-sm font-medium text-white">B2B Partners</p>
+                        <span class="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full font-medium">+8%</span>
                     </div>
-                </a>
-
-                <!-- Pricing Card -->
-                <a href="{{ route('pricing.calendar') }}" 
-                   class="group relative overflow-hidden bg-gradient-to-br from-amber-500/20 to-orange-600/20 backdrop-blur-xl border border-amber-400/30 rounded-2xl p-4 hover:shadow-2xl hover:shadow-amber-500/25 transform hover:scale-105 transition-all duration-500">
-                    <div class="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-orange-500/10 group-hover:from-amber-500/20 group-hover:to-orange-500/20 transition-all duration-500"></div>
-                    <div class="relative z-10 text-center">
-                        <div class="w-12 h-12 mx-auto mb-3 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-amber-500/50 transition-all duration-300">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
-                        <p class="text-sm font-medium text-white">Pricing</p>
-                    </div>
-                </a>
-
-                <!-- Reports Card -->
-                <a href="{{ route('reports.analytics') }}" 
-                   class="group relative overflow-hidden bg-gradient-to-br from-indigo-500/20 to-blue-600/20 backdrop-blur-xl border border-indigo-400/30 rounded-2xl p-4 hover:shadow-2xl hover:shadow-indigo-500/25 transform hover:scale-105 transition-all duration-500">
-                    <div class="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-blue-500/10 group-hover:from-indigo-500/20 group-hover:to-blue-500/20 transition-all duration-500"></div>
-                    <div class="relative z-10 text-center">
-                        <div class="w-12 h-12 mx-auto mb-3 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-indigo-500/50 transition-all duration-300">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                            </svg>
-                        </div>
-                        <p class="text-sm font-medium text-white">Reports</p>
-                    </div>
-                </a>
-
-                <!-- Properties Card -->
-                <a href="{{ route('properties.index') }}" 
-                   class="group relative overflow-hidden bg-gradient-to-br from-rose-500/20 to-red-600/20 backdrop-blur-xl border border-rose-400/30 rounded-2xl p-4 hover:shadow-2xl hover:shadow-rose-500/25 transform hover:scale-105 transition-all duration-500">
-                    <div class="absolute inset-0 bg-gradient-to-r from-rose-500/10 to-red-500/10 group-hover:from-rose-500/20 group-hover:to-red-500/20 transition-all duration-500"></div>
-                    <div class="relative z-10 text-center">
-                        <div class="w-12 h-12 mx-auto mb-3 bg-gradient-to-br from-rose-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-rose-500/50 transition-all duration-300">
-                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M19 7h-3V6a4 4 0 0 0-8 0v1H5a1 1 0 0 0-1 1v11a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V8a1 1 0 0 0-1-1zM10 6a2 2 0 0 1 4 0v1h-4V6zm8 13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V9h2v1a1 1 0 0 0 2 0V9h4v1a1 1 0 0 0 2 0V9h2v10z"/>
-                            </svg>
-                        </div>
-                        <p class="text-sm font-medium text-white">Properties</p>
-                    </div>
-                </a>
+                    <div class="text-2xl font-bold text-gray-800" x-text="'₹' + formatNumber(revenue.month)"></div>
+                    <div class="text-sm text-gray-600">This Month</div>
+                </div>
             </div>
 
-            <!-- Properties List -->
-            <div x-show="loaded" x-transition:enter="transition ease-out duration-700 delay-500" 
-                 x-transition:enter-start="opacity-0 transform translate-y-8" 
-                 x-transition:enter-end="opacity-100 transform translate-y-0"
-                 class="relative overflow-hidden bg-gradient-to-br from-slate-800/40 to-slate-900/60 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl">
-                <div class="absolute inset-0 bg-gradient-to-r from-slate-600/5 to-slate-700/5"></div>
-                <div class="relative z-10">
-                    <div class="px-6 py-5 border-b border-slate-700/50">
-                        <h3 class="text-lg font-semibold text-white flex items-center">
-                            <svg class="w-5 h-5 mr-2 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                            </svg>
-                            Your Properties
-                        </h3>
+            <!-- Properties Section -->
+            <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+                <div class="p-4 border-b border-gray-100">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-bold text-gray-800">Your Properties</h3>
+                        <button @click="navigateToProperties()" class="text-blue-600 font-medium text-sm">View all</button>
                     </div>
-                    <div class="p-2">
-                        @foreach($properties->take(3) as $index => $property)
-                            <div x-data="{ hover: false }" @mouseenter="hover = true" @mouseleave="hover = false"
-                                 class="mx-4 my-3 p-4 bg-gradient-to-r from-slate-700/30 to-slate-800/30 backdrop-blur-sm border border-slate-600/30 rounded-xl hover:border-slate-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-slate-900/50">
-                                <div class="flex justify-between items-center">
-                                    <div class="flex-1">
-                                        <h4 class="font-medium text-white mb-1">{{ $property->name }}</h4>
-                                        <p class="text-sm text-slate-400">{{ $property->category->name ?? 'N/A' }}</p>
-                                    </div>
-                                    <div class="flex items-center space-x-3">
-                                        <span class="px-3 py-1 text-xs font-medium rounded-full
-                                            @if($property->status === 'pending') bg-amber-500/20 text-amber-300 border border-amber-500/30
-                                            @elseif($property->status === 'active') bg-emerald-500/20 text-emerald-300 border border-emerald-500/30
-                                            @else bg-red-500/20 text-red-300 border border-red-500/30 @endif">
-                                            {{ ucfirst($property->status) }}
-                                        </span>
-                                        <svg x-show="hover" x-transition class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                        </svg>
+                </div>
+                
+                <div class="p-4 space-y-4">
+                    <template x-for="property in properties.slice(0, 3)" :key="property.id">
+                        <div class="property-card bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-lg"
+                                     :style="'background: linear-gradient(135deg, ' + property.color + ')'">
+                                    <i class="fas fa-building"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="font-semibold text-gray-800" x-text="property.name"></h4>
+                                    <p class="text-sm text-gray-500" x-text="property.category"></p>
+                                    <div class="flex items-center space-x-2 mt-1">
+                                        <span class="text-xs px-2 py-1 rounded-full font-medium"
+                                              :class="property.status === 'active' ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'"
+                                              x-text="property.status.charAt(0).toUpperCase() + property.status.slice(1)"></span>
+                                        <span class="text-xs text-gray-500" x-text="property.rooms + ' rooms'"></span>
                                     </div>
                                 </div>
+                                <div class="text-right">
+                                    <div class="text-lg font-bold text-gray-800" x-text="property.occupancy + '%'"></div>
+                                    <div class="text-xs text-gray-500">Occupancy</div>
+                                </div>
                             </div>
-                        @endforeach
-                    </div>
-                    @if($properties->count() > 3)
-                        <div class="px-6 py-4 border-t border-slate-700/50">
-                            <a href="{{ route('properties.index') }}" 
-                               class="inline-flex items-center text-sm text-blue-400 hover:text-blue-300 transition-colors group">
-                                View all {{ $properties->count() }} properties
-                                <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                </svg>
-                            </a>
                         </div>
-                    @endif
+                    </template>
+                    
+                    <template x-if="properties.length === 0">
+                        <div class="text-center py-8">
+                            <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-purple-400 to-pink-400 rounded-2xl flex items-center justify-center text-white text-2xl">
+                                <i class="fas fa-plus"></i>
+                            </div>
+                            <h4 class="text-lg font-semibold text-gray-800 mb-2">Create Your First Property</h4>
+                            <p class="text-gray-500 text-sm mb-4">Start managing your hospitality business by adding a property.</p>
+                            <button @click="navigateToCreateProperty()" class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-xl font-medium">
+                                <i class="fas fa-plus mr-2"></i>
+                                Add Property
+                            </button>
+                        </div>
+                    </template>
                 </div>
             </div>
-        @endif
+
+            <!-- Recent Activity -->
+            <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+                <div class="p-4 border-b border-gray-100">
+                    <h3 class="text-lg font-bold text-gray-800">Recent Activity</h3>
+                </div>
+                
+                <div class="divide-y divide-gray-100">
+                    <template x-for="activity in recentActivity" :key="activity.id">
+                        <div class="p-4 flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center"
+                                 :class="activity.type === 'booking' ? 'bg-blue-100 text-blue-600' : 
+                                        activity.type === 'checkin' ? 'bg-green-100 text-green-600' :
+                                        'bg-orange-100 text-orange-600'">
+                                <i :class="activity.type === 'booking' ? 'fas fa-calendar-plus' : 
+                                          activity.type === 'checkin' ? 'fas fa-sign-in-alt' :
+                                          'fas fa-sign-out-alt'"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-gray-800" x-text="activity.message"></p>
+                                <p class="text-xs text-gray-500" x-text="activity.time"></p>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="card-gradient-3 rounded-2xl p-4 shadow-lg">
+                    <div class="w-10 h-10 rounded-xl bg-white bg-opacity-30 flex items-center justify-center mb-3">
+                        <i class="fas fa-users text-purple-600"></i>
+                    </div>
+                    <div class="text-2xl font-bold text-gray-800" x-text="stats.totalGuests"></div>
+                    <div class="text-sm text-gray-600">Total Guests</div>
+                </div>
+
+                <div class="card-gradient-4 rounded-2xl p-4 shadow-lg">
+                    <div class="w-10 h-10 rounded-xl bg-white bg-opacity-30 flex items-center justify-center mb-3">
+                        <i class="fas fa-star text-yellow-600"></i>
+                    </div>
+                    <div class="text-2xl font-bold text-gray-800" x-text="stats.avgRating"></div>
+                    <div class="text-sm text-gray-600">Avg Rating</div>
+                </div>
+            </div>
+        </div>
+
     </div>
-@endsection
+    
+    @include('partials.bottom-bar')
+
+    <script>
+        function dashboardData() {
+            return {
+                notifications: 3,
+                todayStats: {
+                    checkIns: 12,
+                    checkOuts: 8,
+                    newBookings: 5
+                },
+                revenue: {
+                    today: 45000,
+                    month: 890000
+                },
+                stats: {
+                    totalGuests: 1240,
+                    avgRating: 4.8
+                },
+                properties: [
+                    {
+                        id: 1,
+                        name: "Ocean View Resort",
+                        category: "Resort",
+                        status: "active",
+                        rooms: 24,
+                        occupancy: 85,
+                        color: "#667eea, #764ba2"
+                    },
+                    {
+                        id: 2,
+                        name: "Mountain Lodge",
+                        category: "Lodge",
+                        status: "active",
+                        rooms: 12,
+                        occupancy: 92,
+                        color: "#f093fb, #f5576c"
+                    },
+                    {
+                        id: 3,
+                        name: "City Center Hotel",
+                        category: "Hotel",
+                        status: "pending",
+                        rooms: 36,
+                        occupancy: 67,
+                        color: "#4facfe, #00f2fe"
+                    }
+                ],
+                recentActivity: [
+                    {
+                        id: 1,
+                        type: 'booking',
+                        message: 'New booking from John Doe',
+                        time: '2 minutes ago'
+                    },
+                    {
+                        id: 2,
+                        type: 'checkin',
+                        message: 'Guest checked in to Room 205',
+                        time: '15 minutes ago'
+                    },
+                    {
+                        id: 3,
+                        type: 'checkout',
+                        message: 'Guest checked out from Room 102',
+                        time: '1 hour ago'
+                    },
+                    {
+                        id: 4,
+                        type: 'booking',
+                        message: 'Booking confirmed for Amanda Smith',
+                        time: '2 hours ago'
+                    }
+                ],
+
+                init() {
+                    // Initialize dashboard data
+                    console.log('Dashboard initialized');
+                },
+
+                formatNumber(num) {
+                    return new Intl.NumberFormat('en-IN').format(num);
+                },
+
+                navigateToBookings() {
+                    // Replace with actual navigation
+                    console.log('Navigate to bookings');
+                },
+
+                navigateToProperties() {
+                    // Replace with actual navigation
+                    console.log('Navigate to properties');
+                },
+
+                navigateToCreateProperty() {
+                    // Replace with actual navigation
+                    console.log('Navigate to create property');
+                }
+            }
+        }
+    </script>
+</body>
+</html>

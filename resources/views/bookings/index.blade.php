@@ -1,179 +1,219 @@
-@extends('layouts.mobile')
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Bookings - Hospitality Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        .booking-card {
+            background: white;
+            transition: all 0.3s ease;
+        }
+        .booking-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .status-pending { background: #fef3c7; color: #d97706; }
+        .status-confirmed { background: #d1fae5; color: #059669; }
+        .status-checkedin { background: #dbeafe; color: #2563eb; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    @include('partials.sidebar')
+    
+    <div x-data="bookingManager()" x-init="init()" class="lg:ml-72">
+        <!-- Header -->
+        <header class="gradient-bg text-white relative overflow-hidden">
+            <div class="absolute inset-0 bg-black bg-opacity-10"></div>
+            <div class="relative px-4 py-6">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center space-x-3">
+                        <button @click="$dispatch('toggle-sidebar')" class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-30 transition-all lg:hidden">
+                            <i class="fas fa-bars text-white"></i>
+                        </button>
+                        <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center">
+                            <i class="fas fa-calendar-alt text-white"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-xl font-bold">Bookings</h1>
+                            <p class="text-sm opacity-90">Manage your reservations</p>
+                        </div>
+                    </div>
+                    <button @click="openBookingModal()" class="glassmorphism rounded-xl px-4 py-2">
+                        <i class="fas fa-plus mr-2"></i>
+                        <span class="font-medium">New</span>
+                    </button>
+                </div>
 
-@section('title', 'Bookings - Hospitality Manager')
-@section('page-title', 'Bookings')
+                <!-- Filter Tabs -->
+                <div class="flex space-x-2 mb-4">
+                    <button @click="activeFilter = 'all'" 
+                            :class="activeFilter === 'all' ? 'bg-white bg-opacity-30' : 'bg-white bg-opacity-10'"
+                            class="px-4 py-2 rounded-full text-sm font-medium transition">
+                        All
+                    </button>
+                    <button @click="activeFilter = 'pending'" 
+                            :class="activeFilter === 'pending' ? 'bg-white bg-opacity-30' : 'bg-white bg-opacity-10'"
+                            class="px-4 py-2 rounded-full text-sm font-medium transition">
+                        Pending
+                    </button>
+                    <button @click="activeFilter = 'active'" 
+                            :class="activeFilter === 'active' ? 'bg-white bg-opacity-30' : 'bg-white bg-opacity-10'"
+                            class="px-4 py-2 rounded-full text-sm font-medium transition">
+                        Active
+                    </button>
+                </div>
 
-@section('content')
-    <div id="booking-management" x-data="bookingManager()" x-init="init()">
+                <!-- Quick Stats -->
+                <div class="glassmorphism rounded-2xl p-4">
+                    <div class="grid grid-cols-3 gap-4 text-center">
+                        <div>
+                            <div class="text-2xl font-bold" x-text="pendingBookings.length"></div>
+                            <div class="text-xs opacity-75">Pending</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold" x-text="activeBookings.filter(b => b.status === 'confirmed').length"></div>
+                            <div class="text-xs opacity-75">Confirmed</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold" x-text="activeBookings.filter(b => b.status === 'checked_in').length"></div>
+                            <div class="text-xs opacity-75">Checked In</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
         <!-- Flash Messages -->
-        <div x-show="message" x-transition class="mb-4 p-4 rounded-xl" :class="messageType === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'">
+        <div x-show="message" x-transition class="mx-4 mt-4 p-4 rounded-xl" :class="messageType === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'">
             <span x-text="message"></span>
         </div>
 
-        <!-- Header -->
-        <div class="space-y-4 mb-6">
-            <div>
-                <h2 class="heading-1">Booking Management</h2>
-                <p class="body-text">Manage your property bookings</p>
+        <!-- Content -->
+        <div class="px-4 py-6 pb-32 space-y-4">
+            <!-- Property Filter -->
+            <div class="bg-white rounded-2xl p-4 shadow-sm">
+                <select x-model="selectedProperty" @change="loadBookings()" 
+                        class="w-full bg-transparent border-none text-gray-800 font-medium focus:ring-0">
+                    <option value="">All Properties</option>
+                    <template x-for="property in properties" :key="property.id">
+                        <option :value="property.id" x-text="property.name"></option>
+                    </template>
+                </select>
             </div>
-            
-            <div class="flex flex-col sm:flex-row sm:items-center gap-3">
-                <!-- Property Selector -->
-                <div class="flex-1 relative">
-                    <select x-model="selectedProperty" @change="loadBookings()" class="form-select">
-                        <option value="">All Properties</option>
-                        <template x-for="property in properties" :key="property.id">
-                            <option :value="property.id" x-text="property.name"></option>
+
+            <!-- Bookings List -->
+            <template x-for="booking in filteredBookings" :key="booking.id">
+                <div class="booking-card rounded-2xl p-4 shadow-sm">
+                    <!-- Booking Header -->
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
+                                <span x-text="booking.guest.name.charAt(0).toUpperCase()"></span>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-800" x-text="booking.guest.name"></h3>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-xs px-2 py-1 rounded-full font-medium"
+                                          :class="booking.status === 'pending' ? 'status-pending' : 
+                                                 booking.status === 'confirmed' ? 'status-confirmed' : 
+                                                 'status-checkedin'"
+                                          x-text="booking.status.charAt(0).toUpperCase() + booking.status.slice(1)"></span>
+                                    <span x-show="booking.b2b_partner" 
+                                          class="text-xs px-2 py-1 bg-blue-100 text-blue-600 rounded-full font-medium">
+                                        B2B
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-lg font-bold text-gray-800" x-text="'₹' + formatNumber(booking.total_amount)"></div>
+                            <div x-show="booking.balance_pending > 0" 
+                                 class="text-xs text-orange-600 font-medium" 
+                                 x-text="'₹' + formatNumber(booking.balance_pending) + ' pending'"></div>
+                        </div>
+                    </div>
+
+                    <!-- Property Details -->
+                    <div class="bg-gray-50 rounded-xl p-3 mb-3">
+                        <div class="flex items-center space-x-2 mb-2">
+                            <i class="fas fa-map-marker-alt text-gray-500 text-sm"></i>
+                            <span class="text-sm font-medium text-gray-700" 
+                                  x-text="booking.accommodation.property.name + ' - ' + booking.accommodation.display_name"></span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-calendar-alt text-gray-500 text-sm"></i>
+                            <span class="text-sm text-gray-600" 
+                                  x-text="formatDateRange(booking.check_in_date, booking.check_out_date)"></span>
+                            <span class="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full" 
+                                  x-text="calculateNights(booking.check_in_date, booking.check_out_date) + ' nights'"></span>
+                        </div>
+                    </div>
+
+                    <!-- Guest Info -->
+                    <div class="flex items-center justify-between text-sm text-gray-600 mb-4">
+                        <span x-text="booking.adults + ' adults' + (booking.children > 0 ? ', ' + booking.children + ' children' : '')"></span>
+                        <span x-text="booking.guest.mobile_number"></span>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex space-x-2">
+                        <template x-if="booking.status === 'pending'">
+                            <div class="flex space-x-2 w-full">
+                                <button @click="toggleBookingStatus(booking.id)" 
+                                        class="flex-1 bg-green-500 text-white py-2 px-4 rounded-xl font-medium text-sm hover:bg-green-600 transition">
+                                    <i class="fas fa-check mr-1"></i>
+                                    Confirm
+                                </button>
+                                <button @click="openCancelModal(booking.id)" 
+                                        class="flex-1 bg-red-500 text-white py-2 px-4 rounded-xl font-medium text-sm hover:bg-red-600 transition">
+                                    <i class="fas fa-times mr-1"></i>
+                                    Cancel
+                                </button>
+                            </div>
                         </template>
-                    </select>
-                </div>
-                
-                <!-- New Booking Button -->
-                <button @click="openBookingModal()" class="btn-primary">
-                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                    </svg>
-                    New Booking
-                </button>
-            </div>
-        </div>
-
-        <!-- Main Content -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Pending Bookings -->
-            <div class="glass-card overflow-hidden">
-                <div class="px-6 py-4 border-b border-glass-border">
-                    <h3 class="heading-3 text-yellow-300">Pending Bookings (<span x-text="pendingBookings.length"></span>)</h3>
-                </div>
-                
-                <div class="divide-y divide-gray-200 max-h-96 overflow-y-auto">
-                    <template x-for="booking in pendingBookings" :key="booking.id">
-                        <div class="p-4 hover:bg-gray-50">
-                            <div class="flex justify-between items-start">
-                                <div class="flex-1">
-                                    <div class="flex items-center space-x-2 mb-2">
-                                        <h4 class="font-medium text-gray-900" x-text="booking.guest.name"></h4>
-                                        <span x-show="booking.b2b_partner" class="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">B2B</span>
-                                    </div>
-                                    <div class="text-sm text-gray-600 space-y-1">
-                                        <div x-text="booking.accommodation.property.name + ' - ' + booking.accommodation.display_name"></div>
-                                        <div x-text="formatDateRange(booking.check_in_date, booking.check_out_date)"></div>
-                                    </div>
-                                </div>
-                                <div class="text-right space-y-1">
-                                    <div class="font-semibold text-gray-900" x-text="'₹' + formatNumber(booking.total_amount)"></div>
-                                    <div class="space-y-1">
-                                        <button @click="toggleBookingStatus(booking.id)" class="px-3 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800 hover:bg-yellow-200">
-                                            Activate
-                                        </button>
-                                        <button @click="openCancelModal(booking.id)" class="px-3 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800 hover:bg-red-200">
-                                            Cancel
-                                        </button>
-                                    </div>
-                                </div>
+                        <template x-if="booking.status !== 'pending'">
+                            <div class="flex space-x-2 w-full">
+                                <button class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-xl font-medium text-sm hover:bg-blue-600 transition">
+                                    <i class="fas fa-edit mr-1"></i>
+                                    Edit
+                                </button>
+                                <button @click="openCancelModal(booking.id)" 
+                                        class="bg-red-100 text-red-600 py-2 px-4 rounded-xl font-medium text-sm hover:bg-red-200 transition">
+                                    <i class="fas fa-times"></i>
+                                </button>
                             </div>
-                        </div>
-                    </template>
-                    <div x-show="pendingBookings.length === 0" class="p-8 text-center text-gray-500">
-                        <div class="text-sm">No pending bookings</div>
+                        </template>
                     </div>
                 </div>
-            </div>
+            </template>
 
-            <!-- Active Bookings -->
-            <div class="glass-card overflow-hidden">
-                <div class="px-6 py-4 border-b border-glass-border">
-                    <h3 class="heading-3 text-green-300">Active Bookings (<span x-text="activeBookings.length"></span>)</h3>
-                </div>
-                
-                <div class="divide-y divide-gray-200 max-h-96 overflow-y-auto">
-                    <template x-for="booking in activeBookings" :key="booking.id">
-                        <div class="p-4 hover:bg-gray-50">
-                            <div class="flex justify-between items-start">
-                                <div class="flex-1">
-                                    <div class="flex items-center space-x-2 mb-2">
-                                        <h4 class="font-medium text-gray-900" x-text="booking.guest.name"></h4>
-                                        <span class="px-2 py-1 text-xs font-medium rounded-full" :class="booking.status === 'confirmed' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'" x-text="booking.status.charAt(0).toUpperCase() + booking.status.slice(1)"></span>
-                                        <span x-show="booking.b2b_partner" class="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">B2B</span>
-                                    </div>
-                                    <div class="text-sm text-gray-600 space-y-1">
-                                        <div x-text="booking.accommodation.property.name + ' - ' + booking.accommodation.display_name"></div>
-                                        <div x-text="formatDateRange(booking.check_in_date, booking.check_out_date)"></div>
-                                    </div>
-                                </div>
-                                <div class="text-right space-y-1">
-                                    <div class="font-semibold text-gray-900" x-text="'₹' + formatNumber(booking.total_amount)"></div>
-                                    <div x-show="booking.balance_pending > 0" class="text-xs text-orange-600" x-text="'₹' + formatNumber(booking.balance_pending) + ' pending'"></div>
-                                    <button @click="openCancelModal(booking.id)" class="px-3 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800 hover:bg-red-200">
-                                        Cancel
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-                    <div x-show="activeBookings.length === 0" class="p-8 text-center text-gray-500">
-                        <div class="text-sm">No active bookings</div>
+            <!-- Empty State -->
+            <template x-if="filteredBookings.length === 0">
+                <div class="text-center py-12">
+                    <div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-r from-purple-400 to-pink-400 rounded-2xl flex items-center justify-center text-white text-3xl">
+                        <i class="fas fa-calendar-plus"></i>
                     </div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">No Bookings Found</h3>
+                    <p class="text-gray-500 text-sm mb-4">Start by creating your first booking.</p>
+                    <button @click="openBookingModal()" class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-xl font-medium">
+                        <i class="fas fa-plus mr-2"></i>
+                        Create Booking
+                    </button>
                 </div>
-            </div>
-        </div>
-
-        <!-- Quick Stats -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-            <div class="glass-card p-4 text-center">
-                <div class="text-2xl font-bold text-yellow-300" x-text="pendingBookings.length"></div>
-                <div class="small-text text-secondary">Pending</div>
-            </div>
-            <div class="glass-card p-4 text-center">
-                <div class="text-2xl font-bold text-green-300" x-text="activeBookings.filter(b => b.status === 'confirmed').length"></div>
-                <div class="small-text text-secondary">Confirmed</div>
-            </div>
-            <div class="glass-card p-4 text-center">
-                <div class="text-2xl font-bold text-blue-300" x-text="activeBookings.filter(b => b.status === 'checked_in').length"></div>
-                <div class="small-text text-secondary">Checked In</div>
-            </div>
-            <div class="glass-card p-4 text-center">
-                <div class="text-xl font-bold text-primary" x-text="'₹' + formatNumber(totalValue)"></div>
-                <div class="small-text text-secondary">Total Value</div>
-            </div>
-        </div>
-
-        <!-- Cancel Modal -->
-        <div x-show="showCancelModal" x-transition class="fixed inset-0 z-50 overflow-y-auto bg-black/50">
-            <div class="flex items-center justify-center min-h-screen p-4">
-                <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Cancel Booking</h3>
-                    
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Reason</label>
-                            <select x-model="cancelReason" class="w-full border border-gray-300 rounded-xl px-3 py-2">
-                                <option value="">Select reason</option>
-                                <option value="Guest Request">Guest Request</option>
-                                <option value="No Show">No Show</option>
-                                <option value="Payment Issue">Payment Issue</option>
-                                <option value="Property Issue">Property Issue</option>
-                                <option value="Overbooking">Overbooking</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
-                            <textarea x-model="cancelDescription" rows="3" class="w-full border border-gray-300 rounded-xl px-3 py-2" placeholder="Optional description..."></textarea>
-                        </div>
-                    </div>
-                    
-                    <div class="flex gap-3 mt-6">
-                        <button @click="closeCancelModal()" class="flex-1 px-4 py-2 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50">
-                            Cancel
-                        </button>
-                        <button @click="cancelBooking()" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700">
-                            Confirm Cancel
-                        </button>
-                    </div>
-                </div>
-            </div>
+            </template>
         </div>
 
         <!-- Booking Modal -->
@@ -184,31 +224,16 @@
                     <div class="flex items-center justify-between p-6 pb-4 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-t-2xl border-b border-emerald-100">
                         <div class="flex items-center space-x-3">
                             <div class="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
-                                <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                </svg>
+                                <i class="fas fa-calendar-plus text-white"></i>
                             </div>
                             <div>
                                 <h3 class="text-xl font-bold text-gray-900">New Booking</h3>
                                 <p class="text-sm text-emerald-600 font-medium">Create a new reservation</p>
                             </div>
                         </div>
-                        <div class="flex items-center space-x-2">
-                            <!-- Mode Toggle -->
-                            <div class="flex bg-white/80 rounded-lg p-1 shadow-sm">
-                                <button @click="bookingMode = 'quick'" class="px-3 py-1 text-xs font-medium rounded-md transition-colors" :class="bookingMode === 'quick' ? 'bg-emerald-100 text-emerald-700 shadow-sm' : 'text-gray-600'">
-                                    Quick
-                                </button>
-                                <button @click="bookingMode = 'full'" class="px-3 py-1 text-xs font-medium rounded-md transition-colors" :class="bookingMode === 'full' ? 'bg-emerald-100 text-emerald-700 shadow-sm' : 'text-gray-600'">
-                                    Full
-                                </button>
-                            </div>
-                            <button @click="closeBookingModal()" class="p-2 text-gray-400 hover:text-gray-600 rounded-xl">
-                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                </svg>
-                            </button>
-                        </div>
+                        <button @click="closeBookingModal()" class="p-2 text-gray-400 hover:text-gray-600 rounded-xl">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
                     </div>
 
                     <!-- Form -->
@@ -246,14 +271,6 @@
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">Check-out</label>
                                     <input type="date" x-model="booking.check_out_date" @change="calculateRate()" class="w-full border border-gray-200 rounded-xl py-3 px-4">
                                 </div>
-                            </div>
-
-                            <!-- Nights Display -->
-                            <div x-show="booking.check_in_date && booking.check_out_date" class="p-4 rounded-xl" :class="isPastDate() ? 'bg-red-50' : 'bg-emerald-50'">
-                                <p class="text-sm" :class="isPastDate() ? 'text-red-700' : 'text-emerald-700'">
-                                    <span class="font-medium" x-text="calculateNights() + ' night' + (calculateNights() > 1 ? 's' : '')"></span>
-                                    <span x-show="isPastDate()" class="ml-2 text-red-600">⚠️ Past date selected</span>
-                                </p>
                             </div>
 
                             <!-- Guests -->
@@ -300,37 +317,6 @@
                                 </div>
                             </div>
 
-                            <!-- B2B Partner (Full Mode) -->
-                            <div x-show="bookingMode === 'full'" class="space-y-4">
-                                <div class="flex items-center justify-between">
-                                    <label class="block text-sm font-medium text-gray-700">B2B Partner (Optional)</label>
-                                    <div class="flex bg-gray-100 rounded-lg p-1">
-                                        <button type="button" @click="createNewPartner = false" class="px-3 py-1 text-xs font-medium rounded-md transition-colors" :class="!createNewPartner ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'">
-                                            Select
-                                        </button>
-                                        <button type="button" @click="createNewPartner = true" class="px-3 py-1 text-xs font-medium rounded-md transition-colors" :class="createNewPartner ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'">
-                                            Create
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div x-show="createNewPartner">
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-blue-50 rounded-xl">
-                                        <input type="text" x-model="booking.partner_name" placeholder="Partner Name" class="w-full border border-gray-200 rounded-xl py-3 px-4">
-                                        <input type="tel" x-model="booking.partner_mobile" placeholder="Partner Mobile" class="w-full border border-gray-200 rounded-xl py-3 px-4">
-                                    </div>
-                                </div>
-
-                                <div x-show="!createNewPartner">
-                                    <select x-model="booking.b2b_partner_id" class="w-full border border-gray-200 rounded-xl py-3 px-4">
-                                        <option value="">No B2B Partner</option>
-                                        <template x-for="partner in partners" :key="partner.id">
-                                            <option :value="partner.id" x-text="partner.partner_name"></option>
-                                        </template>
-                                    </select>
-                                </div>
-                            </div>
-
                             <!-- Pricing -->
                             <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
                                 <div>
@@ -361,7 +347,48 @@
                 </div>
             </div>
         </div>
+
+        <!-- Cancel Modal -->
+        <div x-show="showCancelModal" x-transition class="fixed inset-0 z-50 overflow-y-auto bg-black/50">
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Cancel Booking</h3>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Reason</label>
+                            <select x-model="cancelReason" class="w-full border border-gray-300 rounded-xl px-3 py-2">
+                                <option value="">Select reason</option>
+                                <option value="Guest Request">Guest Request</option>
+                                <option value="No Show">No Show</option>
+                                <option value="Payment Issue">Payment Issue</option>
+                                <option value="Property Issue">Property Issue</option>
+                                <option value="Overbooking">Overbooking</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                            <textarea x-model="cancelDescription" rows="3" class="w-full border border-gray-300 rounded-xl px-3 py-2" placeholder="Optional description..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-3 mt-6">
+                        <button @click="closeCancelModal()" class="flex-1 px-4 py-2 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50">
+                            Cancel
+                        </button>
+                        <button @click="cancelBooking()" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700">
+                            Confirm Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
+    
+    @include('partials.bottom-bar')
 
     <script>
         function bookingManager() {
@@ -369,10 +396,10 @@
                 properties: [],
                 accommodations: [],
                 guests: [],
-                partners: [],
                 pendingBookings: [],
                 activeBookings: [],
                 selectedProperty: '',
+                activeFilter: 'all',
                 showBookingModal: false,
                 showCancelModal: false,
                 cancelBookingId: null,
@@ -380,9 +407,7 @@
                 cancelDescription: '',
                 message: '',
                 messageType: 'success',
-                bookingMode: 'quick',
                 createNewGuest: true,
-                createNewPartner: false,
                 booking: {
                     property_id: '',
                     accommodation_id: '',
@@ -394,21 +419,20 @@
                     guest_name: '',
                     guest_mobile: '',
                     guest_email: '',
-                    b2b_partner_id: '',
-                    partner_name: '',
-                    partner_mobile: '',
                     total_amount: 0,
                     advance_paid: 0
                 },
 
-                get totalValue() {
-                    return [...this.pendingBookings, ...this.activeBookings].reduce((sum, b) => sum + parseFloat(b.total_amount), 0);
+                get filteredBookings() {
+                    const allBookings = [...this.pendingBookings, ...this.activeBookings];
+                    if (this.activeFilter === 'pending') return this.pendingBookings;
+                    if (this.activeFilter === 'active') return this.activeBookings;
+                    return allBookings;
                 },
 
                 async init() {
                     await this.loadProperties();
                     await this.loadGuests();
-                    await this.loadPartners();
                     await this.loadBookings();
                 },
 
@@ -427,15 +451,6 @@
                         this.guests = await response.json();
                     } catch (error) {
                         console.error('Error loading guests:', error);
-                    }
-                },
-
-                async loadPartners() {
-                    try {
-                        const response = await fetch('/api/partners');
-                        this.partners = await response.json();
-                    } catch (error) {
-                        console.error('Error loading partners:', error);
                     }
                 },
 
@@ -485,14 +500,10 @@
                         guest_name: '',
                         guest_mobile: '',
                         guest_email: '',
-                        b2b_partner_id: '',
-                        partner_name: '',
-                        partner_mobile: '',
                         total_amount: 0,
                         advance_paid: 0
                     };
                     this.createNewGuest = true;
-                    this.createNewPartner = false;
                     if (this.booking.property_id) {
                         this.loadAccommodations();
                     }
@@ -517,37 +528,28 @@
                     }
                 },
 
-                calculateNights() {
-                    if (this.booking.check_in_date && this.booking.check_out_date) {
-                        const checkIn = new Date(this.booking.check_in_date);
-                        const checkOut = new Date(this.booking.check_out_date);
-                        return Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+                calculateNights(checkIn, checkOut) {
+                    if (checkIn && checkOut) {
+                        const start = new Date(checkIn);
+                        const end = new Date(checkOut);
+                        const diff = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+                        return diff > 0 ? diff : 0;
                     }
                     return 0;
-                },
-
-                isPastDate() {
-                    if (this.booking.check_in_date) {
-                        const checkIn = new Date(this.booking.check_in_date);
-                        const today = new Date();
-                        today.setHours(0, 0, 0, 0);
-                        return checkIn < today;
-                    }
-                    return false;
                 },
 
                 calculateRate() {
                     if (this.booking.accommodation_id && this.booking.check_in_date && this.booking.check_out_date) {
                         const acc = this.accommodations.find(a => a.id == this.booking.accommodation_id);
                         if (acc) {
-                            const nights = this.calculateNights();
+                            const nights = this.calculateNights(this.booking.check_in_date, this.booking.check_out_date);
                             this.booking.total_amount = acc.base_price * nights;
                         }
                     }
                 },
 
                 async saveBooking() {
-                    if (!this.booking.property_id || !this.booking.accommodation_id || !this.booking.guest_name || !this.booking.guest_mobile) {
+                    if (!this.booking.property_id || !this.booking.accommodation_id || !this.booking.guest_name || !this.booking.guest_mobile || !this.booking.check_in_date || !this.booking.check_out_date) {
                         this.showMessage('Please fill all required fields', 'error');
                         return;
                     }
@@ -564,7 +566,7 @@
                         
                         const result = await response.json();
                         
-                        if (result.success) {
+                        if (response.ok && result.success) {
                             this.showMessage('Booking created successfully!', 'success');
                             this.closeBookingModal();
                             await this.loadBookings();
@@ -613,7 +615,7 @@
 
                 async cancelBooking() {
                     if (!this.cancelReason) {
-                        this.showMessage('Please select a reason', 'error');
+                        this.showMessage('Please select a reason for cancellation.', 'error');
                         return;
                     }
 
@@ -653,16 +655,18 @@
                 },
 
                 formatNumber(num) {
+                    if (num === null || num === undefined) return '0';
                     return new Intl.NumberFormat('en-IN').format(num);
                 },
 
                 formatDateRange(checkIn, checkOut) {
                     const options = { month: 'short', day: 'numeric' };
-                    const start = new Date(checkIn).toLocaleDateString('en-US', options);
-                    const end = new Date(checkOut).toLocaleDateString('en-US', { ...options, year: 'numeric' });
+                    const start = new Date(checkIn).toLocaleDateString('en-GB', options);
+                    const end = new Date(checkOut).toLocaleDateString('en-GB', options);
                     return `${start} - ${end}`;
                 }
             }
         }
     </script>
-@endsection
+</body>
+</html>
