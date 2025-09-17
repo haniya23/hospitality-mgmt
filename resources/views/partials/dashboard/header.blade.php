@@ -17,6 +17,33 @@
         border: 1px solid rgba(255, 255, 255, 0.2);
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     }
+    .glass-3d-card {
+        border-radius: 20px;
+        background: linear-gradient(40deg, #FF0080, #FF8C00 70%);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 2px 0 rgba(255,255,255,0.2);
+        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        position: relative;
+        overflow: hidden;
+    }
+    .glass-3d-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+        border-radius: 20px;
+    }
+    .glass-3d-content {
+        position: relative;
+        z-index: 2;
+        padding: 16px;
+    }
+    .glass-3d-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.4), inset 0 2px 0 rgba(255,255,255,0.3);
+    }
 </style>
 @endpush
 
@@ -54,41 +81,37 @@
             </div>
         </div>
 
-        {{-- Quick Summary Cards (within the header) --}}
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {{-- Card 1: Sales --}}
-            <div class="soft-glass-card rounded-2xl p-4">
-                <div class="flex items-center space-x-3">
+            <div class="glass-3d-card">
+                <div class="glass-3d-content flex items-center space-x-3">
                     <div class="w-10 h-10 rounded-xl bg-white bg-opacity-50 flex items-center justify-center">
-                        <i class="fas fa-shopping-cart text-orange-500"></i>
+                        <i class="fas fa-calendar-check text-orange-500"></i>
                     </div>
                     <div>
-                        <p class="text-sm text-slate-700">Sales</p>
-                        <p class="text-xl font-bold text-slate-900">1,402</p>
+                        <p class="text-sm text-white opacity-80">Check-ins</p>
+                        <p class="text-xl font-bold text-white" x-text="todayStats.checkIns"></p>
                     </div>
                 </div>
             </div>
-            {{-- Card 2: Customers --}}
-            <div class="soft-glass-card rounded-2xl p-4">
-                <div class="flex items-center space-x-3">
+            <div class="glass-3d-card">
+                <div class="glass-3d-content flex items-center space-x-3">
                     <div class="w-10 h-10 rounded-xl bg-white bg-opacity-50 flex items-center justify-center">
-                        <i class="fas fa-users text-blue-500"></i>
+                        <i class="fas fa-calendar-plus text-blue-500"></i>
                     </div>
                     <div>
-                        <p class="text-sm text-slate-700">Customers</p>
-                        <p class="text-xl font-bold text-slate-900">356</p>
+                        <p class="text-sm text-white opacity-80">New Bookings</p>
+                        <p class="text-xl font-bold text-white" x-text="todayStats.newBookings"></p>
                     </div>
                 </div>
             </div>
-            {{-- Card 3: Pending Orders --}}
-            <div class="soft-glass-card rounded-2xl p-4">
-                <div class="flex items-center space-x-3">
+            <div class="glass-3d-card">
+                <div class="glass-3d-content flex items-center space-x-3">
                     <div class="w-10 h-10 rounded-xl bg-white bg-opacity-50 flex items-center justify-center">
-                        <i class="fas fa-box text-purple-500"></i>
+                        <i class="fas fa-sign-out-alt text-purple-500"></i>
                     </div>
                     <div>
-                        <p class="text-sm text-slate-700">Pending</p>
-                        <p class="text-xl font-bold text-slate-900">23</p>
+                        <p class="text-sm text-white opacity-80">Check-outs</p>
+                        <p class="text-xl font-bold text-white" x-text="todayStats.checkOuts"></p>
                     </div>
                 </div>
             </div>

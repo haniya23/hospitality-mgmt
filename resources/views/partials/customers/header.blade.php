@@ -9,6 +9,33 @@
         border: 1px solid rgba(255, 255, 255, 0.2);
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     }
+    .glass-3d-card {
+        border-radius: 20px;
+        background: linear-gradient(40deg, #FF0080, #FF8C00 70%);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 2px 0 rgba(255,255,255,0.2);
+        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        position: relative;
+        overflow: hidden;
+    }
+    .glass-3d-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+        border-radius: 20px;
+    }
+    .glass-3d-content {
+        position: relative;
+        z-index: 2;
+        padding: 12px;
+    }
+    .glass-3d-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.4), inset 0 2px 0 rgba(255,255,255,0.3);
+    }
 </style>
 @endpush
 
@@ -35,17 +62,23 @@
         </div>
 
         <div class="grid grid-cols-3 gap-4">
-            <div class="soft-glass-card rounded-xl p-3 text-center">
-                <div class="text-2xl font-bold text-slate-900" x-text="filteredCustomers.filter(c => c.status === 'active').length"></div>
-                <div class="text-xs text-slate-600 uppercase tracking-wider">Active</div>
+            <div class="glass-3d-card">
+                <div class="glass-3d-content text-center">
+                    <div class="text-2xl font-bold text-white" x-text="filteredCustomers.filter(c => c.status === 'active').length"></div>
+                    <div class="text-xs text-white opacity-80 uppercase tracking-wider">Active</div>
+                </div>
             </div>
-            <div class="soft-glass-card rounded-xl p-3 text-center">
-                <div class="text-2xl font-bold text-slate-900" x-text="filteredCustomers.reduce((sum, c) => sum + c.totalBookings, 0)"></div>
-                <div class="text-xs text-slate-600 uppercase tracking-wider">Total Bookings</div>
+            <div class="glass-3d-card">
+                <div class="glass-3d-content text-center">
+                    <div class="text-2xl font-bold text-white" x-text="filteredCustomers.reduce((sum, c) => sum + c.totalBookings, 0)"></div>
+                    <div class="text-xs text-white opacity-80 uppercase tracking-wider">Total Bookings</div>
+                </div>
             </div>
-            <div class="soft-glass-card rounded-xl p-3 text-center">
-                <div class="text-2xl font-bold text-slate-900" x-text="filteredCustomers.length"></div>
-                <div class="text-xs text-slate-600 uppercase tracking-wider">Total Customers</div>
+            <div class="glass-3d-card">
+                <div class="glass-3d-content text-center">
+                    <div class="text-2xl font-bold text-white" x-text="filteredCustomers.length"></div>
+                    <div class="text-xs text-white opacity-80 uppercase tracking-wider">Total Customers</div>
+                </div>
             </div>
         </div>
     </div>

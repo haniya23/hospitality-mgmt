@@ -1,5 +1,5 @@
 <!-- Sidebar -->
-<div x-data="{ sidebarOpen: false }" @toggle-sidebar.window="sidebarOpen = !sidebarOpen" @click.away="sidebarOpen = false">
+<div x-data="{ sidebarOpen: false }" @toggle-sidebar.window="sidebarOpen = !sidebarOpen" @keydown.escape.window="sidebarOpen = false">
     <!-- Mobile Sidebar Overlay -->
     <div x-show="sidebarOpen" 
          x-transition:enter="transition-opacity ease-linear duration-300" 
@@ -9,11 +9,10 @@
          x-transition:leave-start="opacity-100" 
          x-transition:leave-end="opacity-0" 
          class="fixed inset-0 z-40 bg-black/50 lg:hidden" 
-         @click="sidebarOpen = false" 
-         style="display: none;"></div>
+         @click="sidebarOpen = false"></div>
 
     <!-- Desktop Sidebar -->
-    <div class="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:w-72 lg:bg-white lg:p-5 lg:shadow-md lg:shadow-purple-200/50 lg:flex lg:flex-col lg:block">
+    <div class="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:w-72 lg:bg-white lg:p-5 lg:shadow-md lg:shadow-purple-200/50 lg:flex lg:flex-col">
         <!-- Header -->
         <div class="flex items-center justify-between mb-6">
             <div class="flex items-center space-x-3">
@@ -124,7 +123,7 @@
          x-transition:leave-start="translate-x-0" 
          x-transition:leave-end="-translate-x-full" 
          class="fixed inset-y-0 left-0 z-50 w-72 bg-white p-5 shadow-xl lg:hidden" 
-         style="display: none;">
+         @click.away="sidebarOpen = false">
         
         <!-- Header -->
         <div class="flex items-center justify-between mb-6">

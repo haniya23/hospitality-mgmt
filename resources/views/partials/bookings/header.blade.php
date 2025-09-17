@@ -55,7 +55,7 @@
         {{-- Top Section: Title and New Booking Button --}}
         <div class="flex items-center justify-between mb-6">
             <div class="flex items-center space-x-3">
-                <button @click="$dispatch('toggle-sidebar')" class="w-10 h-10 rounded-full soft-glass-card flex items-center justify-center hover:bg-opacity-60 transition-all lg:hidden">
+                <button @click="window.dispatchEvent(new CustomEvent('toggle-sidebar'))" class="w-10 h-10 rounded-full soft-glass-card flex items-center justify-center hover:bg-opacity-60 transition-all lg:hidden">
                     <i class="fas fa-bars text-pink-500"></i>
                 </button>
                 <div class="w-10 h-10 rounded-full soft-glass-card flex items-center justify-center">
@@ -77,31 +77,33 @@
             <span x-text="message"></span>
         </div>
 
-        {{-- Combined Interactive Stats & Filters --}}
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {{-- Filter: All --}}
-            <button @click="statusFilter = ''" :class="{ 'active-filter-card': statusFilter === '' }" class="soft-glass-card rounded-xl p-3 text-center transition duration-300">
-                {{-- IMPORTANT: Replace 'bookings.length' with your master array of all bookings for an accurate total count --}}
-                <div class="text-2xl font-bold text-slate-900" x-text="bookings.length"></div>
-                <div class="text-xs text-slate-600 uppercase tracking-wider">All</div>
+            <button @click="statusFilter = ''" :class="{ 'active-filter-card': statusFilter === '' }" class="glass-3d-card">
+                <div class="glass-3d-content text-center">
+                    <div class="text-2xl font-bold text-white" x-text="bookings.length"></div>
+                    <div class="text-xs text-white opacity-80 uppercase tracking-wider">All</div>
+                </div>
             </button>
 
-            {{-- Filter: Pending --}}
-            <button @click="statusFilter = 'pending'" :class="{ 'active-filter-card': statusFilter === 'pending' }" class="soft-glass-card rounded-xl p-3 text-center transition duration-300">
-                <div class="text-2xl font-bold text-slate-900" x-text="bookings.filter(b => b.status === 'pending').length"></div>
-                <div class="text-xs text-slate-600 uppercase tracking-wider">Pending</div>
+            <button @click="statusFilter = 'pending'" :class="{ 'active-filter-card': statusFilter === 'pending' }" class="glass-3d-card">
+                <div class="glass-3d-content text-center">
+                    <div class="text-2xl font-bold text-white" x-text="bookings.filter(b => b.status === 'pending').length"></div>
+                    <div class="text-xs text-white opacity-80 uppercase tracking-wider">Pending</div>
+                </div>
             </button>
 
-            {{-- Filter: Confirmed --}}
-            <button @click="statusFilter = 'confirmed'" :class="{ 'active-filter-card': statusFilter === 'confirmed' }" class="soft-glass-card rounded-xl p-3 text-center transition duration-300">
-                <div class="text-2xl font-bold text-slate-900" x-text="bookings.filter(b => b.status === 'confirmed').length"></div>
-                <div class="text-xs text-slate-600 uppercase tracking-wider">Confirmed</div>
+            <button @click="statusFilter = 'confirmed'" :class="{ 'active-filter-card': statusFilter === 'confirmed' }" class="glass-3d-card">
+                <div class="glass-3d-content text-center">
+                    <div class="text-2xl font-bold text-white" x-text="bookings.filter(b => b.status === 'confirmed').length"></div>
+                    <div class="text-xs text-white opacity-80 uppercase tracking-wider">Confirmed</div>
+                </div>
             </button>
 
-            {{-- Filter: Cancelled --}}
-            <button @click="statusFilter = 'cancelled'" :class="{ 'active-filter-card': statusFilter === 'cancelled' }" class="soft-glass-card rounded-xl p-3 text-center transition duration-300">
-                <div class="text-2xl font-bold text-slate-900" x-text="bookings.filter(b => b.status === 'cancelled').length"></div>
-                <div class="text-xs text-slate-600 uppercase tracking-wider">Cancelled</div>
+            <button @click="statusFilter = 'cancelled'" :class="{ 'active-filter-card': statusFilter === 'cancelled' }" class="glass-3d-card">
+                <div class="glass-3d-content text-center">
+                    <div class="text-2xl font-bold text-white" x-text="bookings.filter(b => b.status === 'cancelled').length"></div>
+                    <div class="text-xs text-white opacity-80 uppercase tracking-wider">Cancelled</div>
+                </div>
             </button>
         </div>
     </div>
