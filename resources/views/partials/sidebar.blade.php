@@ -1,10 +1,19 @@
 <!-- Sidebar -->
-<div x-data="{ sidebarOpen: false }" @toggle-sidebar.window="sidebarOpen = !sidebarOpen">
+<div x-data="{ sidebarOpen: false }" @toggle-sidebar.window="sidebarOpen = !sidebarOpen" @click.away="sidebarOpen = false">
     <!-- Mobile Sidebar Overlay -->
-    <div x-show="sidebarOpen" x-transition:enter="transition-opacity ease-linear duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-linear duration-300" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-30 bg-black/50 lg:hidden" @click="sidebarOpen = false"></div>
+    <div x-show="sidebarOpen" 
+         x-transition:enter="transition-opacity ease-linear duration-300" 
+         x-transition:enter-start="opacity-0" 
+         x-transition:enter-end="opacity-100" 
+         x-transition:leave="transition-opacity ease-linear duration-300" 
+         x-transition:leave-start="opacity-100" 
+         x-transition:leave-end="opacity-0" 
+         class="fixed inset-0 z-40 bg-black/50 lg:hidden" 
+         @click="sidebarOpen = false" 
+         style="display: none;"></div>
 
     <!-- Desktop Sidebar -->
-    <div class="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:w-72 lg:bg-white lg:p-5 lg:shadow-md lg:shadow-purple-200/50 lg:flex lg:flex-col">
+    <div class="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:w-72 lg:bg-white lg:p-5 lg:shadow-md lg:shadow-purple-200/50 lg:flex lg:flex-col lg:block">
         <!-- Header -->
         <div class="flex items-center justify-between mb-6">
             <div class="flex items-center space-x-3">
@@ -107,7 +116,15 @@
     </div>
 
     <!-- Mobile Sidebar -->
-    <div x-show="sidebarOpen" x-transition:enter="transition ease-in-out duration-300 transform" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition ease-in-out duration-300 transform" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full" class="fixed inset-y-0 left-0 z-40 w-72 bg-white p-5 shadow-md shadow-purple-200/50 rounded-r-md lg:hidden">
+    <div x-show="sidebarOpen" 
+         x-transition:enter="transition ease-in-out duration-300 transform" 
+         x-transition:enter-start="-translate-x-full" 
+         x-transition:enter-end="translate-x-0" 
+         x-transition:leave="transition ease-in-out duration-300 transform" 
+         x-transition:leave-start="translate-x-0" 
+         x-transition:leave-end="-translate-x-full" 
+         class="fixed inset-y-0 left-0 z-50 w-72 bg-white p-5 shadow-xl lg:hidden" 
+         style="display: none;">
         
         <!-- Header -->
         <div class="flex items-center justify-between mb-6">

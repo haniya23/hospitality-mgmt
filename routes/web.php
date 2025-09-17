@@ -45,13 +45,19 @@ Route::middleware('auth')->group(function () {
     });
     
     // Customer Management Routes
-    Route::get('/customers', App\Livewire\CustomerManagement::class)->name('customers.index');
+    Route::get('/customers', function () {
+        return view('customers.index');
+    })->name('customers.index');
     
     // B2B Management Routes
-    Route::get('/b2b', App\Livewire\B2BManagement::class)->name('b2b.dashboard');
+    Route::get('/b2b', function () {
+        return view('b2b.index');
+    })->name('b2b.dashboard');
     
     // Resources Management Routes
-    Route::get('/resources', App\Livewire\ResourceManagement::class)->name('resources.index');
+    Route::get('/resources', function () {
+        return view('resources.index');
+    })->name('resources.index');
     
     // Pricing Management Routes
     Route::get('/pricing', function () {
