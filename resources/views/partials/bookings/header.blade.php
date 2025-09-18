@@ -55,7 +55,7 @@
         {{-- Top Section: Title and New Booking Button --}}
         <div class="flex items-center justify-between mb-6">
             <div class="flex items-center space-x-3">
-                <button @click="window.dispatchEvent(new CustomEvent('toggle-sidebar'))" class="w-10 h-10 rounded-full soft-glass-card flex items-center justify-center hover:bg-opacity-60 transition-all lg:hidden">
+                <button @click="sidebarOpen = !sidebarOpen" class="w-10 h-10 rounded-full soft-glass-card flex items-center justify-center hover:bg-opacity-60 transition-all lg:hidden">
                     <i class="fas fa-bars text-pink-500"></i>
                 </button>
                 <div class="w-10 h-10 rounded-full soft-glass-card flex items-center justify-center">

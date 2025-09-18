@@ -57,7 +57,7 @@
         <div class="flex items-center justify-between mb-8">
             <div class="flex items-center space-x-3">
                 {{-- Mobile sidebar toggle button --}}
-                <button @click="$dispatch('toggle-sidebar')" class="w-10 h-10 rounded-full soft-glass-card flex items-center justify-center hover:bg-opacity-60 transition-all lg:hidden">
+                <button @click="sidebarOpen = !sidebarOpen" class="w-10 h-10 rounded-full soft-glass-card flex items-center justify-center hover:bg-opacity-60 transition-all lg:hidden">
                     <i class="fas fa-bars text-pink-500"></i>
                 </button>
                 {{-- Main icon --}}
@@ -76,7 +76,7 @@
                     <i class="fas fa-bell text-pink-500"></i>
                 </button>
                 <div class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center border-2 border-white">
-                    <span class="text-xs font-bold text-white" x-text="notifications"></span>
+                    <span class="text-xs font-bold text-white" x-text="notifications || 0"></span>
                 </div>
             </div>
         </div>
@@ -89,7 +89,7 @@
                     </div>
                     <div>
                         <p class="text-sm text-white opacity-80">Check-ins</p>
-                        <p class="text-xl font-bold text-white" x-text="todayStats.checkIns"></p>
+                        <p class="text-xl font-bold text-white" x-text="todayStats?.checkIns || 0"></p>
                     </div>
                 </div>
             </div>
@@ -100,7 +100,7 @@
                     </div>
                     <div>
                         <p class="text-sm text-white opacity-80">New Bookings</p>
-                        <p class="text-xl font-bold text-white" x-text="todayStats.newBookings"></p>
+                        <p class="text-xl font-bold text-white" x-text="todayStats?.newBookings || 0"></p>
                     </div>
                 </div>
             </div>
@@ -111,7 +111,7 @@
                     </div>
                     <div>
                         <p class="text-sm text-white opacity-80">Check-outs</p>
-                        <p class="text-xl font-bold text-white" x-text="todayStats.checkOuts"></p>
+                        <p class="text-xl font-bold text-white" x-text="todayStats?.checkOuts || 0"></p>
                     </div>
                 </div>
             </div>
