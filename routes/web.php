@@ -83,9 +83,35 @@ Route::middleware('auth')->group(function () {
     })->name('welcome.trial');
     
     // Admin Routes
-    Route::get('/admin', [App\Http\Controllers\AdminController::class, 'dashboard'])->name('admin.dashboard');
-    Route::patch('/admin/properties/{property}/approve', [App\Http\Controllers\AdminController::class, 'approveProperty'])->name('admin.properties.approve');
-    Route::patch('/admin/properties/{property}/reject', [App\Http\Controllers\AdminController::class, 'rejectProperty'])->name('admin.properties.reject');
-    Route::get('/admin/subscriptions', [App\Http\Controllers\AdminController::class, 'subscriptions'])->name('admin.subscriptions');
-    Route::patch('/admin/subscriptions/{request}/approve', [App\Http\Controllers\AdminController::class, 'approveSubscription'])->name('admin.subscriptions.approve');
+    Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/', [App\Http\Controllers\AdminController::class, 'dashboard'])->name('dashboard');
+        
+        // Property Approvals
+        Route::get('/property-approvals', [App\Http\Controllers\AdminController::class, 'propertyApprovals'])->name('property-approvals');
+        Route::patch('/properties/{property}/approve', [App\Http\Controllers\AdminController::class, 'approveProperty'])->name('properties.approve');
+        Route::patch('/properties/{property}/reject', [App\Http\Controllers\AdminController::class, 'rejectProperty'])->name('properties.reject');
+        Route::get('/create-property', [App\Http\Controllers\AdminController::class, 'createPropertyForUser'])->name('create-property');
+        Route::post('/create-property', [App\Http\Controllers\AdminController::class, 'storePropertyForUser'])->name('store-property');
+        
+        // Subscription Management
+        Route::get('/subscriptions', [App\Http\Controllers\AdminController::class, 'subscriptions'])->name('subscriptions');
+        Route::patch('/subscriptions/{request}/approve', [App\Http\Controllers\AdminController::class, 'approveSubscription'])->name('subscriptions.approve');
+        Route::patch('/users/{user}/subscription', [App\Http\Controllers\AdminController::class, 'updateSubscriptionStatus'])->name('users.subscription.update');
+        
+        // User Management
+        Route::get('/user-management', [App\Http\Controllers\AdminController::class, 'userManagement'])->name('user-management');
+        Route::get('/users/create', [App\Http\Controllers\AdminController::class, 'createUser'])->name('users.create');
+        Route::post('/users', [App\Http\Controllers\AdminController::class, 'storeUser'])->name('users.store');
+        Route::get('/users/{user}/edit', [App\Http\Controllers\AdminController::class, 'editUser'])->name('users.edit');
+        Route::put('/users/{user}', [App\Http\Controllers\AdminController::class, 'updateUser'])->name('users.update');
+        
+        // Customer Data
+        Route::get('/customer-data', [App\Http\Controllers\AdminController::class, 'customerData'])->name('customer-data');
+        
+        // B2B Management
+        Route::get('/b2b-management', [App\Http\Controllers\AdminController::class, 'b2bManagement'])->name('b2b-management');
+        
+        // Location Analytics
+        Route::get('/location-analytics', [App\Http\Controllers\AdminController::class, 'locationAnalytics'])->name('location-analytics');
+    });
 });

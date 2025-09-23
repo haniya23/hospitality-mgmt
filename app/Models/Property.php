@@ -17,6 +17,9 @@ class Property extends Model
         'description',
         'status',
         'wizard_step_completed',
+        'approved_at',
+        'approved_by',
+        'rejection_reason',
     ];
 
     protected $casts = [
