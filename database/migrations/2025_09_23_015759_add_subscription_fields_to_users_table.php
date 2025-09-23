@@ -9,7 +9,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->enum('subscription_status', ['trial', 'active', 'expired', 'cancelled'])->default('trial');
+            $table->enum('subscription_status', ['trial', 'starter', 'professional', 'expired', 'cancelled'])->default('trial');
+            $table->enum('trial_plan', ['starter', 'professional'])->default('starter');
             $table->timestamp('trial_ends_at')->nullable();
             $table->timestamp('subscription_ends_at')->nullable();
             $table->integer('properties_limit')->default(3);
@@ -20,7 +21,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['subscription_status', 'trial_ends_at', 'subscription_ends_at', 'properties_limit', 'is_trial_active']);
+            $table->dropColumn(['subscription_status', 'trial_plan', 'trial_ends_at', 'subscription_ends_at', 'properties_limit', 'is_trial_active']);
         });
     }
 };

@@ -14,32 +14,28 @@ class SubscriptionController extends Controller
 
     public function subscribe(Request $request)
     {
-        $plan = $request->input('plan');
+        $request->validate([
+            'plan' => 'required|in:starter,professional',
+            'billing' => 'required|in:monthly,yearly'
+        ]);
+        
         $user = auth()->user();
         
-        // If user is on trial, update trial plan
-        if ($user->subscription_status === 'trial') {
-            $properties_limit = $plan === 'professional' ? 5 : 1;
-            
-            $user->update([
-                'trial_plan' => $plan,
-                'properties_limit' => $properties_limit,
-            ]);
-            
-            return redirect()->route('dashboard')->with('success', 'Trial plan updated! Enjoy ' . ucfirst($plan) . ' features during your trial.');
+        // Check if user already has pending request
+        if ($user->hasPendingRequest()) {
+            return redirect()->back()->with('warning', 'You already have a pending subscription request.');
         }
         
-        // For paid subscriptions, create request for admin approval
-        if (!$user->hasPendingRequest()) {
-            SubscriptionRequest::create([
-                'user_id' => $user->id,
-                'requested_plan' => $plan,
-                'billing_cycle' => $request->input('billing', 'monthly'),
-            ]);
-            
-            return redirect()->route('dashboard')->with('info', 'Subscription request sent to admin for approval.');
-        }
+
         
-        return redirect()->route('dashboard')->with('warning', 'You already have a pending subscription request.');
+        // Create subscription request for admin approval
+        $subscriptionRequest = SubscriptionRequest::create([
+            'user_id' => $user->id,
+            'requested_plan' => $request->plan,
+            'billing_cycle' => $request->billing,
+            'status' => 'pending',
+        ]);
+        
+        return redirect()->back()->with('success', 'Subscription request #' . $subscriptionRequest->id . ' sent successfully! Our executives will contact you soon.');
     }
 }

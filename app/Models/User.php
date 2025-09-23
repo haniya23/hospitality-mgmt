@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
 
 class User extends Authenticatable
 {
@@ -15,6 +16,7 @@ class User extends Authenticatable
         'name',
         'mobile_number',
         'pin_hash',
+        'password',
         'email',
         'is_active',
         'is_admin',
@@ -24,10 +26,14 @@ class User extends Authenticatable
         'subscription_ends_at',
         'properties_limit',
         'is_trial_active',
+        'referral_code',
+        'referred_by',
+        'user_id',
     ];
 
     protected $hidden = [
         'pin_hash',
+        'password',
         'remember_token',
     ];
 
@@ -41,27 +47,11 @@ class User extends Authenticatable
             'trial_ends_at' => 'datetime',
             'subscription_ends_at' => 'datetime',
             'is_trial_active' => 'boolean',
+            'password' => 'hashed',
         ];
     }
 
-    protected static function boot()
-    {
-        parent::boot();
-        
-        static::creating(function ($model) {
-            if (empty($model->uuid)) {
-                $model->uuid = Str::uuid();
-            }
-            // Set 30-day trial for new users
-            if (empty($model->trial_ends_at)) {
-                $model->trial_ends_at = now()->addDays(30);
-                $model->subscription_status = 'trial';
-                $model->trial_plan = 'starter';
-                $model->is_trial_active = true;
-                $model->properties_limit = 1;
-            }
-        });
-    }
+
 
     public function getRouteKeyName()
     {
@@ -167,5 +157,70 @@ class User extends Authenticatable
     public function hasPendingRequest()
     {
         return $this->subscriptionRequests()->where('status', 'pending')->exists();
+    }
+
+    public function referrals()
+    {
+        return $this->hasMany(Referral::class, 'referrer_id');
+    }
+
+    public function referredBy()
+    {
+        return $this->belongsTo(User::class, 'referred_by');
+    }
+
+    public function referralWithdrawals()
+    {
+        return $this->hasMany(ReferralWithdrawal::class);
+    }
+
+    public function getReferralEarningsAttribute()
+    {
+        return $this->referrals()->where('status', 'completed')->sum('reward_amount');
+    }
+
+    public function getCompletedReferralsCountAttribute()
+    {
+        return $this->referrals()->where('status', 'completed')->count();
+    }
+
+    public function canWithdrawReferralEarnings()
+    {
+        return $this->completed_referrals_count >= 4;
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+        
+        static::creating(function ($model) {
+            if (empty($model->uuid)) {
+                $model->uuid = Str::uuid();
+            }
+            // Generate referral code
+            if (empty($model->referral_code)) {
+                $model->referral_code = strtoupper(Str::random(8));
+            }
+            // Generate user_id
+            if (empty($model->user_id)) {
+                $model->user_id = 'USR' . str_pad(rand(100000, 999999), 6, '0', STR_PAD_LEFT) . strtoupper(Str::random(3));
+            }
+            // Set mobile number for admin users if not provided
+            if (empty($model->mobile_number)) {
+                $model->mobile_number = '0000000000';
+            }
+            // Set pin_hash for admin users if not provided
+            if (empty($model->pin_hash)) {
+                $model->pin_hash = Hash::make('0000');
+            }
+            // Set 30-day trial for new users
+            if (empty($model->trial_ends_at)) {
+                $model->trial_ends_at = now()->addDays(30);
+                $model->subscription_status = 'trial';
+                $model->trial_plan = 'starter';
+                $model->is_trial_active = true;
+                $model->properties_limit = 1;
+            }
+        });
     }
 }

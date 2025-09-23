@@ -19,6 +19,92 @@
 
 @section('content')
 <div class="max-w-6xl mx-auto px-4 py-8" x-data="{ yearly: false }">
+    
+    @if(auth()->user()->subscription_status && auth()->user()->subscription_status !== 'trial')
+        <!-- Current Subscription Status -->
+        <div class="bg-gradient-to-r from-green-500 to-blue-600 rounded-2xl p-6 mb-8 text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-xl font-bold mb-2">Current Plan: {{ ucfirst(auth()->user()->subscription_status) }}</h3>
+                    <p class="opacity-90">You have an active subscription</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-2xl font-bold">{{ auth()->user()->subscription_ends_at ? auth()->user()->subscription_ends_at->diffInDays() : 0 }}</div>
+                    <div class="text-sm opacity-90">Days Remaining</div>
+                </div>
+            </div>
+            <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div>
+                    <div class="font-semibold">Properties Limit</div>
+                    <div>{{ auth()->user()->properties_limit ?? 1 }}</div>
+                </div>
+                <div>
+                    <div class="font-semibold">Plan Type</div>
+                    <div>{{ ucfirst(auth()->user()->subscription_status) }}</div>
+                </div>
+                <div>
+                    <div class="font-semibold">Expires On</div>
+                    <div>{{ auth()->user()->subscription_ends_at ? auth()->user()->subscription_ends_at->format('M d, Y') : 'N/A' }}</div>
+                </div>
+                <div>
+                    <div class="font-semibold">Status</div>
+                    <div class="flex items-center">
+                        <span class="w-2 h-2 bg-green-300 rounded-full mr-2"></span>
+                        Active
+                    </div>
+                </div>
+            </div>
+            @if(auth()->user()->subscription_status === 'starter')
+            <div class="mt-4 pt-4 border-t border-white border-opacity-20">
+                <form action="{{ route('subscription.subscribe') }}" method="POST" class="inline">
+                    @csrf
+                    <input type="hidden" name="plan" value="professional">
+                    <input type="hidden" name="billing" value="yearly">
+                    <button type="submit" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-lg font-medium transition-all">
+                        <i class="fas fa-arrow-up mr-2"></i>Upgrade to Professional
+                    </button>
+                </form>
+            </div>
+            @endif
+        </div>
+    @endif
+    
+    <!-- Referral Program Section -->
+    <div class="bg-white rounded-xl p-6 shadow-lg mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h3 class="text-lg font-semibold">Referral Program</h3>
+                <p class="text-gray-600">Earn ₹199 for each successful referral</p>
+            </div>
+            <div class="text-right">
+                <div class="text-xl font-bold text-green-600">₹{{ number_format(auth()->user()->referral_earnings) }}</div>
+                <div class="text-sm text-gray-500">Total Earned</div>
+            </div>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+            <div class="text-center">
+                <div class="text-lg font-bold">{{ auth()->user()->completed_referrals_count }}</div>
+                <div class="text-xs text-gray-500">Completed</div>
+            </div>
+            <div class="text-center">
+                <div class="text-lg font-bold">{{ auth()->user()->referrals()->where('status', 'pending')->count() }}</div>
+                <div class="text-xs text-gray-500">Pending</div>
+            </div>
+            <div class="text-center">
+                <div class="text-lg font-bold {{ auth()->user()->canWithdrawReferralEarnings() ? 'text-green-600' : 'text-red-600' }}">
+                    {{ auth()->user()->canWithdrawReferralEarnings() ? 'Yes' : 'No' }}
+                </div>
+                <div class="text-xs text-gray-500">Can Withdraw</div>
+            </div>
+            <div class="text-center">
+                <a href="{{ route('referral.index') }}" class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">
+                    Manage
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    @if(auth()->user()->subscription_status === 'trial')
     <!-- Billing Toggle -->
     <div class="text-center mb-8">
         <div class="inline-flex items-center bg-gray-100 rounded-full p-1">
@@ -158,7 +244,9 @@
             </form>
         </div>
     </div>
+    @endif
 
+    @if(auth()->user()->subscription_status === 'trial')
     <div class="text-center mt-12">
         <p class="text-gray-600 mb-4">All plans include a 30-day free trial. No credit card required.</p>
         <div class="flex justify-center space-x-8 text-sm text-gray-500">
@@ -167,5 +255,6 @@
             <span><i class="fas fa-headset mr-2"></i>24/7 support</span>
         </div>
     </div>
+    @endif
 </div>
 @endsection
