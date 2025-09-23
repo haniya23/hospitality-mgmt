@@ -10,17 +10,18 @@
                         <div>
                             <h3 class="font-semibold text-gray-800" x-text="customer.name"></h3>
                             <p class="text-sm text-gray-500" x-text="customer.email"></p>
-                            <p class="text-sm text-gray-500" x-text="customer.phone"></p>
+                            <p class="text-sm text-gray-500" x-text="customer.mobile_number || customer.phone || 'No phone'"></p>
                         </div>
                     </div>
                     <div class="flex items-center space-x-3">
-                        <span class="px-3 py-1 rounded-full text-xs font-medium"
-                              :class="customer.status === 'active' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'"
-                              x-text="customer.status.charAt(0).toUpperCase() + customer.status.slice(1)"></span>
                         <div class="text-right">
-                            <div class="text-sm font-medium text-gray-800" x-text="customer.totalBookings + ' bookings'"></div>
-                            <div class="text-xs text-gray-500" x-text="'Last: ' + customer.lastBooking"></div>
+                            <div class="text-sm font-medium text-gray-800" x-text="(customer.reservations_count || 0) + ' bookings'"></div>
+                            <div class="text-xs text-gray-500" x-text="customer.mobile_number || 'No mobile'"></div>
+                            <div class="text-xs text-gray-500" x-text="(customer.loyalty_points || 0) + ' points'"></div>
                         </div>
+                        <a :href="'/customers/' + customer.uuid + '/edit'" class="px-3 py-1 bg-blue-100 text-blue-600 rounded-lg text-sm hover:bg-blue-200 transition-colors">
+                            Edit
+                        </a>
                     </div>
                 </div>
             </div>

@@ -15,35 +15,90 @@
     }
 
     .glass-3d-card {
-        border-radius: 20px;
-        background: linear-gradient(40deg, #FF0080, #FF8C00 70%);
-        box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 2px 0 rgba(255,255,255,0.2);
-        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        --white: #ffe7ff;
+        --bg: #080808;
+        --radius: 20px;
+        outline: none;
+        cursor: pointer;
+        border: 0;
+        position: relative;
+        border-radius: var(--radius);
+        background-color: var(--bg);
+        transition: all 0.2s ease;
+        box-shadow:
+            inset 0 0.3rem 0.9rem rgba(255, 255, 255, 0.3),
+            inset 0 -0.1rem 0.3rem rgba(0, 0, 0, 0.7),
+            inset 0 -0.4rem 0.9rem rgba(255, 255, 255, 0.5),
+            0 3rem 3rem rgba(0, 0, 0, 0.3),
+            0 1rem 1rem -0.6rem rgba(0, 0, 0, 0.8);
+    }
+    .glass-3d-content {
+        color: rgba(255, 255, 255, 0.7);
+        padding: 16px;
+        border-radius: inherit;
         position: relative;
         overflow: hidden;
     }
-    .glass-3d-card::before {
-        content: '';
+    .glass-3d-content::before,
+    .glass-3d-content::after {
+        content: "";
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
-        border-radius: 20px;
+        transition: all 0.3s ease;
     }
-    .glass-3d-content {
-        position: relative;
-        z-index: 2;
-        padding: 12px;
+    .glass-3d-content::before {
+        left: -15%;
+        right: -15%;
+        bottom: 25%;
+        top: -100%;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.12);
+    }
+    .glass-3d-content::after {
+        left: 6%;
+        right: 6%;
+        top: 12%;
+        bottom: 40%;
+        border-radius: 22px 22px 0 0;
+        box-shadow: inset 0 10px 8px -10px rgba(255, 255, 255, 0.8);
+        background: linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.3) 0%,
+            rgba(0, 0, 0, 0) 50%,
+            rgba(0, 0, 0, 0) 100%
+        );
     }
     .glass-3d-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 40px rgba(0,0,0,0.4), inset 0 2px 0 rgba(255,255,255,0.3);
+        box-shadow:
+            inset 0 0.3rem 0.5rem rgba(255, 255, 255, 0.4),
+            inset 0 -0.1rem 0.3rem rgba(0, 0, 0, 0.7),
+            inset 0 -0.4rem 0.9rem rgba(255, 255, 255, 0.7),
+            0 3rem 3rem rgba(0, 0, 0, 0.3),
+            0 1rem 1rem -0.6rem rgba(0, 0, 0, 0.8);
+    }
+    .glass-3d-card:hover .glass-3d-content::before {
+        transform: translateY(-5%);
+    }
+    .glass-3d-card:hover .glass-3d-content::after {
+        opacity: 0.4;
+        transform: translateY(5%);
+    }
+    .glass-3d-card:active {
+        transform: translateY(4px);
+        box-shadow:
+            inset 0 0.3rem 0.5rem rgba(255, 255, 255, 0.5),
+            inset 0 -0.1rem 0.3rem rgba(0, 0, 0, 0.8),
+            inset 0 -0.4rem 0.9rem rgba(255, 255, 255, 0.4),
+            0 3rem 3rem rgba(0, 0, 0, 0.3),
+            0 1rem 1rem -0.6rem rgba(0, 0, 0, 0.8);
     }
     .active-filter-card {
-        background: linear-gradient(40deg, #8983F7, #A3DAFB 70%) !important;
-        box-shadow: 0 12px 40px rgba(137, 131, 247, 0.4), inset 0 2px 0 rgba(255,255,255,0.3) !important;
+        background-color: #333 !important;
+        box-shadow:
+            inset 0 0.3rem 0.5rem rgba(255, 255, 255, 0.5),
+            inset 0 -0.1rem 0.3rem rgba(0, 0, 0, 0.8),
+            inset 0 -0.4rem 0.9rem rgba(255, 255, 255, 0.4),
+            0 3rem 3rem rgba(0, 0, 0, 0.3),
+            0 1rem 1rem -0.6rem rgba(0, 0, 0, 0.8) !important;
     }
 </style>
 @endpush
@@ -55,7 +110,7 @@
         {{-- Top Section: Title and New Booking Button --}}
         <div class="flex items-center justify-between mb-6">
             <div class="flex items-center space-x-3">
-                <button @click="sidebarOpen = !sidebarOpen" class="w-10 h-10 rounded-full soft-glass-card flex items-center justify-center hover:bg-opacity-60 transition-all lg:hidden">
+                <button @click="window.dispatchEvent(new CustomEvent('toggle-sidebar'))" class="w-10 h-10 rounded-full soft-glass-card flex items-center justify-center hover:bg-opacity-60 transition-all lg:hidden">
                     <i class="fas fa-bars text-pink-500"></i>
                 </button>
                 <div class="w-10 h-10 rounded-full soft-glass-card flex items-center justify-center">
@@ -66,10 +121,10 @@
                     <p class="text-sm text-slate-700">Manage your reservations</p>
                 </div>
             </div>
-            <button @click="openBookingModal()" class="soft-glass-card rounded-xl px-4 py-2 hover:bg-opacity-60 transition-all flex items-center">
+            <a href="{{ route('bookings.create') }}" class="soft-glass-card rounded-xl px-4 py-2 hover:bg-opacity-60 transition-all flex items-center">
                 <i class="fas fa-plus text-pink-500 mr-2"></i>
                 <span class="font-medium text-slate-800">New</span>
-            </button>
+            </a>
         </div>
 
         {{-- Flash Messages --}}

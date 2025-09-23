@@ -27,11 +27,11 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('phone')->nullable();
-            $table->date('date_of_birth')->nullable();
+
             $table->enum('gender', ['male', 'female', 'other'])->nullable();
             $table->text('address')->nullable();
-            $table->string('id_type')->nullable(); // passport, license, etc.
-            $table->string('id_number')->nullable();
+            $table->string('id_type')->default('aadhar'); // passport, license, etc.
+            $table->string('id_number');
             $table->timestamps();
         });
 

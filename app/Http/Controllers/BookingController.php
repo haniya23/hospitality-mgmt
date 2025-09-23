@@ -70,17 +70,12 @@ class BookingController extends Controller
                 'created_by' => auth()->id()
             ]);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Booking created successfully!',
-                'booking_id' => $booking->id
-            ]);
+            return redirect()->route('bookings.index')
+                ->with('success', 'Booking created successfully!');
 
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error: ' . $e->getMessage()
-            ], 500);
+            return back()->withErrors(['error' => 'Error: ' . $e->getMessage()])
+                ->withInput();
         }
     }
 
@@ -172,5 +167,79 @@ class BookingController extends Controller
         $partners = \App\Models\B2bPartner::where('status', 'active')
             ->get(['id', 'partner_name']);
         return response()->json($partners);
+    }
+
+    public function create()
+    {
+        $properties = Property::where('owner_id', auth()->id())->get(['id', 'name']);
+        return view('bookings.create', compact('properties'));
+    }
+
+    public function edit($id)
+    {
+        $booking = Reservation::with(['guest', 'accommodation.property'])->findOrFail($id);
+        
+        if ($booking->accommodation->property->owner_id !== auth()->id()) {
+            abort(403, 'Unauthorized');
+        }
+        
+        $properties = Property::where('owner_id', auth()->id())->get(['id', 'name']);
+        $accommodations = PropertyAccommodation::where('property_id', $booking->accommodation->property_id)
+            ->get(['id', 'display_name', 'base_price']);
+        
+        return view('bookings.edit', compact('booking', 'properties', 'accommodations'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $booking = Reservation::with(['guest', 'accommodation.property'])->findOrFail($id);
+        
+        if ($booking->accommodation->property->owner_id !== auth()->id()) {
+            abort(403, 'Unauthorized');
+        }
+        
+        $request->validate([
+            'property_id' => 'required|exists:properties,id',
+            'accommodation_id' => 'required|exists:property_accommodations,id',
+            'check_in_date' => 'required|date',
+            'check_out_date' => 'required|date|after:check_in_date',
+            'adults' => 'required|integer|min:1',
+            'children' => 'required|integer|min:0',
+            'guest_name' => 'required|string',
+            'guest_mobile' => 'required|string',
+            'total_amount' => 'required|numeric|min:0',
+            'advance_paid' => 'required|numeric|min:0',
+            'status' => 'required|in:pending,confirmed,checked_in,checked_out,cancelled'
+        ]);
+
+        try {
+            $guest = Guest::firstOrCreate(
+                ['mobile_number' => $request->guest_mobile],
+                [
+                    'name' => $request->guest_name,
+                    'email' => $request->guest_email
+                ]
+            );
+
+            $booking->update([
+                'guest_id' => $guest->id,
+                'property_accommodation_id' => $request->accommodation_id,
+                'check_in_date' => $request->check_in_date,
+                'check_out_date' => $request->check_out_date,
+                'adults' => $request->adults,
+                'children' => $request->children,
+                'total_amount' => $request->total_amount,
+                'advance_paid' => $request->advance_paid,
+                'balance_pending' => $request->total_amount - $request->advance_paid,
+                'status' => $request->status
+            ]);
+
+            return redirect()->route('bookings.index')
+                ->with('success', 'Booking updated successfully!');
+
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Error: ' . $e->getMessage()])
+                ->withInput();
+        }
     }
 }

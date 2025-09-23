@@ -80,10 +80,10 @@
                 </template>
                 <template x-if="booking.status !== 'pending'">
                     <div class="flex space-x-2 w-full">
-                        <button class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-xl font-medium text-sm hover:bg-blue-600 transition">
+                        <a :href="'/bookings/' + booking.id + '/edit'" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-xl font-medium text-sm hover:bg-blue-600 transition text-center">
                             <i class="fas fa-edit mr-1"></i>
                             Edit
-                        </button>
+                        </a>
                         <button @click="openCancelModal(booking.id)" 
                                 class="bg-red-100 text-red-600 py-2 px-4 rounded-xl font-medium text-sm hover:bg-red-200 transition">
                             <i class="fas fa-times"></i>
@@ -101,9 +101,9 @@
             </div>
             <h3 class="text-lg font-semibold text-gray-800 mb-2">No Bookings Found</h3>
             <p class="text-gray-500 text-sm mb-4">Start by creating your first booking.</p>
-            <button @click="openBookingModal()" class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-xl font-medium">
+            <a href="{{ route('bookings.create') }}" class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-xl font-medium inline-block">
                 <i class="fas fa-plus mr-2"></i>Create Booking
-            </button>
+            </a>
         </div>
     </template>
 </div>

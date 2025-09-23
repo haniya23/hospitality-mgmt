@@ -31,6 +31,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/bookings', function () {
         return view('bookings.index');
     })->name('bookings.index');
+    Route::get('/bookings/create', [App\Http\Controllers\BookingController::class, 'create'])->name('bookings.create');
+    Route::post('/bookings', [App\Http\Controllers\BookingController::class, 'store'])->name('bookings.store');
+    Route::get('/bookings/{booking}/edit', [App\Http\Controllers\BookingController::class, 'edit'])->name('bookings.edit');
+    Route::put('/bookings/{booking}', [App\Http\Controllers\BookingController::class, 'update'])->name('bookings.update');
     
     // API Routes for Alpine.js
     Route::prefix('api')->group(function () {
@@ -39,15 +43,17 @@ Route::middleware('auth')->group(function () {
         Route::get('/guests', [App\Http\Controllers\BookingController::class, 'getGuests']);
         Route::get('/partners', [App\Http\Controllers\BookingController::class, 'getPartners']);
         Route::get('/bookings', [App\Http\Controllers\BookingController::class, 'index']);
-        Route::post('/bookings', [App\Http\Controllers\BookingController::class, 'store']);
+
         Route::patch('/bookings/{booking}/toggle-status', [App\Http\Controllers\BookingController::class, 'toggleStatus']);
         Route::patch('/bookings/{booking}/cancel', [App\Http\Controllers\BookingController::class, 'cancel']);
     });
     
     // Customer Management Routes
-    Route::get('/customers', function () {
-        return view('customers.index');
-    })->name('customers.index');
+    Route::get('/customers', [App\Http\Controllers\CustomerController::class, 'index'])->name('customers.index');
+    Route::get('/customers/create', [App\Http\Controllers\CustomerController::class, 'create'])->name('customers.create');
+    Route::post('/customers', [App\Http\Controllers\CustomerController::class, 'store'])->name('customers.store');
+    Route::get('/customers/{customer}/edit', [App\Http\Controllers\CustomerController::class, 'edit'])->name('customers.edit');
+    Route::put('/customers/{customer}', [App\Http\Controllers\CustomerController::class, 'update'])->name('customers.update');
     
     // B2B Management Routes
     Route::get('/b2b', function () {

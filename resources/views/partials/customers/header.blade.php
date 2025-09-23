@@ -44,7 +44,7 @@
     <div class="relative px-4 py-6">
         <div class="flex items-center justify-between mb-6">
             <div class="flex items-center space-x-3">
-                <button @click="$dispatch('toggle-sidebar')" class="w-10 h-10 rounded-full soft-glass-card flex items-center justify-center hover:bg-opacity-60 transition-all lg:hidden">
+                <button @click="window.dispatchEvent(new CustomEvent('toggle-sidebar'))" class="w-10 h-10 rounded-full soft-glass-card flex items-center justify-center hover:bg-opacity-60 transition-all lg:hidden">
                     <i class="fas fa-bars text-pink-500"></i>
                 </button>
                 <div class="w-10 h-10 rounded-full soft-glass-card flex items-center justify-center">
@@ -55,29 +55,29 @@
                     <p class="text-sm text-slate-700">Manage your customers</p>
                 </div>
             </div>
-            <button @click="showAddModal = true" class="soft-glass-card rounded-xl px-4 py-2 hover:bg-opacity-60 transition-all flex items-center">
+            <a href="{{ route('customers.create') }}" class="soft-glass-card rounded-xl px-4 py-2 hover:bg-opacity-60 transition-all flex items-center">
                 <i class="fas fa-plus text-pink-500 mr-2"></i>
                 <span class="font-medium text-slate-800">Add</span>
-            </button>
+            </a>
         </div>
 
         <div class="grid grid-cols-3 gap-4">
             <div class="glass-3d-card">
                 <div class="glass-3d-content text-center">
-                    <div class="text-2xl font-bold text-white" x-text="filteredCustomers.filter(c => c.status === 'active').length"></div>
-                    <div class="text-xs text-white opacity-80 uppercase tracking-wider">Active</div>
+                    <div class="text-2xl font-bold text-white" x-text="filteredCustomers.length"></div>
+                    <div class="text-xs text-white opacity-80 uppercase tracking-wider">Total</div>
                 </div>
             </div>
             <div class="glass-3d-card">
                 <div class="glass-3d-content text-center">
-                    <div class="text-2xl font-bold text-white" x-text="filteredCustomers.reduce((sum, c) => sum + c.totalBookings, 0)"></div>
+                    <div class="text-2xl font-bold text-white" x-text="filteredCustomers.reduce((sum, c) => sum + (c.reservations_count || 0), 0)"></div>
                     <div class="text-xs text-white opacity-80 uppercase tracking-wider">Total Bookings</div>
                 </div>
             </div>
             <div class="glass-3d-card">
                 <div class="glass-3d-content text-center">
-                    <div class="text-2xl font-bold text-white" x-text="filteredCustomers.length"></div>
-                    <div class="text-xs text-white opacity-80 uppercase tracking-wider">Total Customers</div>
+                    <div class="text-2xl font-bold text-white" x-text="filteredCustomers.reduce((sum, c) => sum + (c.loyalty_points || 0), 0)"></div>
+                    <div class="text-xs text-white opacity-80 uppercase tracking-wider">Loyalty Points</div>
                 </div>
             </div>
         </div>
