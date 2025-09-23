@@ -29,15 +29,44 @@
             <li><a href="{{ route('b2b.dashboard') }}" class="flex gap-4 p-4 font-semibold rounded-full hover:bg-purple-100 {{ request()->routeIs('b2b.*') ? 'bg-gradient-to-r from-purple-400 to-purple-600 text-white' : 'text-gray-700' }} transition-all">
                 <i class="fas fa-handshake w-6"></i>B2B Partners
             </a></li>
-            <li><a href="{{ route('resources.index') }}" class="flex gap-4 p-4 font-semibold rounded-full hover:bg-purple-100 {{ request()->routeIs('resources.*') ? 'bg-gradient-to-r from-purple-400 to-purple-600 text-white' : 'text-gray-700' }} transition-all">
-                <i class="fas fa-boxes w-6"></i>Resources
-            </a></li>
+
             <li><a href="{{ route('pricing.index') }}" class="flex gap-4 p-4 font-semibold rounded-full hover:bg-purple-100 {{ request()->routeIs('pricing.*') ? 'bg-gradient-to-r from-purple-400 to-purple-600 text-white' : 'text-gray-700' }} transition-all">
                 <i class="fas fa-dollar-sign w-6"></i>Pricing
             </a></li>
             <li><a href="{{ route('reports.analytics') }}" class="flex gap-4 p-4 font-semibold rounded-full hover:bg-purple-100 {{ request()->routeIs('reports.*') ? 'bg-gradient-to-r from-purple-400 to-purple-600 text-white' : 'text-gray-700' }} transition-all">
                 <i class="fas fa-chart-bar w-6"></i>Reports
             </a></li>
+            <li><a href="{{ route('subscription.plans') }}" class="flex gap-4 p-4 font-semibold rounded-full hover:bg-purple-100 {{ request()->routeIs('subscription.*') ? 'bg-gradient-to-r from-purple-400 to-purple-600 text-white' : 'text-gray-700' }} transition-all">
+                <i class="fas fa-crown w-6"></i>Subscription
+            </a></li>
+        </ul>
+        
+        <!-- Plan Details -->
+        <div class="mt-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium text-gray-600">Current Plan</span>
+                @if(auth()->user()->isOnTrial())
+                    <span class="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">Trial</span>
+                @else
+                    <span class="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">Active</span>
+                @endif
+            </div>
+            <div class="text-lg font-bold text-gray-900 mb-1">{{ auth()->user()->getPlanName() }}</div>
+            <div class="text-sm text-gray-600 mb-3">
+                @if(auth()->user()->isOnTrial())
+                    {{ auth()->user()->remaining_trial_days }} days left
+                @else
+                    {{ auth()->user()->properties_limit }} {{ Str::plural('property', auth()->user()->properties_limit) }}
+                @endif
+            </div>
+            @if(auth()->user()->isOnTrial() || auth()->user()->subscription_status === 'starter')
+                <a href="{{ route('subscription.plans') }}" class="block w-full text-center bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-medium py-2 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all">
+                    Upgrade Now
+                </a>
+            @endif
+        </div>
+        
+        <ul class="w-full flex flex-col gap-2 mt-4">
             <li class="mt-auto">
                 <form method="POST" action="{{ route('logout') }}" class="w-full">
                     @csrf
@@ -79,15 +108,44 @@
             <li><a href="{{ route('b2b.dashboard') }}" @click="sidebarOpen = false" class="flex gap-4 p-4 font-semibold rounded-full hover:bg-purple-100 {{ request()->routeIs('b2b.*') ? 'bg-gradient-to-r from-purple-400 to-purple-600 text-white' : 'text-gray-700' }} transition-all">
                 <i class="fas fa-handshake w-6"></i>B2B Partners
             </a></li>
-            <li><a href="{{ route('resources.index') }}" @click="sidebarOpen = false" class="flex gap-4 p-4 font-semibold rounded-full hover:bg-purple-100 {{ request()->routeIs('resources.*') ? 'bg-gradient-to-r from-purple-400 to-purple-600 text-white' : 'text-gray-700' }} transition-all">
-                <i class="fas fa-boxes w-6"></i>Resources
-            </a></li>
+
             <li><a href="{{ route('pricing.index') }}" @click="sidebarOpen = false" class="flex gap-4 p-4 font-semibold rounded-full hover:bg-purple-100 {{ request()->routeIs('pricing.*') ? 'bg-gradient-to-r from-purple-400 to-purple-600 text-white' : 'text-gray-700' }} transition-all">
                 <i class="fas fa-dollar-sign w-6"></i>Pricing
             </a></li>
             <li><a href="{{ route('reports.analytics') }}" @click="sidebarOpen = false" class="flex gap-4 p-4 font-semibold rounded-full hover:bg-purple-100 {{ request()->routeIs('reports.*') ? 'bg-gradient-to-r from-purple-400 to-purple-600 text-white' : 'text-gray-700' }} transition-all">
                 <i class="fas fa-chart-bar w-6"></i>Reports
             </a></li>
+            <li><a href="{{ route('subscription.plans') }}" @click="sidebarOpen = false" class="flex gap-4 p-4 font-semibold rounded-full hover:bg-purple-100 {{ request()->routeIs('subscription.*') ? 'bg-gradient-to-r from-purple-400 to-purple-600 text-white' : 'text-gray-700' }} transition-all">
+                <i class="fas fa-crown w-6"></i>Subscription
+            </a></li>
+        </ul>
+        
+        <!-- Plan Details -->
+        <div class="mt-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium text-gray-600">Current Plan</span>
+                @if(auth()->user()->isOnTrial())
+                    <span class="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">Trial</span>
+                @else
+                    <span class="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">Active</span>
+                @endif
+            </div>
+            <div class="text-lg font-bold text-gray-900 mb-1">{{ auth()->user()->getPlanName() }}</div>
+            <div class="text-sm text-gray-600 mb-3">
+                @if(auth()->user()->isOnTrial())
+                    {{ auth()->user()->remaining_trial_days }} days left
+                @else
+                    {{ auth()->user()->properties_limit }} {{ Str::plural('property', auth()->user()->properties_limit) }}
+                @endif
+            </div>
+            @if(auth()->user()->isOnTrial() || auth()->user()->subscription_status === 'starter')
+                <a href="{{ route('subscription.plans') }}" @click="sidebarOpen = false" class="block w-full text-center bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-medium py-2 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all">
+                    Upgrade Now
+                </a>
+            @endif
+        </div>
+        
+        <ul class="w-full flex flex-col gap-2 mt-4">
             <li>
                 <form method="POST" action="{{ route('logout') }}" class="w-full">
                     @csrf

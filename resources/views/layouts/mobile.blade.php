@@ -202,15 +202,7 @@
                         B2B Partners
                     </a>
                 </li>
-                <li>
-                    <a href="{{ route('resources.index') }}" @click="sidebarOpen = false"
-                       class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/25 hover:backdrop-blur-md text-primary transition-all duration-300 {{ request()->routeIs('resources.*') ? 'bg-white/30 backdrop-blur-md border border-white/40 shadow-lg' : '' }}">
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-                        </svg>
-                        Resources
-                    </a>
-                </li>
+
                 <li>
                     <a href="{{ route('pricing.index') }}" @click="sidebarOpen = false"
                        class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/25 hover:backdrop-blur-md text-primary transition-all duration-300 {{ request()->routeIs('pricing.*') ? 'bg-white/30 backdrop-blur-md border border-white/40 shadow-lg' : '' }}">
@@ -322,13 +314,7 @@
                             </svg>
                             Customers
                         </a>
-                        <a href="{{ route('resources.index') }}" @click="open = false" 
-                           class="flex items-center px-4 py-2 body-text hover:bg-white/25 hover:backdrop-blur-md transition-all duration-300">
-                            <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-                            </svg>
-                            Resources
-                        </a>
+
                         <a href="{{ route('pricing.index') }}" @click="open = false" 
                            class="flex items-center px-4 py-2 body-text hover:bg-white/25 hover:backdrop-blur-md transition-all duration-300">
                             <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

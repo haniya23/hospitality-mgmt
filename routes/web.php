@@ -58,12 +58,9 @@ Route::middleware('auth')->group(function () {
     // B2B Management Routes
     Route::get('/b2b', function () {
         return view('b2b.index');
-    })->name('b2b.dashboard');
+    })->name('b2b.dashboard')->middleware('subscription:b2b');
     
-    // Resources Management Routes
-    Route::get('/resources', function () {
-        return view('resources.index');
-    })->name('resources.index');
+
     
     // Pricing Management Routes
     Route::get('/pricing', function () {
@@ -76,10 +73,19 @@ Route::middleware('auth')->group(function () {
     // Reports & Analytics Routes
     Route::get('/reports', function () {
         return view('reports.analytics');
-    })->name('reports.analytics');
+    })->name('reports.analytics')->middleware('subscription:advanced_reports');
+    
+    // Subscription Routes
+    Route::get('/subscription/plans', [App\Http\Controllers\SubscriptionController::class, 'plans'])->name('subscription.plans');
+    Route::post('/subscription/subscribe', [App\Http\Controllers\SubscriptionController::class, 'subscribe'])->name('subscription.subscribe');
+    Route::get('/welcome-trial', function () {
+        return view('welcome-trial');
+    })->name('welcome.trial');
     
     // Admin Routes
     Route::get('/admin', [App\Http\Controllers\AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::patch('/admin/properties/{property}/approve', [App\Http\Controllers\AdminController::class, 'approveProperty'])->name('admin.properties.approve');
     Route::patch('/admin/properties/{property}/reject', [App\Http\Controllers\AdminController::class, 'rejectProperty'])->name('admin.properties.reject');
+    Route::get('/admin/subscriptions', [App\Http\Controllers\AdminController::class, 'subscriptions'])->name('admin.subscriptions');
+    Route::patch('/admin/subscriptions/{request}/approve', [App\Http\Controllers\AdminController::class, 'approveSubscription'])->name('admin.subscriptions.approve');
 });

@@ -7,7 +7,7 @@
 @endsection
 
 @section('content')
-<div x-data="customerData()" x-init="loadCustomers()" class="space-y-6">
+<div x-data="customerData()" x-init="init()" class="space-y-6">
     @include('partials.customers.search')
     @include('partials.customers.list')
 </div>
@@ -19,11 +19,9 @@ function customerData() {
     return {
         searchTerm: '',
         statusFilter: '',
+        message: '',
+        messageType: 'success',
         customers: @json($customers ?? []),
-        
-        async loadCustomers() {
-            // Customers are already loaded from server
-        },
 
         get filteredCustomers() {
             return this.customers.filter(customer => {
@@ -32,6 +30,18 @@ function customerData() {
                                     (customer.mobile_number && customer.mobile_number.includes(this.searchTerm));
                 return matchesSearch;
             });
+        },
+
+        async init() {
+            // Customers are already loaded from server
+        },
+
+        showMessage(msg, type = 'success') {
+            this.message = msg;
+            this.messageType = type;
+            setTimeout(() => {
+                this.message = '';
+            }, 5000);
         }
     }
 }

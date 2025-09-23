@@ -16,6 +16,12 @@ class PropertyController extends Controller
 
     public function store(Request $request)
     {
+        // Check if user can create more properties
+        if (!auth()->user()->canCreateProperty()) {
+            return back()->withErrors(['error' => 'You have reached your property limit. Please upgrade your plan.'])
+                ->withInput();
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'property_category_id' => 'required|exists:property_categories,id',
@@ -27,11 +33,11 @@ class PropertyController extends Controller
             'name' => $request->name,
             'property_category_id' => $request->property_category_id,
             'description' => $request->description,
-            'status' => 'pending',
+            'status' => 'active', // Auto-approve for trial users
             'wizard_step_completed' => 1,
         ]);
 
-        return redirect()->route('dashboard')->with('success', 'Property created and pending approval!');
+        return redirect()->route('dashboard')->with('success', 'Property created successfully!');
     }
 
     public function index()
