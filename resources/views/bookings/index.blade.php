@@ -127,7 +127,6 @@ function bookingData() {
 
         async loadBookings() {
             try {
-                showGlobalLoader('Loading bookings...');
                 const response = await fetch('/api/bookings');
                 const data = await response.json();
                 this.bookings = [...data.pending, ...data.active];
@@ -158,7 +157,6 @@ function bookingData() {
 
         async toggleBookingStatus(bookingId) {
             try {
-                showGlobalLoader('Updating booking status...');
                 const response = await fetch(`/api/bookings/${bookingId}/toggle-status`, {
                     method: 'PATCH',
                     headers: {
@@ -197,7 +195,6 @@ function bookingData() {
             }
 
             try {
-                showGlobalLoader('Cancelling booking...');
                 const response = await fetch(`/api/bookings/${this.cancelBookingId}/cancel`, {
                     method: 'PATCH',
                     headers: {
@@ -240,6 +237,23 @@ function bookingData() {
             const start = new Date(checkIn).toLocaleDateString('en-GB', options);
             const end = new Date(checkOut).toLocaleDateString('en-GB', options);
             return `${start} - ${end}`;
+        },
+
+        // Navigation functions for clickable stats
+        navigateToAllBookings() {
+            window.location.href = '/bookings';
+        },
+
+        navigateToPendingBookings() {
+            window.location.href = '/bookings?status=pending';
+        },
+
+        navigateToConfirmedBookings() {
+            window.location.href = '/bookings?status=confirmed';
+        },
+
+        navigateToCancelledBookings() {
+            window.location.href = '/bookings-cancelled';
         }
     }
 }

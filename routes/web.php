@@ -36,6 +36,15 @@ Route::middleware('auth')->group(function () {
     Route::post('/properties/{property}/accommodations/{accommodation}/update', [App\Http\Controllers\PropertyController::class, 'updateAccommodation'])->name('properties.accommodations.update');
     Route::delete('/properties/{property}/accommodations/{accommodation}/delete', [App\Http\Controllers\PropertyController::class, 'deleteAccommodation'])->name('properties.accommodations.delete');
     
+    // Dedicated Accommodation Routes
+    Route::get('/accommodations', [App\Http\Controllers\AccommodationController::class, 'index'])->name('accommodations.index');
+    Route::get('/accommodations/create', [App\Http\Controllers\AccommodationController::class, 'create'])->name('accommodations.create');
+    Route::post('/accommodations', [App\Http\Controllers\AccommodationController::class, 'store'])->name('accommodations.store');
+    Route::get('/accommodations/{accommodation}', [App\Http\Controllers\AccommodationController::class, 'show'])->name('accommodations.show');
+    Route::get('/accommodations/{accommodation}/edit', [App\Http\Controllers\AccommodationController::class, 'edit'])->name('accommodations.edit');
+    Route::put('/accommodations/{accommodation}', [App\Http\Controllers\AccommodationController::class, 'update'])->name('accommodations.update');
+    Route::delete('/accommodations/{accommodation}', [App\Http\Controllers\AccommodationController::class, 'destroy'])->name('accommodations.destroy');
+    
     // Photo Routes
     Route::post('/properties/{property}/photos', [App\Http\Controllers\PropertyController::class, 'storePhotos'])->name('properties.photos.store');
     Route::delete('/properties/{property}/photos/{photo}', [App\Http\Controllers\PropertyController::class, 'deletePhoto'])->name('properties.photos.delete');
@@ -48,6 +57,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/bookings', [App\Http\Controllers\BookingController::class, 'store'])->name('bookings.store');
     Route::get('/bookings/{booking}/edit', [App\Http\Controllers\BookingController::class, 'edit'])->name('bookings.edit');
     Route::put('/bookings/{booking}', [App\Http\Controllers\BookingController::class, 'update'])->name('bookings.update');
+    Route::get('/bookings-cancelled', [App\Http\Controllers\BookingController::class, 'cancelled'])->name('bookings.cancelled');
     
     // API Routes for Alpine.js
     Route::prefix('api')->group(function () {

@@ -54,6 +54,23 @@ function propertyStats() {
 
         init() {
             console.log('Property stats initialized');
+        },
+
+        // Navigation functions for clickable stats
+        navigateToAllProperties() {
+            window.location.href = '/properties';
+        },
+
+        navigateToActiveProperties() {
+            window.location.href = '/properties?status=active';
+        },
+
+        navigateToAccommodations() {
+            window.location.href = '/accommodations';
+        },
+
+        navigateToBookings() {
+            window.location.href = '/bookings';
         }
     }
 }

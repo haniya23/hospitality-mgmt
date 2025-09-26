@@ -67,6 +67,36 @@ function dashboardData() {
 
         formatNumber(num) {
             return new Intl.NumberFormat('en-IN').format(num);
+        },
+
+        // Navigation functions for clickable stats
+        navigateToRevenue(period) {
+            if (period === 'today') {
+                window.location.href = '/bookings?filter=today';
+            } else if (period === 'month') {
+                window.location.href = '/bookings?filter=month';
+            }
+        },
+
+        navigateToGuests() {
+            window.location.href = '/customers';
+        },
+
+        navigateToReviews() {
+            // For now, redirect to properties page since we don't have a reviews page
+            window.location.href = '/properties';
+        },
+
+        navigateToCheckIns() {
+            window.location.href = '/bookings?status=confirmed&filter=today';
+        },
+
+        navigateToCheckOuts() {
+            window.location.href = '/bookings?status=confirmed&filter=today';
+        },
+
+        navigateToNewBookings() {
+            window.location.href = '/bookings?filter=today';
         }
     }
 }

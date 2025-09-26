@@ -25,8 +25,14 @@
             <li><a href="{{ route('properties.index') }}" class="flex gap-4 p-4 font-semibold rounded-full hover:bg-purple-100 {{ request()->routeIs('properties.*') ? 'bg-gradient-to-r from-purple-400 to-purple-600 text-white' : 'text-gray-700' }} transition-all">
                 <i class="fas fa-building w-6"></i>Properties
             </a></li>
+            <li><a href="{{ route('accommodations.index') }}" class="flex gap-4 p-4 font-semibold rounded-full hover:bg-purple-100 {{ request()->routeIs('accommodations.*') ? 'bg-gradient-to-r from-purple-400 to-purple-600 text-white' : 'text-gray-700' }} transition-all">
+                <i class="fas fa-bed w-6"></i>Accommodations
+            </a></li>
             <li><a href="{{ route('bookings.index') }}" class="flex gap-4 p-4 font-semibold rounded-full hover:bg-purple-100 {{ request()->routeIs('bookings.*') ? 'bg-gradient-to-r from-purple-400 to-purple-600 text-white' : 'text-gray-700' }} transition-all">
                 <i class="fas fa-calendar w-6"></i>Bookings
+            </a></li>
+            <li><a href="{{ route('bookings.cancelled') }}" class="flex gap-4 p-4 font-semibold rounded-full hover:bg-purple-100 {{ request()->routeIs('bookings.cancelled') ? 'bg-gradient-to-r from-purple-400 to-purple-600 text-white' : 'text-gray-700' }} transition-all">
+                <i class="fas fa-times-circle w-6"></i>Cancelled Bookings
             </a></li>
             <li><a href="{{ route('customers.index') }}" class="flex gap-4 p-4 font-semibold rounded-full hover:bg-purple-100 {{ request()->routeIs('customers.*') ? 'bg-gradient-to-r from-purple-400 to-purple-600 text-white' : 'text-gray-700' }} transition-all">
                 <i class="fas fa-users w-6"></i>Customers

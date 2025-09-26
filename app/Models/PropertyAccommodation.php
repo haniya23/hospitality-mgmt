@@ -15,6 +15,7 @@ class PropertyAccommodation extends Model
         'description',
         'features',
         'is_active',
+        'uuid',
     ];
 
     protected $casts = [
@@ -38,11 +39,43 @@ class PropertyAccommodation extends Model
         return $this->hasMany(Reservation::class, 'property_accommodation_id');
     }
 
+    public function amenities()
+    {
+        return $this->belongsToMany(Amenity::class, 'accommodation_amenities', 'accommodation_id', 'amenity_id');
+    }
+
+    public function photos()
+    {
+        return $this->hasMany(PropertyPhoto::class, 'accommodation_id');
+    }
+
     public function getDisplayNameAttribute()
     {
         if ($this->predefinedType && $this->predefinedType->name === 'Custom') {
             return $this->custom_name ?: 'Custom Accommodation';
         }
         return $this->custom_name ?: $this->predefinedType->name;
+    }
+
+    /**
+     * Get the route key for the model.
+     */
+    public function getRouteKeyName()
+    {
+        return 'uuid';
+    }
+
+    /**
+     * Boot the model.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (empty($model->uuid)) {
+                $model->uuid = \Illuminate\Support\Str::uuid();
+            }
+        });
     }
 }

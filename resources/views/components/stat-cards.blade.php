@@ -86,8 +86,10 @@
             <!-- Action Button -->
             @if($card['clickable'] ?? false)
             <button class="text-xs sm:text-sm text-blue-600 group-hover:text-blue-700 transition-colors duration-300 flex items-center gap-1 font-medium">
-                <span>{{ $card['buttonText'] ?? 'View Details' }}</span>
+                @if(isset($card['buttonText']))
+                <span>{{ $card['buttonText'] }}</span>
                 <i class="fas fa-arrow-right text-xs"></i>
+                @endif
             </button>
             @endif
             

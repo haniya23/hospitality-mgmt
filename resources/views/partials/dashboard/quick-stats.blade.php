@@ -6,7 +6,8 @@
 @endpush
 
 <div class="grid grid-cols-2 gap-4">
-    <div class="card-gradient-3 rounded-2xl p-4 shadow-lg">
+    <div class="card-gradient-3 rounded-2xl p-4 shadow-lg cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:scale-105" 
+         @click="navigateToGuests()">
         <div class="w-10 h-10 rounded-xl bg-white bg-opacity-30 flex items-center justify-center mb-3">
             <i class="fas fa-users text-purple-600"></i>
         </div>
@@ -14,7 +15,8 @@
         <div class="text-sm text-gray-600">Total Guests</div>
     </div>
 
-    <div class="card-gradient-4 rounded-2xl p-4 shadow-lg">
+    <div class="card-gradient-4 rounded-2xl p-4 shadow-lg cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:scale-105" 
+         @click="navigateToReviews()">
         <div class="w-10 h-10 rounded-xl bg-white bg-opacity-30 flex items-center justify-center mb-3">
             <i class="fas fa-star text-yellow-600"></i>
         </div>

@@ -12,28 +12,36 @@
                 'label' => 'Total Properties',
                 'icon' => 'fas fa-building',
                 'bgGradient' => 'from-blue-50 to-indigo-50',
-                'accentColor' => 'bg-blue-500'
+                'accentColor' => 'bg-blue-500',
+                'clickable' => true,
+                'action' => 'navigateToAllProperties()'
             ],
             [
                 'value' => 'stats.active', 
                 'label' => 'Active Properties',
                 'icon' => 'fas fa-check-circle',
                 'bgGradient' => 'from-green-50 to-emerald-50',
-                'accentColor' => 'bg-green-500'
+                'accentColor' => 'bg-green-500',
+                'clickable' => true,
+                'action' => 'navigateToActiveProperties()'
             ],
             [
                 'value' => 'stats.accommodations', 
                 'label' => 'Total Accommodations',
                 'icon' => 'fas fa-bed',
                 'bgGradient' => 'from-purple-50 to-violet-50',
-                'accentColor' => 'bg-purple-500'
+                'accentColor' => 'bg-purple-500',
+                'clickable' => true,
+                'action' => 'navigateToAccommodations()'
             ],
             [
                 'value' => 'stats.bookings', 
                 'label' => 'Total Bookings',
                 'icon' => 'fas fa-calendar-check',
                 'bgGradient' => 'from-orange-50 to-amber-50',
-                'accentColor' => 'bg-orange-500'
+                'accentColor' => 'bg-orange-500',
+                'clickable' => true,
+                'action' => 'navigateToBookings()'
             ]
         ]" />
     </div>

@@ -6,7 +6,8 @@
 @endpush
 
 <div class="grid grid-cols-2 gap-4">
-    <div class="card-gradient rounded-2xl p-4 shadow-lg">
+    <div class="card-gradient rounded-2xl p-4 shadow-lg cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:scale-105" 
+         @click="navigateToRevenue('today')">
         <div class="flex items-center justify-between mb-2">
             <div class="w-10 h-10 rounded-xl bg-white bg-opacity-30 flex items-center justify-center">
                 <i class="fas fa-rupee-sign text-orange-600"></i>
@@ -17,7 +18,8 @@
         <div class="text-sm text-gray-600">Today's Revenue</div>
     </div>
 
-    <div class="card-gradient-2 rounded-2xl p-4 shadow-lg">
+    <div class="card-gradient-2 rounded-2xl p-4 shadow-lg cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:scale-105" 
+         @click="navigateToRevenue('month')">
         <div class="flex items-center justify-between mb-2">
             <div class="w-10 h-10 rounded-xl bg-white bg-opacity-30 flex items-center justify-center">
                 <i class="fas fa-chart-line text-blue-600"></i>

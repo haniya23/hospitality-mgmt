@@ -350,4 +350,25 @@ class BookingController extends Controller
         
         return response()->json($response);
     }
+
+    public function cancelled(Request $request)
+    {
+        $query = CancelledBooking::with(['reservation.guest', 'reservation.accommodation.property', 'reservation.b2bPartner'])
+            ->whereHas('reservation.accommodation.property', function($q) {
+                $q->where('owner_id', auth()->id());
+            });
+
+        if ($request->property_id) {
+            $query->whereHas('reservation.accommodation', function($q) use ($request) {
+                $q->where('property_id', $request->property_id);
+            });
+        }
+
+        $cancelledBookings = $query->latest()->paginate(10);
+
+        $properties = Property::where('owner_id', auth()->id())
+            ->get(['id', 'name']);
+
+        return view('bookings.cancelled', compact('cancelledBookings', 'properties'));
+    }
 }
