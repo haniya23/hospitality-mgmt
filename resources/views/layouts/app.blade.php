@@ -16,6 +16,8 @@
     
     <!-- Custom Select2 Styling -->
     <style>
+        [x-cloak] { display: none !important; }
+        
         .select2-container--default .select2-selection--single {
             height: 42px;
             border: 1px solid #d1d5db;

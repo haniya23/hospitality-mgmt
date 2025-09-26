@@ -189,7 +189,7 @@ class BookingController extends Controller
                 ->map(function($acc) {
                     return [
                         'id' => $acc->id,
-                        'display_name' => $acc->display_name,
+                        'custom_name' => $acc->custom_name,
                         'base_price' => $acc->base_price,
                         'max_occupancy' => $acc->max_occupancy,
                         'predefined_type' => [
@@ -246,9 +246,9 @@ class BookingController extends Controller
         return view('bookings.create', compact('properties'));
     }
 
-    public function edit($id)
+    public function edit(Reservation $booking)
     {
-        $booking = Reservation::with(['guest', 'accommodation.property'])->findOrFail($id);
+        $booking->load(['guest', 'accommodation.property', 'b2bPartner']);
         
         if ($booking->accommodation->property->owner_id !== auth()->id()) {
             abort(403, 'Unauthorized');
@@ -256,14 +256,14 @@ class BookingController extends Controller
         
         $properties = Property::where('owner_id', auth()->id())->get(['id', 'name']);
         $accommodations = PropertyAccommodation::where('property_id', $booking->accommodation->property_id)
-            ->get(['id', 'display_name', 'base_price']);
+            ->get(['id', 'custom_name', 'base_price']);
         
         return view('bookings.edit', compact('booking', 'properties', 'accommodations'));
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, Reservation $booking)
     {
-        $booking = Reservation::with(['guest', 'accommodation.property'])->findOrFail($id);
+        $booking->load(['guest', 'accommodation.property']);
         
         if ($booking->accommodation->property->owner_id !== auth()->id()) {
             abort(403, 'Unauthorized');

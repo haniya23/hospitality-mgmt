@@ -6,9 +6,9 @@
     add-text="New Booking">
     
     <x-stat-cards :cards="[
-        ['staticValue' => '0', 'label' => 'All'],
-        ['staticValue' => '0', 'label' => 'Pending'],
-        ['staticValue' => '0', 'label' => 'Confirmed'],
-        ['staticValue' => '0', 'label' => 'Cancelled']
+        ['value' => 'bookingStats.all', 'label' => 'All'],
+        ['value' => 'bookingStats.pending', 'label' => 'Pending'],
+        ['value' => 'bookingStats.confirmed', 'label' => 'Confirmed'],
+        ['value' => 'bookingStats.cancelled', 'label' => 'Cancelled']
     ]" />
 </x-page-header>

@@ -80,7 +80,7 @@
                 </template>
                 <template x-if="booking.status !== 'pending'">
                     <div class="flex space-x-2 w-full">
-                        <a :href="'/bookings/' + booking.id + '/edit'" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-xl font-medium text-sm hover:bg-blue-600 transition text-center">
+                        <a :href="'/bookings/' + booking.uuid + '/edit'" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-xl font-medium text-sm hover:bg-blue-600 transition text-center">
                             <i class="fas fa-edit mr-1"></i>
                             Edit
                         </a>
