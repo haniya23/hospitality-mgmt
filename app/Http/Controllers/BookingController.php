@@ -41,10 +41,12 @@ class BookingController extends Controller
             'check_out_date' => 'required|date|after:check_in_date',
             'adults' => 'required|integer|min:1',
             'children' => 'required|integer|min:0',
+            'booking_type' => 'required|in:per_day,per_person',
             'guest_name' => 'required|string',
             'guest_mobile' => 'required|string',
             'total_amount' => 'required|numeric|min:0',
             'advance_paid' => 'required|numeric|min:0',
+            'special_requests' => 'nullable|string|max:1000',
             'b2b_partner_id' => 'nullable|exists:b2b_partners,id',
             'commission_percentage' => 'nullable|numeric|min:0|max:100',
             'commission_amount' => 'nullable|numeric|min:0'
@@ -66,9 +68,11 @@ class BookingController extends Controller
                 'check_out_date' => $validated['check_out_date'],
                 'adults' => $validated['adults'],
                 'children' => $validated['children'],
+                'booking_type' => $validated['booking_type'],
                 'total_amount' => $validated['total_amount'],
                 'advance_paid' => $validated['advance_paid'],
                 'balance_pending' => $validated['total_amount'] - $validated['advance_paid'],
+                'special_requests' => $validated['special_requests'] ?? null,
                 'status' => 'pending',
                 'created_by' => auth()->id(),
                 'b2b_partner_id' => $validated['b2b_partner_id'] ?? null
@@ -268,5 +272,38 @@ class BookingController extends Controller
             return back()->withErrors(['error' => 'Error: ' . $e->getMessage()])
                 ->withInput();
         }
+    }
+
+    public function getAccommodationCount()
+    {
+        $properties = Property::where('owner_id', auth()->id())
+            ->withCount('propertyAccommodations')
+            ->get();
+        
+        $totalProperties = $properties->count();
+        $totalAccommodations = $properties->sum('property_accommodations_count');
+        
+        $response = [
+            'totalProperties' => $totalProperties,
+            'totalAccommodations' => $totalAccommodations
+        ];
+        
+        // If only one property with one accommodation, provide default values
+        if ($totalProperties === 1 && $totalAccommodations === 1) {
+            $property = $properties->first();
+            $accommodation = $property->propertyAccommodations->first();
+            
+            $response['defaultPropertyId'] = $property->id;
+            $response['defaultAccommodationId'] = $accommodation->id;
+            $response['defaultPrice'] = $accommodation->base_price;
+            $response['defaultAccommodation'] = [
+                'id' => $accommodation->id,
+                'display_name' => $accommodation->display_name,
+                'base_price' => $accommodation->base_price,
+                'property_name' => $property->name
+            ];
+        }
+        
+        return response()->json($response);
     }
 }
