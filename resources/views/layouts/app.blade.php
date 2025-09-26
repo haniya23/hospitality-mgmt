@@ -55,11 +55,45 @@
             background-color: #e5e7eb;
             color: #374151;
         }
+        
+        /* Global Loader Styles */
+        .global-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.3s ease;
+        }
+        
+        .global-loader.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .loader-spinner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .loader-text {
+            color: #6b7280;
+            font-size: 1rem;
+            font-weight: 500;
+        }
     </style>
     
     @stack('styles')
 </head>
-<body class="bg-gray-50" x-data="{ sidebarOpen: false }">
+<body class="bg-gray-50" x-data="{ sidebarOpen: false, globalLoading: false, loadingMessage: 'Loading...' }">
     @include('partials.sidebar')
     
     <div class="lg:ml-72">
@@ -72,6 +106,25 @@
     
     @include('partials.bottom-bar')
     
+    <!-- Global Loader -->
+    <div x-show="globalLoading" 
+         x-transition:enter="ease-out duration-300" 
+         x-transition:enter-start="opacity-0" 
+         x-transition:enter-end="opacity-100" 
+         x-transition:leave="ease-in duration-200" 
+         x-transition:leave-start="opacity-100" 
+         x-transition:leave-end="opacity-0"
+         class="global-loader"
+         x-cloak>
+        <div class="loader-spinner">
+            <!-- From Uiverse.io by devAaus -->
+            <div class="w-20 h-20 border-4 border-transparent text-blue-400 text-4xl animate-spin flex items-center justify-center border-t-blue-400 rounded-full">
+                <div class="w-16 h-16 border-4 border-transparent text-red-400 text-2xl animate-spin flex items-center justify-center border-t-red-400 rounded-full"></div>
+            </div>
+            <p class="loader-text" x-text="loadingMessage"></p>
+        </div>
+    </div>
+    
     <script>
         // Listen for sidebar toggle events
         document.addEventListener('DOMContentLoaded', function() {
@@ -83,6 +136,43 @@
                 }
             });
         });
+        
+        // Global loader functions
+        window.showGlobalLoader = function(message = 'Loading...') {
+            const body = document.body;
+            if (body._x_dataStack && body._x_dataStack[0]) {
+                body._x_dataStack[0].loadingMessage = message;
+                body._x_dataStack[0].globalLoading = true;
+            }
+        };
+        
+        window.hideGlobalLoader = function() {
+            const body = document.body;
+            if (body._x_dataStack && body._x_dataStack[0]) {
+                body._x_dataStack[0].globalLoading = false;
+            }
+        };
+        
+        // Intercept fetch requests to show/hide global loader
+        const originalFetch = window.fetch;
+        window.fetch = function(...args) {
+            // Show loader for non-GET requests or if it's a page load
+            if (args[1] && args[1].method && args[1].method !== 'GET') {
+                showGlobalLoader('Processing...');
+            }
+            
+            return originalFetch.apply(this, args)
+                .then(response => {
+                    // Hide loader when request completes
+                    setTimeout(() => hideGlobalLoader(), 300);
+                    return response;
+                })
+                .catch(error => {
+                    // Hide loader on error
+                    hideGlobalLoader();
+                    throw error;
+                });
+        };
     </script>
     
     @stack('scripts')

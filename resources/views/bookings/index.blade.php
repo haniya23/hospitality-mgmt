@@ -22,11 +22,10 @@
          x-transition:leave-start="opacity-100" 
          x-transition:leave-end="opacity-0" 
          class="fixed inset-0 z-50 overflow-y-auto"
-         x-cloak>
-        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="closeCancelModal()"></div>
-            
-            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+         x-cloak
+         style="background-color: rgba(0,0,0,0.5);">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0" @click="closeCancelModal()">
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full" @click.stop>
                 <form @submit.prevent="cancelBooking()">
                     <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                         <div class="sm:flex sm:items-start">
@@ -128,6 +127,7 @@ function bookingData() {
 
         async loadBookings() {
             try {
+                showGlobalLoader('Loading bookings...');
                 const response = await fetch('/api/bookings');
                 const data = await response.json();
                 this.bookings = [...data.pending, ...data.active];
@@ -158,6 +158,7 @@ function bookingData() {
 
         async toggleBookingStatus(bookingId) {
             try {
+                showGlobalLoader('Updating booking status...');
                 const response = await fetch(`/api/bookings/${bookingId}/toggle-status`, {
                     method: 'PATCH',
                     headers: {
@@ -196,6 +197,7 @@ function bookingData() {
             }
 
             try {
+                showGlobalLoader('Cancelling booking...');
                 const response = await fetch(`/api/bookings/${this.cancelBookingId}/cancel`, {
                     method: 'PATCH',
                     headers: {
