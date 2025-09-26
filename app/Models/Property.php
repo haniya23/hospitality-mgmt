@@ -91,4 +91,9 @@ class Property extends Model
     {
         return $this->hasMany(PropertyAccommodation::class);
     }
+
+    public function reservations()
+    {
+        return $this->hasManyThrough(Reservation::class, PropertyAccommodation::class);
+    }
 }

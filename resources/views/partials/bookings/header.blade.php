@@ -6,9 +6,9 @@
     add-text="New Booking">
     
     <x-stat-cards :cards="[
-        ['value' => 'bookings.length', 'label' => 'All', 'clickable' => true, 'action' => 'statusFilter = \'\''],
-        ['value' => 'bookings.filter(b => b.status === \'pending\').length', 'label' => 'Pending', 'clickable' => true, 'action' => 'statusFilter = \'pending\''],
-        ['value' => 'bookings.filter(b => b.status === \'confirmed\').length', 'label' => 'Confirmed', 'clickable' => true, 'action' => 'statusFilter = \'confirmed\''],
-        ['value' => 'bookings.filter(b => b.status === \'cancelled\').length', 'label' => 'Cancelled', 'clickable' => true, 'action' => 'statusFilter = \'cancelled\'']
+        ['staticValue' => '0', 'label' => 'All'],
+        ['staticValue' => '0', 'label' => 'Pending'],
+        ['staticValue' => '0', 'label' => 'Confirmed'],
+        ['staticValue' => '0', 'label' => 'Cancelled']
     ]" />
 </x-page-header>

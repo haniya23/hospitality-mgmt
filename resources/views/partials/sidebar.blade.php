@@ -13,6 +13,11 @@
             </div>
         </div>
 
+        @php
+            $user = auth()->user();
+            $canAccessAdvanced = ($user->subscription_status === 'trial' && $user->trial_plan === 'professional') || in_array($user->subscription_status, ['starter', 'professional']);
+        @endphp
+
         <ul class="w-full flex flex-col gap-2 flex-1">
             <li><a href="{{ route('dashboard') }}" class="flex gap-4 p-4 font-semibold rounded-full hover:bg-purple-100 {{ request()->routeIs('dashboard') ? 'bg-gradient-to-r from-purple-400 to-purple-600 text-white' : 'text-gray-700' }} transition-all">
                 <i class="fas fa-home w-6"></i>Dashboard
@@ -26,16 +31,20 @@
             <li><a href="{{ route('customers.index') }}" class="flex gap-4 p-4 font-semibold rounded-full hover:bg-purple-100 {{ request()->routeIs('customers.*') ? 'bg-gradient-to-r from-purple-400 to-purple-600 text-white' : 'text-gray-700' }} transition-all">
                 <i class="fas fa-users w-6"></i>Customers
             </a></li>
+            @if($canAccessAdvanced)
             <li><a href="{{ route('b2b.dashboard') }}" class="flex gap-4 p-4 font-semibold rounded-full hover:bg-purple-100 {{ request()->routeIs('b2b.*') ? 'bg-gradient-to-r from-purple-400 to-purple-600 text-white' : 'text-gray-700' }} transition-all">
                 <i class="fas fa-handshake w-6"></i>B2B Partners
             </a></li>
+            @endif
 
             <li><a href="{{ route('pricing.index') }}" class="flex gap-4 p-4 font-semibold rounded-full hover:bg-purple-100 {{ request()->routeIs('pricing.*') ? 'bg-gradient-to-r from-purple-400 to-purple-600 text-white' : 'text-gray-700' }} transition-all">
                 <i class="fas fa-dollar-sign w-6"></i>Pricing
             </a></li>
+            @if($canAccessAdvanced)
             <li><a href="{{ route('reports.analytics') }}" class="flex gap-4 p-4 font-semibold rounded-full hover:bg-purple-100 {{ request()->routeIs('reports.*') ? 'bg-gradient-to-r from-purple-400 to-purple-600 text-white' : 'text-gray-700' }} transition-all">
                 <i class="fas fa-chart-bar w-6"></i>Reports
             </a></li>
+            @endif
             <li><a href="{{ route('subscription.plans') }}" class="flex gap-4 p-4 font-semibold rounded-full hover:bg-purple-100 {{ request()->routeIs('subscription.*') ? 'bg-gradient-to-r from-purple-400 to-purple-600 text-white' : 'text-gray-700' }} transition-all">
                 <i class="fas fa-crown w-6"></i>Subscription
             </a></li>

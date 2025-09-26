@@ -49,46 +49,42 @@
                             <span class="text-xs px-3 py-1 rounded-full font-medium"
                                   :class="'status-' + property.status"
                                   x-text="property.status.charAt(0).toUpperCase() + property.status.slice(1)"></span>
-                            <span class="text-xs text-gray-500" x-text="property.category"></span>
+                            <span class="text-xs text-gray-500" x-text="property.category?.name"></span>
                         </div>
                     </div>
                 </div>
                 <div class="text-left sm:text-right">
-                    <div class="text-xl font-bold text-gray-800" x-text="property.accommodations_count + ' rooms'"></div>
-                    <div class="text-sm text-gray-500">85% occupied</div>
+                    <div class="text-xl font-bold text-gray-800" x-text="property.property_accommodations_count + ' accommodations'"></div>
+                    <div class="text-sm text-gray-500" x-text="property.bookings_count + ' bookings'"></div>
                 </div>
             </div>
 
             <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-4 mb-4">
                 <div class="flex items-center space-x-2 mb-3">
                     <i class="fas fa-map-marker-alt text-gray-500"></i>
-                    <span class="text-sm text-gray-600 font-medium" x-text="property.location?.city + ', ' + property.location?.state"></span>
+                    <span class="text-sm text-gray-600 font-medium" x-text="property.location?.city?.name + ', ' + property.location?.city?.district?.state?.name"></span>
                 </div>
-                <div class="grid grid-cols-3 gap-4 text-center">
+                <div class="grid grid-cols-2 gap-4 text-center">
                     <div class="text-center">
-                        <div class="text-lg font-bold text-gray-800" x-text="property.accommodations_count"></div>
-                        <div class="text-xs text-gray-500">Rooms</div>
+                        <div class="text-lg font-bold text-gray-800" x-text="property.property_accommodations_count"></div>
+                        <div class="text-xs text-gray-500">Accommodations</div>
                     </div>
                     <div class="text-center">
-                        <div class="text-lg font-bold text-gray-800">4.5</div>
-                        <div class="text-xs text-gray-500">Rating</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-lg font-bold text-gray-800">12</div>
+                        <div class="text-lg font-bold text-gray-800" x-text="property.bookings_count || 0"></div>
                         <div class="text-xs text-gray-500">Bookings</div>
                     </div>
                 </div>
             </div>
 
             <div class="flex flex-col sm:flex-row gap-2">
-                <a :href="'/properties/' + property.id + '/edit'" class="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 px-4 rounded-xl font-medium text-sm hover:from-blue-600 hover:to-blue-700 transition text-center action-btn">
+                <a :href="'/properties/' + property.uuid + '/edit'" class="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 px-4 rounded-xl font-medium text-sm hover:from-blue-600 hover:to-blue-700 transition text-center action-btn">
                     <i class="fas fa-edit mr-2"></i>
                     Edit Property
                 </a>
                 <div class="flex gap-2">
-                    <button class="bg-gradient-to-r from-green-100 to-green-200 text-green-700 py-3 px-4 rounded-xl font-medium text-sm hover:from-green-200 hover:to-green-300 transition action-btn">
-                        <i class="fas fa-eye"></i>
-                    </button>
+                    <a :href="'/bookings/create?property_id=' + property.id" class="bg-gradient-to-r from-green-100 to-green-200 text-green-700 py-3 px-4 rounded-xl font-medium text-sm hover:from-green-200 hover:to-green-300 transition action-btn">
+                        <i class="fas fa-calendar-plus"></i>
+                    </a>
                     <button class="bg-gradient-to-r from-red-100 to-red-200 text-red-700 py-3 px-4 rounded-xl font-medium text-sm hover:from-red-200 hover:to-red-300 transition action-btn">
                         <i class="fas fa-trash"></i>
                     </button>

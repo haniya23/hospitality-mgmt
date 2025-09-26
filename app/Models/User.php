@@ -103,24 +103,23 @@ class User extends Authenticatable
 
     public function hasFeature($feature)
     {
-        // Trial users have limited features
-        if ($this->subscription_status === 'trial') {
-            return in_array($feature, ['basic_bookings', 'basic_customers', 'basic_properties']);
+        // Professional trial: allow all features
+        if ($this->subscription_status === 'trial' && $this->trial_plan === 'professional') {
+            return true;
         }
-        
-        // Starter plan features
-        if ($this->properties_limit <= 3) {
-            return in_array($feature, ['basic_bookings', 'basic_customers', 'basic_properties', 'basic_pricing']);
+        // Any paid plan: allow all features; property count is limited elsewhere
+        if (in_array($this->subscription_status, ['starter', 'professional'])) {
+            return true;
         }
-        
-        // Professional plan - all features
-        return true;
+        // Fallback (non-auth or unknown): restrict
+        return false;
     }
 
     public function getPlanNameAttribute()
     {
         if ($this->subscription_status === 'trial') {
-            return 'Trial - ' . ucfirst($this->trial_plan);
+            // Always show Professional during trial in UI
+            return 'Trial - Professional';
         }
         
         if (in_array($this->subscription_status, ['starter', 'professional'])) {
@@ -217,7 +216,7 @@ class User extends Authenticatable
             if (empty($model->trial_ends_at)) {
                 $model->trial_ends_at = now()->addDays(30);
                 $model->subscription_status = 'trial';
-                $model->trial_plan = 'starter';
+                $model->trial_plan = 'professional';
                 $model->is_trial_active = true;
                 $model->properties_limit = 1;
             }

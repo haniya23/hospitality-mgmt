@@ -20,16 +20,11 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::table('users', function (Blueprint $table) {
-            $table->enum('trial_plan', ['starter', 'professional'])->default('starter')->after('subscription_status');
-        });
+
     }
 
     public function down(): void
     {
         Schema::dropIfExists('subscription_requests');
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('trial_plan');
-        });
     }
 };

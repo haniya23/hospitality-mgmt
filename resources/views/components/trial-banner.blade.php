@@ -1,57 +1,81 @@
 @if(auth()->user()->subscription_status === 'trial' && auth()->user()->is_trial_active)
-<div class="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 rounded-xl mb-6 shadow-lg cursor-pointer" onclick="window.location.href='{{ route('subscription.plans') }}'">
-    <div class="flex items-center justify-between">
-        <div class="flex items-center space-x-3">
-            <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                <i class="fas fa-gift text-white text-lg"></i>
+<div class="mb-6 mt-4 sm:mt-6 mx-4 sm:mx-6 lg:mx-8">
+    <a href="{{ route('subscription.plans') }}" class="block w-full rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6 shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:scale-[1.02]">
+        <div class="flex items-center justify-between gap-3 sm:gap-4">
+            <div class="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                <div class="bg-white/20 rounded-full p-2 sm:p-2.5 flex-shrink-0">
+                    <i class="fas fa-gift text-white text-sm sm:text-base"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <span class="text-sm sm:text-base font-semibold leading-tight block">
+                        <span class="text-blue-100">{{ auth()->user()->remaining_trial_days }} days left</span>
+                    </span>
+                    <span class="text-xs sm:text-sm text-blue-100 font-medium block mt-0.5">
+                        Professional trial • Tap to upgrade
+                    </span>
+                </div>
             </div>
-            <div>
-                <h3 class="font-bold text-lg">{{ auth()->user()->remaining_trial_days }} Days Trial Remaining</h3>
-                <p class="text-sm opacity-90">
-                    {{ auth()->user()->plan_name }} • {{ auth()->user()->remaining_properties }} properties left
-                    • Click to unlock full access
-                </p>
+            <div class="hidden sm:flex items-center gap-2 flex-shrink-0">
+                <span class="text-xs font-bold bg-white/25 hover:bg-white/35 px-3 py-2 rounded-full transition-colors backdrop-blur-sm border border-white/20">
+                    Upgrade Now
+                </span>
+                <i class="fas fa-arrow-right text-white/70 text-sm"></i>
             </div>
         </div>
-        <div class="text-right">
-            <div class="bg-white text-purple-600 px-4 py-2 rounded-lg font-bold text-sm">
-                Upgrade from ₹399/mo
-            </div>
-            <div class="text-xs mt-1 opacity-75">73% OFF Limited Time</div>
-        </div>
-    </div>
+    </a>
 </div>
+
 @elseif(auth()->user()->isTrialExpired())
-<div class="bg-gradient-to-r from-red-500 to-red-600 text-white p-4 rounded-xl mb-6 shadow-lg">
-    <div class="flex items-center justify-between">
-        <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                <i class="fas fa-exclamation-triangle text-white"></i>
+<div class="mb-6 mt-4 sm:mt-6 mx-4 sm:mx-6 lg:mx-8">
+    <div class="bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6 rounded-xl shadow-lg border-l-4 border-red-300">
+        <div class="flex items-center justify-between gap-3 sm:gap-4">
+            <div class="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                <div class="bg-white/20 rounded-full p-2 sm:p-2.5 flex-shrink-0">
+                    <i class="fas fa-exclamation-triangle text-white text-sm sm:text-base animate-pulse"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <span class="text-sm sm:text-base font-bold block">
+                        Trial Expired
+                    </span>
+                    <span class="text-xs sm:text-sm text-red-100 font-medium block mt-0.5">
+                        Upgrade now to continue using all features
+                    </span>
+                </div>
             </div>
-            <div>
-                <h3 class="font-bold text-lg">Trial Expired</h3>
-                <p class="text-sm opacity-90">Upgrade to continue using all features</p>
-            </div>
+            <a href="{{ route('subscription.plans') }}" 
+               class="bg-white text-red-600 px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg font-bold hover:bg-red-50 transition-all text-xs sm:text-sm flex-shrink-0 shadow-md hover:shadow-lg transform hover:scale-105">
+                <i class="fas fa-rocket mr-1"></i>Upgrade
+            </a>
         </div>
-        <a href="{{ route('subscription.plans') }}" class="bg-white text-red-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-all">
-            Subscribe Now
-        </a>
     </div>
 </div>
+
 @elseif(auth()->user()->subscription_status === 'active')
-<div class="bg-gradient-to-r from-green-500 to-green-600 text-white p-3 rounded-xl mb-6 shadow-lg">
-    <div class="flex items-center justify-between">
-        <div class="flex items-center space-x-3">
-            <div class="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                <i class="fas fa-crown text-white text-sm"></i>
+<div class="mb-6 mt-4 sm:mt-6 mx-4 sm:mx-6 lg:mx-8">
+    <div class="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6 rounded-xl shadow-lg border-l-4 border-green-300">
+        <div class="flex items-center justify-between gap-3 sm:gap-4">
+            <div class="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                <div class="bg-white/20 rounded-full p-2 sm:p-2.5 flex-shrink-0">
+                    <i class="fas fa-check-circle text-white text-sm sm:text-base"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <span class="text-sm sm:text-base font-bold block">
+                        {{ auth()->user()->plan_name }} Plan
+                    </span>
+                    <span class="text-xs sm:text-sm text-green-100 font-medium block mt-0.5">
+                        Active subscription • Full access
+                    </span>
+                </div>
             </div>
-            <div>
-                <h3 class="font-semibold">{{ auth()->user()->plan_name }} Plan Active</h3>
+            <div class="flex items-center gap-2 flex-shrink-0">
+                <a href="{{ route('subscription.plans') }}" 
+                   class="text-white text-xs sm:text-sm font-medium underline hover:no-underline transition-all hover:text-green-100 flex items-center gap-1">
+                    <i class="fas fa-cog text-xs"></i>
+                    <span class="hidden sm:inline">Manage</span>
+                </a>
+                <div class="w-2 h-2 bg-green-300 rounded-full animate-pulse"></div>
             </div>
         </div>
-        <a href="{{ route('subscription.plans') }}" class="text-white text-sm underline hover:no-underline">
-            Manage Plan
-        </a>
     </div>
 </div>
-@endif
+@endif  

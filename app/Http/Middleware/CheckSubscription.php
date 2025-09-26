@@ -25,16 +25,25 @@ class CheckSubscription
         if ($feature) {
             switch ($feature) {
                 case 'b2b':
-                    if (($user->subscription_status === 'trial' && $user->trial_plan !== 'professional') || 
-                        ($user->subscription_status !== 'trial' && $user->subscription_status !== 'professional')) {
+                    if ($user->subscription_status === 'trial') {
+                        // Allow during professional trial
+                        if ($user->trial_plan !== 'professional') {
+                            return redirect()->route('subscription.plans')
+                                ->with('error', 'B2B Partner management requires Professional plan.');
+                        }
+                    } elseif (!in_array($user->subscription_status, ['starter', 'professional'])) {
                         return redirect()->route('subscription.plans')
                             ->with('error', 'B2B Partner management requires Professional plan.');
                     }
                     break;
                     
                 case 'advanced_reports':
-                    if (($user->subscription_status === 'trial' && $user->trial_plan !== 'professional') || 
-                        ($user->subscription_status !== 'trial' && $user->subscription_status !== 'professional')) {
+                    if ($user->subscription_status === 'trial') {
+                        if ($user->trial_plan !== 'professional') {
+                            return redirect()->route('subscription.plans')
+                                ->with('error', 'Advanced reports require Professional plan.');
+                        }
+                    } elseif (!in_array($user->subscription_status, ['starter', 'professional'])) {
                         return redirect()->route('subscription.plans')
                             ->with('error', 'Advanced reports require Professional plan.');
                     }

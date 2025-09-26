@@ -184,11 +184,12 @@ class BasicDataSeeder extends Seeder
 
         // Create admin user
         User::firstOrCreate(
-            ['mobile_number' => '1111111111'],
+            ['email' => 'admin@admin.com'],
             [
                 'name' => 'Admin User',
+                'mobile_number' => '1111111111',
                 'pin_hash' => Hash::make('0000'),
-                'email' => 'admin@example.com',
+                'password' => Hash::make('password'),
                 'is_admin' => true,
             ]
         );

@@ -33,35 +33,7 @@ function dashboardData() {
             totalGuests: 1240,
             avgRating: 4.8
         },
-        properties: [
-            {
-                id: 1,
-                name: "Ocean View Resort",
-                category: "Resort",
-                status: "active",
-                rooms: 24,
-                occupancy: 85,
-                color: "#667eea, #764ba2"
-            },
-            {
-                id: 2,
-                name: "Mountain Lodge",
-                category: "Lodge",
-                status: "active",
-                rooms: 12,
-                occupancy: 92,
-                color: "#f093fb, #f5576c"
-            },
-            {
-                id: 3,
-                name: "City Center Hotel",
-                category: "Hotel",
-                status: "pending",
-                rooms: 36,
-                occupancy: 67,
-                color: "#4facfe, #00f2fe"
-            }
-        ],
+        properties: @json($properties ?? []),
         recentActivity: [
             {
                 id: 1,

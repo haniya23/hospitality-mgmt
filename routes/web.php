@@ -17,7 +17,7 @@ Route::post('/logout', [MobileAuthController::class, 'logout'])->name('logout');
 // Protected Routes
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
-        $properties = auth()->user()->properties()->latest()->get();
+        $properties = auth()->user()->properties()->with(['category', 'location'])->latest()->get();
         return view('dashboard', compact('properties'));
     })->name('dashboard');
     
@@ -25,7 +25,20 @@ Route::middleware('auth')->group(function () {
     Route::post('/properties', [App\Http\Controllers\PropertyController::class, 'store'])->name('properties.store');
     Route::get('/properties', [App\Http\Controllers\PropertyController::class, 'index'])->name('properties.index');
     Route::get('/properties/{property}/edit', [App\Http\Controllers\PropertyController::class, 'edit'])->name('properties.edit');
+    Route::get('/properties/{property}/edit-section', [App\Http\Controllers\PropertyController::class, 'editSection'])->name('properties.edit-section');
     Route::patch('/properties/{property}/update-section', [App\Http\Controllers\PropertyController::class, 'updateSection'])->name('properties.update-section');
+    Route::post('/properties/{property}/test-ajax', [App\Http\Controllers\PropertyController::class, 'testAjax'])->name('properties.test-ajax');
+    
+    // Accommodation Routes
+    Route::get('/properties/{property}/accommodations/create', [App\Http\Controllers\PropertyController::class, 'createAccommodation'])->name('properties.accommodations.create');
+    Route::get('/properties/{property}/accommodations/{accommodation}/edit', [App\Http\Controllers\PropertyController::class, 'editAccommodation'])->name('properties.accommodations.edit');
+    Route::post('/properties/{property}/accommodations/store', [App\Http\Controllers\PropertyController::class, 'storeAccommodation'])->name('properties.accommodations.store');
+    Route::post('/properties/{property}/accommodations/{accommodation}/update', [App\Http\Controllers\PropertyController::class, 'updateAccommodation'])->name('properties.accommodations.update');
+    Route::delete('/properties/{property}/accommodations/{accommodation}/delete', [App\Http\Controllers\PropertyController::class, 'deleteAccommodation'])->name('properties.accommodations.delete');
+    
+    // Photo Routes
+    Route::post('/properties/{property}/photos', [App\Http\Controllers\PropertyController::class, 'storePhotos'])->name('properties.photos.store');
+    Route::delete('/properties/{property}/photos/{photo}', [App\Http\Controllers\PropertyController::class, 'deletePhoto'])->name('properties.photos.delete');
     
     // Booking Management Routes
     Route::get('/bookings', function () {

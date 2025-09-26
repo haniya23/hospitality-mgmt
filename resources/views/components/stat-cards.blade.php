@@ -1,25 +1,28 @@
 @props(['cards' => []])
 
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+<div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
     @foreach($cards as $index => $card)
-    <div class="group relative h-32 w-full bg-white rounded-2xl overflow-hidden p-4 shadow-lg hover:shadow-xl transition-all duration-300 {{ $card['clickable'] ?? false ? 'cursor-pointer' : '' }}"
+    <div class="group relative bg-white rounded-2xl overflow-hidden p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 {{ $card['clickable'] ?? false ? 'cursor-pointer hover:scale-105' : '' }} border border-gray-100"
          @if($card['clickable'] ?? false) @click="{{ $card['action'] }}" @endif>
         
-        <!-- Animated Background Circle -->
-        <div class="absolute h-20 w-20 -top-10 -right-10 rounded-full {{ $card['bgColor'] ?? 'bg-blue-500' }} group-hover:scale-[800%] duration-500 transition-transform z-0"></div>
+        <!-- Gradient Background -->
+        <div class="absolute inset-0 bg-gradient-to-br {{ $card['bgGradient'] ?? 'from-blue-50 to-purple-50' }} opacity-50 group-hover:opacity-70 transition-opacity duration-300"></div>
+        
+        <!-- Animated Accent -->
+        <div class="absolute top-0 right-0 w-20 h-20 {{ $card['accentColor'] ?? 'bg-blue-500' }} rounded-full transform translate-x-8 -translate-y-8 group-hover:scale-150 transition-transform duration-500 opacity-10"></div>
         
         <!-- Icon (if provided) -->
         @if(isset($card['icon']))
-        <div class="absolute top-3 right-3 text-gray-400 group-hover:text-white transition-colors duration-500 z-10">
-            <i class="{{ $card['icon'] }} text-xl"></i>
+        <div class="absolute top-4 right-4 text-gray-400 group-hover:text-blue-600 transition-colors duration-300 z-10">
+            <i class="{{ $card['icon'] }} text-xl sm:text-2xl"></i>
         </div>
         @endif
         
         <!-- Main Content -->
         <div class="relative z-10">
             <!-- Value Display -->
-            <div class="mb-2">
-                <div class="text-3xl font-bold text-gray-800 group-hover:text-white transition-colors duration-500"
+            <div class="mb-3">
+                <div class="text-2xl sm:text-3xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-300"
                      @if(isset($card['value'])) 
                          x-data="{
                              displayValue: 0,
@@ -55,33 +58,31 @@
                 
                 <!-- Value Unit/Suffix -->
                 @if(isset($card['suffix']) || isset($card['prefix']))
-                <div class="text-sm text-gray-500 group-hover:text-white/80 transition-colors duration-500">
+                <div class="text-sm text-gray-500 group-hover:text-blue-500 transition-colors duration-300">
                     {{ $card['prefix'] ?? '' }}{{ $card['suffix'] ?? '' }}
                 </div>
                 @endif
             </div>
             
             <!-- Label -->
-            <h3 class="text-lg font-semibold text-gray-700 group-hover:text-white transition-colors duration-500 mb-1">
+            <h3 class="text-sm sm:text-base font-semibold text-gray-700 group-hover:text-gray-900 transition-colors duration-300 mb-1">
                 {{ $card['label'] }}
             </h3>
             
             <!-- Subtitle -->
             @if(isset($card['subtitle']))
-            <p class="text-sm text-gray-500 group-hover:text-white/80 transition-colors duration-500">
+            <p class="text-xs sm:text-sm text-gray-500 group-hover:text-gray-600 transition-colors duration-300">
                 {{ $card['subtitle'] }}
             </p>
             @endif
         </div>
         
         <!-- Bottom Section -->
-        <div class="absolute bottom-3 left-4 right-4 flex justify-between items-end">
+        <div class="absolute bottom-4 left-4 right-4 flex justify-between items-end">
             <!-- Action Button -->
             @if($card['clickable'] ?? false)
-            <button class="text-sm text-{{ $card['buttonColor'] ?? 'blue' }}-600 group-hover:text-white transition-colors duration-500 flex items-center gap-1">
-                <span class="relative before:h-0.5 before:absolute before:w-full before:bg-{{ $card['buttonColor'] ?? 'blue' }}-600 group-hover:before:bg-white before:bottom-0 before:left-0 before:transition-colors before:duration-300">
-                    {{ $card['buttonText'] ?? 'View Details' }}
-                </span>
+            <button class="text-xs sm:text-sm text-blue-600 group-hover:text-blue-700 transition-colors duration-300 flex items-center gap-1 font-medium">
+                <span>{{ $card['buttonText'] ?? 'View Details' }}</span>
                 <i class="fas fa-arrow-right text-xs"></i>
             </button>
             @endif
@@ -90,15 +91,15 @@
             @if(isset($card['trend']))
             <div class="flex items-center gap-1">
                 @if($card['trend'] === 'up')
-                    <i class="fas fa-arrow-up text-green-500 group-hover:text-white text-sm"></i>
+                    <i class="fas fa-arrow-up text-green-500 text-xs sm:text-sm"></i>
                 @elseif($card['trend'] === 'down')
-                    <i class="fas fa-arrow-down text-red-500 group-hover:text-white text-sm"></i>
+                    <i class="fas fa-arrow-down text-red-500 text-xs sm:text-sm"></i>
                 @else
-                    <i class="fas fa-minus text-yellow-500 group-hover:text-white text-sm"></i>
+                    <i class="fas fa-minus text-yellow-500 text-xs sm:text-sm"></i>
                 @endif
                 
                 @if(isset($card['trendValue']))
-                <span class="text-xs text-gray-600 group-hover:text-white/80 transition-colors duration-500">
+                <span class="text-xs text-gray-600">
                     {{ $card['trendValue'] }}
                 </span>
                 @endif
@@ -108,8 +109,8 @@
         
         <!-- Progress Bar (if provided) -->
         @if(isset($card['progress']))
-        <div class="absolute bottom-0 left-0 right-0 h-1 bg-gray-100 group-hover:bg-white/20 transition-colors duration-500">
-            <div class="h-full {{ $card['progressColor'] ?? 'bg-blue-500' }} group-hover:bg-white transition-all duration-700 transform origin-left"
+        <div class="absolute bottom-0 left-0 right-0 h-1 bg-gray-100">
+            <div class="h-full {{ $card['progressColor'] ?? 'bg-blue-500' }} transition-all duration-700 transform origin-left"
                  style="width: {{ $card['progress'] }}%"></div>
         </div>
         @endif

@@ -89,7 +89,7 @@ class AdminController extends Controller
         
         $user->update([
             'subscription_status' => $request->requested_plan,
-            'properties_limit' => $request->requested_plan === 'professional' ? 5 : 3,
+            'properties_limit' => $request->requested_plan === 'professional' ? 5 : 1,
             'subscription_ends_at' => now()->addMonths($duration),
             'is_trial_active' => false,
         ]);

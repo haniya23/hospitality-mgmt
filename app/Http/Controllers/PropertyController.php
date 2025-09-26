@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Property;
 use App\Models\PropertyCategory;
+use App\Http\Requests\PropertyUpdateRequest;
 use Illuminate\Http\Request;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class PropertyController extends Controller
 {
+    use AuthorizesRequests;
     public function create()
     {
         $categories = PropertyCategory::all();
@@ -42,7 +45,15 @@ class PropertyController extends Controller
 
     public function index()
     {
-        $properties = auth()->user()->properties()->latest()->get();
+        $properties = auth()->user()->properties()
+            ->with([
+                'category', 
+                'location.city.district.state.country',
+                'propertyAccommodations'
+            ])
+            ->withCount(['propertyAccommodations', 'reservations as bookings_count'])
+            ->latest()
+            ->get();
         return view('properties.index', compact('properties'));
     }
 
@@ -61,55 +72,321 @@ class PropertyController extends Controller
         return view('properties.edit', compact('property'));
     }
 
-    public function updateSection(Request $request, Property $property)
+    public function updateSection(PropertyUpdateRequest $request, Property $property)
     {
-        if ($property->owner_id !== auth()->id()) {
-            abort(403);
-        }
-
         $section = $request->input('section');
         
+        // Debug logging
+        \Log::info('Property update request', [
+            'property_id' => $property->id,
+            'section' => $section,
+            'request_data' => $request->all(),
+            'validated_data' => $request->validated(),
+            'user_id' => auth()->id(),
+            'method' => $request->method(),
+            'content_type' => $request->header('Content-Type'),
+            'is_ajax' => $request->ajax(),
+            'raw_input' => $request->getContent(),
+            'input_keys' => array_keys($request->all()),
+            'post_data' => $request->post(),
+            'get_data' => $request->query(),
+            'files' => $request->files->all()
+        ]);
+        
         if ($section === 'basic') {
-            $request->validate([
-                'name' => 'required|string|max:255',
-                'property_category_id' => 'required|exists:property_categories,id',
-                'description' => 'nullable|string',
-            ]);
+            $updateData = $request->only(['name', 'property_category_id', 'description']);
+            \Log::info('Updating property with data', $updateData);
             
-            $property->update($request->only(['name', 'property_category_id', 'description']));
+            $result = $property->update($updateData);
+            \Log::info('Property update result', ['success' => $result]);
+            
+            // Update owner name if provided
+            if ($request->filled('owner_name')) {
+                $ownerResult = $property->owner()->update(['name' => $request->owner_name]);
+                \Log::info('Owner update result', ['success' => $ownerResult]);
+            }
         }
         
         if ($section === 'location') {
-            $request->validate([
-                'address' => 'required|string',
-                'country_id' => 'required|exists:countries,id',
-            ]);
+            $locationData = $request->only(['address', 'country_id', 'state_id', 'district_id', 'city_id', 'pincode_id', 'latitude', 'longitude']);
+            \Log::info('Updating location with data', $locationData);
             
-            $property->location()->updateOrCreate(
+            $result = $property->location()->updateOrCreate(
                 ['property_id' => $property->id],
-                $request->only(['address', 'country_id', 'state_id'])
+                $locationData
             );
+            \Log::info('Location update result', ['success' => $result]);
         }
         
         if ($section === 'accommodation') {
             $request->validate([
-                'accommodation_name' => 'required|string|max:255',
+                'display_name' => 'required|string|max:255',
                 'max_occupancy' => 'required|integer|min:1',
                 'base_price' => 'required|numeric|min:0',
+                'description' => 'nullable|string',
+                'is_active' => 'nullable|boolean',
+                'accommodation_id' => 'nullable|exists:property_accommodations,id'
             ]);
+
+            $payload = [
+                'custom_name' => $request->input('display_name'),
+                'description' => $request->input('description'),
+                'max_occupancy' => $request->input('max_occupancy'),
+                'base_price' => $request->input('base_price'),
+                'is_active' => $request->boolean('is_active'),
+            ];
+
+            if ($request->filled('accommodation_id')) {
+                $accommodation = $property->propertyAccommodations()->where('id', $request->accommodation_id)->firstOrFail();
+                $accommodation->update($payload);
+            } else {
+                $property->propertyAccommodations()->create($payload);
+            }
+        }
+        
+        if ($section === 'amenities') {
+            $amenityIds = $request->input('amenities', []);
+            \Log::info('Updating amenities with data', ['amenities' => $amenityIds]);
             
-            $property->accommodations()->updateOrCreate(
+            $result = $property->amenities()->sync($amenityIds);
+            \Log::info('Amenities update result', ['success' => $result]);
+        }
+        
+        if ($section === 'policies') {
+            $policyData = $request->only(['check_in_time', 'check_out_time', 'cancellation_policy', 'house_rules']);
+            \Log::info('Updating policies with data', $policyData);
+            
+            $result = $property->policy()->updateOrCreate(
                 ['property_id' => $property->id],
-                [
-                    'name' => $request->accommodation_name,
-                    'description' => $request->accommodation_description,
-                    'max_occupancy' => $request->max_occupancy,
-                    'base_price' => $request->base_price,
-                    'status' => 'active',
-                ]
+                $policyData
             );
+            \Log::info('Policies update result', ['success' => $result]);
         }
 
-        return response()->json(['success' => true, 'message' => 'Updated successfully!']);
+        return response()->json([
+            'success' => true, 
+            'message' => 'Updated successfully!',
+            'section' => $section,
+            'property_id' => $property->id
+        ]);
+    }
+
+    /**
+     * Test endpoint to verify AJAX data reception
+     */
+    public function testAjax(PropertyUpdateRequest $request, Property $property)
+    {
+        \Log::info('Test AJAX endpoint called', [
+            'property_id' => $property->id,
+            'request_data' => $request->all(),
+            'method' => $request->method(),
+            'content_type' => $request->header('Content-Type'),
+            'is_ajax' => $request->ajax(),
+            'raw_input' => $request->getContent()
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Test endpoint reached',
+            'received_data' => $request->all(),
+            'section' => $request->input('section'),
+            'property_id' => $property->id
+        ]);
+    }
+
+
+    public function editSection(Property $property, Request $request)
+    {
+        $this->authorize('update', $property);
+        
+        $section = $request->input('section', 'basic');
+        
+        // Load necessary data based on section
+        $data = [
+            'property' => $property,
+            'section' => $section
+        ];
+        
+        switch ($section) {
+            case 'basic':
+                $data['categories'] = \App\Models\PropertyCategory::all();
+                break;
+            case 'location':
+                $data['countries'] = \App\Models\Country::all();
+                $data['states'] = \App\Models\State::all();
+                $data['districts'] = \App\Models\District::all();
+                $data['cities'] = \App\Models\City::all();
+                $data['pincodes'] = \App\Models\Pincode::all();
+                break;
+            case 'amenities':
+                $data['amenities'] = \App\Models\Amenity::all();
+                break;
+            case 'policies':
+                // No additional data needed for policies
+                break;
+        }
+        
+        return view('properties.partials.modal-content', $data);
+    }
+
+    public function createAccommodation(Property $property)
+    {
+        $this->authorize('update', $property);
+        
+        $predefinedTypes = \App\Models\PredefinedAccommodationType::all();
+        
+        return view('properties.partials.accommodation-form', [
+            'property' => $property,
+            'accommodation' => null,
+            'predefinedTypes' => $predefinedTypes,
+            'isEdit' => false
+        ]);
+    }
+
+    public function editAccommodation(Property $property, $accommodationId)
+    {
+        $this->authorize('update', $property);
+        
+        $accommodation = $property->propertyAccommodations()->findOrFail($accommodationId);
+        $predefinedTypes = \App\Models\PredefinedAccommodationType::all();
+        
+        return view('properties.partials.accommodation-form', [
+            'property' => $property,
+            'accommodation' => $accommodation,
+            'predefinedTypes' => $predefinedTypes,
+            'isEdit' => true
+        ]);
+    }
+
+    public function storeAccommodation(Request $request, Property $property)
+    {
+        $this->authorize('update', $property);
+        
+        $request->validate([
+            'predefined_type_id' => 'nullable|exists:predefined_accommodation_types,id',
+            'custom_name' => 'required|string|max:255',
+            'max_occupancy' => 'required|integer|min:1',
+            'base_price' => 'required|numeric|min:0',
+            'description' => 'nullable|string',
+            'is_active' => 'boolean',
+        ]);
+
+        $accommodation = $property->propertyAccommodations()->create([
+            'predefined_type_id' => $request->predefined_type_id,
+            'custom_name' => $request->custom_name,
+            'max_occupancy' => $request->max_occupancy,
+            'base_price' => $request->base_price,
+            'description' => $request->description,
+            'is_active' => $request->boolean('is_active', true),
+        ]);
+
+        return response()->json([
+            'success' => true, 
+            'message' => 'Accommodation created successfully!'
+        ]);
+    }
+
+    public function updateAccommodation(Request $request, Property $property, $accommodationId)
+    {
+        $this->authorize('update', $property);
+        
+        $accommodation = $property->propertyAccommodations()->findOrFail($accommodationId);
+        
+        $request->validate([
+            'predefined_type_id' => 'nullable|exists:predefined_accommodation_types,id',
+            'custom_name' => 'required|string|max:255',
+            'max_occupancy' => 'required|integer|min:1',
+            'base_price' => 'required|numeric|min:0',
+            'description' => 'nullable|string',
+            'is_active' => 'boolean',
+        ]);
+
+        $accommodation->update([
+            'predefined_type_id' => $request->predefined_type_id,
+            'custom_name' => $request->custom_name,
+            'max_occupancy' => $request->max_occupancy,
+            'base_price' => $request->base_price,
+            'description' => $request->description,
+            'is_active' => $request->boolean('is_active', true),
+        ]);
+
+        return response()->json([
+            'success' => true, 
+            'message' => 'Accommodation updated successfully!'
+        ]);
+    }
+
+    public function deleteAccommodation(Property $property, $accommodationId)
+    {
+        $this->authorize('update', $property);
+        
+        $accommodation = $property->propertyAccommodations()->findOrFail($accommodationId);
+        $accommodation->delete();
+
+        return response()->json([
+            'success' => true, 
+            'message' => 'Accommodation deleted successfully!'
+        ]);
+    }
+
+    public function storePhotos(Request $request, Property $property)
+    {
+        $this->authorize('update', $property);
+        
+        $request->validate([
+            'photos' => 'required|array',
+            'photos.*' => 'image|mimes:jpeg,png,jpg,gif|max:10240', // 10MB max
+            'main_photo_id' => 'nullable|exists:property_photos,id',
+            'main_photo_new' => 'nullable|integer',
+        ]);
+
+        // Handle new photo uploads
+        if ($request->hasFile('photos')) {
+            foreach ($request->file('photos') as $index => $photo) {
+                $path = $photo->store('property-photos', 'public');
+                
+                $isMain = false;
+                if ($request->filled('main_photo_new') && $request->main_photo_new == $index) {
+                    $isMain = true;
+                }
+                
+                $property->photos()->create([
+                    'file_path' => $path,
+                    'is_main' => $isMain,
+                ]);
+            }
+        }
+
+        // Handle setting main photo from existing photos
+        if ($request->filled('main_photo_id')) {
+            // Remove main flag from all photos
+            $property->photos()->update(['is_main' => false]);
+            // Set new main photo
+            $property->photos()->where('id', $request->main_photo_id)->update(['is_main' => true]);
+        }
+
+        return response()->json([
+            'success' => true, 
+            'message' => 'Photos updated successfully!'
+        ]);
+    }
+
+    public function deletePhoto(Property $property, $photoId)
+    {
+        $this->authorize('update', $property);
+        
+        $photo = $property->photos()->findOrFail($photoId);
+        
+        // Delete file from storage
+        if (\Storage::disk('public')->exists($photo->file_path)) {
+            \Storage::disk('public')->delete($photo->file_path);
+        }
+        
+        $photo->delete();
+
+        return response()->json([
+            'success' => true, 
+            'message' => 'Photo deleted successfully!'
+        ]);
     }
 }

@@ -34,7 +34,7 @@ class BookingController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'property_id' => 'required|exists:properties,id',
             'accommodation_id' => 'required|exists:property_accommodations,id',
             'check_in_date' => 'required|date',
@@ -44,7 +44,10 @@ class BookingController extends Controller
             'guest_name' => 'required|string',
             'guest_mobile' => 'required|string',
             'total_amount' => 'required|numeric|min:0',
-            'advance_paid' => 'required|numeric|min:0'
+            'advance_paid' => 'required|numeric|min:0',
+            'b2b_partner_id' => 'nullable|exists:b2b_partners,id',
+            'commission_percentage' => 'nullable|numeric|min:0|max:100',
+            'commission_amount' => 'nullable|numeric|min:0'
         ]);
 
         try {
@@ -58,17 +61,41 @@ class BookingController extends Controller
 
             $booking = Reservation::create([
                 'guest_id' => $guest->id,
-                'property_accommodation_id' => $request->accommodation_id,
-                'check_in_date' => $request->check_in_date,
-                'check_out_date' => $request->check_out_date,
-                'adults' => $request->adults,
-                'children' => $request->children,
-                'total_amount' => $request->total_amount,
-                'advance_paid' => $request->advance_paid,
-                'balance_pending' => $request->total_amount - $request->advance_paid,
+                'property_accommodation_id' => $validated['accommodation_id'],
+                'check_in_date' => $validated['check_in_date'],
+                'check_out_date' => $validated['check_out_date'],
+                'adults' => $validated['adults'],
+                'children' => $validated['children'],
+                'total_amount' => $validated['total_amount'],
+                'advance_paid' => $validated['advance_paid'],
+                'balance_pending' => $validated['total_amount'] - $validated['advance_paid'],
                 'status' => 'pending',
-                'created_by' => auth()->id()
+                'created_by' => auth()->id(),
+                'b2b_partner_id' => $validated['b2b_partner_id'] ?? null
             ]);
+
+            // Create commission if B2B booking
+            if (!empty($validated['b2b_partner_id'])) {
+                $total = (float) $booking->total_amount;
+                $pct = array_key_exists('commission_percentage', $validated) && $validated['commission_percentage'] !== null
+                    ? (float) $validated['commission_percentage'] : 10.0; // default 10%
+                $amt = array_key_exists('commission_amount', $validated) && $validated['commission_amount'] !== null
+                    ? (float) $validated['commission_amount'] : null;
+
+                if (is_null($amt)) {
+                    $amt = round(($total * $pct) / 100, 2);
+                } elseif (!$request->filled('commission_percentage')) {
+                    $pct = $total > 0 ? round(($amt / $total) * 100, 2) : 0.0;
+                }
+
+                \App\Models\Commission::create([
+                    'booking_id' => $booking->id,
+                    'partner_id' => $request->b2b_partner_id,
+                    'percentage' => $pct,
+                    'amount' => $amt,
+                    'status' => 'pending',
+                ]);
+            }
 
             return redirect()->route('bookings.index')
                 ->with('success', 'Booking created successfully!');

@@ -18,6 +18,10 @@
 </head>
 <body class="theme-bg" x-data="{ sidebarOpen: false }">
     <!-- Desktop Sidebar -->
+    @php
+        $user = auth()->user();
+        $canAccessAdvanced = $user && (($user->subscription_status === 'trial' && $user->trial_plan === 'professional') || in_array($user->subscription_status, ['starter', 'professional']));
+    @endphp
     <div class="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:w-72 lg:bg-white lg:p-5 lg:shadow-md lg:shadow-purple-200/50 lg:flex lg:flex-col">
         <!-- Header -->
         <div class="flex items-center justify-between mb-6">
@@ -69,6 +73,7 @@
                 </a>
             </li>
 
+            @if($canAccessAdvanced)
             <li class="flex-center cursor-pointer p-16-semibold w-full whitespace-nowrap">
                 <a href="{{ route('b2b.dashboard') }}" class="p-16-semibold flex size-full gap-4 p-4 group font-semibold rounded-full bg-cover hover:bg-purple-100 hover:shadow-inner {{ request()->routeIs('b2b.*') ? 'bg-gradient-to-r from-purple-400 to-purple-600 text-white' : 'text-gray-700' }} transition-all ease-linear">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="size-6">
@@ -77,6 +82,7 @@
                     B2B Partners
                 </a>
             </li>
+            @endif
 
             <li class="flex-center cursor-pointer p-16-semibold w-full whitespace-nowrap">
                 <a href="{{ route('pricing.index') }}" class="p-16-semibold flex size-full gap-4 p-4 group font-semibold rounded-full bg-cover hover:bg-purple-100 hover:shadow-inner {{ request()->routeIs('pricing.*') ? 'bg-gradient-to-r from-purple-400 to-purple-600 text-white' : 'text-gray-700' }} transition-all ease-linear">
@@ -87,6 +93,7 @@
                 </a>
             </li>
 
+            @if($canAccessAdvanced)
             <li class="flex-center cursor-pointer p-16-semibold w-full whitespace-nowrap">
                 <a href="{{ route('reports.analytics') }}" class="p-16-semibold flex size-full gap-4 p-4 group font-semibold rounded-full bg-cover hover:bg-purple-100 hover:shadow-inner {{ request()->routeIs('reports.*') ? 'bg-gradient-to-r from-purple-400 to-purple-600 text-white' : 'text-gray-700' }} transition-all ease-linear">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="size-6">
@@ -95,6 +102,7 @@
                     Reports
                 </a>
             </li>
+            @endif
 
 
 
@@ -148,7 +156,7 @@
             </div>
             
             <ul class="space-y-2">
-                <li>
+            <li>
                     <a href="{{ route('dashboard') }}" @click="sidebarOpen = false"
                        class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/25 hover:backdrop-blur-md text-primary transition-all duration-300 {{ request()->routeIs('dashboard') ? 'bg-white/30 backdrop-blur-md border border-white/40 shadow-lg' : '' }}">
                         <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -157,7 +165,7 @@
                         Dashboard
                     </a>
                 </li>
-                <li>
+            <li>
                     <a href="{{ route('properties.index') }}" @click="sidebarOpen = false"
                        class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/25 hover:backdrop-blur-md text-primary transition-all duration-300 {{ request()->routeIs('properties.*') ? 'bg-white/30 backdrop-blur-md border border-white/40 shadow-lg' : '' }}">
                         <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -166,7 +174,7 @@
                         Properties
                     </a>
                 </li>
-                <li>
+            <li>
                     <a href="{{ route('bookings.index') }}" @click="sidebarOpen = false"
                        class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/25 hover:backdrop-blur-md text-primary transition-all duration-300 {{ request()->routeIs('bookings.*') ? 'bg-white/30 backdrop-blur-md border border-white/40 shadow-lg' : '' }}">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -175,8 +183,8 @@
                         Bookings
                     </a>
                 </li>
-                <li>
-                    <a href="{{ route('customers.index') }}" @click="sidebarOpen = false"
+            <li>
+                <a href="{{ route('customers.index') }}" @click="sidebarOpen = false"
                        class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/25 hover:backdrop-blur-md text-primary transition-all duration-300 {{ request()->routeIs('customers.*') ? 'bg-white/30 backdrop-blur-md border border-white/40 shadow-lg' : '' }}">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
@@ -184,18 +192,20 @@
                         Customers
                     </a>
                 </li>
-                <li>
-                    <a href="{{ route('b2b.dashboard') }}" @click="sidebarOpen = false"
+            @if($canAccessAdvanced)
+            <li>
+                <a href="{{ route('b2b.dashboard') }}" @click="sidebarOpen = false"
                        class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/25 hover:backdrop-blur-md text-primary transition-all duration-300 {{ request()->routeIs('b2b.*') ? 'bg-white/30 backdrop-blur-md border border-white/40 shadow-lg' : '' }}">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                         </svg>
                         B2B Partners
-                    </a>
-                </li>
+                </a>
+            </li>
+            @endif
 
-                <li>
-                    <a href="{{ route('pricing.index') }}" @click="sidebarOpen = false"
+            <li>
+                <a href="{{ route('pricing.index') }}" @click="sidebarOpen = false"
                        class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/25 hover:backdrop-blur-md text-primary transition-all duration-300 {{ request()->routeIs('pricing.*') ? 'bg-white/30 backdrop-blur-md border border-white/40 shadow-lg' : '' }}">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -203,15 +213,17 @@
                         Pricing
                     </a>
                 </li>
-                <li>
-                    <a href="{{ route('reports.analytics') }}" @click="sidebarOpen = false"
+            @if($canAccessAdvanced)
+            <li>
+                <a href="{{ route('reports.analytics') }}" @click="sidebarOpen = false"
                        class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/25 hover:backdrop-blur-md text-primary transition-all duration-300 {{ request()->routeIs('reports.*') ? 'bg-white/30 backdrop-blur-md border border-white/40 shadow-lg' : '' }}">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                         </svg>
                         Reports
-                    </a>
-                </li>
+                </a>
+            </li>
+            @endif
 
                 <li class="pt-4 border-t border-glass-border">
                     <form method="POST" action="{{ route('logout') }}">
@@ -268,11 +280,13 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
                 </a>
+                @if($canAccessAdvanced)
                 <a href="{{ route('b2b.dashboard') }}" class="flex-nav-item {{ request()->routeIs('b2b.*') ? 'active' : '' }}">
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                     </svg>
                 </a>
+                @endif
                 <a href="{{ route('properties.index') }}" class="flex-nav-item {{ request()->routeIs('properties.*') ? 'active' : '' }}">
                     <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
@@ -301,6 +315,7 @@
                             </svg>
                             Pricing
                         </a>
+                        @if($canAccessAdvanced)
                         <a href="{{ route('reports.analytics') }}" @click="open = false" 
                            class="flex items-center px-4 py-2 body-text hover:bg-white/25 hover:backdrop-blur-md transition-all duration-300">
                             <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -308,6 +323,7 @@
                             </svg>
                             Reports
                         </a>
+                        @endif
 
                     </div>
                 </div>
