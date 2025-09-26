@@ -153,16 +153,30 @@
             }
         };
         
-        // Show loader on page load
+        // Show loader immediately on page load
         showGlobalLoader('Loading page...');
         
         // Hide loader when page is fully loaded
         window.addEventListener('load', function() {
-            setTimeout(() => hideGlobalLoader(), 500);
+            setTimeout(() => hideGlobalLoader(), 800);
         });
         
         // Also hide loader when DOM is ready (faster)
         document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => hideGlobalLoader(), 500);
+        });
+        
+        // Show loader on page refresh/reload
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                showGlobalLoader('Loading page...');
+                setTimeout(() => hideGlobalLoader(), 300);
+            }
+        });
+        
+        // Show loader on back/forward navigation
+        window.addEventListener('popstate', function() {
+            showGlobalLoader('Loading page...');
             setTimeout(() => hideGlobalLoader(), 300);
         });
         

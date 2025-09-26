@@ -366,6 +366,9 @@
             });
         });
         
+        // Show loader immediately on page load
+        showGlobeLoader();
+        
         // Show loader on page navigation
         window.addEventListener('beforeunload', function() {
             showGlobeLoader();
@@ -373,7 +376,26 @@
         
         // Hide loader when page loads
         window.addEventListener('load', function() {
-            hideGlobeLoader();
+            setTimeout(() => hideGlobeLoader(), 800);
+        });
+        
+        // Hide loader when DOM is ready (faster)
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => hideGlobeLoader(), 500);
+        });
+        
+        // Show loader on page refresh/reload
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                showGlobeLoader();
+                setTimeout(() => hideGlobeLoader(), 300);
+            }
+        });
+        
+        // Show loader on back/forward navigation
+        window.addEventListener('popstate', function() {
+            showGlobeLoader();
+            setTimeout(() => hideGlobeLoader(), 300);
         });
     </script>
 </body>
