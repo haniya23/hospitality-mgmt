@@ -23,7 +23,7 @@
             <!-- Value Display -->
             <div class="mb-3">
                 <div class="text-2xl sm:text-3xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-300"
-                     @if(isset($card['value'])) 
+                     @if(isset($card['value']) && is_numeric($card['value'])) 
                          x-data="{
                              displayValue: 0,
                              targetValue: {{ $card['value'] }},
@@ -49,11 +49,15 @@
                          }"
                          x-init="setTimeout(() => animateValue(), {{ $index * 200 + 300 }})"
                          x-text="displayValue.toLocaleString()"
+                     @elseif(isset($card['value']))
+                         x-text="{{ $card['value'] }}"
                      @else
                          x-data="{ value: '{{ $card['staticValue'] ?? '0' }}' }"
                          x-text="value"
                      @endif>
-                    {{ $card['staticValue'] ?? '0' }}
+                    @if(!isset($card['value']))
+                        {{ $card['staticValue'] ?? '0' }}
+                    @endif
                 </div>
                 
                 <!-- Value Unit/Suffix -->

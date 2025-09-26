@@ -28,12 +28,32 @@ function propertyManager() {
             return {
                 total: this.properties.length,
                 active: this.properties.filter(p => p.status === 'active').length,
-                rooms: this.properties.reduce((sum, p) => sum + (p.accommodations_count || 0), 0)
+                accommodations: this.properties.reduce((sum, p) => sum + (p.property_accommodations_count || 0), 0),
+                bookings: this.properties.reduce((sum, p) => sum + (p.bookings_count || 0), 0)
             };
         },
 
         init() {
             console.log('Properties loaded:', this.properties.length);
+        }
+    }
+}
+
+function propertyStats() {
+    return {
+        properties: @json($properties ?? []),
+        
+        get stats() {
+            return {
+                total: this.properties.length,
+                active: this.properties.filter(p => p.status === 'active').length,
+                accommodations: this.properties.reduce((sum, p) => sum + (p.property_accommodations_count || 0), 0),
+                bookings: this.properties.reduce((sum, p) => sum + (p.bookings_count || 0), 0)
+            };
+        },
+
+        init() {
+            console.log('Property stats initialized');
         }
     }
 }
