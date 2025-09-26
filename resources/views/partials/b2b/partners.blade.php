@@ -15,7 +15,7 @@
                                   x-text="partner.status.charAt(0).toUpperCase() + partner.status.slice(1)"></span>
                         </div>
                         <div class="text-sm text-gray-600 space-y-1">
-                            <div>👤 <span x-text="partner.contact_person"></span></div>
+                            <div>👤 <span x-text="partner.contact_user ? partner.contact_user.name : 'N/A'"></span></div>
                             <div>📱 <span x-text="partner.phone"></span></div>
                             <div x-show="partner.email">✉️ <span x-text="partner.email"></span></div>
                             <div class="text-xs text-gray-500">
@@ -37,6 +37,14 @@
                                class="p-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors">
                                 <i class="fab fa-whatsapp w-4 h-4"></i>
                             </a>
+                            <a :href="'/b2b/' + partner.uuid" 
+                               class="p-2 bg-purple-100 text-purple-600 rounded-full hover:bg-purple-200 transition-colors">
+                                <i class="fas fa-eye w-4 h-4"></i>
+                            </a>
+                            <a :href="'/b2b/' + partner.uuid + '/edit'" 
+                               class="p-2 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 transition-colors">
+                                <i class="fas fa-edit w-4 h-4"></i>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -50,10 +58,10 @@
                 </div>
                 <h3 class="text-lg font-medium text-gray-900 mb-2">No B2B Partners Found</h3>
                 <p class="text-gray-600 mb-4">Start by adding your first business partner.</p>
-                <button @click="openCreateModal()" 
-                        class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-medium hover:from-blue-700 hover:to-indigo-700 transition-all">
+                <a href="/b2b/create" 
+                   class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-medium hover:from-blue-700 hover:to-indigo-700 transition-all">
                     Add First Partner
-                </button>
+                </a>
             </div>
         </template>
     </div>

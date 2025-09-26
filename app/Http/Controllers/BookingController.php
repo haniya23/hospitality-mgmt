@@ -42,24 +42,36 @@ class BookingController extends Controller
             'adults' => 'required|integer|min:1',
             'children' => 'required|integer|min:0',
             'booking_type' => 'required|in:per_day,per_person',
-            'guest_name' => 'required|string',
-            'guest_mobile' => 'required|string',
+            'guest_name' => 'nullable|string',
+            'guest_mobile' => 'nullable|string',
+            'guest_email' => 'nullable|email',
             'total_amount' => 'required|numeric|min:0',
             'advance_paid' => 'required|numeric|min:0',
             'special_requests' => 'nullable|string|max:1000',
-            'b2b_partner_id' => 'nullable|exists:b2b_partners,id',
+            'b2b_partner_id' => 'nullable|exists:b2b_partners,uuid',
             'commission_percentage' => 'nullable|numeric|min:0|max:100',
-            'commission_amount' => 'nullable|numeric|min:0'
+            'commission_amount' => 'nullable|numeric|min:0',
+            'use_b2b_reserved_customer' => 'nullable|in:0,1,true,false'
         ]);
 
         try {
-            $guest = Guest::firstOrCreate(
-                ['mobile_number' => $request->guest_mobile],
-                [
-                    'name' => $request->guest_name,
-                    'email' => $request->guest_email
-                ]
-            );
+            // Convert string boolean to actual boolean
+            $useB2BReservedCustomer = filter_var($validated['use_b2b_reserved_customer'], FILTER_VALIDATE_BOOLEAN);
+            
+            // Handle B2B reserved customer
+            if ($useB2BReservedCustomer && $validated['b2b_partner_id']) {
+                $partner = \App\Models\B2bPartner::where('uuid', $validated['b2b_partner_id'])->first();
+                $guest = $partner->getOrCreateReservedCustomer();
+            } else {
+                // Regular customer creation
+                $guest = Guest::firstOrCreate(
+                    ['mobile_number' => $request->guest_mobile],
+                    [
+                        'name' => $request->guest_name,
+                        'email' => $request->guest_email
+                    ]
+                );
+            }
 
             $booking = Reservation::create([
                 'guest_id' => $guest->id,
@@ -75,11 +87,11 @@ class BookingController extends Controller
                 'special_requests' => $validated['special_requests'] ?? null,
                 'status' => 'pending',
                 'created_by' => auth()->id(),
-                'b2b_partner_id' => $validated['b2b_partner_id'] ?? null
+                'b2b_partner_id' => $partner ? $partner->id : null
             ]);
 
             // Create commission if B2B booking
-            if (!empty($validated['b2b_partner_id'])) {
+            if ($partner) {
                 $total = (float) $booking->total_amount;
                 $pct = array_key_exists('commission_percentage', $validated) && $validated['commission_percentage'] !== null
                     ? (float) $validated['commission_percentage'] : 10.0; // default 10%
@@ -94,7 +106,7 @@ class BookingController extends Controller
 
                 \App\Models\Commission::create([
                     'booking_id' => $booking->id,
-                    'partner_id' => $request->b2b_partner_id,
+                    'partner_id' => $partner->id,
                     'percentage' => $pct,
                     'amount' => $amt,
                     'status' => 'pending',
@@ -178,7 +190,11 @@ class BookingController extends Controller
                     return [
                         'id' => $acc->id,
                         'display_name' => $acc->display_name,
-                        'base_price' => $acc->base_price
+                        'base_price' => $acc->base_price,
+                        'max_occupancy' => $acc->max_occupancy,
+                        'predefined_type' => [
+                            'name' => $acc->predefinedType->name ?? 'Custom'
+                        ]
                     ];
                 });
             return response()->json($accommodations);
@@ -189,15 +205,39 @@ class BookingController extends Controller
 
     public function getGuests()
     {
-        $guests = Guest::orderBy('name')->get(['id', 'name', 'mobile_number', 'email']);
+        $guests = Guest::regularCustomers()
+            ->orderBy('name')
+            ->get(['id', 'name', 'mobile_number', 'email']);
         return response()->json($guests);
     }
 
     public function getPartners()
     {
         $partners = \App\Models\B2bPartner::where('status', 'active')
-            ->get(['id', 'partner_name']);
+            ->get(['id', 'uuid', 'partner_name', 'commission_rate']);
         return response()->json($partners);
+    }
+
+    public function getPartnerReservedCustomer($partnerId)
+    {
+        $partner = \App\Models\B2bPartner::where('uuid', $partnerId)->first();
+        
+        if (!$partner) {
+            return response()->json(['error' => 'Partner not found'], 404);
+        }
+
+        $reservedCustomer = $partner->reservedCustomer;
+        
+        if (!$reservedCustomer) {
+            return response()->json(['error' => 'Reserved customer not found'], 404);
+        }
+
+        return response()->json([
+            'id' => $reservedCustomer->id,
+            'name' => $reservedCustomer->name,
+            'email' => $reservedCustomer->email,
+            'mobile_number' => $reservedCustomer->mobile_number
+        ]);
     }
 
     public function create()
@@ -300,7 +340,11 @@ class BookingController extends Controller
                 'id' => $accommodation->id,
                 'display_name' => $accommodation->display_name,
                 'base_price' => $accommodation->base_price,
-                'property_name' => $property->name
+                'max_occupancy' => $accommodation->max_occupancy,
+                'property_name' => $property->name,
+                'predefined_type' => [
+                    'name' => $accommodation->predefinedType->name ?? 'Custom'
+                ]
             ];
         }
         

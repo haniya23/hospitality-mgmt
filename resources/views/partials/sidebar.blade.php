@@ -32,7 +32,7 @@
                 <i class="fas fa-users w-6"></i>Customers
             </a></li>
             @if($canAccessAdvanced)
-            <li><a href="{{ route('b2b.dashboard') }}" class="flex gap-4 p-4 font-semibold rounded-full hover:bg-purple-100 {{ request()->routeIs('b2b.*') ? 'bg-gradient-to-r from-purple-400 to-purple-600 text-white' : 'text-gray-700' }} transition-all">
+            <li><a href="{{ route('b2b.index') }}" class="flex gap-4 p-4 font-semibold rounded-full hover:bg-purple-100 {{ request()->routeIs('b2b.*') ? 'bg-gradient-to-r from-purple-400 to-purple-600 text-white' : 'text-gray-700' }} transition-all">
                 <i class="fas fa-handshake w-6"></i>B2B Partners
             </a></li>
             @endif
@@ -114,7 +114,7 @@
             <li><a href="{{ route('customers.index') }}" @click="sidebarOpen = false" class="flex gap-4 p-4 font-semibold rounded-full hover:bg-purple-100 {{ request()->routeIs('customers.*') ? 'bg-gradient-to-r from-purple-400 to-purple-600 text-white' : 'text-gray-700' }} transition-all">
                 <i class="fas fa-users w-6"></i>Customers
             </a></li>
-            <li><a href="{{ route('b2b.dashboard') }}" @click="sidebarOpen = false" class="flex gap-4 p-4 font-semibold rounded-full hover:bg-purple-100 {{ request()->routeIs('b2b.*') ? 'bg-gradient-to-r from-purple-400 to-purple-600 text-white' : 'text-gray-700' }} transition-all">
+            <li><a href="{{ route('b2b.index') }}" @click="sidebarOpen = false" class="flex gap-4 p-4 font-semibold rounded-full hover:bg-purple-100 {{ request()->routeIs('b2b.*') ? 'bg-gradient-to-r from-purple-400 to-purple-600 text-white' : 'text-gray-700' }} transition-all">
                 <i class="fas fa-handshake w-6"></i>B2B Partners
             </a></li>
 

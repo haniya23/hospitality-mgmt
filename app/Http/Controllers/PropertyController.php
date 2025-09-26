@@ -260,7 +260,7 @@ class PropertyController extends Controller
 
     public function storeAccommodation(Request $request, Property $property)
     {
-        $this->authorize('update', $property);
+        $this->authorize('createAccommodation', $property);
         
         $request->validate([
             'predefined_type_id' => 'nullable|exists:predefined_accommodation_types,id',
@@ -272,7 +272,7 @@ class PropertyController extends Controller
         ]);
 
         $accommodation = $property->propertyAccommodations()->create([
-            'predefined_type_id' => $request->predefined_type_id,
+            'predefined_accommodation_type_id' => $request->predefined_type_id ?: 3, // Default to "Custom" type (ID: 3)
             'custom_name' => $request->custom_name,
             'max_occupancy' => $request->max_occupancy,
             'base_price' => $request->base_price,
@@ -288,7 +288,7 @@ class PropertyController extends Controller
 
     public function updateAccommodation(Request $request, Property $property, $accommodationId)
     {
-        $this->authorize('update', $property);
+        $this->authorize('updateAccommodation', $property);
         
         $accommodation = $property->propertyAccommodations()->findOrFail($accommodationId);
         
@@ -302,7 +302,7 @@ class PropertyController extends Controller
         ]);
 
         $accommodation->update([
-            'predefined_type_id' => $request->predefined_type_id,
+            'predefined_accommodation_type_id' => $request->predefined_type_id ?: 3, // Default to "Custom" type (ID: 3)
             'custom_name' => $request->custom_name,
             'max_occupancy' => $request->max_occupancy,
             'base_price' => $request->base_price,
@@ -318,7 +318,7 @@ class PropertyController extends Controller
 
     public function deleteAccommodation(Property $property, $accommodationId)
     {
-        $this->authorize('update', $property);
+        $this->authorize('deleteAccommodation', $property);
         
         $accommodation = $property->propertyAccommodations()->findOrFail($accommodationId);
         $accommodation->delete();

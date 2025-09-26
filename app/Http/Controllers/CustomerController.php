@@ -9,7 +9,8 @@ class CustomerController extends Controller
 {
     public function index()
     {
-        $customers = Guest::withCount('reservations')
+        $customers = Guest::regularCustomers()
+            ->withCount('reservations')
             ->orderBy('created_at', 'desc')
             ->get();
         

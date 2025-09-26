@@ -75,7 +75,7 @@
 
             @if($canAccessAdvanced)
             <li class="flex-center cursor-pointer p-16-semibold w-full whitespace-nowrap">
-                <a href="{{ route('b2b.dashboard') }}" class="p-16-semibold flex size-full gap-4 p-4 group font-semibold rounded-full bg-cover hover:bg-purple-100 hover:shadow-inner {{ request()->routeIs('b2b.*') ? 'bg-gradient-to-r from-purple-400 to-purple-600 text-white' : 'text-gray-700' }} transition-all ease-linear">
+                <a href="{{ route('b2b.index') }}" class="p-16-semibold flex size-full gap-4 p-4 group font-semibold rounded-full bg-cover hover:bg-purple-100 hover:shadow-inner {{ request()->routeIs('b2b.*') ? 'bg-gradient-to-r from-purple-400 to-purple-600 text-white' : 'text-gray-700' }} transition-all ease-linear">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="size-6">
                         <path class="{{ request()->routeIs('b2b.*') ? 'fill-white' : 'group-hover:fill-purple-600' }}" fill="#000" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                     </svg>
@@ -194,7 +194,7 @@
                 </li>
             @if($canAccessAdvanced)
             <li>
-                <a href="{{ route('b2b.dashboard') }}" @click="sidebarOpen = false"
+                <a href="{{ route('b2b.index') }}" @click="sidebarOpen = false"
                        class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/25 hover:backdrop-blur-md text-primary transition-all duration-300 {{ request()->routeIs('b2b.*') ? 'bg-white/30 backdrop-blur-md border border-white/40 shadow-lg' : '' }}">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
@@ -281,7 +281,7 @@
                     </svg>
                 </a>
                 @if($canAccessAdvanced)
-                <a href="{{ route('b2b.dashboard') }}" class="flex-nav-item {{ request()->routeIs('b2b.*') ? 'active' : '' }}">
+                <a href="{{ route('b2b.index') }}" class="flex-nav-item {{ request()->routeIs('b2b.*') ? 'active' : '' }}">
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                     </svg>

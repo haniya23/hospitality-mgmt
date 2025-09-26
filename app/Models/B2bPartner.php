@@ -72,6 +72,16 @@ class B2bPartner extends Model
         return $this->hasMany(PricingRule::class);
     }
 
+    public function reservedCustomer()
+    {
+        return $this->hasOne(Guest::class, 'partner_id')->where('is_reserved', true);
+    }
+
+    public function getReservedCustomerAttribute()
+    {
+        return $this->reservedCustomer()->first();
+    }
+
     public function sentRequests()
     {
         return $this->hasMany(B2bRequest::class, 'from_partner_id', 'contact_user_id');
@@ -139,5 +149,25 @@ class B2bPartner extends Model
             'requested_by' => $requesterUserId,
             'status' => 'pending',
         ]);
+    }
+
+    // Get or create reserved customer for this partner
+    public function getOrCreateReservedCustomer()
+    {
+        if (!$this->reservedCustomer) {
+            return Guest::createReservedCustomerForPartner($this);
+        }
+        
+        return $this->reservedCustomer;
+    }
+
+    // Update reserved customer name when partner name changes
+    public function updateReservedCustomerName()
+    {
+        if ($this->reservedCustomer) {
+            $this->reservedCustomer->update([
+                'name' => "Reserved – {$this->partner_name}"
+            ]);
+        }
     }
 }

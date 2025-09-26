@@ -56,6 +56,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/properties/{propertyId}/accommodations', [App\Http\Controllers\BookingController::class, 'getAccommodations']);
         Route::get('/guests', [App\Http\Controllers\BookingController::class, 'getGuests']);
         Route::get('/partners', [App\Http\Controllers\BookingController::class, 'getPartners']);
+        Route::get('/partners/{partnerId}/reserved-customer', [App\Http\Controllers\BookingController::class, 'getPartnerReservedCustomer']);
         Route::get('/bookings', [App\Http\Controllers\BookingController::class, 'index']);
 
         Route::patch('/bookings/{booking}/toggle-status', [App\Http\Controllers\BookingController::class, 'toggleStatus']);
@@ -70,9 +71,14 @@ Route::middleware('auth')->group(function () {
     Route::put('/customers/{customer}', [App\Http\Controllers\CustomerController::class, 'update'])->name('customers.update');
     
     // B2B Management Routes
-    Route::get('/b2b', function () {
-        return view('b2b.index');
-    })->name('b2b.dashboard')->middleware('subscription:b2b');
+    Route::get('/b2b', [App\Http\Controllers\B2bController::class, 'index'])->name('b2b.index')->middleware('subscription:b2b');
+    Route::get('/b2b/create', [App\Http\Controllers\B2bController::class, 'create'])->name('b2b.create')->middleware('subscription:b2b');
+    Route::post('/b2b', [App\Http\Controllers\B2bController::class, 'store'])->name('b2b.store')->middleware('subscription:b2b');
+    Route::get('/b2b/{b2b}', [App\Http\Controllers\B2bController::class, 'show'])->name('b2b.show')->middleware('subscription:b2b');
+    Route::get('/b2b/{b2b}/edit', [App\Http\Controllers\B2bController::class, 'edit'])->name('b2b.edit')->middleware('subscription:b2b');
+    Route::put('/b2b/{b2b}', [App\Http\Controllers\B2bController::class, 'update'])->name('b2b.update')->middleware('subscription:b2b');
+    Route::delete('/b2b/{b2b}', [App\Http\Controllers\B2bController::class, 'destroy'])->name('b2b.destroy')->middleware('subscription:b2b');
+    Route::patch('/b2b/{b2b}/toggle-status', [App\Http\Controllers\B2bController::class, 'toggleStatus'])->name('b2b.toggle-status')->middleware('subscription:b2b');
     
 
     

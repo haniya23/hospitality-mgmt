@@ -55,11 +55,12 @@ class CustomerManagement extends Component
 
     public function render()
     {
-        $customers = Guest::when($this->search, function($query) {
-            $query->where('name', 'like', '%' . $this->search . '%')
-                  ->orWhere('mobile_number', 'like', '%' . $this->search . '%')
-                  ->orWhere('email', 'like', '%' . $this->search . '%');
-        })->latest()->paginate(15);
+        $customers = Guest::regularCustomers()
+            ->when($this->search, function($query) {
+                $query->where('name', 'like', '%' . $this->search . '%')
+                      ->orWhere('mobile_number', 'like', '%' . $this->search . '%')
+                      ->orWhere('email', 'like', '%' . $this->search . '%');
+            })->latest()->paginate(15);
 
         return view('livewire.customer-management', compact('customers'))
             ->extends('layouts.mobile')

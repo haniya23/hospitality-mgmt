@@ -11,17 +11,135 @@
     <form method="POST" action="{{ route('bookings.store') }}" x-data="bookingCreateForm()" x-init="init()" class="space-y-4 sm:space-y-6">
         @csrf
         
+        <!-- Property & Accommodation Section -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+            <div class="flex items-center space-x-3 mb-4">
+                <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Property & Accommodation</h3>
+                    <p class="text-sm text-gray-600">Booking details for your stay</p>
+                </div>
+            </div>
+            
+            <!-- Property Details Card -->
+            <div x-show="!showPropertyAccommodationSelection" class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 p-4 sm:p-6">
+                <div class="flex flex-col sm:flex-row sm:items-start sm:space-x-4 space-y-3 sm:space-y-0">
+                    <!-- Property Icon -->
+                    <div class="flex-shrink-0">
+                        <div class="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center shadow-sm">
+                            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                            </svg>
+                        </div>
+                    </div>
+                    
+                    <!-- Property Info -->
+                    <div class="flex-1 min-w-0">
+                        <h4 class="text-lg font-semibold text-blue-900 mb-1" x-text="selectedAccommodationInfo?.property_name || 'Property'"></h4>
+                        <p class="text-sm text-blue-700 mb-3" x-text="selectedAccommodationInfo?.display_name || 'Accommodation'"></p>
+                        
+                        <!-- Property Details Grid -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
+                            <div class="flex items-center space-x-2">
+                                <svg class="w-4 h-4 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                                </svg>
+                                <span class="text-blue-800">
+                                    <span class="font-medium">Price:</span>
+                                    <span x-text="'₹' + (selectedAccommodationPrice || 0).toLocaleString() + '/day'"></span>
+                                </span>
+                            </div>
+                            
+                            <div class="flex items-center space-x-2">
+                                <svg class="w-4 h-4 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                </svg>
+                                <span class="text-blue-800">
+                                    <span class="font-medium">Max Guests:</span>
+                                    <span x-text="selectedAccommodationInfo?.max_occupancy || 0"></span>
+                                </span>
+                            </div>
+                            
+                            <div class="flex items-center space-x-2">
+                                <svg class="w-4 h-4 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                                </svg>
+                                <span class="text-blue-800">
+                                    <span class="font-medium">Type:</span>
+                                    <span x-text="selectedAccommodationInfo?.predefined_type?.name || 'Custom'"></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Property Selection (when multiple properties) -->
+            <div x-show="showPropertyAccommodationSelection" class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Property</label>
+                        <select name="property_id" x-model="selectedProperty" @change="loadAccommodations()" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent select2-dropdown" 
+                                :required="showPropertyAccommodationSelection">
+                            <option value="">Select Property</option>
+                            @foreach($properties as $property)
+                                <option value="{{ $property->id }}" {{ old('property_id') == $property->id ? 'selected' : '' }}>
+                                    {{ $property->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('property_id')
+                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Accommodation</label>
+                        <select name="accommodation_id" x-model="selectedAccommodation" @change="updateAccommodationPrice()" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent select2-dropdown" 
+                                :required="showPropertyAccommodationSelection">
+                            <option value="">Select Accommodation</option>
+                        </select>
+                        @error('accommodation_id')
+                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Hidden inputs for single property/accommodation -->
+            <template x-if="!showPropertyAccommodationSelection">
+                <div>
+                    <input type="hidden" name="property_id" x-model="defaultPropertyId">
+                    <input type="hidden" name="accommodation_id" x-model="defaultAccommodationId">
+                </div>
+            </template>
+        </div>
+        
         <!-- 1. Check-in Section -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Check-in Details</h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Check-in Date</label>
-                    <input type="date" name="check_in_date" x-model="checkInDate" @change="updateCheckOutDate()" 
+                    <input type="date" name="check_in_date" x-model="checkInDate" @change="updateCheckOutDate(); checkPastBooking()" 
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
                     @error('check_in_date')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror
+                    <!-- Past booking warning -->
+                    <div x-show="isPastBooking" class="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <div class="flex items-center">
+                            <svg class="w-4 h-4 text-yellow-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                            </svg>
+                            <span class="text-sm text-yellow-800">You're recording a past booking</span>
+                        </div>
+                    </div>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Check-out Date</label>
@@ -77,7 +195,23 @@
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-4">
                         <div class="text-center">
-                            <div class="text-2xl font-bold text-blue-600" x-text="days"></div>
+                            <div class="flex items-center justify-center space-x-2">
+                                <button type="button" @click="decreaseDays()" 
+                                        x-show="days > 1"
+                                        class="w-8 h-8 bg-blue-600 text-white rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center justify-center">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                                    </svg>
+                                </button>
+                                <div class="text-2xl font-bold text-blue-600 min-w-[2rem] text-center" x-text="days"></div>
+                                <button type="button" @click="increaseDays()" 
+                                        x-show="canIncreaseDays()"
+                                        class="w-8 h-8 bg-blue-600 text-white rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center justify-center">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                    </svg>
+                                </button>
+                            </div>
                             <div class="text-sm text-blue-500">Days</div>
                         </div>
                         <div class="text-center">
@@ -123,16 +257,16 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Total Amount (Override)</label>
-                    <input type="number" name="total_amount" x-model="totalAmount" step="0.01" min="0" 
+                    <input type="number" name="total_amount" x-model="totalAmount" @input="updateBalance()" step="0.01" min="0" 
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
-                    <p class="text-xs text-gray-500 mt-1">Leave empty to use default amount</p>
+                    <p class="text-xs text-gray-500 mt-1">Shows calculated amount, can be overridden</p>
                     @error('total_amount')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Advance Paid</label>
-                    <input type="number" name="advance_paid" x-model="advancePaid" step="0.01" min="0" 
+                    <input type="number" name="advance_paid" x-model="advancePaid" @input="updateBalance()" step="0.01" min="0" 
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
                     @error('advance_paid')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -149,10 +283,10 @@
             </div>
         </div>
 
-        <!-- 3. B2B Commission Section -->
+        <!-- 3. Commission Section -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-900">B2B Commission</h3>
+                <h3 class="text-lg font-semibold text-gray-900">Commission</h3>
                 <div class="flex bg-gray-100 rounded-lg p-1">
                     <button type="button" @click="isB2B = false" :class="!isB2B ? 'bg-white shadow-sm' : ''" class="px-3 py-1 text-sm font-medium rounded-md transition-colors">Direct</button>
                     <button type="button" @click="isB2B = true; calculateCommission()" :class="isB2B ? 'bg-white shadow-sm' : ''" class="px-3 py-1 text-sm font-medium rounded-md transition-colors">B2B</button>
@@ -162,13 +296,19 @@
             <div x-show="isB2B" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">B2B Partner</label>
-                    <select name="b2b_partner_id" x-model="selectedPartner" @change="calculateCommission()" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent select2-dropdown">
-                        <option value="">Select Partner</option>
-                        <template x-for="partner in partners" :key="partner.id">
-                            <option :value="partner.id" x-text="partner.partner_name"></option>
-                        </template>
-                    </select>
+                    <div class="relative">
+                        <input type="text" x-model="partnerSearch" @input="searchPartners()" placeholder="Search partners..." 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        <div x-show="filteredPartners.length > 0" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-40 overflow-y-auto">
+                            <template x-for="partner in filteredPartners" :key="partner.id">
+                                <div @click="selectPartner(partner)" class="px-3 py-2 hover:bg-gray-100 cursor-pointer">
+                                    <div class="font-medium" x-text="partner.partner_name"></div>
+                                    <div class="text-sm text-gray-500" x-text="partner.commission_rate + '% commission'"></div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                    <input type="hidden" name="b2b_partner_id" x-model="selectedPartner">
                 </div>
                 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -224,16 +364,16 @@
                 </div>
             </div>
             
-            <!-- B2B Customer Toggle -->
+            <!-- B2B Reserved Customer Toggle -->
             <div x-show="isB2B && customerType === 'b2b'" class="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h4 class="text-sm font-medium text-blue-800">B2B Customer</h4>
-                        <p class="text-xs text-blue-600">Using dummy customer for B2B partner to block dates</p>
+                        <h4 class="text-sm font-medium text-blue-800">B2B Reserved Customer</h4>
+                        <p class="text-xs text-blue-600">Using reserved customer for B2B partner to block dates</p>
                     </div>
                     <label class="flex items-center">
-                        <input type="checkbox" x-model="useB2BDummyCustomer" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                        <span class="ml-2 text-sm text-blue-700">Use B2B Dummy Customer</span>
+                        <input type="checkbox" x-model="useB2BReservedCustomer" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                        <span class="ml-2 text-sm text-blue-700">Use B2B Reserved Customer</span>
                     </label>
                 </div>
             </div>
@@ -254,11 +394,13 @@
                 </div>
             </div>
             
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Customer Input Fields - Hidden when B2B Reserved Customer is selected -->
+            <div x-show="!(customerType === 'b2b' && useB2BReservedCustomer)" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Guest Name</label>
                     <input type="text" name="guest_name" x-model="guestName" value="{{ old('guest_name') }}" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
+                           :required="!(customerType === 'b2b' && useB2BReservedCustomer)">
                     @error('guest_name')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror
@@ -266,7 +408,8 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Mobile Number</label>
                     <input type="text" name="guest_mobile" x-model="guestMobile" value="{{ old('guest_mobile') }}" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
+                           :required="!(customerType === 'b2b' && useB2BReservedCustomer)">
                     @error('guest_mobile')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror
@@ -280,65 +423,25 @@
                     @enderror
                 </div>
             </div>
-        </div>
-        
-        <!-- 5. Property & Accommodation -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Property & Accommodation</h3>
-            
-            <!-- Show only if multiple properties or accommodations -->
-            <div x-show="showPropertyAccommodationSelection" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Property</label>
-                    <select name="property_id" x-model="selectedProperty" @change="loadAccommodations()" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent select2-dropdown" 
-                            :required="showPropertyAccommodationSelection">
-                        <option value="">Select Property</option>
-                        @foreach($properties as $property)
-                            <option value="{{ $property->id }}" {{ old('property_id') == $property->id ? 'selected' : '' }}>
-                                {{ $property->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('property_id')
-                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Accommodation</label>
-                    <select name="accommodation_id" x-model="selectedAccommodation" @change="updateAccommodationPrice()" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent select2-dropdown" 
-                            :required="showPropertyAccommodationSelection">
-                        <option value="">Select Accommodation</option>
-                    </select>
-                    @error('accommodation_id')
-                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                    @enderror
-            </div>
-        </div>
 
-            <!-- Show selected property/accommodation info -->
-            <div x-show="selectedAccommodationInfo" class="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <div class="flex items-center justify-between">
-                <div>
-                        <h4 class="font-medium text-gray-900" x-text="selectedAccommodationInfo?.display_name"></h4>
-                        <p class="text-sm text-gray-600" x-text="selectedAccommodationInfo?.property_name"></p>
-                </div>
-                    <div class="text-right">
-                        <div class="text-lg font-bold text-gray-900" x-text="'₹' + (selectedAccommodationInfo?.base_price || 0).toLocaleString()"></div>
-                        <div class="text-sm text-gray-500">per night</div>
+            <!-- B2B Reserved Customer Info Display -->
+            <div x-show="customerType === 'b2b' && useB2BReservedCustomer" class="p-4 bg-green-50 rounded-lg border border-green-200">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h4 class="text-sm font-medium text-green-800">Using B2B Reserved Customer</h4>
+                        <p class="text-sm text-green-700" x-text="selectedPartnerReservedCustomer || 'Select a B2B partner to see reserved customer details'"></p>
+        </div>
                 </div>
             </div>
         </div>
 
-            <!-- Hidden inputs for single property/accommodation -->
-            <template x-if="!showPropertyAccommodationSelection">
-                <div>
-                    <input type="hidden" name="property_id" x-model="defaultPropertyId">
-                    <input type="hidden" name="accommodation_id" x-model="defaultAccommodationId">
-                </div>
-            </template>
-        </div>
+        <!-- Hidden input for B2B reserved customer flag -->
+        <input type="hidden" name="use_b2b_reserved_customer" :value="useB2BReservedCustomer ? '1' : '0'">
 
 
         <!-- Action Buttons -->
@@ -363,7 +466,7 @@ function bookingCreateForm() {
         selectedAccommodation: '{{ old('accommodation_id') }}',
         customerType: 'new',
         isB2B: false,
-        useB2BDummyCustomer: false,
+        useB2BReservedCustomer: false,
         guestSearch: '',
         guestName: '{{ old('guest_name') }}',
         guestMobile: '{{ old('guest_mobile') }}',
@@ -377,12 +480,13 @@ function bookingCreateForm() {
         children: {{ old('children', 0) }},
         days: 1,
         nights: 0,
+        isPastBooking: false,
         totalGuests: 1,
         bookingType: '{{ old('booking_type', 'per_day') }}',
         perPersonPrice: 1000,
         
         // Amount data
-        totalAmount: {{ old('total_amount', 0) }},
+        totalAmount: 0,
         advancePaid: {{ old('advance_paid', 0) }},
         defaultAmount: 0,
         balancePending: 0,
@@ -405,15 +509,20 @@ function bookingCreateForm() {
         guests: [],
         filteredGuests: [],
         partners: [],
+        filteredPartners: [],
         accommodations: [],
+        selectedPartnerReservedCustomer: null,
+        partnerSearch: '',
         
         async init() {
             await this.loadGuests();
             await this.loadPartners();
             await this.checkPropertyAccommodationLogic();
             this.calculateDaysNights();
+            // Calculate amount after accommodation price is set
             this.calculateAmount();
             this.calculateCommission();
+            this.checkPastBooking();
         },
         
         async loadGuests() {
@@ -433,6 +542,22 @@ function bookingCreateForm() {
                 console.error('Error loading partners:', error);
             }
         },
+
+        async loadPartnerReservedCustomer(partnerId) {
+            if (!partnerId) {
+                this.selectedPartnerReservedCustomer = null;
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/partners/${partnerId}/reserved-customer`);
+                const data = await response.json();
+                this.selectedPartnerReservedCustomer = data.name;
+            } catch (error) {
+                console.error('Error loading partner reserved customer:', error);
+                this.selectedPartnerReservedCustomer = null;
+            }
+        },
         
         searchGuests() {
             if (this.guestSearch.length < 2) {
@@ -444,6 +569,35 @@ function bookingCreateForm() {
                 guest.name.toLowerCase().includes(this.guestSearch.toLowerCase()) ||
                 guest.mobile_number.includes(this.guestSearch)
             ).slice(0, 5);
+        },
+
+        searchPartners() {
+            if (this.partnerSearch.length < 2) {
+                this.filteredPartners = [];
+                return;
+            }
+            
+            this.filteredPartners = this.partners.filter(partner => {
+                const name = partner.partner_name || '';
+                const search = this.partnerSearch.toLowerCase();
+                return name.toLowerCase().includes(search);
+            }).slice(0, 5);
+        },
+
+        selectPartner(partner) {
+            this.selectedPartner = partner.uuid;
+            this.partnerSearch = partner.partner_name;
+            this.filteredPartners = [];
+            
+            // Set default commission rate from partner
+            this.commissionValue = partner.commission_rate || 10;
+            this.commissionType = 'percentage';
+            this.calculateCommission();
+        },
+
+        updateBalance() {
+            this.balancePending = this.totalAmount - this.advancePaid;
+            this.calculateCommission();
         },
         
         selectGuest(guest) {
@@ -510,6 +664,80 @@ function bookingCreateForm() {
             }
         },
         
+        increaseDays() {
+            // Check if adding one more day would exceed 30 days from check-in
+            if (this.checkInDate) {
+                const checkIn = new Date(this.checkInDate);
+                const maxCheckOut = new Date(checkIn);
+                maxCheckOut.setDate(maxCheckOut.getDate() + 30);
+                
+                const proposedCheckOut = new Date(checkIn);
+                proposedCheckOut.setDate(proposedCheckOut.getDate() + this.days + 1);
+                
+                if (proposedCheckOut <= maxCheckOut) {
+                    this.days = this.days + 1;
+                    this.nights = this.days - 1;
+                    this.updateCheckOutDate();
+                    this.calculateTotalGuests();
+                    this.calculateAmount();
+                }
+            } else {
+                // If no check-in date, allow up to 30 days
+                if (this.days < 30) {
+                    this.days = this.days + 1;
+                    this.nights = this.days - 1;
+                    this.calculateTotalGuests();
+                    this.calculateAmount();
+                }
+            }
+        },
+        
+        decreaseDays() {
+            if (this.days > 1) {
+                this.days = this.days - 1;
+                this.nights = this.days - 1;
+                this.updateCheckOutDate();
+                this.calculateTotalGuests();
+                this.calculateAmount();
+            }
+        },
+        
+        updateCheckOutDate() {
+            if (this.checkInDate) {
+                const checkIn = new Date(this.checkInDate);
+                const checkOut = new Date(checkIn);
+                checkOut.setDate(checkOut.getDate() + this.days);
+                this.checkOutDate = checkOut.toISOString().split('T')[0];
+            }
+        },
+        
+        canIncreaseDays() {
+            if (this.checkInDate) {
+                const checkIn = new Date(this.checkInDate);
+                const maxCheckOut = new Date(checkIn);
+                maxCheckOut.setDate(maxCheckOut.getDate() + 30);
+                
+                const proposedCheckOut = new Date(checkIn);
+                proposedCheckOut.setDate(proposedCheckOut.getDate() + this.days + 1);
+                
+                return proposedCheckOut <= maxCheckOut;
+            } else {
+                // If no check-in date, allow up to 30 days
+                return this.days < 30;
+            }
+        },
+        
+        checkPastBooking() {
+            if (this.checkInDate) {
+                const checkIn = new Date(this.checkInDate);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0); // Reset time to start of day
+                this.isPastBooking = checkIn < today;
+            } else {
+                this.isPastBooking = false;
+            }
+        },
+        
         calculateTotalGuests() {
             this.totalGuests = parseInt(this.adults) + parseInt(this.children);
         },
@@ -521,8 +749,9 @@ function bookingCreateForm() {
                 this.defaultAmount = this.selectedAccommodationPrice * this.days;
             }
             
-            // Reset total amount when booking type changes to show new default
+            // Always update total amount to match calculated amount
             this.totalAmount = this.defaultAmount;
+            
             this.balancePending = this.totalAmount - this.advancePaid;
             this.calculateCommission();
         },
@@ -565,12 +794,30 @@ function bookingCreateForm() {
                     this.defaultAccommodationId = data.defaultAccommodationId;
                     this.selectedAccommodationPrice = data.defaultPrice;
                     this.selectedAccommodationInfo = data.defaultAccommodation;
+                    // Recalculate amount after setting accommodation price
+                    this.calculateAmount();
                 } else {
                     this.showPropertyAccommodationSelection = true;
                 }
             } catch (error) {
                 console.error('Error checking property logic:', error);
                 this.showPropertyAccommodationSelection = true;
+            }
+        },
+
+        // Watch for partner selection changes
+        watch: {
+            selectedPartner(newValue) {
+                if (this.customerType === 'b2b' && this.useB2BReservedCustomer) {
+                    this.loadPartnerReservedCustomer(newValue);
+                }
+            },
+            useB2BReservedCustomer(newValue) {
+                if (newValue && this.selectedPartner) {
+                    this.loadPartnerReservedCustomer(this.selectedPartner);
+                } else {
+                    this.selectedPartnerReservedCustomer = null;
+                }
             }
         }
     }
