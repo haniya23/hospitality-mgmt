@@ -3,11 +3,13 @@
 @section('title', 'Add B2B Partner')
 
 @section('header')
-    @include('partials.b2b.header')
+    <div x-data="b2bCreateData()" x-init="init()">
+        @include('partials.b2b.header')
+    </div>
 @endsection
 
 @section('content')
-<div x-data="b2bCreateData()" x-init="init()" class="max-w-2xl mx-auto">
+<div class="max-w-2xl mx-auto">
     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8">
         <div class="mb-6">
             <h2 class="text-2xl font-bold text-gray-900">Add New B2B Partner</h2>
