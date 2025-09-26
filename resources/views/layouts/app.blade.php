@@ -153,10 +153,23 @@
             }
         };
         
+        // Show loader on page load
+        showGlobalLoader('Loading page...');
+        
+        // Hide loader when page is fully loaded
+        window.addEventListener('load', function() {
+            setTimeout(() => hideGlobalLoader(), 500);
+        });
+        
+        // Also hide loader when DOM is ready (faster)
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => hideGlobalLoader(), 300);
+        });
+        
         // Intercept fetch requests to show/hide global loader
         const originalFetch = window.fetch;
         window.fetch = function(...args) {
-            // Show loader for non-GET requests or if it's a page load
+            // Show loader for non-GET requests
             if (args[1] && args[1].method && args[1].method !== 'GET') {
                 showGlobalLoader('Processing...');
             }
@@ -173,6 +186,25 @@
                     throw error;
                 });
         };
+        
+        // Intercept page navigation to show loader
+        window.addEventListener('beforeunload', function() {
+            showGlobalLoader('Loading page...');
+        });
+        
+        // Show loader for form submissions
+        document.addEventListener('submit', function(e) {
+            if (e.target.tagName === 'FORM') {
+                showGlobalLoader('Processing form...');
+            }
+        });
+        
+        // Show loader for link clicks (except hash links)
+        document.addEventListener('click', function(e) {
+            if (e.target.tagName === 'A' && e.target.href && !e.target.href.includes('#')) {
+                showGlobalLoader('Loading page...');
+            }
+        });
     </script>
     
     @stack('scripts')
