@@ -3,7 +3,9 @@
 @section('title', 'B2B Management')
 
 @section('header')
-    @include('partials.b2b.header')
+    <div x-data="b2bData()" x-init="init()">
+        @include('partials.b2b.header')
+    </div>
 @endsection
 
 @section('content')
