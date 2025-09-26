@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Hospitality Manager')</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
@@ -69,6 +69,20 @@
     </div>
     
     @include('partials.bottom-bar')
+    
+    <script>
+        // Listen for sidebar toggle events
+        document.addEventListener('DOMContentLoaded', function() {
+            window.addEventListener('toggle-sidebar', function() {
+                // Find the Alpine.js component and toggle sidebar
+                const body = document.body;
+                if (body._x_dataStack && body._x_dataStack[0]) {
+                    body._x_dataStack[0].sidebarOpen = !body._x_dataStack[0].sidebarOpen;
+                }
+            });
+        });
+    </script>
+    
     @stack('scripts')
 </body>
 </html>

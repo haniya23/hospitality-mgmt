@@ -7,7 +7,7 @@
 @endsection
 
 @section('content')
-<div class="max-w-2xl mx-auto">
+<div x-data="b2bCreateData()" x-init="init()" class="max-w-2xl mx-auto">
     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8">
         <div class="mb-6">
             <h2 class="text-2xl font-bold text-gray-900">Add New B2B Partner</h2>
@@ -164,3 +164,31 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+function b2bCreateData() {
+    return {
+        // Dummy data for the stat cards to prevent Alpine.js errors
+        partners: [],
+        
+        get activePartners() {
+            return 0; // No partners on create page
+        },
+        
+        get totalBookings() {
+            return 0; // No bookings on create page
+        },
+        
+        get totalPartners() {
+            return 0; // No partners on create page
+        },
+        
+        init() {
+            // Initialize any needed functionality
+            console.log('B2B Create page initialized');
+        }
+    }
+}
+</script>
+@endpush
