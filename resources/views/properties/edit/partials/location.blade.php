@@ -109,7 +109,7 @@
                         <div>
                             <label for="country_id" class="block text-sm font-medium text-gray-700 mb-2">Country</label>
                             <select id="country_id" name="country_id" 
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent select2-dropdown">
                                 <option value="">Select Country</option>
                                 @foreach(\App\Models\Country::all() as $country)
                                     <option value="{{ $country->id }}" {{ ($property->location->country_id ?? null) == $country->id ? 'selected' : '' }}>
@@ -122,7 +122,7 @@
                         <div>
                             <label for="state_id" class="block text-sm font-medium text-gray-700 mb-2">State</label>
                             <select id="state_id" name="state_id" 
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent select2-dropdown">
                                 <option value="">Select State</option>
                                 @foreach(\App\Models\State::all() as $state)
                                     <option value="{{ $state->id }}" {{ ($property->location->state_id ?? null) == $state->id ? 'selected' : '' }}>
@@ -135,7 +135,7 @@
                         <div>
                             <label for="district_id" class="block text-sm font-medium text-gray-700 mb-2">District</label>
                             <select id="district_id" name="district_id" 
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent select2-dropdown">
                                 <option value="">Select District</option>
                                 @foreach(\App\Models\District::all() as $district)
                                     <option value="{{ $district->id }}" {{ ($property->location->district_id ?? null) == $district->id ? 'selected' : '' }}>
@@ -148,7 +148,7 @@
                         <div>
                             <label for="city_id" class="block text-sm font-medium text-gray-700 mb-2">City</label>
                             <select id="city_id" name="city_id" 
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent select2-dropdown">
                                 <option value="">Select City</option>
                                 @foreach(\App\Models\City::all() as $city)
                                     <option value="{{ $city->id }}" {{ ($property->location->city_id ?? null) == $city->id ? 'selected' : '' }}>
@@ -161,7 +161,7 @@
                         <div>
                             <label for="pincode_id" class="block text-sm font-medium text-gray-700 mb-2">Pincode</label>
                             <select id="pincode_id" name="pincode_id" 
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent select2-dropdown">
                                 <option value="">Select Pincode</option>
                                 @foreach(\App\Models\Pincode::all() as $pincode)
                                     <option value="{{ $pincode->id }}" {{ ($property->location->pincode_id ?? null) == $pincode->id ? 'selected' : '' }}>
@@ -206,9 +206,19 @@
 <script>
 function openLocationModal(propertyUuid) {
     document.getElementById('locationModal').classList.remove('hidden');
+    
+    // Initialize Select2 for all location dropdowns
+    $('#country_id, #state_id, #district_id, #city_id, #pincode_id').select2({
+        placeholder: 'Select option',
+        allowClear: true,
+        width: '100%',
+        dropdownParent: $('#locationModal')
+    });
 }
 
 function closeLocationModal() {
+    // Destroy Select2 instances before closing modal
+    $('#country_id, #state_id, #district_id, #city_id, #pincode_id').select2('destroy');
     document.getElementById('locationModal').classList.add('hidden');
 }
 

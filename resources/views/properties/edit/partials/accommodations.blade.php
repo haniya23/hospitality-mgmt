@@ -106,7 +106,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Accommodation Type</label>
                             <select name="predefined_type_id" 
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent select2-dropdown">
                                 <option value="">Select Type (Optional)</option>
                                 @foreach(\App\Models\PredefinedAccommodationType::all() as $type)
                                     <option value="{{ $type->id }}">{{ $type->name }}</option>
@@ -196,9 +196,19 @@ function openAccommodationModal(propertyUuid, accommodationId = null) {
     }
     
     modal.classList.remove('hidden');
+    
+    // Initialize Select2 for accommodation type dropdown
+    $('select[name="predefined_type_id"]').select2({
+        placeholder: 'Select Type (Optional)',
+        allowClear: true,
+        width: '100%',
+        dropdownParent: $('#accommodationModal')
+    });
 }
 
 function closeAccommodationModal() {
+    // Destroy Select2 instance before closing modal
+    $('select[name="predefined_type_id"]').select2('destroy');
     document.getElementById('accommodationModal').classList.add('hidden');
     currentAccommodationId = null;
 }

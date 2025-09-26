@@ -92,7 +92,7 @@
                     <div>
                         <label for="property_category_id" class="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
                         <select id="property_category_id" name="property_category_id" 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent select2-dropdown">
                             <option value="">Select Property Type</option>
                             @foreach(\App\Models\PropertyCategory::all() as $category)
                                 <option value="{{ $category->id }}" {{ $property->property_category_id == $category->id ? 'selected' : '' }}>
@@ -134,9 +134,19 @@
 <script>
 function openBasicInfoModal(propertyUuid) {
     document.getElementById('basicInfoModal').classList.remove('hidden');
+    
+    // Initialize Select2 for property category dropdown
+    $('#property_category_id').select2({
+        placeholder: 'Select Property Type',
+        allowClear: true,
+        width: '100%',
+        dropdownParent: $('#basicInfoModal')
+    });
 }
 
 function closeBasicInfoModal() {
+    // Destroy Select2 instance before closing modal
+    $('#property_category_id').select2('destroy');
     document.getElementById('basicInfoModal').classList.add('hidden');
 }
 

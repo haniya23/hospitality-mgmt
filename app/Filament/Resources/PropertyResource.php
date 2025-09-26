@@ -3,16 +3,19 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PropertyResource\Pages;
+use App\Filament\Resources\PropertyResource\RelationManagers;
 use App\Models\Property;
 use App\Models\User;
 use App\Models\PropertyCategory;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Notifications\Notification;
+use Illuminate\Database\Eloquent\Builder;
 
 class PropertyResource extends Resource
 {
@@ -20,6 +23,16 @@ class PropertyResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-building-office';
     protected static ?string $navigationLabel = 'Properties';
     protected static ?string $navigationGroup = 'Property Management';
+
+    public static function getEloquentQuery(): Builder
+    {
+        // Admin can see all properties, regular users can only see their own
+        if (auth()->user()->is_admin) {
+            return parent::getEloquentQuery()->with(['location', 'policy']);
+        }
+        
+        return parent::getEloquentQuery()->where('owner_id', auth()->id())->with(['location', 'policy']);
+    }
 
     public static function form(Form $form): Form
     {
@@ -30,6 +43,7 @@ class PropertyResource extends Resource
                     ->relationship('owner', 'name')
                     ->searchable()
                     ->required()
+                    ->disabled(fn () => !auth()->user()->is_admin)
                     ->createOptionForm([
                         Forms\Components\TextInput::make('name')
                             ->required()
@@ -74,6 +88,101 @@ class PropertyResource extends Resource
                     ->maxLength(255),
                 Forms\Components\Textarea::make('description')
                     ->columnSpanFull(),
+                
+                // Location Section
+                Forms\Components\Section::make('Location Details')
+                    ->schema([
+                        Forms\Components\Textarea::make('location.address')
+                            ->label('Address')
+                            ->rows(3)
+                            ->columnSpanFull()
+                            ->default(fn ($record) => $record?->location?->address),
+                        Forms\Components\Select::make('location.country_id')
+                            ->label('Country')
+                            ->options(\App\Models\Country::pluck('name', 'id'))
+                            ->searchable()
+                            ->reactive()
+                            ->default(fn ($record) => $record?->location?->country_id)
+                            ->afterStateUpdated(fn (Set $set) => $set('location.state_id', null)),
+                        Forms\Components\Select::make('location.state_id')
+                            ->label('State')
+                            ->options(function (callable $get) {
+                                $countryId = $get('location.country_id');
+                                if (!$countryId) return [];
+                                return \App\Models\State::where('country_id', $countryId)->pluck('name', 'id');
+                            })
+                            ->searchable()
+                            ->reactive()
+                            ->default(fn ($record) => $record?->location?->state_id)
+                            ->afterStateUpdated(fn (Set $set) => $set('location.district_id', null)),
+                        Forms\Components\Select::make('location.district_id')
+                            ->label('District')
+                            ->options(function (callable $get) {
+                                $stateId = $get('location.state_id');
+                                if (!$stateId) return [];
+                                return \App\Models\District::where('state_id', $stateId)->pluck('name', 'id');
+                            })
+                            ->searchable()
+                            ->reactive()
+                            ->default(fn ($record) => $record?->location?->district_id)
+                            ->afterStateUpdated(fn (Set $set) => $set('location.city_id', null)),
+                        Forms\Components\Select::make('location.city_id')
+                            ->label('City')
+                            ->options(function (callable $get) {
+                                $districtId = $get('location.district_id');
+                                if (!$districtId) return [];
+                                return \App\Models\City::where('district_id', $districtId)->pluck('name', 'id');
+                            })
+                            ->searchable()
+                            ->reactive()
+                            ->default(fn ($record) => $record?->location?->city_id)
+                            ->afterStateUpdated(fn (Set $set) => $set('location.pincode_id', null)),
+                        Forms\Components\Select::make('location.pincode_id')
+                            ->label('Pincode')
+                            ->options(function (callable $get) {
+                                $cityId = $get('location.city_id');
+                                if (!$cityId) return [];
+                                return \App\Models\Pincode::where('city_id', $cityId)->pluck('code', 'id');
+                            })
+                            ->searchable()
+                            ->default(fn ($record) => $record?->location?->pincode_id),
+                        Forms\Components\TextInput::make('location.latitude')
+                            ->label('Latitude')
+                            ->numeric()
+                            ->step(0.000001)
+                            ->default(fn ($record) => $record?->location?->latitude),
+                        Forms\Components\TextInput::make('location.longitude')
+                            ->label('Longitude')
+                            ->numeric()
+                            ->step(0.000001)
+                            ->default(fn ($record) => $record?->location?->longitude),
+                    ])
+                    ->columns(2)
+                    ->collapsible(),
+                
+                // Policies Section
+                Forms\Components\Section::make('Property Policies')
+                    ->schema([
+                        Forms\Components\TimePicker::make('policy.check_in_time')
+                            ->label('Check-in Time')
+                            ->default(fn ($record) => $record?->policy?->check_in_time),
+                        Forms\Components\TimePicker::make('policy.check_out_time')
+                            ->label('Check-out Time')
+                            ->default(fn ($record) => $record?->policy?->check_out_time),
+                        Forms\Components\Textarea::make('policy.cancellation_policy')
+                            ->label('Cancellation Policy')
+                            ->rows(3)
+                            ->columnSpanFull()
+                            ->default(fn ($record) => $record?->policy?->cancellation_policy),
+                        Forms\Components\Textarea::make('policy.house_rules')
+                            ->label('House Rules')
+                            ->rows(3)
+                            ->columnSpanFull()
+                            ->default(fn ($record) => $record?->policy?->house_rules),
+                    ])
+                    ->columns(2)
+                    ->collapsible(),
+                
                 Forms\Components\Select::make('status')
                     ->options([
                         'draft' => 'Draft',
@@ -104,6 +213,14 @@ class PropertyResource extends Resource
                 Tables\Columns\TextColumn::make('category.name')
                     ->label('Category')
                     ->sortable(),
+                Tables\Columns\TextColumn::make('location.city.name')
+                    ->label('City')
+                    ->sortable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('location.city.district.state.name')
+                    ->label('State')
+                    ->sortable()
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
@@ -117,6 +234,10 @@ class PropertyResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->toggleable(),
+                Tables\Columns\TextColumn::make('property_accommodations_count')
+                    ->label('Accommodations')
+                    ->counts('propertyAccommodations')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -132,6 +253,11 @@ class PropertyResource extends Resource
                     ]),
             ])
             ->actions([
+                Tables\Actions\Action::make('accommodations')
+                    ->icon('heroicon-m-home')
+                    ->color('info')
+                    ->url(fn (Property $record): string => route('filament.admin.resources.property-accommodations.index', ['property' => $record->id]))
+                    ->openUrlInNewTab(),
                 Tables\Actions\Action::make('approve')
                     ->icon('heroicon-m-check')
                     ->color('success')
@@ -181,7 +307,7 @@ class PropertyResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\PropertyAccommodationsRelationManager::class,
         ];
     }
 
