@@ -72,6 +72,16 @@ class User extends Authenticatable
     {
         return $this->hasMany(B2bPartner::class, 'contact_user_id');
     }
+    
+    public function b2bPartners()
+    {
+        return $this->hasMany(B2bPartner::class, 'requested_by');
+    }
+    
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class, 'created_by');
+    }
 
     public function approvedProperties()
     {

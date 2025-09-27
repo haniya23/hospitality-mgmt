@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Property Pending Approval - Hospitality Manager')
+@section('title', 'Property Pending Approval - Stay loops')
 @section('page-title', 'Property Pending Approval')
 
 @section('content')

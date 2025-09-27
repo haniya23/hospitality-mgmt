@@ -12,6 +12,7 @@ class B2bController extends Controller
     public function index()
     {
         $partners = B2bPartner::with(['contactUser', 'reservedCustomer'])
+            ->where('requested_by', auth()->id())
             ->withCount('reservations')
             ->orderBy('created_at', 'desc')
             ->get();

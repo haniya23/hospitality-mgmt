@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Reservation;
 use App\Models\PropertyAccommodation;
+use App\Models\Property;
 use App\Models\Guest;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -15,18 +16,23 @@ class BookingSeeder extends Seeder
     public function run(): void
     {
         // Check if bookings already exist
-        if (Reservation::count() >= 50) {
+        if (Reservation::count() >= 30) {
             $this->command->info('Bookings already seeded. Skipping...');
             return;
         }
 
         // Get existing data
-        $accommodations = PropertyAccommodation::all();
+        $accommodations = PropertyAccommodation::with('property')->get();
         $guests = Guest::all();
         $users = User::where('is_admin', false)->get();
 
         if ($accommodations->isEmpty()) {
             $this->command->warn('No accommodations found. Please run AccommodationSeeder first.');
+            return;
+        }
+
+        if ($users->isEmpty()) {
+            $this->command->warn('No users found. Please create users first.');
             return;
         }
 
@@ -81,14 +87,14 @@ class BookingSeeder extends Seeder
             null, null, null, null, null // Some bookings without notes
         ];
 
-        // Create bookings for the next 6 months
-        for ($i = 0; $i < 50; $i++) {
+        // Create bookings for the next 3 months (upcoming bookings for calendar)
+        for ($i = 0; $i < 30; $i++) {
             $accommodation = $accommodations->random();
             $guest = $guests->random();
             $user = $users->random();
             
-            // Generate random check-in date (within next 6 months)
-            $checkInDate = Carbon::now()->addDays(rand(1, 180));
+            // Generate random check-in date (within next 3 months)
+            $checkInDate = Carbon::now()->addDays(rand(1, 90));
             $checkOutDate = $checkInDate->copy()->addDays(rand(1, 7)); // 1-7 nights stay
             
             $basePrice = $accommodation->base_price;
@@ -123,7 +129,7 @@ class BookingSeeder extends Seeder
                 'status' => $status,
                 'special_requests' => $specialRequests[rand(0, count($specialRequests) - 1)],
                 'notes' => $notes[rand(0, count($notes) - 1)],
-                'created_by' => $user->id,
+                'created_by' => $accommodation->property->owner_id, // Use property owner as creator
                 'uuid' => Str::uuid(),
             ]);
 

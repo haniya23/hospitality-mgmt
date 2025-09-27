@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Register - Hospitality Manager')
+@section('title', 'Register - Stay loops')
 @section('page-title', 'Create Account')
 
 @section('content')
@@ -8,7 +8,7 @@
     <div class="max-w-md w-full space-y-8">
         <div class="text-center">
             <h2 class="text-3xl font-bold text-gray-900">Create your account</h2>
-            <p class="mt-2 text-sm text-gray-600">Join Hospitality Manager today</p>
+            <p class="mt-2 text-sm text-gray-600">Join Stay loops today</p>
         </div>
 
         <form class="mt-8 space-y-6" action="{{ route('register') }}" method="POST">

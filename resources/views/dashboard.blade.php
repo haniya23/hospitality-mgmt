@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard - Hospitality Manager')
+@section('title', 'Dashboard - Stay loops')
 
 @section('header')
     @include('partials.dashboard.header')

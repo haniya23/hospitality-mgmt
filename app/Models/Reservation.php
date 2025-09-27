@@ -28,6 +28,7 @@ class Reservation extends Model
         'special_requests',
         'notes',
         'created_by',
+        'uuid',
     ];
 
     protected $casts = [
@@ -67,6 +68,11 @@ class Reservation extends Model
     }
 
     public function accommodation()
+    {
+        return $this->belongsTo(PropertyAccommodation::class, 'property_accommodation_id');
+    }
+
+    public function propertyAccommodation()
     {
         return $this->belongsTo(PropertyAccommodation::class, 'property_accommodation_id');
     }

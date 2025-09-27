@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Hospitality Manager</title>
+    <title>Login - Stay loops</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-gradient-to-br from-green-50 to-green-100 min-h-screen flex items-center justify-center">
     <div class="max-w-md w-full space-y-8 px-4" x-data="{ showPin: false }">
         <div class="text-center">
             <h1 class="text-4xl font-bold text-gray-900 mb-2">
-                Hospitality Manager
+                Stay loops
             </h1>
             <h2 class="text-xl font-semibold text-gray-700">
                 Sign in to your account

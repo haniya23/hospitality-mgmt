@@ -102,55 +102,93 @@
             <!-- Modal Content -->
             <div class="flex-1 overflow-y-auto p-6">
                 <form id="accommodationForm" class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Accommodation Type</label>
-                            <select name="predefined_type_id" 
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent select2-dropdown">
-                                <option value="">Select Type (Optional)</option>
-                                @foreach(\App\Models\PredefinedAccommodationType::all() as $type)
-                                    <option value="{{ $type->id }}">{{ $type->name }}</option>
-                                @endforeach
-                            </select>
-                            <p class="text-xs text-gray-500 mt-1">Choose a predefined type or leave blank for custom</p>
+                    <!-- Basic Information -->
+                    <div class="space-y-6">
+                        <h4 class="text-lg font-semibold text-gray-900">Basic Information</h4>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Accommodation Name *</label>
+                                <input type="text" name="custom_name" 
+                                       placeholder="e.g., Deluxe Room, Villa Suite, etc."
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent" 
+                                       required>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Type</label>
+                                <select name="predefined_type_id" 
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent select2-dropdown">
+                                    <option value="">Select Type</option>
+                                    @foreach(\App\Models\PredefinedAccommodationType::all() as $type)
+                                        <option value="{{ $type->id }}">{{ $type->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Base Price (₹) *</label>
+                                <input type="number" name="base_price" 
+                                       value="0" min="0" step="0.01"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent" 
+                                       required>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Max Occupancy *</label>
+                                <input type="number" name="max_occupancy" 
+                                       value="2" min="1"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent" 
+                                       required>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Size (sq ft)</label>
+                                <input type="number" name="size" 
+                                       min="0" step="0.01"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                            </div>
                         </div>
                         
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Display Name</label>
-                            <input type="text" name="custom_name" 
-                                   placeholder="e.g., Deluxe Room, Villa Suite, etc."
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent" 
-                                   required>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                            <textarea name="description" rows="4" 
+                                      placeholder="Describe the accommodation, amenities, and special features..."
+                                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"></textarea>
                         </div>
                     </div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Maximum Occupancy</label>
-                            <input type="number" name="max_occupancy" 
-                                   value="2" min="1" max="20"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent" 
-                                   required>
-                            <p class="text-xs text-gray-500 mt-1">Maximum number of guests</p>
+                    <!-- Amenities -->
+                    <div class="space-y-4">
+                        <h4 class="text-lg font-semibold text-gray-900">Amenities</h4>
+                        
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            @foreach(\App\Models\Amenity::all(['id', 'name', 'icon']) as $amenity)
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="checkbox" name="amenities[]" value="{{ $amenity->id }}"
+                                           class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
+                                    <div class="flex items-center space-x-2">
+                                        <i class="{{ $amenity->icon }} text-gray-600"></i>
+                                        <span class="text-sm text-gray-700">{{ $amenity->name }}</span>
+                                    </div>
+                                </label>
+                            @endforeach
                         </div>
+                    </div>
+                    
+                    <!-- Photos -->
+                    <div class="space-y-4">
+                        <h4 class="text-lg font-semibold text-gray-900">Photos</h4>
                         
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Base Price (₹)</label>
-                            <input type="number" name="base_price" 
-                                   value="0" min="0" step="0.01"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent" 
-                                   required>
-                            <p class="text-xs text-gray-500 mt-1">Price per night</p>
+                            <label for="photos" class="block text-sm font-medium text-gray-700 mb-2">Upload Photos</label>
+                            <input type="file" name="photos[]" id="photos" multiple accept="image/*"
+                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                            <p class="text-sm text-gray-500 mt-1">You can select multiple photos. Supported formats: JPEG, PNG, JPG, GIF (max 2MB each)</p>
                         </div>
                     </div>
                     
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                        <textarea name="description" rows="4" 
-                                  placeholder="Describe the accommodation, amenities, and special features..."
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"></textarea>
-                    </div>
-                    
+                    <!-- Status -->
                     <div class="flex items-center">
                         <input type="checkbox" name="is_active" value="1" checked
                                class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
@@ -233,9 +271,16 @@ async function loadAccommodationData(propertyUuid, accommodationId) {
             form.querySelector('input[name="custom_name"]').value = accommodation.custom_name || '';
             form.querySelector('input[name="max_occupancy"]').value = accommodation.max_occupancy || '';
             form.querySelector('input[name="base_price"]').value = accommodation.base_price || '';
+            form.querySelector('input[name="size"]').value = accommodation.size || '';
             form.querySelector('textarea[name="description"]').value = accommodation.description || '';
             form.querySelector('input[name="is_active"]').checked = accommodation.is_active;
             document.getElementById('accommodationId').value = accommodation.id;
+            
+            // Handle amenities
+            const amenityCheckboxes = form.querySelectorAll('input[name="amenities[]"]');
+            amenityCheckboxes.forEach(checkbox => {
+                checkbox.checked = accommodation.amenities && accommodation.amenities.some(amenity => amenity.id == checkbox.value);
+            });
         }
     } catch (error) {
         console.error('Error loading accommodation:', error);
@@ -259,8 +304,10 @@ async function saveAccommodation(propertyUuid) {
         custom_name: form.querySelector('[name="custom_name"]').value,
         max_occupancy: parseInt(form.querySelector('[name="max_occupancy"]').value),
         base_price: parseFloat(form.querySelector('[name="base_price"]').value),
+        size: form.querySelector('[name="size"]').value ? parseFloat(form.querySelector('[name="size"]').value) : null,
         description: form.querySelector('[name="description"]').value || null,
-        is_active: form.querySelector('[name="is_active"]').checked
+        is_active: form.querySelector('[name="is_active"]').checked,
+        amenities: Array.from(form.querySelectorAll('input[name="amenities[]"]:checked')).map(cb => parseInt(cb.value))
     };
     
     // Debug: Log form data

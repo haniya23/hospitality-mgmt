@@ -28,8 +28,21 @@ class BookingController extends Controller
 
         return response()->json([
             'pending' => $bookings->where('status', 'pending')->values(),
-            'active' => $bookings->whereIn('status', ['confirmed', 'checked_in'])->values()
+            'active' => $bookings->whereIn('status', ['confirmed', 'checked_in'])->values(),
+            'cancelled' => $bookings->where('status', 'cancelled')->values()
         ]);
+    }
+
+    public function show(Reservation $booking)
+    {
+        // Ensure the booking belongs to the authenticated user's property
+        $booking->load(['guest', 'accommodation.property', 'b2bPartner']);
+        
+        if ($booking->accommodation->property->owner_id !== auth()->id()) {
+            abort(403, 'Unauthorized');
+        }
+
+        return view('bookings.show', compact('booking'));
     }
 
     public function store(Request $request)
@@ -122,10 +135,10 @@ class BookingController extends Controller
         }
     }
 
-    public function toggleStatus($id)
+    public function toggleStatus(Reservation $booking)
     {
         try {
-            $booking = Reservation::with('accommodation.property')->findOrFail($id);
+            $booking->load('accommodation.property');
             
             if ($booking->accommodation->property->owner_id !== auth()->id()) {
                 return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
@@ -143,12 +156,12 @@ class BookingController extends Controller
         }
     }
 
-    public function cancel(Request $request, $id)
+    public function cancel(Request $request, Reservation $booking)
     {
         $request->validate(['reason' => 'required|string']);
 
         try {
-            $booking = Reservation::with('accommodation.property')->findOrFail($id);
+            $booking->load('accommodation.property');
             
             if ($booking->accommodation->property->owner_id !== auth()->id()) {
                 return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
@@ -205,7 +218,15 @@ class BookingController extends Controller
 
     public function getGuests()
     {
+        // Get current owner's property IDs
+        $ownerPropertyIds = auth()->user()->properties()->pluck('id');
+        
         $guests = Guest::regularCustomers()
+            ->whereHas('reservations', function($query) use ($ownerPropertyIds) {
+                $query->whereHas('accommodation', function($accommodationQuery) use ($ownerPropertyIds) {
+                    $accommodationQuery->whereIn('property_id', $ownerPropertyIds);
+                });
+            })
             ->orderBy('name')
             ->get(['id', 'name', 'mobile_number', 'email']);
         return response()->json($guests);
@@ -214,6 +235,7 @@ class BookingController extends Controller
     public function getPartners()
     {
         $partners = \App\Models\B2bPartner::where('status', 'active')
+            ->where('requested_by', auth()->id())
             ->get(['id', 'uuid', 'partner_name', 'commission_rate']);
         return response()->json($partners);
     }
@@ -370,5 +392,58 @@ class BookingController extends Controller
             ->get(['id', 'name']);
 
         return view('bookings.cancelled', compact('cancelledBookings', 'properties'));
+    }
+    
+    public function findAvailableAccommodations(Request $request)
+    {
+        $request->validate([
+            'check_in_date' => 'required|date',
+            'check_out_date' => 'required|date|after:check_in_date',
+        ]);
+        
+        $user = auth()->user();
+        $checkIn = $request->check_in_date;
+        $checkOut = $request->check_out_date;
+        
+        // Get all accommodations from user's properties
+        $accommodations = PropertyAccommodation::whereHas('property', function($query) use ($user) {
+            $query->where('owner_id', $user->id)->where('status', 'active');
+        })
+        ->where('status', 'active')
+        ->with(['property'])
+        ->get();
+        
+        // Filter out accommodations that have conflicting bookings
+        $availableAccommodations = $accommodations->filter(function($accommodation) use ($checkIn, $checkOut) {
+            $conflictingBookings = Reservation::where('property_accommodation_id', $accommodation->id)
+                ->where('status', '!=', 'cancelled')
+                ->where(function($query) use ($checkIn, $checkOut) {
+                    $query->whereBetween('check_in_date', [$checkIn, $checkOut])
+                          ->orWhereBetween('check_out_date', [$checkIn, $checkOut])
+                          ->orWhere(function($q) use ($checkIn, $checkOut) {
+                              $q->where('check_in_date', '<=', $checkIn)
+                                ->where('check_out_date', '>=', $checkOut);
+                          });
+                })
+                ->exists();
+                
+            return !$conflictingBookings;
+        });
+        
+        // Format the response
+        $formattedAccommodations = $availableAccommodations->map(function($accommodation) {
+            return [
+                'id' => $accommodation->id,
+                'name' => $accommodation->name,
+                'type' => $accommodation->type,
+                'capacity' => $accommodation->capacity,
+                'base_price' => $accommodation->base_price,
+                'currency' => $accommodation->currency,
+                'property_name' => $accommodation->property->name,
+                'property_id' => $accommodation->property->id
+            ];
+        });
+        
+        return response()->json($formattedAccommodations->values());
     }
 }

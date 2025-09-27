@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Admin Dashboard - Hospitality Manager')
+@section('title', 'Admin Dashboard - Stay loops')
 @section('page-title', 'Admin Panel')
 
 @section('content')

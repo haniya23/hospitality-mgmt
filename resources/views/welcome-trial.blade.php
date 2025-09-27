@@ -116,8 +116,8 @@
 
     <div class="text-center mt-8">
         <p class="text-gray-600 mb-4">You can switch between plans anytime during your trial</p>
-        <a href="{{ route('dashboard') }}" class="text-purple-600 hover:text-purple-700 font-medium">
-            Skip for now and explore dashboard →
+        <a href="{{ route('onboarding.wizard') }}" class="text-green-600 hover:text-green-700 font-medium">
+            Start Setup Wizard →
         </a>
     </div>
 </div>

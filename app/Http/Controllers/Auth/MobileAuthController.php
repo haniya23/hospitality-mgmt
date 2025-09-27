@@ -86,6 +86,6 @@ class MobileAuthController extends Controller
 
         Auth::login($user);
 
-        return redirect()->route('welcome.trial');
+        return redirect()->route('onboarding.wizard');
     }
 }

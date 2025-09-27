@@ -9,7 +9,15 @@ class CustomerController extends Controller
 {
     public function index()
     {
+        // Get current owner's property IDs
+        $ownerPropertyIds = auth()->user()->properties()->pluck('id');
+        
         $customers = Guest::regularCustomers()
+            ->whereHas('reservations', function($query) use ($ownerPropertyIds) {
+                $query->whereHas('accommodation', function($accommodationQuery) use ($ownerPropertyIds) {
+                    $accommodationQuery->whereIn('property_id', $ownerPropertyIds);
+                });
+            })
             ->withCount('reservations')
             ->orderBy('created_at', 'desc')
             ->get();

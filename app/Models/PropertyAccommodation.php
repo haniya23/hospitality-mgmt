@@ -12,6 +12,7 @@ class PropertyAccommodation extends Model
         'custom_name',
         'max_occupancy',
         'base_price',
+        'size',
         'description',
         'features',
         'is_active',
@@ -22,6 +23,7 @@ class PropertyAccommodation extends Model
         'features' => 'array',
         'is_active' => 'boolean',
         'base_price' => 'decimal:2',
+        'size' => 'decimal:2',
     ];
 
     public function property()

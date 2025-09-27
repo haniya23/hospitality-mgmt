@@ -16,7 +16,14 @@ Route::post('/logout', [MobileAuthController::class, 'logout'])->name('logout');
 // Protected Routes
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
-        $properties = auth()->user()->properties()->with(['category', 'location'])->latest()->get();
+        $user = auth()->user();
+        $properties = $user->properties()->with(['category', 'location'])->latest()->get();
+        
+        // If user has no properties, redirect to onboarding wizard
+        if ($properties->isEmpty()) {
+            return redirect()->route('onboarding.wizard');
+        }
+        
         return view('dashboard', compact('properties'));
     })->name('dashboard');
     
@@ -52,8 +59,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/bookings', function () {
         return view('bookings.index');
     })->name('bookings.index');
+    Route::get('/bookings/calendar', function () {
+        return view('bookings.calendar');
+    })->name('bookings.calendar');
     Route::get('/bookings/create', [App\Http\Controllers\BookingController::class, 'create'])->name('bookings.create');
     Route::post('/bookings', [App\Http\Controllers\BookingController::class, 'store'])->name('bookings.store');
+    Route::get('/bookings/{booking}', [App\Http\Controllers\BookingController::class, 'show'])->name('bookings.show');
     Route::get('/bookings/{booking}/edit', [App\Http\Controllers\BookingController::class, 'edit'])->name('bookings.edit');
     Route::put('/bookings/{booking}', [App\Http\Controllers\BookingController::class, 'update'])->name('bookings.update');
     Route::get('/bookings-cancelled', [App\Http\Controllers\BookingController::class, 'cancelled'])->name('bookings.cancelled');
@@ -61,8 +72,12 @@ Route::middleware('auth')->group(function () {
     // API Routes for Alpine.js
     Route::prefix('api')->group(function () {
         Route::get('/properties', [App\Http\Controllers\BookingController::class, 'getProperties']);
+        Route::post('/properties', [App\Http\Controllers\PropertyController::class, 'store']);
         Route::get('/properties/accommodation-count', [App\Http\Controllers\BookingController::class, 'getAccommodationCount']);
         Route::get('/properties/{propertyId}/accommodations', [App\Http\Controllers\BookingController::class, 'getAccommodations']);
+        Route::get('/properties/{property}/accommodations', [App\Http\Controllers\PropertyController::class, 'getAccommodations']);
+        Route::post('/properties/{property}/accommodations', [App\Http\Controllers\PropertyController::class, 'storeAccommodation']);
+        Route::post('/accommodations/available', [App\Http\Controllers\BookingController::class, 'findAvailableAccommodations']);
         Route::get('/guests', [App\Http\Controllers\BookingController::class, 'getGuests']);
         Route::get('/partners', [App\Http\Controllers\BookingController::class, 'getPartners']);
         Route::get('/partners/{partnerId}/reserved-customer', [App\Http\Controllers\BookingController::class, 'getPartnerReservedCustomer']);
@@ -104,7 +119,50 @@ Route::middleware('auth')->group(function () {
         return view('reports.analytics');
     })->name('reports.analytics')->middleware('subscription:advanced_reports');
     
-    // Subscription Routes
+    // Onboarding Routes
+    Route::get('/onboarding', function () {
+        $propertyCategories = \App\Models\PropertyCategory::all();
+        return view('onboarding.wizard', compact('propertyCategories'));
+    })->name('onboarding.wizard');
+    
+    // Booking Dashboard Routes
+    Route::get('/booking-dashboard', function () {
+        $user = auth()->user();
+        $recentBookings = $user->reservations()
+            ->with(['propertyAccommodation.property', 'guest'])
+            ->latest()
+            ->limit(5)
+            ->get()
+            ->map(function ($booking) {
+                return [
+                    'id' => $booking->id,
+                    'guest_name' => $booking->guest->name,
+                    'property_name' => $booking->propertyAccommodation->property->name,
+                    'accommodation_name' => $booking->propertyAccommodation->name,
+                    'check_in_date' => $booking->check_in_date->format('M d'),
+                    'check_out_date' => $booking->check_out_date->format('M d'),
+                    'total_amount' => $booking->total_amount
+                ];
+            });
+        
+        $stats = [
+            'total_bookings' => $user->reservations()->count(),
+            'confirmed_bookings' => $user->reservations()->where('status', 'confirmed')->count(),
+            'pending_bookings' => $user->reservations()->where('status', 'pending')->count(),
+            'total_revenue' => $user->reservations()->sum('total_amount')
+        ];
+        
+        return view('booking-dashboard', compact('recentBookings', 'stats'));
+    })->name('booking.dashboard');
+    
+    // Enhanced Booking Routes
+    Route::get('/bookings/enhanced-create', function () {
+        $user = auth()->user();
+        $properties = $user->properties()->with(['category', 'propertyAccommodations'])->get();
+        $b2bPartners = $user->b2bPartners()->where('status', 'active')->get();
+        
+        return view('bookings.enhanced-create', compact('properties', 'b2bPartners'));
+    })->name('bookings.enhanced-create');
     Route::get('/subscription/plans', [App\Http\Controllers\SubscriptionController::class, 'plans'])->name('subscription.plans');
     Route::post('/subscription/subscribe', [App\Http\Controllers\SubscriptionController::class, 'subscribe'])->name('subscription.subscribe');
     Route::get('/welcome-trial', function () {

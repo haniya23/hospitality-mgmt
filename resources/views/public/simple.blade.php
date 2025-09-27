@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hospitality Manager - Simple Landing</title>
+    <title>Stay loops - Simple Landing</title>
     <link rel="stylesheet" href="{{ asset('css/simple-landing.css') }}">
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
@@ -468,7 +468,7 @@
     <!-- Top Navigation -->
     <nav class="nav-container">
         <div class="nav-content">
-            <a href="#home" class="logo">🏨 Hospitality Manager</a>
+            <a href="#home" class="logo">🏨 Stay loops</a>
             
             <!-- Desktop Navigation Buttons -->
             <div class="nav-buttons-desktop">

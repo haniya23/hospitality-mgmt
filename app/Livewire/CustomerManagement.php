@@ -55,7 +55,15 @@ class CustomerManagement extends Component
 
     public function render()
     {
+        // Get current owner's property IDs
+        $ownerPropertyIds = auth()->user()->properties()->pluck('id');
+        
         $customers = Guest::regularCustomers()
+            ->whereHas('reservations', function($query) use ($ownerPropertyIds) {
+                $query->whereHas('accommodation', function($accommodationQuery) use ($ownerPropertyIds) {
+                    $accommodationQuery->whereIn('property_id', $ownerPropertyIds);
+                });
+            })
             ->when($this->search, function($query) {
                 $query->where('name', 'like', '%' . $this->search . '%')
                       ->orWhere('mobile_number', 'like', '%' . $this->search . '%')

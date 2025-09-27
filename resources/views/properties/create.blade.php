@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Create Property - Hospitality Manager')
+@section('title', 'Create Property - Stay loops')
 @section('page-title', 'Create Property')
 
 @section('content')

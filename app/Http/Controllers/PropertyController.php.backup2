@@ -63,15 +63,8 @@ class PropertyController extends Controller
             'is_api' => $request->is('api/*'),
             'expects_json' => $request->expectsJson(),
             'accept_header' => $request->header('Accept'),
-            'content_type' => $request->header('Content-Type'),
-            'method' => $request->method()
+            'content_type' => $request->header('Content-Type')
         ]);
-        
-        // Always return JSON for API routes
-        if ($request->is('api/*') || str_contains($request->path(), 'api/')) {
-            \Log::info('API request detected, returning JSON response');
-            return response()->json($property->load('category'));
-        }
         
         // Check if request expects JSON
         if ($request->expectsJson()) {
@@ -101,49 +94,25 @@ class PropertyController extends Controller
         }
         
         $request->validate([
-            'custom_name' => 'required|string|max:255',
-            'predefined_type_id' => 'nullable|exists:predefined_accommodation_types,id',
+            'name' => 'required|string|max:255',
+            'type' => 'required|string|max:255',
+            'capacity' => 'required|integer|min:1',
             'base_price' => 'required|numeric|min:0',
-            'max_occupancy' => 'required|integer|min:1',
-            'size' => 'nullable|numeric|min:0',
+            'currency' => 'required|string|max:3',
             'description' => 'nullable|string',
-            'is_active' => 'boolean',
-            'amenities' => 'nullable|array',
-            'amenities.*' => 'exists:amenities,id',
-            'photos.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
         
         $accommodation = $property->propertyAccommodations()->create([
-            'predefined_accommodation_type_id' => $request->predefined_type_id ?: 3, // Default to "Custom" type (ID: 3)
-            'custom_name' => $request->custom_name,
-            'max_occupancy' => $request->max_occupancy,
+            'name' => $request->name,
+            'type' => $request->type,
+            'capacity' => $request->capacity,
             'base_price' => $request->base_price,
-            'size' => $request->size,
+            'currency' => $request->currency,
             'description' => $request->description,
-            'is_active' => $request->boolean('is_active', true),
+            'status' => 'active',
         ]);
-
-        // Attach amenities
-        if ($request->amenities) {
-            $accommodation->amenities()->attach($request->amenities);
-        }
-
-        // Handle photos
-        if ($request->hasFile('photos')) {
-            foreach ($request->file('photos') as $photo) {
-                $path = $photo->store('accommodations', 'public');
-                $accommodation->photos()->create([
-                    'file_path' => $path,
-                    'is_main' => false
-                ]);
-            }
-        }
         
-        return response()->json([
-            'success' => true,
-            'message' => 'Accommodation created successfully!',
-            'accommodation' => $accommodation->load(['amenities', 'photos'])
-        ]);
+        return response()->json($accommodation);
     }
 
     public function index()
@@ -350,15 +319,7 @@ class PropertyController extends Controller
     {
         $this->authorize('update', $property);
         
-        $accommodation = $property->propertyAccommodations()->with(['amenities', 'photos'])->findOrFail($accommodationId);
-        
-        if (request()->expectsJson()) {
-            return response()->json([
-                'success' => true,
-                'accommodation' => $accommodation
-            ]);
-        }
-        
+        $accommodation = $property->propertyAccommodations()->findOrFail($accommodationId);
         $predefinedTypes = \App\Models\PredefinedAccommodationType::all();
         
         return view('properties.partials.accommodation-form', [
@@ -381,12 +342,8 @@ class PropertyController extends Controller
             'custom_name' => 'required|string|max:255',
             'max_occupancy' => 'required|integer|min:1',
             'base_price' => 'required|numeric|min:0',
-            'size' => 'nullable|numeric|min:0',
             'description' => 'nullable|string',
             'is_active' => 'boolean',
-            'amenities' => 'nullable|array',
-            'amenities.*' => 'exists:amenities,id',
-            'photos.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
         $accommodation->update([
@@ -394,29 +351,13 @@ class PropertyController extends Controller
             'custom_name' => $request->custom_name,
             'max_occupancy' => $request->max_occupancy,
             'base_price' => $request->base_price,
-            'size' => $request->size,
             'description' => $request->description,
             'is_active' => $request->boolean('is_active', true),
         ]);
 
-        // Sync amenities
-        $accommodation->amenities()->sync($request->amenities ?? []);
-
-        // Handle new photos
-        if ($request->hasFile('photos')) {
-            foreach ($request->file('photos') as $photo) {
-                $path = $photo->store('accommodations', 'public');
-                $accommodation->photos()->create([
-                    'file_path' => $path,
-                    'is_main' => false
-                ]);
-            }
-        }
-
         return response()->json([
             'success' => true, 
-            'message' => 'Accommodation updated successfully!',
-            'accommodation' => $accommodation->load(['amenities', 'photos'])
+            'message' => 'Accommodation updated successfully!'
         ]);
     }
 

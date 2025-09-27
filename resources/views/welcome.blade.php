@@ -3,15 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hospitality Manager - Property Management Made Easy</title>
+    <title>Stay loops - Property Management Made Easy</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-gradient-to-br from-green-50 to-green-100 min-h-screen">
+    <!-- Navigation Bar -->
+    <nav class="bg-white/80 backdrop-blur-lg border-b border-gray-200/50 shadow-sm">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
+                        <span class="text-white text-lg font-bold">S</span>
+                    </div>
+                    <span class="text-xl font-bold text-gray-900">Stay loops</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="{{ route('login') }}" class="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-2 rounded-xl font-medium hover:from-green-700 hover:to-emerald-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                        Sign In
+                    </a>
+                    <a href="{{ route('register') }}" class="border border-green-600 text-green-600 px-6 py-2 rounded-xl font-medium hover:bg-green-50 transition-colors">
+                        Create Account
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
     <div class="container mx-auto px-4 py-8">
         <!-- Header -->
         <div class="text-center mb-12">
             <h1 class="text-4xl md:text-6xl font-bold text-gray-900 mb-4">
-                Hospitality Manager
+                Stay loops
             </h1>
             <p class="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
                 Streamline your property management with our comprehensive hospitality solution
