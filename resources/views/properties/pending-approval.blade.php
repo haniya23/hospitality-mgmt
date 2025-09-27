@@ -1,4 +1,4 @@
-@extends('layouts.mobile')
+@extends('layouts.app')
 
 @section('title', 'Property Pending Approval - Hospitality Manager')
 @section('page-title', 'Property Pending Approval')

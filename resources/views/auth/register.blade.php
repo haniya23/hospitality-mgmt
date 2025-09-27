@@ -1,4 +1,4 @@
-@extends('layouts.mobile')
+@extends('layouts.app')
 
 @section('title', 'Register - Hospitality Manager')
 @section('page-title', 'Create Account')

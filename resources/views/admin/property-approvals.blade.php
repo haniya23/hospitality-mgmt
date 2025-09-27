@@ -1,4 +1,4 @@
-@extends('layouts.mobile')
+@extends('layouts.app')
 
 @section('title', 'Property Approvals - Admin')
 @section('page-title', 'Property Approvals')

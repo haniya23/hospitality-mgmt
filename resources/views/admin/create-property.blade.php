@@ -1,4 +1,4 @@
-@extends('layouts.mobile')
+@extends('layouts.app')
 
 @section('title', 'Create Property - Admin')
 @section('page-title', 'Create Property for User')

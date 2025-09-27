@@ -69,7 +69,7 @@ class B2BManagement extends Component
             })->latest()->paginate(15);
 
         return view('livewire.b2-b-management', compact('partners'))
-            ->extends('layouts.mobile')
+            ->extends('layouts.app')
             ->section('content');
     }
 }

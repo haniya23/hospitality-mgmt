@@ -1,4 +1,4 @@
-@extends('layouts.mobile')
+@extends('layouts.app')
 
 @section('title', 'Admin Dashboard - Hospitality Manager')
 @section('page-title', 'Admin Panel')

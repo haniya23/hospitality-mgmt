@@ -63,7 +63,7 @@ class CustomerManagement extends Component
             })->latest()->paginate(15);
 
         return view('livewire.customer-management', compact('customers'))
-            ->extends('layouts.mobile')
+            ->extends('layouts.app')
             ->section('content');
     }
 }

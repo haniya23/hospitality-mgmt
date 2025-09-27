@@ -1,4 +1,4 @@
-@extends('layouts.mobile')
+@extends('layouts.app')
 
 @section('title', 'Pricing Management - Hospitality Manager')
 @section('page-title', 'Pricing Management')

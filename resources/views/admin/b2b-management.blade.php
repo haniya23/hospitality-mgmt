@@ -1,4 +1,4 @@
-@extends('layouts.mobile')
+@extends('layouts.app')
 
 @section('title', 'B2B Management - Admin')
 @section('page-title', 'B2B Management')

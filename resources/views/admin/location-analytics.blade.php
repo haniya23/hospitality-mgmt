@@ -1,4 +1,4 @@
-@extends('layouts.mobile')
+@extends('layouts.app')
 
 @section('title', 'Location Analytics - Admin')
 @section('page-title', 'Location Analytics')
