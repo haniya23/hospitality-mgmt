@@ -74,14 +74,19 @@
                     <span>Created: </span>
                     <span class="font-medium text-gray-900" x-text="new Date(accommodation.created_at).toLocaleDateString()"></span>
                 </div>
-                <div class="flex space-x-2">
+                <div class="flex space-x-2 flex-wrap">
+                    <button @click="bookAccommodation(accommodation)" 
+                            class="bg-gradient-to-r from-green-500 to-emerald-500 text-white py-2 px-4 rounded-xl font-medium text-sm hover:from-green-600 hover:to-emerald-600 transition">
+                        <i class="fas fa-calendar-plus mr-1"></i>
+                        Book Now
+                    </button>
                     <a :href="'/accommodations/' + accommodation.uuid" 
                        class="bg-blue-500 text-white py-2 px-4 rounded-xl font-medium text-sm hover:bg-blue-600 transition">
                         <i class="fas fa-eye mr-1"></i>
-                        View
+                        Details
                     </a>
                     <a :href="'/accommodations/' + accommodation.uuid + '/edit'" 
-                       class="bg-green-500 text-white py-2 px-4 rounded-xl font-medium text-sm hover:bg-green-600 transition">
+                       class="bg-gray-500 text-white py-2 px-4 rounded-xl font-medium text-sm hover:bg-gray-600 transition">
                         <i class="fas fa-edit mr-1"></i>
                         Edit
                     </a>

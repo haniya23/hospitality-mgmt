@@ -131,6 +131,25 @@ function accommodationData() {
             window.location.href = '/bookings';
         },
 
+        bookAccommodation(accommodation) {
+            // Store accommodation details in sessionStorage for booking page
+            sessionStorage.setItem('selectedAccommodation', JSON.stringify({
+                id: accommodation.id,
+                uuid: accommodation.uuid,
+                name: accommodation.custom_name,
+                property_id: accommodation.property_id,
+                property_name: accommodation.property.name,
+                base_price: accommodation.base_price,
+                max_occupancy: accommodation.max_occupancy,
+                size: accommodation.size,
+                description: accommodation.description,
+                amenities: accommodation.amenities || []
+            }));
+            
+            // Navigate to booking page with accommodation pre-selected
+            window.location.href = '/booking-dashboard?accommodation=' + accommodation.uuid;
+        },
+
         deleteAccommodation(accommodationUuid) {
             if (confirm('Are you sure you want to delete this accommodation? This action cannot be undone.')) {
                 fetch(`/accommodations/${accommodationUuid}`, {

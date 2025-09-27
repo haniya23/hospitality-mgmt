@@ -8,35 +8,27 @@
     <!-- Floating Navigation Container -->
     <div class="mx-4 mb-6 lg:mx-8 lg:mb-8">
         <div class="bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl border border-gray-200/50 px-2 py-3 lg:px-4 lg:py-4">
-            <div class="flex items-center justify-around lg:justify-center lg:gap-8">
+            <div class="flex items-center justify-around lg:justify-center lg:gap-6">
                 <!-- Dashboard -->
                 <div class="group relative">
-                    <a href="{{ route('dashboard') }}" class="flex flex-col items-center justify-center p-3 lg:p-4 rounded-2xl transition-all duration-200 {{ request()->routeIs('dashboard') ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg' : 'text-gray-600 hover:text-green-600 hover:bg-green-50' }}">
-                        <i class="fas fa-home text-xl lg:text-2xl mb-1"></i>
+                    <a href="{{ route('dashboard') }}" class="flex flex-col items-center justify-center p-2 lg:p-4 rounded-2xl transition-all duration-200 {{ request()->routeIs('dashboard') ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg' : 'text-gray-600 hover:text-green-600 hover:bg-green-50' }}">
+                        <i class="fas fa-home text-lg lg:text-2xl mb-1"></i>
                         <span class="text-xs lg:text-sm font-medium">Dashboard</span>
                     </a>
                 </div>
 
-                <!-- Booking Dashboard -->
+                <!-- Properties -->
                 <div class="group relative">
-                    <a href="{{ route('booking.dashboard') }}" class="flex flex-col items-center justify-center p-3 lg:p-4 rounded-2xl transition-all duration-200 {{ request()->routeIs('booking.*') ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg' : 'text-gray-600 hover:text-green-600 hover:bg-green-50' }}">
-                        <i class="fas fa-calendar-plus text-xl lg:text-2xl mb-1"></i>
-                        <span class="text-xs lg:text-sm font-medium">Booking</span>
+                    <a href="{{ route('properties.index') }}" class="flex flex-col items-center justify-center p-2 lg:p-4 rounded-2xl transition-all duration-200 {{ request()->routeIs('properties.*') ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg' : 'text-gray-600 hover:text-green-600 hover:bg-green-50' }}">
+                        <i class="fas fa-building text-lg lg:text-2xl mb-1"></i>
+                        <span class="text-xs lg:text-sm font-medium">Properties</span>
                     </a>
                 </div>
 
-                <!-- Calendar -->
+                <!-- More Menu (Centered - 3rd position) -->
                 <div class="group relative">
-                    <a href="{{ route('bookings.calendar') }}" class="flex flex-col items-center justify-center p-3 lg:p-4 rounded-2xl transition-all duration-200 {{ request()->routeIs('bookings.calendar') ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg' : 'text-gray-600 hover:text-green-600 hover:bg-green-50' }}">
-                        <i class="fas fa-calendar-alt text-xl lg:text-2xl mb-1"></i>
-                        <span class="text-xs lg:text-sm font-medium">Calendar</span>
-                    </a>
-                </div>
-
-                <!-- More Menu -->
-                <div class="group relative">
-                    <button @click="showMoreMenu = !showMoreMenu" class="flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-200 text-gray-600 hover:text-green-600 hover:bg-green-50">
-                        <i class="fas fa-ellipsis-h text-xl mb-1"></i>
+                    <button @click="showMoreMenu = !showMoreMenu" class="flex flex-col items-center justify-center p-2 lg:p-3 rounded-2xl transition-all duration-200 text-gray-600 hover:text-green-600 hover:bg-green-50">
+                        <i class="fas fa-bars text-lg lg:text-xl mb-1"></i>
                         <span class="text-xs font-medium">More</span>
                     </button>
 
@@ -55,13 +47,28 @@
                         <div class="px-3 py-2">
                             <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Properties</h4>
                             <div class="space-y-1">
-                                <a href="{{ route('properties.index') }}" @click="showMoreMenu = false" class="flex items-center px-3 py-2 text-gray-700 hover:bg-green-50 hover:text-green-600 transition-colors rounded-lg {{ request()->routeIs('properties.*') ? 'bg-green-50 text-green-600' : '' }}">
-                                    <i class="fas fa-building w-4 mr-3"></i>
-                                    <span class="text-sm">Properties</span>
-                                </a>
                                 <a href="{{ route('accommodations.index') }}" @click="showMoreMenu = false" class="flex items-center px-3 py-2 text-gray-700 hover:bg-green-50 hover:text-green-600 transition-colors rounded-lg {{ request()->routeIs('accommodations.*') ? 'bg-green-50 text-green-600' : '' }}">
                                     <i class="fas fa-bed w-4 mr-3"></i>
                                     <span class="text-sm">Accommodations</span>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Bookings Section -->
+                        <div class="px-3 py-2">
+                            <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Bookings</h4>
+                            <div class="space-y-1">
+                                <a href="{{ route('bookings.calendar') }}" @click="showMoreMenu = false" class="flex items-center px-3 py-2 text-gray-700 hover:bg-green-50 hover:text-green-600 transition-colors rounded-lg {{ request()->routeIs('bookings.calendar') ? 'bg-green-50 text-green-600' : '' }}">
+                                    <i class="fas fa-calendar-alt w-4 mr-3"></i>
+                                    <span class="text-sm">Calendar</span>
+                                </a>
+                                <a href="{{ route('bookings.index') }}" @click="showMoreMenu = false" class="flex items-center px-3 py-2 text-gray-700 hover:bg-green-50 hover:text-green-600 transition-colors rounded-lg {{ request()->routeIs('bookings.index') ? 'bg-green-50 text-green-600' : '' }}">
+                                    <i class="fas fa-list w-4 mr-3"></i>
+                                    <span class="text-sm">All Bookings</span>
+                                </a>
+                                <a href="{{ route('bookings.cancelled') }}" @click="showMoreMenu = false" class="flex items-center px-3 py-2 text-gray-700 hover:bg-green-50 hover:text-green-600 transition-colors rounded-lg {{ request()->routeIs('bookings.cancelled') ? 'bg-green-50 text-green-600' : '' }}">
+                                    <i class="fas fa-times-circle w-4 mr-3"></i>
+                                    <span class="text-sm">Cancelled Bookings</span>
                                 </a>
                             </div>
                         </div>
@@ -105,6 +112,14 @@
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <!-- New Booking -->
+                <div class="group relative">
+                    <a href="{{ route('bookings.create') }}" class="flex flex-col items-center justify-center p-2 lg:p-4 rounded-2xl transition-all duration-200 {{ request()->routeIs('bookings.create') ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg' : 'text-gray-600 hover:text-green-600 hover:bg-green-50' }}">
+                        <i class="fas fa-calendar-plus text-lg lg:text-2xl mb-1"></i>
+                        <span class="text-xs lg:text-sm font-medium">New Booking</span>
+                    </a>
                 </div>
             </div>
         </div>

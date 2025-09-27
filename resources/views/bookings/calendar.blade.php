@@ -1,22 +1,15 @@
 @extends('layouts.app')
 
 @section('title', 'Calendar - Stay loops')
+@section('page-title', 'Booking Calendar')
+@section('page-subtitle', 'Manage your bookings and view upcoming reservations')
 
 @section('header')
-<div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Booking Calendar</h1>
-            <p class="text-gray-600">Manage your bookings and view upcoming reservations</p>
-        </div>
-        <div class="mt-4 sm:mt-0">
-            <a href="{{ route('booking.dashboard') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                <i class="fas fa-plus mr-2"></i>
-                New Booking
-            </a>
-        </div>
-    </div>
-</div>
+    <x-page-header 
+        title="Calendar" 
+        subtitle="View your bookings and upcoming reservations" 
+        icon="calendar-alt">
+    </x-page-header>
 @endsection
 
 @section('content')

@@ -56,7 +56,7 @@ class B2bController extends Controller
                 'phone' => $validated['mobile_number'],
                 'commission_rate' => $validated['commission_rate'] ?? 10.00,
                 'default_discount_pct' => $validated['default_discount_pct'] ?? 5.00,
-                'status' => 'pending',
+                'status' => 'active',
                 'requested_by' => auth()->id(),
             ]);
 

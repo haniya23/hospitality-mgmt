@@ -93,13 +93,14 @@
     
     @stack('styles')
 </head>
-<body class="bg-gray-50" x-data="{ sidebarOpen: false, globalLoading: false, loadingMessage: 'Loading...' }">
+<body class="bg-gray-50" x-data="{ sidebarOpen: false, sidebarCollapsed: false, globalLoading: false, loadingMessage: 'Loading...' }">
+    @include('partials.top-bar')
     @include('partials.sidebar')
     
-    <div class="lg:ml-72">
+    <div class="lg:ml-72 transition-all duration-300" :class="{ 'lg:ml-16': sidebarCollapsed }">
         @yield('header')
         
-        <main class="px-4 py-6 pb-32">
+        <main class="px-4 pt-20 pb-32 lg:pt-6">
             @yield('content')
         </main>
     </div>

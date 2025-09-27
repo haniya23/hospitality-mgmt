@@ -3,14 +3,18 @@
     <div x-show="sidebarOpen" x-transition.opacity class="fixed inset-0 z-40 bg-black/50 lg:hidden" @click="sidebarOpen = false"></div>
 
     <!-- Desktop Sidebar -->
-    <div class="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:w-72 lg:bg-white lg:p-5 lg:shadow-md lg:shadow-green-200/50 lg:flex lg:flex-col lg:overflow-y-auto">
+    <div class="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:bg-white lg:shadow-md lg:shadow-green-200/50 lg:flex lg:flex-col lg:overflow-y-auto transition-all duration-300" 
+         :class="sidebarCollapsed ? 'lg:w-16 lg:p-2' : 'lg:w-72 lg:p-5'">
         <div class="flex items-center justify-between mb-6">
-            <div class="flex items-center space-x-3">
+            <div class="flex items-center space-x-3" :class="{ 'justify-center': sidebarCollapsed }">
                 <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
                     <span class="text-white text-lg font-bold">S</span>
                 </div>
-                <span class="text-xl font-bold text-gray-900">Stay loops</span>
+                <span class="text-xl font-bold text-gray-900 transition-opacity duration-300" :class="{ 'opacity-0 w-0 overflow-hidden': sidebarCollapsed }">Stay loops</span>
             </div>
+            <button @click="sidebarCollapsed = !sidebarCollapsed" class="hidden lg:flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-100 transition-colors" :title="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'">
+                <i class="fas text-gray-500" :class="sidebarCollapsed ? 'fa-chevron-right' : 'fa-chevron-left'"></i>
+            </button>
         </div>
 
         @php
@@ -21,10 +25,11 @@
         <div class="flex-1 overflow-y-auto">
             <!-- Dashboard Section -->
             <div class="mb-6">
-                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">Main</h3>
+                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4 transition-opacity duration-300" :class="{ 'opacity-0': sidebarCollapsed }">Main</h3>
                 <ul class="space-y-1">
-                    <li><a href="{{ route('dashboard') }}" class="flex gap-4 p-3 font-semibold rounded-lg hover:bg-green-100 {{ request()->routeIs('dashboard') ? 'bg-gradient-to-r from-green-400 to-green-600 text-white' : 'text-gray-700' }} transition-all">
-                        <i class="fas fa-home w-5"></i>Dashboard
+                    <li><a href="{{ route('dashboard') }}" class="flex gap-4 p-3 font-semibold rounded-lg hover:bg-green-100 {{ request()->routeIs('dashboard') ? 'bg-gradient-to-r from-green-400 to-green-600 text-white' : 'text-gray-700' }} transition-all" :title="sidebarCollapsed ? 'Dashboard' : ''">
+                        <i class="fas fa-home w-5"></i>
+                        <span class="transition-opacity duration-300" :class="{ 'opacity-0 w-0 overflow-hidden': sidebarCollapsed }">Dashboard</span>
                     </a></li>
                 </ul>
             </div>

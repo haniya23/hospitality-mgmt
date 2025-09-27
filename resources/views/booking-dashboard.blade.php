@@ -177,6 +177,64 @@ function bookingDashboard() {
 
         init() {
             console.log('Booking dashboard initialized');
+            
+            // Check if accommodation was pre-selected from accommodations page
+            const urlParams = new URLSearchParams(window.location.search);
+            const accommodationUuid = urlParams.get('accommodation');
+            
+            if (accommodationUuid) {
+                const selectedAccommodation = sessionStorage.getItem('selectedAccommodation');
+                if (selectedAccommodation) {
+                    try {
+                        const accommodation = JSON.parse(selectedAccommodation);
+                        console.log('Pre-selected accommodation:', accommodation);
+                        
+                        // Show a notification about the pre-selected accommodation
+                        this.showPreSelectedAccommodation(accommodation);
+                        
+                        // Auto-start normal booking with pre-selected accommodation
+                        setTimeout(() => {
+                            this.startNormalBookingWithAccommodation(accommodation);
+                        }, 2000);
+                    } catch (error) {
+                        console.error('Error parsing selected accommodation:', error);
+                    }
+                }
+            }
+        },
+
+        showPreSelectedAccommodation(accommodation) {
+            // Create and show a notification
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-4 right-4 bg-green-500 text-white p-4 rounded-lg shadow-lg z-50 max-w-md';
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle mr-3"></i>
+                    <div>
+                        <p class="font-semibold">Accommodation Selected!</p>
+                        <p class="text-sm">${accommodation.name} - ₹${accommodation.base_price}/night</p>
+                        <p class="text-xs mt-1">Redirecting to booking form...</p>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Remove notification after 3 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        },
+
+        startNormalBookingWithAccommodation(accommodation) {
+            // Clear the accommodation parameter from URL and sessionStorage
+            const url = new URL(window.location);
+            url.searchParams.delete('accommodation');
+            window.history.replaceState({}, document.title, url.toString());
+            sessionStorage.removeItem('selectedAccommodation');
+            
+            // Redirect to booking create page with accommodation pre-selected
+            window.location.href = `/bookings/create?accommodation=${accommodation.uuid}&type=normal`;
         },
 
         startNormalBooking() {
