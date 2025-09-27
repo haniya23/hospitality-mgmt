@@ -1,9 +1,9 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Booking')
+@section('title', 'Update Booking')
 
 @section('header')
-    @include('partials.bookings.create-header')
+    @include('partials.bookings.edit-header')
 @endsection
 
 @section('content')
@@ -243,7 +243,37 @@
             </div>
         </div>
 
-        <!-- 2. Amount Section -->
+        <!-- 2. Booking Status Section -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Booking Status</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Current Status</label>
+                    <select name="status" x-model="bookingStatus" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+                        <option value="pending">Pending</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="checked_in">Checked In</option>
+                        <option value="checked_out">Checked Out</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                    @error('status')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Confirmation Number</label>
+                    <input type="text" name="confirmation_number" x-model="confirmationNumber" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
+                           placeholder="Auto-generated or custom">
+                    @error('confirmation_number')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Amount Section -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Amount Calculation</h3>
             
@@ -289,7 +319,7 @@
             </div>
         </div>
 
-        <!-- 3. Commission Section -->
+        <!-- 4. Commission Section -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-gray-900">Commission</h3>
@@ -375,7 +405,7 @@
             </div>
         </div>
 
-        <!-- 4. Customer Information -->
+        <!-- 5. Customer Information -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-gray-900">Customer Information</h3>
@@ -492,6 +522,10 @@ function bookingEditForm() {
         guestName: '{{ old('guest_name', $booking->guest->name) }}',
         guestMobile: '{{ old('guest_mobile', $booking->guest->mobile_number) }}',
         guestEmail: '{{ old('guest_email', $booking->guest->email) }}',
+        
+        // Status fields
+        bookingStatus: '{{ old('status', $booking->status) }}',
+        confirmationNumber: '{{ old('confirmation_number', $booking->confirmation_number) }}',
         selectedPartner: '{{ old('b2b_partner_id', $booking->b2b_partner_id) }}',
         
         // Date and guest data

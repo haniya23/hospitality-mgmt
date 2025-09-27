@@ -129,7 +129,7 @@ function bookingData() {
             try {
                 const response = await fetch('/api/bookings');
                 const data = await response.json();
-                this.bookings = [...data.pending, ...data.active];
+                this.bookings = [...data.pending, ...data.active, ...data.cancelled];
             } catch (error) {
                 console.error('Error loading bookings:', error);
                 this.showMessage('Error loading bookings', 'error');
@@ -155,9 +155,9 @@ function bookingData() {
             return 0;
         },
 
-        async toggleBookingStatus(bookingId) {
+        async toggleBookingStatus(bookingUuid) {
             try {
-                const response = await fetch(`/api/bookings/${bookingId}/toggle-status`, {
+                const response = await fetch(`/api/bookings/${bookingUuid}/toggle-status`, {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
@@ -176,8 +176,8 @@ function bookingData() {
             }
         },
 
-        openCancelModal(bookingId) {
-            this.cancelBookingId = bookingId;
+        openCancelModal(bookingUuid) {
+            this.cancelBookingId = bookingUuid;
             this.showCancelModal = true;
             this.cancelReason = '';
             this.cancelDescription = '';

@@ -72,7 +72,7 @@
             </div>
 
             <!-- Amount Information -->
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between mb-4">
                 <div class="text-sm text-gray-500">
                     <span>Total Amount: </span>
                     <span class="font-medium text-gray-900" x-text="'₹' + booking.reservation.total_amount"></span>
@@ -81,6 +81,20 @@
                     <span>Refund Amount: </span>
                     <span class="font-medium text-green-600" x-text="'₹' + (booking.refund_amount || 0)"></span>
                 </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex space-x-2">
+                <button @click="reactivateBooking(booking.reservation.uuid, 'pending')" 
+                        class="flex-1 bg-yellow-500 text-white py-2 px-4 rounded-xl font-medium text-sm hover:bg-yellow-600 transition">
+                    <i class="fas fa-clock mr-1"></i>
+                    Reactivate as Pending
+                </button>
+                <button @click="reactivateBooking(booking.reservation.uuid, 'confirmed')" 
+                        class="flex-1 bg-green-500 text-white py-2 px-4 rounded-xl font-medium text-sm hover:bg-green-600 transition">
+                    <i class="fas fa-check mr-1"></i>
+                    Reactivate as Confirmed
+                </button>
             </div>
         </div>
     </template>

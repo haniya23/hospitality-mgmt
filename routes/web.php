@@ -85,6 +85,7 @@ Route::middleware('auth')->group(function () {
 
         Route::patch('/bookings/{booking}/toggle-status', [App\Http\Controllers\BookingController::class, 'toggleStatus']);
         Route::patch('/bookings/{booking}/cancel', [App\Http\Controllers\BookingController::class, 'cancel']);
+        Route::patch('/bookings/{booking}/reactivate', [App\Http\Controllers\BookingController::class, 'reactivate']);
     });
     
     // Customer Management Routes

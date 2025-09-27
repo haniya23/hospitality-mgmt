@@ -66,12 +66,12 @@
             <div class="flex space-x-2">
                 <template x-if="booking.status === 'pending'">
                     <div class="flex space-x-2 w-full">
-                        <button @click="toggleBookingStatus(booking.id)" 
+                        <button @click="toggleBookingStatus(booking.uuid)" 
                                 class="flex-1 bg-green-500 text-white py-2 px-4 rounded-xl font-medium text-sm hover:bg-green-600 transition">
                             <i class="fas fa-check mr-1"></i>
                             Confirm
                         </button>
-                        <button @click="openCancelModal(booking.id)" 
+                        <button @click="openCancelModal(booking.uuid)" 
                                 class="flex-1 bg-red-500 text-white py-2 px-4 rounded-xl font-medium text-sm hover:bg-red-600 transition">
                             <i class="fas fa-times mr-1"></i>
                             Cancel
@@ -84,7 +84,7 @@
                             <i class="fas fa-edit mr-1"></i>
                             Edit
                         </a>
-                        <button @click="openCancelModal(booking.id)" 
+                        <button @click="openCancelModal(booking.uuid)" 
                                 class="bg-red-100 text-red-600 py-2 px-4 rounded-xl font-medium text-sm hover:bg-red-200 transition">
                             <i class="fas fa-times"></i>
                         </button>

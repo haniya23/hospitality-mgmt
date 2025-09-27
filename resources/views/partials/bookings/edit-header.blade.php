@@ -24,8 +24,8 @@
                     <i class="fas fa-edit text-teal-600"></i>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold text-slate-900">Edit Booking</h1>
-                    <p class="text-sm text-slate-700">Booking ID: #{{ $booking->id }}</p>
+                    <h1 class="text-xl font-bold text-slate-900">Update Booking</h1>
+                    <p class="text-sm text-slate-700">Edit booking details and status</p>
                 </div>
             </div>
             <a href="{{ route('bookings.index') }}" class="soft-glass-card rounded-xl px-4 py-2 hover:bg-opacity-60 transition-all flex items-center">

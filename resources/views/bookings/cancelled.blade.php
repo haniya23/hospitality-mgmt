@@ -171,6 +171,68 @@ function cancelledBookingData() {
             }
             
             return links;
+        },
+
+        async reactivateBooking(bookingUuid, newStatus) {
+            if (!confirm(`Are you sure you want to reactivate this booking as ${newStatus}?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/bookings/${bookingUuid}/reactivate`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        status: newStatus
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Remove the booking from the cancelled list
+                    this.cancelledBookings = this.cancelledBookings.filter(booking => 
+                        booking.reservation.uuid !== bookingUuid
+                    );
+                    this.filteredBookings = this.filteredBookings.filter(booking => 
+                        booking.reservation.uuid !== bookingUuid
+                    );
+                    
+                    // Show success message
+                    this.showMessage(`Booking reactivated as ${newStatus} successfully!`, 'success');
+                } else {
+                    this.showMessage(data.message || 'Error reactivating booking', 'error');
+                }
+            } catch (error) {
+                console.error('Error reactivating booking:', error);
+                this.showMessage('Error reactivating booking', 'error');
+            }
+        },
+
+        showMessage(message, type = 'success') {
+            // Create a temporary message element
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `fixed top-4 right-4 z-50 max-w-sm w-full rounded-lg shadow-lg p-4 ${
+                type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+            }`;
+            messageDiv.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} mr-2"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(messageDiv);
+            
+            // Remove the message after 5 seconds
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.parentNode.removeChild(messageDiv);
+                }
+            }, 5000);
         }
     }
 }

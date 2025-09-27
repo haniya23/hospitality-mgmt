@@ -302,7 +302,8 @@ class BookingController extends Controller
             'guest_mobile' => 'required|string',
             'total_amount' => 'required|numeric|min:0',
             'advance_paid' => 'required|numeric|min:0',
-            'status' => 'required|in:pending,confirmed,checked_in,checked_out,cancelled'
+            'status' => 'required|in:pending,confirmed,checked_in,checked_out,cancelled',
+            'confirmation_number' => 'nullable|string|max:255'
         ]);
 
         try {
@@ -324,7 +325,8 @@ class BookingController extends Controller
                 'total_amount' => $request->total_amount,
                 'advance_paid' => $request->advance_paid,
                 'balance_pending' => $request->total_amount - $request->advance_paid,
-                'status' => $request->status
+                'status' => $request->status,
+                'confirmation_number' => $request->confirmation_number
             ]);
 
             return redirect()->route('bookings.index')
@@ -445,5 +447,33 @@ class BookingController extends Controller
         });
         
         return response()->json($formattedAccommodations->values());
+    }
+
+    public function reactivate(Request $request, Reservation $booking)
+    {
+        try {
+            $booking->load('accommodation.property');
+            
+            if ($booking->accommodation->property->owner_id !== auth()->id()) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+            }
+            
+            if ($booking->status !== 'cancelled') {
+                return response()->json(['success' => false, 'message' => 'Booking is not cancelled'], 400);
+            }
+            
+            $request->validate([
+                'status' => 'required|in:pending,confirmed'
+            ]);
+            
+            $booking->update(['status' => $request->status]);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Booking reactivated successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
 }
