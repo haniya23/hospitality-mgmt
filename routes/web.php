@@ -3,9 +3,8 @@
 use App\Http\Controllers\Auth\MobileAuthController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Public Routes
+Route::get('/', [App\Http\Controllers\PublicController::class, 'simple'])->name('public.index');
 
 // Authentication Routes
 Route::get('/login', [MobileAuthController::class, 'showLoginForm'])->name('login');
