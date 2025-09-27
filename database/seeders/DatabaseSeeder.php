@@ -17,6 +17,9 @@ class DatabaseSeeder extends Seeder
             BasicDataSeeder::class,
             WayanadDataSeeder::class,
             TrialFixSeeder::class,
+            PropertySeeder::class,
+            AccommodationSeeder::class,
+            BookingSeeder::class,
         ]);
     }
 }
