@@ -6,6 +6,9 @@
     <title>Hospitality Manager - Simple Landing</title>
     <link rel="stylesheet" href="{{ asset('css/simple-landing.css') }}">
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
     
     <!-- Modern Counter Styles -->
     <style>
@@ -475,11 +478,11 @@
                     <a href="#analytics" class="nav-button">Analytics</a>
                 </div>
                 
-                <div class="auth-dropdown" x-data="{ open: false }">
-                    <button @click="open = !open" class="dropdown-toggle">
+                <div class="auth-dropdown" onclick="toggleDropdown(this)">
+                    <button class="dropdown-toggle">
                         Account
                     </button>
-                    <div x-show="open" @click.away="open = false" class="dropdown-menu" x-transition>
+                    <div class="dropdown-menu">
                         <a href="{{ route('login') }}" class="dropdown-item">Sign In</a>
                         <a href="{{ route('register') }}" class="dropdown-item">Register</a>
                     </div>
@@ -724,6 +727,31 @@
     </div>
 
     <script>
+        // Dropdown toggle function
+        function toggleDropdown(element) {
+            const dropdown = element.querySelector('.dropdown-menu');
+            const isOpen = dropdown.classList.contains('show');
+            
+            // Close all other dropdowns
+            document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+                menu.classList.remove('show');
+            });
+            
+            // Toggle current dropdown
+            if (!isOpen) {
+                dropdown.classList.add('show');
+            }
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.auth-dropdown')) {
+                document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+                    menu.classList.remove('show');
+                });
+            }
+        });
+
         // Smooth scrolling for navigation links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
