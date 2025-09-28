@@ -24,7 +24,51 @@ Route::middleware('auth')->group(function () {
             return redirect()->route('onboarding.wizard');
         }
         
-        return view('dashboard', compact('properties'));
+          // Get dynamic dashboard data
+        $dashboardData = [
+            'properties' => $properties->load(['propertyAccommodations.reservations', 'category', 'location.city.district.state']),
+            'nextBooking' => \App\Models\Reservation::whereHas('accommodation.property', function($q) use ($user) {
+                $q->where('owner_id', $user->id);
+            })->where('status', 'confirmed')
+            ->where('check_in_date', '>=', now())
+            ->orderBy('check_in_date')
+            ->first(),
+            'upcomingBookingsThisWeek' => \App\Models\Reservation::whereHas('accommodation.property', function($q) use ($user) {
+                $q->where('owner_id', $user->id);
+            })->where('status', 'confirmed')
+            ->whereBetween('check_in_date', [now(), now()->addWeek()])
+            ->count(),
+            'upcomingBookingsThisMonth' => \App\Models\Reservation::whereHas('accommodation.property', function($q) use ($user) {
+                $q->where('owner_id', $user->id);
+            })->where('status', 'confirmed')
+            ->whereBetween('check_in_date', [now(), now()->addMonth()])
+            ->count(),
+            'topB2bPartner' => \App\Models\B2bPartner::whereHas('reservations.accommodation.property', function($q) use ($user) {
+                $q->where('owner_id', $user->id);
+            })->withCount('reservations')
+            ->orderBy('reservations_count', 'desc')
+            ->first(),
+            'recentBookings' => \App\Models\Reservation::whereHas('accommodation.property', function($q) use ($user) {
+                $q->where('owner_id', $user->id);
+            })->with(['guest', 'accommodation.property'])
+            ->latest()
+            ->limit(5)
+            ->get(),
+            'pendingBookings' => \App\Models\Reservation::whereHas('accommodation.property', function($q) use ($user) {
+                $q->where('owner_id', $user->id);
+            })->where('status', 'pending')
+            ->with(['guest', 'accommodation.property'])
+            ->latest()
+            ->get(),
+            'activeBookings' => \App\Models\Reservation::whereHas('accommodation.property', function($q) use ($user) {
+                $q->where('owner_id', $user->id);
+            })->whereIn('status', ['confirmed', 'checked_in'])
+            ->with(['guest', 'accommodation.property'])
+            ->latest()
+            ->get(),
+        ];
+        
+        return view('dashboard', $dashboardData);
     })->name('dashboard');
     
     Route::get('/properties/create', [App\Http\Controllers\PropertyController::class, 'create'])->name('properties.create');

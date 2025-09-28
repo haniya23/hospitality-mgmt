@@ -7,96 +7,100 @@
 @endsection
 
 @section('content')
-<div x-data="dashboardData()" x-init="init()" class="space-y-6">
+<div x-data="dashboardData()" x-init="init()" class="space-y-4">
     @include('partials.dashboard.revenue-cards')
+    @include('partials.dashboard.quick-stats')
+    @include('partials.dashboard.quick-links')
     @include('partials.dashboard.properties-section')
     @include('partials.dashboard.recent-activity')
-    @include('partials.dashboard.quick-stats')
 </div>
 @endsection
+
+@include('partials.dashboard.motivational-quotes')
 
 @push('scripts')
 <script>
 function dashboardData() {
     return {
         notifications: 3,
-        todayStats: {
-            checkIns: 12,
-            checkOuts: 8,
-            newBookings: 5
-        },
-        revenue: {
-            today: 45000,
-            month: 890000
-        },
-        stats: {
-            totalGuests: 1240,
-            avgRating: 4.8
-        },
         properties: @json($properties ?? []),
-        recentActivity: [
-            {
-                id: 1,
-                type: 'booking',
-                message: 'New booking from John Doe',
-                time: '2 minutes ago'
-            },
-            {
-                id: 2,
-                type: 'checkin',
-                message: 'Guest checked in to Room 205',
-                time: '15 minutes ago'
-            },
-            {
-                id: 3,
-                type: 'checkout',
-                message: 'Guest checked out from Room 102',
-                time: '1 hour ago'
-            },
-            {
-                id: 4,
-                type: 'booking',
-                message: 'Booking confirmed for Amanda Smith',
-                time: '2 hours ago'
-            }
-        ],
+        nextBooking: @json($nextBooking ?? null),
+        upcomingBookingsThisWeek: @json($upcomingBookingsThisWeek ?? 0),
+        upcomingBookingsThisMonth: @json($upcomingBookingsThisMonth ?? 0),
+        topB2bPartner: @json($topB2bPartner ?? null),
+        recentBookings: @json($recentBookings ?? []),
+        pendingBookings: @json($pendingBookings ?? []),
+        activeBookings: @json($activeBookings ?? []),
+        motivationalQuotes: @json($motivationalQuotes ?? []),
+        currentQuoteIndex: 0,
+
+        get currentQuote() {
+            if (this.motivationalQuotes.length === 0) return 'No quotes available';
+            return this.motivationalQuotes[this.currentQuoteIndex];
+        },
 
         init() {
             console.log('Dashboard initialized');
+            // Set random initial quote
+            this.currentQuoteIndex = Math.floor(Math.random() * this.motivationalQuotes.length);
         },
 
         formatNumber(num) {
             return new Intl.NumberFormat('en-IN').format(num);
         },
 
+        formatDate(dateString) {
+            if (!dateString) return 'No date';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-IN', { 
+                day: 'numeric', 
+                month: 'short', 
+                year: 'numeric' 
+            });
+        },
+
+        nextQuote() {
+            this.currentQuoteIndex = (this.currentQuoteIndex + 1) % this.motivationalQuotes.length;
+        },
+
+        getTotalBookings(property) {
+            if (!property.property_accommodations) return 0;
+            let total = 0;
+            property.property_accommodations.forEach(accommodation => {
+                if (accommodation.reservations) {
+                    total += accommodation.reservations.length;
+                }
+            });
+            return total;
+        },
+
         // Navigation functions for clickable stats
-        navigateToRevenue(period) {
-            if (period === 'today') {
-                window.location.href = '/bookings?filter=today';
-            } else if (period === 'month') {
-                window.location.href = '/bookings?filter=month';
-            }
+        navigateToBookings() {
+            window.location.href = '/bookings';
         },
 
-        navigateToGuests() {
-            window.location.href = '/customers';
+        navigateToPendingBookings() {
+            window.location.href = '/bookings?status=pending';
         },
 
-        navigateToReviews() {
-            // For now, redirect to properties page since we don't have a reviews page
+        navigateToActiveBookings() {
+            window.location.href = '/bookings?status=confirmed,checked_in';
+        },
+
+        navigateToB2bPartners() {
+            window.location.href = '/b2b';
+        },
+
+        navigateToProperties() {
             window.location.href = '/properties';
         },
 
-        navigateToCheckIns() {
-            window.location.href = '/bookings?status=confirmed&filter=today';
+        navigateToAccommodations() {
+            window.location.href = '/properties';
         },
 
-        navigateToCheckOuts() {
-            window.location.href = '/bookings?status=confirmed&filter=today';
-        },
-
-        navigateToNewBookings() {
-            window.location.href = '/bookings?filter=today';
+        navigateToNewBooking() {
+            window.location.href = '/bookings/create';
         }
     }
 }

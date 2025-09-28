@@ -32,8 +32,8 @@
                         </div>
                     </div>
                     <div class="text-left sm:text-right">
-                        <div class="text-xl font-bold text-gray-800" x-text="(property.property_accommodations_count || 0) + ' accommodations'"></div>
-                        <div class="text-sm text-gray-500" x-text="(property.bookings_count || 0) + ' bookings'"></div>
+                        <div class="text-xl font-bold text-gray-800" x-text="(property.property_accommodations ? property.property_accommodations.length : 0) + ' accommodations'"></div>
+                        <div class="text-sm text-gray-500" x-text="getTotalBookings(property) + ' bookings'"></div>
                     </div>
                 </div>
 
@@ -47,11 +47,11 @@
                     </div>
                     <div class="grid grid-cols-2 gap-4 text-center">
                         <div class="text-center">
-                            <div class="text-lg font-bold text-gray-800" x-text="property.property_accommodations_count || 0"></div>
+                            <div class="text-lg font-bold text-gray-800" x-text="property.property_accommodations ? property.property_accommodations.length : 0"></div>
                             <div class="text-xs text-gray-500">Accommodations</div>
                         </div>
                         <div class="text-center">
-                            <div class="text-lg font-bold text-gray-800" x-text="property.bookings_count || 0"></div>
+                            <div class="text-lg font-bold text-gray-800" x-text="getTotalBookings(property)"></div>
                             <div class="text-xs text-gray-500">Bookings</div>
                         </div>
                     </div>
