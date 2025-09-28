@@ -8,7 +8,7 @@
 
 @section('content')
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-    <form method="POST" action="{{ route('bookings.store') }}" x-data="bookingCreateForm()" x-init="init()" class="space-y-4 sm:space-y-6">
+    <form method="POST" action="{{ route('bookings.store') }}" x-data="bookingCreateForm()" x-init="init()" @submit="handleSubmit" class="space-y-4 sm:space-y-6">
         @csrf
         
         <!-- Property & Accommodation Section -->
@@ -33,7 +33,7 @@
             </div>
             
             <!-- Property Details Card -->
-            <div x-show="!showPropertyAccommodationSelection" class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 p-4 sm:p-6">
+            <div x-show="!showPropertyAccommodationSelection && selectedAccommodationInfo && !selectedPropertyInfo" class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 p-4 sm:p-6">
                 <div class="flex flex-col sm:flex-row sm:items-start sm:space-x-4 space-y-3 sm:space-y-0">
                     <!-- Property Icon -->
                     <div class="flex-shrink-0">
@@ -46,7 +46,7 @@
                     
                     <!-- Property Info -->
                     <div class="flex-1 min-w-0">
-                        <h4 class="text-lg font-semibold text-blue-900 mb-1" x-text="selectedAccommodationInfo?.property_name || 'Property'"></h4>
+                        <h4 class="text-lg font-semibold text-blue-900 mb-1" x-text="selectedPropertyInfo?.name || selectedAccommodationInfo?.property_name || 'Property'"></h4>
                         <p class="text-sm text-blue-700 mb-3" x-text="selectedAccommodationInfo?.display_name || 'Accommodation'"></p>
                         
                         <!-- Property Details Grid -->
@@ -131,57 +131,61 @@
             </div>
             
             <!-- Property Selection (when multiple properties) -->
-            <div x-show="showPropertyAccommodationSelection && showPropertySelection" class="space-y-4">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Property</label>
-                        <select name="property_id" x-model="selectedProperty" @change="loadAccommodations()" 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent select2-dropdown" 
-                                :required="showPropertyAccommodationSelection && showPropertySelection">
-                            <option value="">Select Property</option>
-                            @foreach($properties as $property)
-                                <option value="{{ $property->id }}" {{ old('property_id') == $property->id ? 'selected' : '' }}>
-                                    {{ $property->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('property_id')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Accommodation</label>
-                        <select name="accommodation_id" x-model="selectedAccommodation" @change="updateAccommodationPrice()" 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent select2-dropdown" 
-                                :required="showPropertyAccommodationSelection">
-                            <option value="">Select Accommodation</option>
-                        </select>
-                        @error('accommodation_id')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                        @enderror
+            <template x-if="showPropertyAccommodationSelection && showPropertySelection">
+                <div class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Property</label>
+                            <select name="property_id" x-model="selectedProperty" @change="loadAccommodations()" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent select2-dropdown" 
+                                    required>
+                                <option value="">Select Property</option>
+                                @foreach($properties as $property)
+                                    <option value="{{ $property->id }}" {{ old('property_id') == $property->id ? 'selected' : '' }}>
+                                        {{ $property->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('property_id')
+                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Accommodation</label>
+                            <select name="accommodation_id" x-model="selectedAccommodation" @change="updateAccommodationPrice()" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent select2-dropdown" 
+                                    required>
+                                <option value="">Select Accommodation</option>
+                            </select>
+                            @error('accommodation_id')
+                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
                     </div>
                 </div>
-            </div>
+            </template>
             
             <!-- Accommodation Selection Only (when single property, multiple accommodations) -->
-            <div x-show="showPropertyAccommodationSelection && !showPropertySelection" class="space-y-4">
-                <div class="grid grid-cols-1 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Accommodation</label>
-                        <select name="accommodation_id" x-model="selectedAccommodation" @change="updateAccommodationPrice()" 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent select2-dropdown" 
-                                :required="!showPropertySelectionModal">
-                            <option value="">Select Accommodation</option>
-                            <template x-for="accommodation in singlePropertyAccommodations" :key="accommodation.id">
-                                <option :value="accommodation.id" x-text="accommodation.display_name"></option>
-                            </template>
-                        </select>
-                        @error('accommodation_id')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                        @enderror
+            <template x-if="showPropertyAccommodationSelection && !showPropertySelection">
+                <div class="space-y-4">
+                    <div class="grid grid-cols-1 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Accommodation</label>
+                            <select name="accommodation_id" x-model="selectedAccommodation" @change="updateAccommodationPrice()" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent select2-dropdown" 
+                                    required>
+                                <option value="">Select Accommodation</option>
+                                <template x-for="accommodation in singlePropertyAccommodations" :key="accommodation.id">
+                                    <option :value="accommodation.id" x-text="accommodation.display_name"></option>
+                                </template>
+                            </select>
+                            @error('accommodation_id')
+                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
                     </div>
                 </div>
-            </div>
+            </template>
             
             <!-- Hidden inputs for single property/accommodation -->
             <template x-if="!showPropertyAccommodationSelection">
@@ -448,7 +452,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <h4 class="text-sm font-medium text-blue-800">B2B Reserved Customer</h4>
-                        <p class="text-xs text-blue-600">Using reserved customer for B2B partner to block dates</p>
+                        <p class="text-xs text-blue-600" x-text="useB2BReservedCustomer ? 'Automatically selected reserved customer for this partner' : 'Using reserved customer for B2B partner to block dates'"></p>
                     </div>
                     <label class="flex items-center">
                         <input type="checkbox" x-model="useB2BReservedCustomer" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
@@ -513,14 +517,16 @@
                     </div>
                     <div class="ml-3">
                         <h4 class="text-sm font-medium text-green-800">Using B2B Reserved Customer</h4>
-                        <p class="text-sm text-green-700" x-text="selectedPartnerReservedCustomer || 'Select a B2B partner to see reserved customer details'"></p>
-        </div>
+                        <p class="text-sm text-green-700" x-text="selectedPartnerReservedCustomer || 'Loading reserved customer details...'"></p>
+                        <p class="text-xs text-green-600 mt-1" x-show="useB2BReservedCustomer && selectedPartnerReservedCustomer && !selectedPartnerReservedCustomer.includes('No reserved') && !selectedPartnerReservedCustomer.includes('Error')">This customer is automatically selected for the B2B partner</p>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Hidden input for B2B reserved customer flag -->
         <input type="hidden" name="use_b2b_reserved_customer" :value="useB2BReservedCustomer ? '1' : '0'">
+
 
 
         <!-- Action Buttons -->
@@ -716,6 +722,25 @@ function bookingCreateForm() {
             this.checkPastBooking();
         },
         
+        handleSubmit(event) {
+            // Check if form is valid
+            const form = event.target;
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+                
+                // Find the first invalid field and focus it
+                const invalidField = form.querySelector(':invalid');
+                if (invalidField) {
+                    invalidField.focus();
+                    invalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                return false;
+            }
+            
+            return true;
+        },
+        
         async loadGuests() {
             try {
                 const response = await fetch('/api/guests');
@@ -743,10 +768,18 @@ function bookingCreateForm() {
             try {
                 const response = await fetch(`/api/partners/${partnerId}/reserved-customer`);
                 const data = await response.json();
-                this.selectedPartnerReservedCustomer = data.name;
+                
+                if (response.ok && data.name) {
+                    this.selectedPartnerReservedCustomer = data.name;
+                } else {
+                    // Partner doesn't have a reserved customer
+                    this.selectedPartnerReservedCustomer = 'No reserved customer found for this partner';
+                    this.useB2BReservedCustomer = false;
+                }
             } catch (error) {
                 console.error('Error loading partner reserved customer:', error);
-                this.selectedPartnerReservedCustomer = null;
+                this.selectedPartnerReservedCustomer = 'Error loading reserved customer';
+                this.useB2BReservedCustomer = false;
             }
         },
         
@@ -784,6 +817,14 @@ function bookingCreateForm() {
             this.commissionValue = partner.commission_rate || 10;
             this.commissionType = 'percentage';
             this.calculateCommission();
+            
+            // Automatically set B2B mode and reserved customer
+            this.isB2B = true;
+            this.customerType = 'b2b';
+            this.useB2BReservedCustomer = true;
+            
+            // Load the reserved customer for this partner
+            this.loadPartnerReservedCustomer(partner.uuid);
         },
 
         updateBalance() {
@@ -806,15 +847,18 @@ function bookingCreateForm() {
                 const response = await fetch(`/api/properties/${this.selectedProperty}/accommodations`);
                 this.accommodations = await response.json();
                 
+                // Update the select element for multiple properties case
                 const select = document.querySelector('select[name="accommodation_id"]');
-                select.innerHTML = '<option value="">Select Accommodation</option>';
-                
-                this.accommodations.forEach(acc => {
-                    const option = document.createElement('option');
-                    option.value = acc.id;
-                    option.textContent = `${acc.display_name} - ₹${acc.base_price}`;
-                    select.appendChild(option);
-                });
+                if (select) {
+                    select.innerHTML = '<option value="">Select Accommodation</option>';
+                    
+                    this.accommodations.forEach(acc => {
+                        const option = document.createElement('option');
+                        option.value = acc.id;
+                        option.textContent = `${acc.display_name} - ₹${acc.base_price}`;
+                        select.appendChild(option);
+                    });
+                }
                 
                 this.selectedAccommodation = '';
             } catch (error) {
@@ -984,6 +1028,8 @@ function bookingCreateForm() {
                     this.showPropertySelection = false;
                     this.defaultPropertyId = data.defaultPropertyId;
                     this.defaultAccommodationId = data.defaultAccommodationId;
+                    this.selectedProperty = data.defaultPropertyId; // Set selectedProperty for form validation
+                    this.selectedAccommodation = data.defaultAccommodationId; // Set selectedAccommodation for form validation
                     this.selectedAccommodationPrice = data.defaultPrice;
                     this.selectedAccommodationInfo = data.defaultAccommodation;
                     // Recalculate amount after setting accommodation price
@@ -1063,12 +1109,19 @@ function bookingCreateForm() {
             this.selectedAccommodationInfo = accommodation;
             this.selectedAccommodationPrice = accommodation.base_price;
             
-            // Load accommodations for the form
-            await this.loadAccommodations();
-            this.updateAccommodationPrice();
+            // Hide the property/accommodation selection since we've made a selection
+            this.showPropertyAccommodationSelection = false;
+            this.showPropertySelection = false;
+            
+            // Set the default values for hidden inputs
+            this.defaultPropertyId = this.selectedModalProperty.id;
+            this.defaultAccommodationId = accommodation.id;
             
             // Update property info
             await this.loadPropertyInfo();
+            
+            // Calculate amount with the new accommodation price
+            this.calculateAmount();
             
             // Update URL with selected property and accommodation
             const propertyUuid = this.selectedModalProperty.uuid;
