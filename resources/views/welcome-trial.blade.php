@@ -30,7 +30,7 @@
             <div class="text-center mb-6">
                 <h3 class="text-2xl font-bold text-gray-900 mb-2">Start with Starter</h3>
                 <div class="text-4xl font-bold text-blue-600 mb-2">FREE</div>
-                <div class="text-sm text-gray-500 mb-4">30-day trial • Then ₹399/month</div>
+                <div class="text-sm text-gray-500 mb-4">30-day trial • Then ₹299/month</div>
                 <p class="text-gray-600">Perfect for single property</p>
             </div>
             
@@ -48,8 +48,8 @@
                     <span>Customer management</span>
                 </li>
                 <li class="flex items-center">
-                    <i class="fas fa-check text-green-500 mr-3"></i>
-                    <span>1 image per accommodation</span>
+                    <i class="fas fa-times text-red-500 mr-3"></i>
+                    <span class="text-gray-400">No image uploads during trial</span>
                 </li>
             </ul>
             
@@ -73,7 +73,7 @@
             <div class="text-center mb-6">
                 <h3 class="text-2xl font-bold text-gray-900 mb-2">Try Professional</h3>
                 <div class="text-4xl font-bold text-purple-600 mb-2">FREE</div>
-                <div class="text-sm text-gray-500 mb-4">30-day trial • Then ₹699/month</div>
+                <div class="text-sm text-gray-500 mb-4">30-day trial • Then ₹999/month</div>
                 <p class="text-gray-600">Complete hospitality solution</p>
             </div>
             
@@ -91,8 +91,8 @@
                     <span>Advanced customer management</span>
                 </li>
                 <li class="flex items-center">
-                    <i class="fas fa-check text-green-500 mr-3"></i>
-                    <span>5 images per accommodation</span>
+                    <i class="fas fa-times text-red-500 mr-3"></i>
+                    <span class="text-gray-400">No image uploads during trial</span>
                 </li>
                 <li class="flex items-center">
                     <i class="fas fa-check text-green-500 mr-3"></i>

@@ -36,6 +36,10 @@ class SubscriptionController extends Controller
             'status' => 'pending',
         ]);
         
-        return redirect()->back()->with('success', 'Subscription request #' . $subscriptionRequest->id . ' sent successfully! Our executives will contact you soon.');
+        $planName = ucfirst($request->plan);
+        $price = $request->plan === 'starter' ? '₹299' : '₹999';
+        $period = $request->billing === 'yearly' ? 'year' : 'month';
+        
+        return redirect()->back()->with('success', "Subscription request for {$planName} plan ({$price}/{$period}) sent successfully! Our executives will contact you soon.");
     }
 }

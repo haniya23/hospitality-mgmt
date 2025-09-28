@@ -119,14 +119,14 @@
             <div class="text-center mb-6">
                 <h3 class="text-2xl font-bold text-gray-900 mb-2">Starter</h3>
                 <div class="flex items-center justify-center space-x-2 mb-2">
-                    <span class="text-2xl text-gray-400 line-through" x-text="yearly ? '₹14,990' : '₹1,499'"></span>
+                    <span class="text-2xl text-gray-400 line-through" x-text="yearly ? '₹2,999' : '₹299'"></span>
                     <div class="text-4xl font-bold text-blue-600">
-                        <span x-text="yearly ? '₹3,990' : '₹399'"></span>
+                        <span x-text="yearly ? '₹2,999' : '₹299'"></span>
                         <span class="text-lg text-gray-500" x-text="yearly ? '/year' : '/month'"></span>
                     </div>
                 </div>
                 <div class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm font-medium inline-block mb-2">
-                    <span x-text="yearly ? 'Save ₹798 annually (2 months free)' : 'Limited Time Offer - 73% OFF'"></span>
+                    <span x-text="yearly ? 'Save ₹598 annually (2 months free)' : 'Special Offer'"></span>
                 </div>
                 <p class="text-gray-600">Perfect for single property</p>
             </div>
@@ -135,6 +135,10 @@
                 <li class="flex items-center">
                     <i class="fas fa-check text-green-500 mr-3"></i>
                     <span>1 property only</span>
+                </li>
+                <li class="flex items-center">
+                    <i class="fas fa-check text-green-500 mr-3"></i>
+                    <span>3 accommodations</span>
                 </li>
                 <li class="flex items-center">
                     <i class="fas fa-check text-green-500 mr-3"></i>
@@ -150,7 +154,7 @@
                 </li>
                 <li class="flex items-center">
                     <i class="fas fa-check text-green-500 mr-3"></i>
-                    <span>1 image per accommodation</span>
+                    <span>Image uploads available</span>
                 </li>
                 <li class="flex items-center">
                     <i class="fas fa-times text-red-500 mr-3"></i>
@@ -183,14 +187,14 @@
             <div class="text-center mb-6">
                 <h3 class="text-2xl font-bold text-gray-900 mb-2">Professional</h3>
                 <div class="flex items-center justify-center space-x-2 mb-2">
-                    <span class="text-2xl text-gray-400 line-through" x-text="yearly ? '₹29,990' : '₹2,999'"></span>
+                    <span class="text-2xl text-gray-400 line-through" x-text="yearly ? '₹9,999' : '₹999'"></span>
                     <div class="text-4xl font-bold text-purple-600">
-                        <span x-text="yearly ? '₹6,990' : '₹699'"></span>
+                        <span x-text="yearly ? '₹9,999' : '₹999'"></span>
                         <span class="text-lg text-gray-500" x-text="yearly ? '/year' : '/month'"></span>
                     </div>
                 </div>
                 <div class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm font-medium inline-block mb-2">
-                    <span x-text="yearly ? 'Save ₹1,398 annually (2 months free)' : 'Special Offer - 77% OFF'"></span>
+                    <span x-text="yearly ? 'Save ₹1,998 annually (2 months free)' : 'Special Offer'"></span>
                 </div>
                 <p class="text-gray-600">Complete hospitality solution</p>
             </div>
@@ -199,6 +203,10 @@
                 <li class="flex items-center">
                     <i class="fas fa-check text-green-500 mr-3"></i>
                     <span>Up to 5 properties</span>
+                </li>
+                <li class="flex items-center">
+                    <i class="fas fa-check text-green-500 mr-3"></i>
+                    <span>15 accommodations</span>
                 </li>
                 <li class="flex items-center">
                     <i class="fas fa-check text-green-500 mr-3"></i>
@@ -214,7 +222,7 @@
                 </li>
                 <li class="flex items-center">
                     <i class="fas fa-check text-green-500 mr-3"></i>
-                    <span>5 images per accommodation</span>
+                    <span>Unlimited image uploads</span>
                 </li>
                 <li class="flex items-center">
                     <i class="fas fa-check text-green-500 mr-3"></i>

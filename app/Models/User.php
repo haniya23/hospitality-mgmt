@@ -152,10 +152,15 @@ class User extends Authenticatable
     public function getImageUploadLimitAttribute()
     {
         if ($this->subscription_status === 'trial') {
-            return $this->trial_plan === 'professional' ? 5 : 1;
+            return 0; // No image uploads during trial
         }
         
-        return $this->subscription_status === 'professional' ? 5 : 1;
+        return $this->subscription_status === 'professional' ? 999 : 1;
+    }
+
+    public function canUploadImages()
+    {
+        return $this->subscription_status !== 'trial';
     }
 
     public function subscriptionRequests()
@@ -222,11 +227,11 @@ class User extends Authenticatable
             if (empty($model->pin_hash)) {
                 $model->pin_hash = Hash::make('0000');
             }
-            // Set 30-day trial for new users
-            if (empty($model->trial_ends_at)) {
-                $model->trial_ends_at = now()->addDays(30);
+            // Set default values for new users (only if not already set)
+            if (empty($model->subscription_status)) {
                 $model->subscription_status = 'trial';
                 $model->trial_plan = 'professional';
+                $model->trial_ends_at = now()->addDays(30);
                 $model->is_trial_active = true;
                 $model->properties_limit = 1;
             }

@@ -138,11 +138,11 @@
                             {{ auth()->user()->properties_limit }} {{ Str::plural('property', auth()->user()->properties_limit) }}
                         @endif
                     </div>
-                    @if(auth()->user()->isOnTrial() || auth()->user()->subscription_status === 'starter')
+                    {{-- @if(auth()->user()->isOnTrial() || auth()->user()->subscription_status === 'starter')
                         <a href="{{ route('subscription.plans') }}" class="block w-full text-center bg-gradient-to-r from-green-500 to-emerald-500 text-white text-sm font-medium py-2 rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all">
                             Upgrade Now
                         </a>
-                    @endif
+                    @endif --}}
                 </div>
                 
                 <!-- Logout Button -->

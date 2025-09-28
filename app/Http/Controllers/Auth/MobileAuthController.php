@@ -59,14 +59,45 @@ class MobileAuthController extends Controller
             'mobile_number' => 'required|string|unique:users',
             'pin' => 'required|string|size:4|confirmed',
             'email' => 'nullable|email|unique:users',
+            'subscription_choice' => 'required|in:trial,starter,professional',
         ]);
 
-        $user = User::create([
+        // Set subscription details based on choice
+        $subscriptionData = [];
+        if ($request->subscription_choice === 'trial') {
+            $subscriptionData = [
+                'subscription_status' => 'trial',
+                'trial_plan' => 'professional',
+                'trial_ends_at' => now()->addDays(30),
+                'is_trial_active' => true,
+                'properties_limit' => 1,
+            ];
+        } elseif ($request->subscription_choice === 'starter') {
+            $subscriptionData = [
+                'subscription_status' => 'starter',
+                'trial_plan' => null,
+                'trial_ends_at' => null,
+                'is_trial_active' => false,
+                'properties_limit' => 1,
+                'subscription_ends_at' => now()->addYear(),
+            ];
+        } elseif ($request->subscription_choice === 'professional') {
+            $subscriptionData = [
+                'subscription_status' => 'professional',
+                'trial_plan' => null,
+                'trial_ends_at' => null,
+                'is_trial_active' => false,
+                'properties_limit' => 5,
+                'subscription_ends_at' => now()->addYear(),
+            ];
+        }
+
+        $user = User::create(array_merge([
             'name' => $request->name,
             'mobile_number' => $request->mobile_number,
             'pin_hash' => Hash::make($request->pin),
             'email' => $request->email,
-        ]);
+        ], $subscriptionData));
 
         // Handle referral if ref parameter exists
         if ($request->has('ref') && $request->ref) {
