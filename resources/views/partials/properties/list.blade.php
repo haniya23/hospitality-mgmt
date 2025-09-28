@@ -77,13 +77,13 @@
             </div>
 
             <div class="flex flex-col sm:flex-row gap-2">
-                <a :href="'/properties/' + property.uuid + '/edit'" class="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 px-4 rounded-xl font-medium text-sm hover:from-blue-600 hover:to-blue-700 transition text-center action-btn">
-                    <i class="fas fa-edit mr-2"></i>
-                    Edit Property
-                </a>
+                <button @click="openBookingModal(property)" class="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white py-3 px-4 rounded-xl font-medium text-sm hover:from-green-600 hover:to-green-700 transition text-center action-btn">
+                    <i class="fas fa-calendar-plus mr-2"></i>
+                    Add Booking
+                </button>
                 <div class="flex gap-2">
-                    <a :href="'/bookings/create?property_id=' + property.id" class="bg-gradient-to-r from-green-100 to-green-200 text-green-700 py-3 px-4 rounded-xl font-medium text-sm hover:from-green-200 hover:to-green-300 transition action-btn">
-                        <i class="fas fa-calendar-plus"></i>
+                    <a :href="'/properties/' + property.uuid + '/edit'" class="bg-gradient-to-r from-blue-100 to-blue-200 text-blue-700 py-3 px-4 rounded-xl font-medium text-sm hover:from-blue-200 hover:to-blue-300 transition action-btn">
+                        <i class="fas fa-edit"></i>
                     </a>
                     <button class="bg-gradient-to-r from-red-100 to-red-200 text-red-700 py-3 px-4 rounded-xl font-medium text-sm hover:from-red-200 hover:to-red-300 transition action-btn">
                         <i class="fas fa-trash"></i>
@@ -106,4 +106,88 @@
             </a>
         </div>
     </template>
+</div>
+
+<!-- Property Booking Modal -->
+<div x-show="showBookingModal" x-transition class="fixed inset-0 z-50 overflow-y-auto backdrop-blur-sm bg-black/40">
+    <div class="flex min-h-full items-center justify-center p-4">
+        <div class="relative w-full max-w-2xl mx-auto bg-white rounded-2xl shadow-2xl ring-1 ring-black/5 max-h-[95vh] flex flex-col">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-6 border-b border-gray-200">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Add Booking</h3>
+                    <p class="text-sm text-gray-600" x-text="'Create booking for ' + selectedProperty?.name"></p>
+                </div>
+                <button @click="closeBookingModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Modal Content -->
+            <div class="flex-1 overflow-y-auto p-6">
+                <div x-show="!selectedAccommodation" class="space-y-4">
+                    <h4 class="text-md font-semibold text-gray-900">Select Accommodation</h4>
+                    <div class="grid grid-cols-1 gap-3">
+                        <template x-for="accommodation in propertyAccommodations" :key="accommodation.id">
+                            <button @click="selectAccommodation(accommodation)" 
+                                    class="p-4 border border-gray-200 rounded-lg hover:border-green-500 hover:bg-green-50 transition-colors text-left">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h5 class="font-medium text-gray-900" x-text="accommodation.display_name"></h5>
+                                        <p class="text-sm text-gray-600" x-text="accommodation.predefined_type?.name || 'Custom'"></p>
+                                        <p class="text-sm text-gray-500" x-text="'Max occupancy: ' + accommodation.max_occupancy"></p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="font-semibold text-green-600" x-text="'₹' + accommodation.base_price"></p>
+                                        <p class="text-xs text-gray-500">per day</p>
+                                    </div>
+                                </div>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+                
+                <div x-show="selectedAccommodation" class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-md font-semibold text-gray-900">Selected Accommodation</h4>
+                        <button @click="selectedAccommodation = null; customPrice = null" class="text-sm text-blue-600 hover:text-blue-800">
+                            Change
+                        </button>
+                    </div>
+                    
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h5 class="font-medium text-gray-900" x-text="selectedAccommodation?.display_name"></h5>
+                        <p class="text-sm text-gray-600" x-text="selectedAccommodation?.predefined_type?.name || 'Custom'"></p>
+                        <p class="text-sm text-gray-500" x-text="'Max occupancy: ' + selectedAccommodation?.max_occupancy"></p>
+                        <p class="font-semibold text-green-600" x-text="'₹' + (customPrice || selectedAccommodation?.base_price) + ' per day'"></p>
+                    </div>
+                    
+                    <!-- Price Override -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Price Override (Optional)</label>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-gray-500">₹</span>
+                            <input type="number" x-model="customPrice" 
+                                   :placeholder="selectedAccommodation?.base_price"
+                                   class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                            <button @click="customPrice = null" class="px-3 py-2 text-sm text-gray-500 hover:text-gray-700">
+                                Reset
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-500">Leave empty to use default price</p>
+                    </div>
+                    
+                    <div class="text-center">
+                        <a :href="'/bookings/create?property_uuid=' + selectedProperty?.uuid + '&accommodation_uuid=' + selectedAccommodation?.uuid + (customPrice ? '&custom_price=' + customPrice : '')" 
+                           class="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                            <i class="fas fa-calendar-plus mr-2"></i>
+                            Continue to Booking
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

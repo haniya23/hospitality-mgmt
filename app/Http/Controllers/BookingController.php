@@ -193,6 +193,23 @@ class BookingController extends Controller
         return response()->json($properties);
     }
 
+    public function getProperty($propertyId)
+    {
+        try {
+            $property = Property::where('owner_id', auth()->id())
+                ->where('id', $propertyId)
+                ->first(['id', 'name', 'description']);
+            
+            if (!$property) {
+                return response()->json(['error' => 'Property not found'], 404);
+            }
+            
+            return response()->json($property);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
     public function getAccommodations($propertyId)
     {
         try {
@@ -202,7 +219,9 @@ class BookingController extends Controller
                 ->map(function($acc) {
                     return [
                         'id' => $acc->id,
+                        'uuid' => $acc->uuid,
                         'custom_name' => $acc->custom_name,
+                        'display_name' => $acc->display_name,
                         'base_price' => $acc->base_price,
                         'max_occupancy' => $acc->max_occupancy,
                         'predefined_type' => [
@@ -341,35 +360,56 @@ class BookingController extends Controller
     public function getAccommodationCount()
     {
         $properties = Property::where('owner_id', auth()->id())
-            ->withCount('propertyAccommodations')
+            ->with(['propertyAccommodations.predefinedType'])
             ->get();
         
         $totalProperties = $properties->count();
-        $totalAccommodations = $properties->sum('property_accommodations_count');
+        $totalAccommodations = $properties->sum(function($property) {
+            return $property->propertyAccommodations->count();
+        });
         
         $response = [
             'totalProperties' => $totalProperties,
             'totalAccommodations' => $totalAccommodations
         ];
         
-        // If only one property with one accommodation, provide default values
-        if ($totalProperties === 1 && $totalAccommodations === 1) {
+        // If only one property, provide default property and accommodations
+        if ($totalProperties === 1) {
             $property = $properties->first();
-            $accommodation = $property->propertyAccommodations->first();
+            $accommodations = $property->propertyAccommodations;
             
             $response['defaultPropertyId'] = $property->id;
-            $response['defaultAccommodationId'] = $accommodation->id;
-            $response['defaultPrice'] = $accommodation->base_price;
-            $response['defaultAccommodation'] = [
-                'id' => $accommodation->id,
-                'display_name' => $accommodation->display_name,
-                'base_price' => $accommodation->base_price,
-                'max_occupancy' => $accommodation->max_occupancy,
-                'property_name' => $property->name,
-                'predefined_type' => [
-                    'name' => $accommodation->predefinedType->name ?? 'Custom'
-                ]
-            ];
+            $response['defaultPropertyName'] = $property->name;
+            $response['accommodations'] = $accommodations->map(function($accommodation) {
+                return [
+                    'id' => $accommodation->id,
+                    'uuid' => $accommodation->uuid,
+                    'display_name' => $accommodation->display_name,
+                    'base_price' => $accommodation->base_price,
+                    'max_occupancy' => $accommodation->max_occupancy,
+                    'predefined_type' => [
+                        'name' => $accommodation->predefinedType->name ?? 'Custom'
+                    ]
+                ];
+            });
+            
+            // If only one accommodation, provide default values
+            if ($totalAccommodations === 1) {
+                $accommodation = $accommodations->first();
+                $response['defaultAccommodationId'] = $accommodation->id;
+                $response['defaultPrice'] = $accommodation->base_price;
+                $response['defaultAccommodation'] = [
+                    'id' => $accommodation->id,
+                    'uuid' => $accommodation->uuid,
+                    'display_name' => $accommodation->display_name,
+                    'base_price' => $accommodation->base_price,
+                    'max_occupancy' => $accommodation->max_occupancy,
+                    'property_name' => $property->name,
+                    'predefined_type' => [
+                        'name' => $accommodation->predefinedType->name ?? 'Custom'
+                    ]
+                ];
+            }
         }
         
         return response()->json($response);

@@ -78,14 +78,59 @@
                 </div>
             </div>
             
+            <!-- Property & Accommodation Info (when selected via URL) -->
+            <div x-show="selectedPropertyInfo && selectedAccommodationInfo" class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200 p-4 sm:p-6">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-semibold text-green-800" x-text="selectedPropertyInfo?.name || 'Property'"></h4>
+                        <p class="text-sm text-green-600" x-text="selectedAccommodationInfo?.display_name || 'Accommodation'"></p>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="flex items-center space-x-2">
+                        <svg class="w-4 h-4 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                        </svg>
+                        <span class="text-green-800">
+                            <span class="font-medium">Price:</span>
+                            <span x-text="'₹' + selectedAccommodationPrice"></span>
+                        </span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <svg class="w-4 h-4 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                        <span class="text-green-800">
+                            <span class="font-medium">Max Occupancy:</span>
+                            <span x-text="selectedAccommodationInfo?.max_occupancy || 'N/A'"></span>
+                        </span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <svg class="w-4 h-4 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                        </svg>
+                        <span class="text-green-800">
+                            <span class="font-medium">Type:</span>
+                            <span x-text="selectedAccommodationInfo?.predefined_type?.name || 'Custom'"></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
             <!-- Property Selection (when multiple properties) -->
-            <div x-show="showPropertyAccommodationSelection" class="space-y-4">
+            <div x-show="showPropertyAccommodationSelection && showPropertySelection" class="space-y-4">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Property</label>
                         <select name="property_id" x-model="selectedProperty" @change="loadAccommodations()" 
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent select2-dropdown" 
-                                :required="showPropertyAccommodationSelection">
+                                :required="showPropertyAccommodationSelection && showPropertySelection">
                             <option value="">Select Property</option>
                             @foreach($properties as $property)
                                 <option value="{{ $property->id }}" {{ old('property_id') == $property->id ? 'selected' : '' }}>
@@ -111,11 +156,38 @@
                 </div>
             </div>
             
+            <!-- Accommodation Selection Only (when single property, multiple accommodations) -->
+            <div x-show="showPropertyAccommodationSelection && !showPropertySelection" class="space-y-4">
+                <div class="grid grid-cols-1 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Accommodation</label>
+                        <select name="accommodation_id" x-model="selectedAccommodation" @change="updateAccommodationPrice()" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent select2-dropdown" 
+                                required>
+                            <option value="">Select Accommodation</option>
+                            <template x-for="accommodation in singlePropertyAccommodations" :key="accommodation.id">
+                                <option :value="accommodation.id" x-text="accommodation.display_name"></option>
+                            </template>
+                        </select>
+                        @error('accommodation_id')
+                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
+            </div>
+            
             <!-- Hidden inputs for single property/accommodation -->
             <template x-if="!showPropertyAccommodationSelection">
                 <div>
                     <input type="hidden" name="property_id" x-model="defaultPropertyId">
                     <input type="hidden" name="accommodation_id" x-model="defaultAccommodationId">
+                </div>
+            </template>
+            
+            <!-- Hidden input for single property with multiple accommodations -->
+            <template x-if="showPropertyAccommodationSelection && !showPropertySelection">
+                <div>
+                    <input type="hidden" name="property_id" x-model="defaultPropertyId">
                 </div>
             </template>
         </div>
@@ -455,6 +527,82 @@
         </div>
     </form>
 </div>
+
+<!-- Property Selection Modal -->
+<div x-show="showPropertySelectionModal" x-transition class="fixed inset-0 z-50 overflow-y-auto backdrop-blur-sm bg-black/40">
+    <div class="flex min-h-full items-center justify-center p-4">
+        <div class="relative w-full max-w-2xl mx-auto bg-white rounded-2xl shadow-2xl ring-1 ring-black/5 max-h-[95vh] flex flex-col">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-6 border-b border-gray-200">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Select Property & Accommodation</h3>
+                    <p class="text-sm text-gray-600">Choose a property and accommodation for your booking</p>
+                </div>
+                <button @click="closePropertySelectionModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Modal Content -->
+            <div class="flex-1 overflow-y-auto p-6">
+                <div x-show="!selectedModalProperty" class="space-y-4">
+                    <h4 class="text-md font-semibold text-gray-900">Select Property</h4>
+                    <div class="grid grid-cols-1 gap-3">
+                        @foreach($properties as $property)
+                            <button @click="selectModalProperty({{ $property->id }}, '{{ $property->uuid }}', '{{ $property->name }}')" 
+                                    class="p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors text-left">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h5 class="font-medium text-gray-900">{{ $property->name }}</h5>
+                                        <p class="text-sm text-gray-600">{{ $property->propertyAccommodations->count() }} accommodations</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <i class="fas fa-chevron-right text-gray-400"></i>
+                                    </div>
+                                </div>
+                            </button>
+                        @endforeach
+                    </div>
+                </div>
+                
+                <div x-show="selectedModalProperty" class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-md font-semibold text-gray-900">Select Accommodation</h4>
+                        <button @click="selectedModalProperty = null; modalAccommodations = []" class="text-sm text-blue-600 hover:text-blue-800">
+                            Back to Properties
+                        </button>
+                    </div>
+                    
+                    <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                        <h5 class="font-medium text-gray-900" x-text="selectedModalProperty?.name"></h5>
+                        <p class="text-sm text-gray-600" x-text="modalAccommodations.length + ' accommodations available'"></p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 gap-3">
+                        <template x-for="accommodation in modalAccommodations" :key="accommodation.id">
+                            <button @click="selectModalAccommodation(accommodation)" 
+                                    class="p-4 border border-gray-200 rounded-lg hover:border-green-500 hover:bg-green-50 transition-colors text-left">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h5 class="font-medium text-gray-900" x-text="accommodation.display_name"></h5>
+                                        <p class="text-sm text-gray-600" x-text="accommodation.predefined_type?.name || 'Custom'"></p>
+                                        <p class="text-sm text-gray-500" x-text="'Max occupancy: ' + accommodation.max_occupancy"></p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="font-semibold text-green-600" x-text="'₹' + accommodation.base_price"></p>
+                                        <p class="text-xs text-gray-500">per day</p>
+                                    </div>
+                                </div>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -462,8 +610,9 @@
 function bookingCreateForm() {
     return {
         // Form data
-        selectedProperty: '{{ old('property_id') }}',
-        selectedAccommodation: '{{ old('accommodation_id') }}',
+        selectedProperty: '{{ old('property_id', request('property_uuid') ? \App\Models\Property::where('uuid', request('property_uuid'))->first()?->id : '') }}',
+        selectedAccommodation: '',
+        
         customerType: 'new',
         isB2B: false,
         useB2BReservedCustomer: false,
@@ -502,8 +651,19 @@ function bookingCreateForm() {
         
         // Property logic
         showPropertyAccommodationSelection: true,
+        showPropertySelection: true,
+        singlePropertyAccommodations: [],
         defaultPropertyId: null,
         defaultAccommodationId: null,
+        
+        // Property selection modal
+        showPropertySelectionModal: false,
+        selectedModalProperty: null,
+        modalAccommodations: [],
+        
+        // Property info for URL parameters
+        selectedPropertyInfo: null,
+        customPrice: {{ request('custom_price') ?: 'null' }},
         
         // Data arrays
         guests: [],
@@ -521,6 +681,19 @@ function bookingCreateForm() {
             this.calculateDaysNights();
             // Calculate amount after accommodation price is set
             this.calculateAmount();
+            
+            // If property and accommodation are provided via URL, load accommodations
+            if (this.selectedProperty && '{{ request('accommodation_uuid') }}') {
+                await this.loadAccommodations();
+                await this.findAccommodationByUuid();
+                await this.loadPropertyInfo();
+                
+                // Apply custom price if provided
+                if (this.customPrice) {
+                    this.selectedAccommodationPrice = this.customPrice;
+                    this.calculateAmount();
+                }
+            }
             this.calculateCommission();
             this.checkPastBooking();
         },
@@ -787,21 +960,33 @@ function bookingCreateForm() {
                 const response = await fetch('/api/properties/accommodation-count');
                 const data = await response.json();
                 
-                // If only one property with one accommodation, hide selection
+                // If only one property with one accommodation, hide selection completely
                 if (data.totalProperties === 1 && data.totalAccommodations === 1) {
                     this.showPropertyAccommodationSelection = false;
+                    this.showPropertySelection = false;
                     this.defaultPropertyId = data.defaultPropertyId;
                     this.defaultAccommodationId = data.defaultAccommodationId;
                     this.selectedAccommodationPrice = data.defaultPrice;
                     this.selectedAccommodationInfo = data.defaultAccommodation;
                     // Recalculate amount after setting accommodation price
                     this.calculateAmount();
-                } else {
+                } 
+                // If only one property with multiple accommodations, show only accommodation selection
+                else if (data.totalProperties === 1 && data.totalAccommodations > 1) {
                     this.showPropertyAccommodationSelection = true;
+                    this.showPropertySelection = false;
+                    this.defaultPropertyId = data.defaultPropertyId;
+                    this.singlePropertyAccommodations = data.accommodations;
+                } 
+                // If multiple properties, show both property and accommodation selection
+                else {
+                    this.showPropertyAccommodationSelection = true;
+                    this.showPropertySelection = true;
                 }
             } catch (error) {
                 console.error('Error checking property logic:', error);
                 this.showPropertyAccommodationSelection = true;
+                this.showPropertySelection = true;
             }
         },
 
@@ -817,6 +1002,74 @@ function bookingCreateForm() {
                     this.loadPartnerReservedCustomer(this.selectedPartner);
                 } else {
                     this.selectedPartnerReservedCustomer = null;
+                }
+            }
+        },
+        
+        // Property selection modal methods
+        openPropertySelectionModal() {
+            this.showPropertySelectionModal = true;
+            this.selectedModalProperty = null;
+            this.modalAccommodations = [];
+        },
+        
+        closePropertySelectionModal() {
+            this.showPropertySelectionModal = false;
+            this.selectedModalProperty = null;
+            this.modalAccommodations = [];
+        },
+        
+        async selectModalProperty(propertyId, propertyUuid, propertyName) {
+            this.selectedModalProperty = {
+                id: propertyId,
+                uuid: propertyUuid,
+                name: propertyName
+            };
+            
+            try {
+                const response = await fetch(`/api/properties/${propertyId}/accommodations`);
+                const accommodations = await response.json();
+                this.modalAccommodations = accommodations;
+            } catch (error) {
+                console.error('Error loading accommodations:', error);
+                this.modalAccommodations = [];
+            }
+        },
+        
+        selectModalAccommodation(accommodation) {
+            // Set the selected property and accommodation
+            this.selectedProperty = this.selectedModalProperty.id;
+            this.selectedAccommodation = accommodation.id;
+            
+            // Load accommodations for the form
+            this.loadAccommodations();
+            this.updateAccommodationPrice();
+            
+            // Close the modal
+            this.closePropertySelectionModal();
+        },
+        
+        async loadPropertyInfo() {
+            if (this.selectedProperty) {
+                try {
+                    const response = await fetch(`/api/properties/${this.selectedProperty}`);
+                    const property = await response.json();
+                    this.selectedPropertyInfo = property;
+                } catch (error) {
+                    console.error('Error loading property info:', error);
+                }
+            }
+        },
+        
+        async findAccommodationByUuid() {
+            const accommodationUuid = '{{ request('accommodation_uuid') }}';
+            if (accommodationUuid && this.accommodations.length > 0) {
+                const accommodation = this.accommodations.find(acc => acc.uuid === accommodationUuid);
+                if (accommodation) {
+                    this.selectedAccommodation = accommodation.id;
+                    this.selectedAccommodationPrice = accommodation.base_price;
+                    this.selectedAccommodationInfo = accommodation;
+                    this.calculateAmount();
                 }
             }
         }

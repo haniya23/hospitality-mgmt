@@ -18,6 +18,13 @@ function propertyManager() {
     return {
         properties: @json($properties ?? []),
         activeFilter: 'all',
+        
+        // Booking modal state
+        showBookingModal: false,
+        selectedProperty: null,
+        selectedAccommodation: null,
+        propertyAccommodations: [],
+        customPrice: null,
 
         get filteredProperties() {
             if (this.activeFilter === 'all') return this.properties;
@@ -35,6 +42,33 @@ function propertyManager() {
 
         init() {
             console.log('Properties loaded:', this.properties.length);
+        },
+        
+        async openBookingModal(property) {
+            this.selectedProperty = property;
+            this.selectedAccommodation = null;
+            this.showBookingModal = true;
+            
+            try {
+                const response = await fetch(`/api/properties/${property.id}/accommodations`);
+                const accommodations = await response.json();
+                this.propertyAccommodations = accommodations;
+            } catch (error) {
+                console.error('Error loading accommodations:', error);
+                this.propertyAccommodations = [];
+            }
+        },
+        
+        closeBookingModal() {
+            this.showBookingModal = false;
+            this.selectedProperty = null;
+            this.selectedAccommodation = null;
+            this.propertyAccommodations = [];
+            this.customPrice = null;
+        },
+        
+        selectAccommodation(accommodation) {
+            this.selectedAccommodation = accommodation;
         }
     }
 }
