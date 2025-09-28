@@ -525,11 +525,8 @@
                 Create Booking
             </button>
         </div>
-    </form>
-</div>
-
-<!-- Property Selection Modal -->
-<div x-show="showPropertySelectionModal" x-transition class="fixed inset-0 z-50 overflow-y-auto backdrop-blur-sm bg-black/40">
+        <!-- Property Selection Modal -->
+        <div x-show="showPropertySelectionModal" x-transition class="fixed inset-0 z-50 overflow-y-auto backdrop-blur-sm bg-black/40">
     <div class="flex min-h-full items-center justify-center p-4">
         <div class="relative w-full max-w-2xl mx-auto bg-white rounded-2xl shadow-2xl ring-1 ring-black/5 max-h-[95vh] flex flex-col">
             <!-- Modal Header -->
@@ -602,6 +599,8 @@
             </div>
         </div>
     </div>
+        </div>
+    </form>
 </div>
 @endsection
 
@@ -697,6 +696,10 @@ function bookingCreateForm() {
                     this.selectedAccommodationPrice = this.customPrice;
                     this.calculateAmount();
                 }
+            }
+            // If no property is pre-selected and we have multiple properties, show modal
+            else if (!this.selectedProperty && this.showPropertySelection) {
+                this.showPropertySelectionModal = true;
             }
             
             // If B2B partner is provided via URL, auto-select it

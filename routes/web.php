@@ -72,9 +72,9 @@ Route::middleware('auth')->group(function () {
     // API Routes for Alpine.js
     Route::prefix('api')->group(function () {
         Route::get('/properties', [App\Http\Controllers\BookingController::class, 'getProperties']);
+        Route::get('/properties/accommodation-count', [App\Http\Controllers\BookingController::class, 'getAccommodationCount']);
         Route::get('/properties/{propertyId}', [App\Http\Controllers\BookingController::class, 'getProperty']);
         Route::post('/properties', [App\Http\Controllers\PropertyController::class, 'store']);
-        Route::get('/properties/accommodation-count', [App\Http\Controllers\BookingController::class, 'getAccommodationCount']);
         Route::get('/properties/{propertyId}/accommodations', [App\Http\Controllers\BookingController::class, 'getAccommodations']);
         Route::get('/properties/{property}/accommodations', [App\Http\Controllers\PropertyController::class, 'getAccommodations']);
         Route::post('/properties/{property}/accommodations', [App\Http\Controllers\PropertyController::class, 'storeAccommodation']);
