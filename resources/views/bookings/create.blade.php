@@ -612,15 +612,15 @@ function bookingCreateForm() {
         // Form data
         selectedProperty: '{{ old('property_id', request('property_uuid') ? \App\Models\Property::where('uuid', request('property_uuid'))->first()?->id : '') }}',
         selectedAccommodation: '',
+        selectedPartner: '{{ old('b2b_partner_id', request('b2b_partner_uuid') ? \App\Models\B2bPartner::where('uuid', request('b2b_partner_uuid'))->first()?->uuid : '') }}',
         
-        customerType: 'new',
-        isB2B: false,
-        useB2BReservedCustomer: false,
+        customerType: '{{ request('b2b_partner_uuid') ? 'b2b' : 'new' }}',
+        isB2B: {{ request('b2b_partner_uuid') ? 'true' : 'false' }},
+        useB2BReservedCustomer: {{ request('b2b_partner_uuid') ? 'true' : 'false' }},
         guestSearch: '',
         guestName: '{{ old('guest_name') }}',
         guestMobile: '{{ old('guest_mobile') }}',
         guestEmail: '{{ old('guest_email') }}',
-        selectedPartner: '{{ old('b2b_partner_id') }}',
         
         // Date and guest data
         checkInDate: '{{ old('check_in_date') }}',
@@ -665,6 +665,10 @@ function bookingCreateForm() {
         selectedPropertyInfo: null,
         customPrice: {{ request('custom_price') ?: 'null' }},
         
+        // Commission parameters
+        commissionType: '{{ request('commission_type', 'percentage') }}',
+        commissionValue: {{ request('commission_value', 10) }},
+        
         // Data arrays
         guests: [],
         filteredGuests: [],
@@ -692,6 +696,14 @@ function bookingCreateForm() {
                 if (this.customPrice) {
                     this.selectedAccommodationPrice = this.customPrice;
                     this.calculateAmount();
+                }
+            }
+            
+            // If B2B partner is provided via URL, auto-select it
+            if (this.selectedPartner && this.partners.length > 0) {
+                const partner = this.partners.find(p => p.uuid === this.selectedPartner);
+                if (partner) {
+                    this.selectPartner(partner);
                 }
             }
             this.calculateCommission();
