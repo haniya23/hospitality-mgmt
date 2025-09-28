@@ -29,10 +29,6 @@
                 </div>
             </div>
             <div class="flex items-center space-x-3">
-                <button @click="openPropertySelectionModal()" class="soft-glass-card rounded-xl px-4 py-2 hover:bg-opacity-60 transition-all flex items-center">
-                    <i class="fas fa-building text-teal-600 mr-2"></i>
-                    <span class="font-medium text-slate-800">Select Property</span>
-                </button>
                 <a href="{{ route('bookings.index') }}" class="soft-glass-card rounded-xl px-4 py-2 hover:bg-opacity-60 transition-all flex items-center">
                     <i class="fas fa-arrow-left text-pink-500 mr-2"></i>
                     <span class="font-medium text-slate-800">Back</span>

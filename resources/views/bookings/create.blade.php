@@ -13,16 +13,23 @@
         
         <!-- Property & Accommodation Section -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
-            <div class="flex items-center space-x-3 mb-4">
-                <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Property & Accommodation</h3>
+                        <p class="text-sm text-gray-600">Booking details for your stay</p>
+                    </div>
+                </div>
+                <button @click="openPropertySelectionModal()" class="w-10 h-10 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg hover:shadow-xl transition-all">
                     <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                     </svg>
-                </div>
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-900">Property & Accommodation</h3>
-                    <p class="text-sm text-gray-600">Booking details for your stay</p>
-                </div>
+                </button>
             </div>
             
             <!-- Property Details Card -->
@@ -163,7 +170,7 @@
                         <label class="block text-sm font-medium text-gray-700 mb-2">Accommodation</label>
                         <select name="accommodation_id" x-model="selectedAccommodation" @change="updateAccommodationPrice()" 
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent select2-dropdown" 
-                                required>
+                                :required="!showPropertySelectionModal">
                             <option value="">Select Accommodation</option>
                             <template x-for="accommodation in singlePropertyAccommodations" :key="accommodation.id">
                                 <option :value="accommodation.id" x-text="accommodation.display_name"></option>
@@ -697,10 +704,6 @@ function bookingCreateForm() {
                     this.calculateAmount();
                 }
             }
-            // If no property is pre-selected and we have multiple properties, show modal
-            else if (!this.selectedProperty && this.showPropertySelection) {
-                this.showPropertySelectionModal = true;
-            }
             
             // If B2B partner is provided via URL, auto-select it
             if (this.selectedPartner && this.partners.length > 0) {
@@ -1051,14 +1054,29 @@ function bookingCreateForm() {
             }
         },
         
-        selectModalAccommodation(accommodation) {
+        async selectModalAccommodation(accommodation) {
             // Set the selected property and accommodation
             this.selectedProperty = this.selectedModalProperty.id;
             this.selectedAccommodation = accommodation.id;
             
+            // Set accommodation info
+            this.selectedAccommodationInfo = accommodation;
+            this.selectedAccommodationPrice = accommodation.base_price;
+            
             // Load accommodations for the form
-            this.loadAccommodations();
+            await this.loadAccommodations();
             this.updateAccommodationPrice();
+            
+            // Update property info
+            await this.loadPropertyInfo();
+            
+            // Update URL with selected property and accommodation
+            const propertyUuid = this.selectedModalProperty.uuid;
+            const accommodationUuid = accommodation.uuid;
+            const currentUrl = new URL(window.location);
+            currentUrl.searchParams.set('property_uuid', propertyUuid);
+            currentUrl.searchParams.set('accommodation_uuid', accommodationUuid);
+            window.history.replaceState({}, '', currentUrl);
             
             // Close the modal
             this.closePropertySelectionModal();
