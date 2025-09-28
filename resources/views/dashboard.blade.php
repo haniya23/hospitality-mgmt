@@ -16,8 +16,6 @@
 </div>
 @endsection
 
-@include('partials.dashboard.motivational-quotes')
-
 @push('scripts')
 <script>
 function dashboardData() {
@@ -35,14 +33,17 @@ function dashboardData() {
         currentQuoteIndex: 0,
 
         get currentQuote() {
-            if (this.motivationalQuotes.length === 0) return 'No quotes available';
+            if (this.motivationalQuotes.length === 0) return {quote: 'No quotes available', author: ''};
             return this.motivationalQuotes[this.currentQuoteIndex];
         },
 
         init() {
             console.log('Dashboard initialized');
-            // Set random initial quote
-            this.currentQuoteIndex = Math.floor(Math.random() * this.motivationalQuotes.length);
+            // Set quote based on day of year (one quote per day)
+            const today = new Date();
+            const startOfYear = new Date(today.getFullYear(), 0, 0);
+            const dayOfYear = Math.floor((today - startOfYear) / (1000 * 60 * 60 * 24));
+            this.currentQuoteIndex = dayOfYear % this.motivationalQuotes.length;
         },
 
         formatNumber(num) {

@@ -121,7 +121,7 @@
                     <option value="">Select Pincode</option>
                     @foreach($pincodes as $pincode)
                         <option value="{{ $pincode->id }}" {{ ($property->location->pincode_id ?? '') == $pincode->id ? 'selected' : '' }}>
-                            {{ $pincode->pincode }}
+                            {{ $pincode->code }}
                         </option>
                     @endforeach
                 </select>

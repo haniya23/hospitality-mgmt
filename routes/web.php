@@ -68,6 +68,9 @@ Route::middleware('auth')->group(function () {
             ->get(),
         ];
         
+        // Include motivational quotes from partial
+        $dashboardData['motivationalQuotes'] = include resource_path('views/partials/dashboard/motivational-quotes.blade.php');
+        
         return view('dashboard', $dashboardData);
     })->name('dashboard');
     

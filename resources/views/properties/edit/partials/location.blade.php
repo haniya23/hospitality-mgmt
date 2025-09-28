@@ -58,7 +58,7 @@
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Pincode</label>
             <div class="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                <p class="text-gray-900">{{ $property->location->pincode->pincode ?? 'Not set' }}</p>
+                <p class="text-gray-900">{{ $property->location->pincode->code ?? 'Not set' }}</p>
             </div>
         </div>
         
@@ -165,7 +165,7 @@
                                 <option value="">Select Pincode</option>
                                 @foreach(\App\Models\Pincode::all() as $pincode)
                                     <option value="{{ $pincode->id }}" {{ ($property->location->pincode_id ?? null) == $pincode->id ? 'selected' : '' }}>
-                                        {{ $pincode->pincode }}
+                                        {{ $pincode->code }}
                                     </option>
                                 @endforeach
                             </select>
