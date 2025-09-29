@@ -1,6 +1,6 @@
 @props(['cards' => []])
 
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+<div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
     @foreach($cards as $index => $card)
     <div class="group relative bg-white rounded-2xl overflow-hidden p-3 sm:p-4 lg:p-6 shadow-lg hover:shadow-xl transition-all duration-300 {{ $card['clickable'] ?? false ? 'cursor-pointer hover:scale-105' : '' }} border border-gray-100"
          @if($card['clickable'] ?? false) @click="{{ $card['action'] }}" @endif>
