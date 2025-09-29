@@ -1,8 +1,8 @@
 @props(['cards' => []])
 
-<div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
     @foreach($cards as $index => $card)
-    <div class="group relative bg-white rounded-2xl overflow-hidden p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 {{ $card['clickable'] ?? false ? 'cursor-pointer hover:scale-105' : '' }} border border-gray-100"
+    <div class="group relative bg-white rounded-2xl overflow-hidden p-3 sm:p-4 lg:p-6 shadow-lg hover:shadow-xl transition-all duration-300 {{ $card['clickable'] ?? false ? 'cursor-pointer hover:scale-105' : '' }} border border-gray-100"
          @if($card['clickable'] ?? false) @click="{{ $card['action'] }}" @endif>
         
         <!-- Gradient Background -->
@@ -13,8 +13,8 @@
         
         <!-- Icon (if provided) -->
         @if(isset($card['icon']))
-        <div class="absolute top-4 right-4 text-gray-400 group-hover:text-blue-600 transition-colors duration-300 z-10">
-            <i class="{{ $card['icon'] }} text-xl sm:text-2xl"></i>
+        <div class="absolute top-3 right-3 sm:top-4 sm:right-4 text-gray-400 group-hover:text-blue-600 transition-colors duration-300 z-10">
+            <i class="{{ $card['icon'] }} text-lg sm:text-xl lg:text-2xl"></i>
         </div>
         @endif
         
@@ -22,7 +22,7 @@
         <div class="relative z-10">
             <!-- Value Display -->
             <div class="mb-3">
-                <div class="text-2xl sm:text-3xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-300"
+                <div class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-300"
                      @if(isset($card['value']) && is_numeric($card['value'])) 
                          x-data="{
                              displayValue: 0,
@@ -69,7 +69,7 @@
             </div>
             
             <!-- Label -->
-            <h3 class="text-sm sm:text-base font-semibold text-gray-700 group-hover:text-gray-900 transition-colors duration-300 mb-1">
+            <h3 class="text-xs sm:text-sm lg:text-base font-semibold text-gray-700 group-hover:text-gray-900 transition-colors duration-300 mb-1">
                 {{ $card['label'] }}
             </h3>
             
@@ -82,7 +82,7 @@
         </div>
         
         <!-- Bottom Section -->
-        <div class="absolute bottom-4 left-4 right-4 flex justify-between items-end">
+        <div class="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 flex justify-between items-end">
             <!-- Action Button -->
             @if($card['clickable'] ?? false)
             <button class="text-xs sm:text-sm text-blue-600 group-hover:text-blue-700 transition-colors duration-300 flex items-center gap-1 font-medium">

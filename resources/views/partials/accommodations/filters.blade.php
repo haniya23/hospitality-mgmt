@@ -1,7 +1,7 @@
-<div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6">
-    <div class="flex flex-col sm:flex-row gap-4">
+<div class="bg-white rounded-2xl shadow-sm p-3 sm:p-4 lg:p-6">
+    <div class="flex flex-col gap-3 sm:gap-4">
         <!-- Search -->
-        <div class="flex-1 relative">
+        <div class="relative">
             <input type="text" 
                    x-model="search" 
                    @input="filterAccommodations()" 
@@ -13,7 +13,7 @@
         </div>
 
         <!-- Property Filter -->
-        <div class="sm:w-64">
+        <div class="w-full sm:w-auto sm:max-w-xs">
             <select x-model="selectedProperty" 
                     @change="filterAccommodations()" 
                     class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base">
