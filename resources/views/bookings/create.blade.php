@@ -206,7 +206,7 @@
         <!-- 1. Check-in Section -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Check-in Details</h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Check-in Date</label>
                     <input type="date" name="check_in_date" x-model="checkInDate" @change="updateCheckOutDate(); checkPastBooking()" 
@@ -337,9 +337,9 @@
             </div>
             
             <!-- Override Amount -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Total Amount (Override)</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Set Amount</label>
                     <input type="number" name="total_amount" x-model="totalAmount" @input="updateBalance()" step="0.01" min="0" 
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
                     <p class="text-xs text-gray-500 mt-1">Shows calculated amount, can be overridden</p>
@@ -370,13 +370,22 @@
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-gray-900">Commission</h3>
+                @if($hasB2bPartners)
                 <div class="flex bg-gray-100 rounded-lg p-1">
                     <button type="button" @click="isB2B = false" :class="!isB2B ? 'bg-white shadow-sm' : ''" class="px-3 py-1 text-sm font-medium rounded-md transition-colors">Direct</button>
                     <button type="button" @click="isB2B = true; calculateCommission()" :class="isB2B ? 'bg-white shadow-sm' : ''" class="px-3 py-1 text-sm font-medium rounded-md transition-colors">B2B</button>
                 </div>
+                @else
+                <div class="flex items-center space-x-2">
+                    <div class="text-sm text-gray-500">Direct booking only</div>
+                    <a href="{{ route('b2b.create') }}" class="text-xs text-blue-600 hover:text-blue-800 underline">
+                        Add B2B Partner
+                    </a>
+                </div>
+                @endif
             </div>
             
-            <div x-show="isB2B" class="space-y-4">
+            <div x-show="isB2B && {{ $hasB2bPartners ? 'true' : 'false' }}" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">B2B Partner</label>
                     <div class="relative">
@@ -448,7 +457,7 @@
             </div>
             
             <!-- B2B Reserved Customer Toggle -->
-            <div x-show="isB2B && customerType === 'b2b'" class="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+            <div x-show="isB2B && customerType === 'b2b' && {{ $hasB2bPartners ? 'true' : 'false' }}" class="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
                 <div class="flex items-center justify-between">
                     <div>
                         <h4 class="text-sm font-medium text-blue-800">B2B Reserved Customer</h4>
@@ -508,7 +517,7 @@
             </div>
 
             <!-- B2B Reserved Customer Info Display -->
-            <div x-show="customerType === 'b2b' && useB2BReservedCustomer" class="p-4 bg-green-50 rounded-lg border border-green-200">
+            <div x-show="customerType === 'b2b' && useB2BReservedCustomer && {{ $hasB2bPartners ? 'true' : 'false' }}" class="p-4 bg-green-50 rounded-lg border border-green-200">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">

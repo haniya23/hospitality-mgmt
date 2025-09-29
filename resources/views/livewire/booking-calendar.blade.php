@@ -33,7 +33,23 @@
                 @foreach($week as $day)
                     <div class="min-h-[80px] p-1 border border-gray-100 rounded-lg relative
                         {{ $day['isCurrentMonth'] ? 'bg-white' : 'bg-gray-50' }}
-                        {{ $day['isToday'] ? 'ring-2 ring-emerald-500' : '' }}"
+                        {{ $day['isToday'] ? 'ring-2 ring-emerald-500' : '' }}
+                        @if($day['bookingCount'] > 0)
+                            @php
+                                $statuses = $day['bookings']->pluck('status')->unique();
+                                $hasPending = $statuses->contains('pending');
+                                $hasConfirmed = $statuses->contains('confirmed') || $statuses->contains('active');
+                                $hasCheckedIn = $statuses->contains('checked_in');
+                                $hasCompleted = $statuses->contains('completed');
+                                $hasCancelled = $statuses->contains('cancelled');
+                            @endphp
+                            @if($hasCancelled) bg-red-50 border-red-200
+                            @elseif($hasCheckedIn) bg-blue-50 border-blue-200
+                            @elseif($hasCompleted) bg-purple-50 border-purple-200
+                            @elseif($hasConfirmed) bg-green-50 border-green-200
+                            @elseif($hasPending) bg-yellow-50 border-yellow-200
+                            @endif
+                        @endif"
                         wire:click="selectDate('{{ $day['date']->format('Y-m-d') }}')"
                     >
                         <!-- Date Number -->
@@ -89,16 +105,24 @@
     <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
         <div class="flex flex-wrap gap-4 text-xs">
             <div class="flex items-center space-x-2">
-                <div class="w-3 h-3 bg-yellow-100 border border-yellow-300 rounded"></div>
+                <div class="w-3 h-3 bg-yellow-50 border border-yellow-200 rounded"></div>
                 <span class="text-gray-600">Pending</span>
             </div>
             <div class="flex items-center space-x-2">
-                <div class="w-3 h-3 bg-green-100 border border-green-300 rounded"></div>
+                <div class="w-3 h-3 bg-green-50 border border-green-200 rounded"></div>
                 <span class="text-gray-600">Confirmed</span>
             </div>
             <div class="flex items-center space-x-2">
-                <div class="w-3 h-3 bg-blue-100 border border-blue-300 rounded"></div>
+                <div class="w-3 h-3 bg-blue-50 border border-blue-200 rounded"></div>
                 <span class="text-gray-600">Checked-in</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <div class="w-3 h-3 bg-purple-50 border border-purple-200 rounded"></div>
+                <span class="text-gray-600">Completed</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <div class="w-3 h-3 bg-red-50 border border-red-200 rounded"></div>
+                <span class="text-gray-600">Cancelled</span>
             </div>
             <div class="flex items-center space-x-2">
                 <div class="w-2 h-2 bg-green-500 rounded-full"></div>

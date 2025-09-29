@@ -82,10 +82,17 @@
                         <i class="fas fa-calendar-plus mr-2"></i>
                         Add Booking
                     </button>
+                    @if($hasB2bPartners)
                     <button @click="openB2BBookingModal(property)" class="flex-1 bg-gradient-to-r from-purple-500 to-purple-600 text-white py-3 px-4 rounded-xl font-medium text-sm hover:from-purple-600 hover:to-purple-700 transition text-center action-btn">
                         <i class="fas fa-handshake mr-2"></i>
                         B2B Booking
                     </button>
+                    @else
+                    <a href="{{ route('b2b.create') }}" class="flex-1 bg-gradient-to-r from-gray-400 to-gray-500 text-white py-3 px-4 rounded-xl font-medium text-sm hover:from-gray-500 hover:to-gray-600 transition text-center action-btn">
+                        <i class="fas fa-plus mr-2"></i>
+                        Add B2B Partner
+                    </a>
+                    @endif
                 </div>
                 <div class="flex gap-2">
                     <a :href="'/properties/' + property.uuid + '/edit'" class="bg-gradient-to-r from-blue-100 to-blue-200 text-blue-700 py-3 px-4 rounded-xl font-medium text-sm hover:from-blue-200 hover:to-blue-300 transition action-btn">

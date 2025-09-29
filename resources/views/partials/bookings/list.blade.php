@@ -66,7 +66,7 @@
             <div class="flex space-x-2">
                 <template x-if="booking.status === 'pending'">
                     <div class="flex space-x-2 w-full">
-                        <button @click="toggleBookingStatus(booking.uuid)" 
+                        <button @click="openConfirmModal(booking)" 
                                 class="flex-1 bg-green-500 text-white py-2 px-4 rounded-xl font-medium text-sm hover:bg-green-600 transition">
                             <i class="fas fa-check mr-1"></i>
                             Confirm

@@ -135,6 +135,38 @@ class BookingController extends Controller
         }
     }
 
+    public function confirm(Request $request, Reservation $booking)
+    {
+        try {
+            $booking->load('accommodation.property');
+            
+            if ($booking->accommodation->property->owner_id !== auth()->id()) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+            }
+            
+            $request->validate([
+                'rate' => 'required|numeric|min:0',
+                'total_amount' => 'required|numeric|min:0',
+                'advance_paid' => 'required|numeric|min:0'
+            ]);
+            
+            $booking->update([
+                'status' => 'confirmed',
+                'total_amount' => $request->total_amount,
+                'advance_paid' => $request->advance_paid,
+                'balance_pending' => $request->total_amount - $request->advance_paid,
+                'confirmed_at' => now()
+            ]);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Booking confirmed successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
     public function toggleStatus(Reservation $booking)
     {
         try {
@@ -284,7 +316,10 @@ class BookingController extends Controller
     public function create()
     {
         $properties = Property::where('owner_id', auth()->id())->get(['id', 'name']);
-        return view('bookings.create', compact('properties'));
+        $hasB2bPartners = \App\Models\B2bPartner::where('status', 'active')
+            ->where('requested_by', auth()->id())
+            ->exists();
+        return view('bookings.create', compact('properties', 'hasB2bPartners'));
     }
 
     public function edit(Reservation $booking)

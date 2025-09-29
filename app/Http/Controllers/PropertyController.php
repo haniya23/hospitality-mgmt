@@ -157,7 +157,10 @@ class PropertyController extends Controller
             ->withCount(['propertyAccommodations', 'reservations as bookings_count'])
             ->latest()
             ->get();
-        return view('properties.index', compact('properties'));
+        $hasB2bPartners = \App\Models\B2bPartner::where('status', 'active')
+            ->where('requested_by', auth()->id())
+            ->exists();
+        return view('properties.index', compact('properties', 'hasB2bPartners'));
     }
 
     public function edit(Property $property)
