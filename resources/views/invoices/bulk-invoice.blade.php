@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Bulk Invoice Report</title>
+    <title>Invoice Report</title>
 
     {{-- 
         NOTE FOR DOMPDF: For the 'Poppins' font to work, you must install the TTF font files 
@@ -41,9 +41,9 @@
             position: absolute;
             top: -100px;
             left: -100px;
-            width: 450px;
-            height: 450px;
-            background-color: #00A99D;
+            width: 650px;
+            height: 300px;
+            background-color:rgb(143, 183, 181);
             border-bottom-right-radius: 200px;
             z-index: -1;
         }

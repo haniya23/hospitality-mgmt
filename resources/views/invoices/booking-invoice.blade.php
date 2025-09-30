@@ -43,9 +43,9 @@
             position: absolute;
             top: -100px;
             left: -100px;
-            width: 450px;
-            height: 450px;
-            background-color: #00A99D; /* Main Teal Color */
+            width: 650px;
+            height: 300px;
+            background-color:rgb(171, 208, 206); /* Main Teal Color */
             border-bottom-right-radius: 200px;
             z-index: -1;
         }
