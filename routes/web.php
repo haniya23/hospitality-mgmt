@@ -117,6 +117,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/bookings-cancelled', [App\Http\Controllers\BookingController::class, 'cancelled'])->name('bookings.cancelled');
     
     // Invoice Routes
+    Route::get('/bookings/{booking}/invoice/preview', [App\Http\Controllers\InvoiceController::class, 'preview'])->name('bookings.invoice.preview');
     Route::get('/bookings/{booking}/invoice/download', [App\Http\Controllers\InvoiceController::class, 'download'])->name('bookings.invoice.download');
     Route::get('/bookings/{booking}/invoice/view', [App\Http\Controllers\InvoiceController::class, 'view'])->name('bookings.invoice.view');
     Route::get('/bookings/bulk-invoice/download', [App\Http\Controllers\InvoiceController::class, 'bulkDownload'])->name('bookings.bulk-invoice.download');

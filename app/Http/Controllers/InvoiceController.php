@@ -12,6 +12,40 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 class InvoiceController extends Controller
 {
     use AuthorizesRequests;
+    public function preview(Reservation $booking)
+    {
+        // Ensure the booking belongs to the authenticated user's property
+        $this->authorize('view', $booking);
+        
+        // Load all necessary relationships
+        $booking->load([
+            'guest',
+            'accommodation.property.location.city.district.state',
+            'accommodation.property.owner',
+            'b2bPartner',
+            'commission'
+        ]);
+
+        // Calculate additional details
+        $nights = $booking->check_in_date->diffInDays($booking->check_out_date);
+        $invoiceData = [
+            'booking' => $booking,
+            'nights' => $nights,
+            'invoice_number' => 'INV-' . strtoupper(substr($booking->uuid, 0, 8)) . '-' . $booking->id,
+            'invoice_date' => now()->format('d/m/Y'),
+            'due_date' => $booking->check_in_date->format('d/m/Y'),
+            'property_owner' => $booking->accommodation->property->owner,
+            'property_location' => $booking->accommodation->property->location,
+            'accommodation_details' => $booking->accommodation,
+            'guest_details' => $booking->guest,
+            'b2b_partner' => $booking->b2bPartner,
+            'commission_details' => $booking->commission,
+            'is_b2b_booking' => $booking->isB2bBooking(),
+        ];
+
+        return view('invoices.preview', $invoiceData);
+    }
+
     public function download(Reservation $booking)
     {
         // Ensure the booking belongs to the authenticated user's property

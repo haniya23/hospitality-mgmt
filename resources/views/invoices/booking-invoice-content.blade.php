@@ -293,61 +293,6 @@
         .status-cancelled {
             background: #e74c3c;
         }
-        
-        @media print {
-            body {
-                font-size: 10px;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            
-            .invoice-container {
-                width: 100%;
-                min-height: 100%;
-                padding: 12mm;
-                margin: 0;
-            }
-            
-            .header {
-                page-break-inside: avoid;
-                margin-bottom: 15px;
-            }
-            
-            .guest-section {
-                page-break-inside: avoid;
-                margin-bottom: 15px;
-            }
-            
-            .booking-details {
-                page-break-inside: avoid;
-                margin-bottom: 15px;
-            }
-            
-            .accommodation-details {
-                page-break-inside: avoid;
-                margin-bottom: 15px;
-            }
-            
-            .financial-summary {
-                page-break-inside: avoid;
-                margin-bottom: 15px;
-            }
-            
-            .total-section {
-                page-break-inside: avoid;
-                margin-bottom: 15px;
-            }
-            
-            .terms-section {
-                page-break-inside: avoid;
-                margin-top: 15px;
-            }
-            
-            .footer {
-                page-break-inside: avoid;
-                margin-top: 15px;
-            }
-        }
     </style>
 </head>
 <body>
@@ -495,7 +440,6 @@
                 @endif
             </div>
         </div>
-
 
         <!-- Total Section -->
         <div class="total-section">
