@@ -136,7 +136,7 @@
                             <input id="trial" name="subscription_choice" type="radio" value="trial" checked
                                    class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 mt-1">
                             <label for="trial" class="ml-3 block text-sm font-medium text-gray-700">
-                                <span class="font-semibold text-green-600">30-Day Free Trial</span>
+                                <span class="font-semibold text-green-600">15-Day Free Trial</span>
                                 <span class="text-gray-500 block text-xs">Start with Professional features, then choose your plan</span>
                             </label>
                         </div>

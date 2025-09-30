@@ -26,7 +26,6 @@ class User extends Authenticatable
         'subscription_ends_at',
         'properties_limit',
         'is_trial_active',
-        'referral_code',
         'referred_by',
         'user_id',
     ];
@@ -103,12 +102,82 @@ class User extends Authenticatable
 
     public function canCreateProperty()
     {
-        return $this->properties()->count() < $this->properties_limit;
+        $maxProperties = $this->getMaxProperties();
+        return $this->properties()->count() < $maxProperties;
+    }
+
+    public function canCreateAccommodation($propertyId = null)
+    {
+        $maxAccommodations = $this->getMaxAccommodations();
+        $currentAccommodations = $this->properties()->withCount('accommodations')->get()->sum('accommodations_count');
+        
+        if ($propertyId) {
+            $propertyAccommodations = $this->properties()->where('id', $propertyId)->withCount('accommodations')->first();
+            if ($propertyAccommodations && $propertyAccommodations->accommodations_count >= 3) {
+                return false; // Max 3 accommodations per property
+            }
+        }
+        
+        return $currentAccommodations < $maxAccommodations;
+    }
+
+    public function getMaxProperties()
+    {
+        switch ($this->subscription_status) {
+            case 'starter':
+                return 1;
+            case 'professional':
+                return 5;
+            case 'trial':
+                return 5; // Trial users get professional limits
+            default:
+                return 1;
+        }
+    }
+
+    public function getMaxAccommodations()
+    {
+        switch ($this->subscription_status) {
+            case 'starter':
+                return 3;
+            case 'professional':
+                return 15;
+            case 'trial':
+                return 15; // Trial users get professional limits
+            default:
+                return 3;
+        }
+    }
+
+    public function getUsagePercentage()
+    {
+        $propertiesUsed = $this->properties()->count();
+        $accommodationsUsed = $this->properties()->withCount('accommodations')->get()->sum('accommodations_count');
+        
+        $maxProperties = $this->getMaxProperties();
+        $maxAccommodations = $this->getMaxAccommodations();
+        
+        $propertiesPercentage = $maxProperties > 0 ? ($propertiesUsed / $maxProperties) * 100 : 0;
+        $accommodationsPercentage = $maxAccommodations > 0 ? ($accommodationsUsed / $maxAccommodations) * 100 : 0;
+        
+        return [
+            'properties' => [
+                'used' => $propertiesUsed,
+                'max' => $maxProperties,
+                'percentage' => min(100, $propertiesPercentage)
+            ],
+            'accommodations' => [
+                'used' => $accommodationsUsed,
+                'max' => $maxAccommodations,
+                'percentage' => min(100, $accommodationsPercentage)
+            ]
+        ];
     }
 
     public function getRemainingPropertiesAttribute()
     {
-        return max(0, $this->properties_limit - $this->properties()->count());
+        $maxProperties = $this->getMaxProperties();
+        return max(0, $maxProperties - $this->properties()->count());
     }
 
     public function hasFeature($feature)
@@ -173,35 +242,6 @@ class User extends Authenticatable
         return $this->subscriptionRequests()->where('status', 'pending')->exists();
     }
 
-    public function referrals()
-    {
-        return $this->hasMany(Referral::class, 'referrer_id');
-    }
-
-    public function referredBy()
-    {
-        return $this->belongsTo(User::class, 'referred_by');
-    }
-
-    public function referralWithdrawals()
-    {
-        return $this->hasMany(ReferralWithdrawal::class);
-    }
-
-    public function getReferralEarningsAttribute()
-    {
-        return $this->referrals()->where('status', 'completed')->sum('reward_amount');
-    }
-
-    public function getCompletedReferralsCountAttribute()
-    {
-        return $this->referrals()->where('status', 'completed')->count();
-    }
-
-    public function canWithdrawReferralEarnings()
-    {
-        return $this->completed_referrals_count >= 4;
-    }
 
     protected static function boot()
     {
@@ -210,10 +250,6 @@ class User extends Authenticatable
         static::creating(function ($model) {
             if (empty($model->uuid)) {
                 $model->uuid = Str::uuid();
-            }
-            // Generate referral code
-            if (empty($model->referral_code)) {
-                $model->referral_code = strtoupper(Str::random(8));
             }
             // Generate user_id
             if (empty($model->user_id)) {
@@ -231,7 +267,7 @@ class User extends Authenticatable
             if (empty($model->subscription_status)) {
                 $model->subscription_status = 'trial';
                 $model->trial_plan = 'professional';
-                $model->trial_ends_at = now()->addDays(30);
+                $model->trial_ends_at = now()->addDays(15);
                 $model->is_trial_active = true;
                 $model->properties_limit = 1;
             }

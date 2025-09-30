@@ -113,25 +113,26 @@
                 <div class="mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200">
                     <div class="flex items-center justify-between mb-2">
                         <span class="text-sm font-medium text-gray-600">Current Plan</span>
-                        @if(auth()->user()->isOnTrial())
+                        @if(auth()->user()->subscription_status === 'trial')
                             <span class="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">Trial</span>
                         @else
                             <span class="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">Active</span>
                         @endif
                     </div>
-                    <div class="text-lg font-bold text-gray-900 mb-1">{{ auth()->user()->getPlanName() }}</div>
+                    <div class="text-lg font-bold text-gray-900 mb-1">
+                        @if(auth()->user()->subscription_status === 'trial')
+                            Trial - Professional
+                        @else
+                            {{ ucfirst(auth()->user()->subscription_status) }} Plan
+                        @endif
+                    </div>
                     <div class="text-sm text-gray-600 mb-3">
-                        @if(auth()->user()->isOnTrial())
+                        @if(auth()->user()->subscription_status === 'trial')
                             {{ auth()->user()->remaining_trial_days }} days left
                         @else
                             {{ auth()->user()->properties_limit }} {{ Str::plural('property', auth()->user()->properties_limit) }}
                         @endif
                     </div>
-                    {{-- @if(auth()->user()->isOnTrial() || auth()->user()->subscription_status === 'starter')
-                        <a href="{{ route('subscription.plans') }}" class="block w-full text-center bg-gradient-to-r from-green-500 to-emerald-500 text-white text-sm font-medium py-2 rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all">
-                            Upgrade Now
-                        </a>
-                    @endif --}}
                 </div>
                 
                 <!-- Logout Button -->
@@ -281,25 +282,26 @@
         <div class="mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-sm font-medium text-gray-600">Current Plan</span>
-                @if(auth()->user()->isOnTrial())
+                @if(auth()->user()->subscription_status === 'trial')
                     <span class="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">Trial</span>
                 @else
                     <span class="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">Active</span>
                 @endif
             </div>
-            <div class="text-lg font-bold text-gray-900 mb-1">{{ auth()->user()->getPlanName() }}</div>
+            <div class="text-lg font-bold text-gray-900 mb-1">
+                @if(auth()->user()->subscription_status === 'trial')
+                    Trial - Professional
+                @else
+                    {{ ucfirst(auth()->user()->subscription_status) }} Plan
+                @endif
+            </div>
             <div class="text-sm text-gray-600 mb-3">
-                @if(auth()->user()->isOnTrial())
+                @if(auth()->user()->subscription_status === 'trial')
                     {{ auth()->user()->remaining_trial_days }} days left
                 @else
                     {{ auth()->user()->properties_limit }} {{ Str::plural('property', auth()->user()->properties_limit) }}
                 @endif
             </div>
-            @if(auth()->user()->isOnTrial() || auth()->user()->subscription_status === 'starter')
-                <a href="{{ route('subscription.plans') }}" @click="sidebarOpen = false" class="block w-full text-center bg-gradient-to-r from-green-500 to-emerald-500 text-white text-sm font-medium py-2 rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all">
-                    Upgrade Now
-                </a>
-            @endif
         </div>
         
         <ul class="w-full flex flex-col gap-2 mt-4">

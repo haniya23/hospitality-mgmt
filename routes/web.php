@@ -219,9 +219,11 @@ Route::middleware('auth')->group(function () {
         return view('welcome-trial');
     })->name('welcome.trial');
     
-    // Referral Routes
-    Route::get('/referral', [App\Http\Controllers\ReferralController::class, 'index'])->name('referral.index');
-    Route::post('/referral/withdraw', [App\Http\Controllers\ReferralController::class, 'withdraw'])->name('referral.withdraw');
+    // Cashfree Payment Routes
+    Route::post('/cashfree/create-order', [App\Http\Controllers\CashfreeController::class, 'createOrder'])->name('cashfree.create-order');
+    Route::get('/cashfree/success', [App\Http\Controllers\CashfreeController::class, 'success'])->name('cashfree.success');
+    Route::post('/cashfree/webhook', [App\Http\Controllers\CashfreeController::class, 'webhook'])->name('cashfree.webhook');
+    
     
     // Admin panel is now handled by Filament at /admin
 });

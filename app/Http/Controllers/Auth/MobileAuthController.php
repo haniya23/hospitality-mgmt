@@ -68,7 +68,7 @@ class MobileAuthController extends Controller
             $subscriptionData = [
                 'subscription_status' => 'trial',
                 'trial_plan' => 'professional',
-                'trial_ends_at' => now()->addDays(30),
+                'trial_ends_at' => now()->addDays(15),
                 'is_trial_active' => true,
                 'properties_limit' => 1,
             ];
@@ -99,21 +99,6 @@ class MobileAuthController extends Controller
             'email' => $request->email,
         ], $subscriptionData));
 
-        // Handle referral if ref parameter exists
-        if ($request->has('ref') && $request->ref) {
-            $referrer = User::where('referral_code', $request->ref)->first();
-            if ($referrer) {
-                $user->update(['referred_by' => $referrer->id]);
-                
-                \App\Models\Referral::create([
-                    'referrer_id' => $referrer->id,
-                    'referred_id' => $user->id,
-                    'status' => 'pending',
-                    'reward_amount' => 199.00,
-                    'referral_id' => 'REF' . str_pad(rand(100000, 999999), 6, '0', STR_PAD_LEFT) . strtoupper(\Illuminate\Support\Str::random(3)),
-                ]);
-            }
-        }
 
         Auth::login($user);
 
