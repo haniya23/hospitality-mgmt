@@ -84,6 +84,17 @@
                             <i class="fas fa-edit mr-1"></i>
                             Edit
                         </a>
+                        <a :href="'/bookings/' + booking.uuid + '/invoice/download'" 
+                           class="bg-purple-500 text-white py-2 px-4 rounded-xl font-medium text-sm hover:bg-purple-600 transition text-center"
+                           target="_blank">
+                            <i class="fas fa-file-pdf mr-1"></i>
+                            Invoice
+                        </a>
+                        <button @click="shareToWhatsApp(booking)" 
+                                class="bg-green-500 text-white py-2 px-4 rounded-xl font-medium text-sm hover:bg-green-600 transition text-center">
+                            <i class="fab fa-whatsapp mr-1"></i>
+                            Share
+                        </button>
                         <button @click="openCancelModal(booking.uuid)" 
                                 class="bg-red-100 text-red-600 py-2 px-4 rounded-xl font-medium text-sm hover:bg-red-200 transition">
                             <i class="fas fa-times"></i>

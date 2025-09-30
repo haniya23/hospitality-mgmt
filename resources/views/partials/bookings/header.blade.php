@@ -5,6 +5,14 @@
     :add-route="route('bookings.create')" 
     add-text="New Booking">
     
+    <template #actions>
+        <button @click="openBulkDownloadModal()" 
+                class="bg-purple-600 text-white px-4 py-2 rounded-lg font-medium text-sm hover:bg-purple-700 transition flex items-center space-x-2">
+            <i class="fas fa-download"></i>
+            <span>Bulk Download</span>
+        </button>
+    </template>
+    
     <x-stat-cards :cards="[
         [
             'value' => 'bookingStats.all', 

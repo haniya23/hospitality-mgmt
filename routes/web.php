@@ -116,6 +116,11 @@ Route::middleware('auth')->group(function () {
     Route::put('/bookings/{booking}', [App\Http\Controllers\BookingController::class, 'update'])->name('bookings.update');
     Route::get('/bookings-cancelled', [App\Http\Controllers\BookingController::class, 'cancelled'])->name('bookings.cancelled');
     
+    // Invoice Routes
+    Route::get('/bookings/{booking}/invoice/download', [App\Http\Controllers\InvoiceController::class, 'download'])->name('bookings.invoice.download');
+    Route::get('/bookings/{booking}/invoice/view', [App\Http\Controllers\InvoiceController::class, 'view'])->name('bookings.invoice.view');
+    Route::get('/bookings/bulk-invoice/download', [App\Http\Controllers\InvoiceController::class, 'bulkDownload'])->name('bookings.bulk-invoice.download');
+    
     // API Routes for Alpine.js
     Route::prefix('api')->group(function () {
         Route::get('/properties', [App\Http\Controllers\BookingController::class, 'getProperties']);
