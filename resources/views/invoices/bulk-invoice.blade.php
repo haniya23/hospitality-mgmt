@@ -194,7 +194,7 @@
         
         <div class="header">
             <div class="header-background"></div>
-            <h1>BULK INVOICE REPORT</h1>
+            <h1>INVOICE REPORT</h1>
             <p>Report No: {{ $invoice_number }}</p>
             <p>Generated on: {{ $generated_date }}</p>
 
