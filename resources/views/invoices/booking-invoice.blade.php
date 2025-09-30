@@ -13,22 +13,17 @@
         
         body {
             font-family: 'Arial', sans-serif;
-            line-height: 1.4;
-            color: #000;
+            line-height: 1.3;
+            color: #333;
             background: #fff;
-            font-size: 12px;
-        }
-        
-        .rupee {
-            font-family: 'Arial', sans-serif;
-            font-weight: bold;
+            font-size: 11px;
         }
         
         .invoice-container {
             width: 210mm;
             min-height: 297mm;
             margin: 0 auto;
-            padding: 10mm;
+            padding: 15mm;
             background: #fff;
         }
         
@@ -36,229 +31,215 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #000;
-            min-height: 120px;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #2c3e50;
         }
         
         .company-info {
             flex: 1;
-            margin-right: 20px;
         }
         
         .company-info h1 {
-            color: #000;
-            font-size: 18px;
+            color: #2c3e50;
+            font-size: 24px;
             font-weight: bold;
-            margin-bottom: 3px;
-            line-height: 1.2;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         
         .company-info p {
-            color: #000;
-            font-size: 10px;
-            margin: 1px 0;
-            line-height: 1.2;
+            color: #666;
+            font-size: 11px;
+            margin: 2px 0;
+            line-height: 1.4;
         }
         
         .invoice-info {
             text-align: right;
-            flex: 0 0 200px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
             min-width: 200px;
         }
         
         .invoice-info h2 {
-            color: #000;
-            font-size: 16px;
-            margin-bottom: 8px;
+            color: #2c3e50;
+            font-size: 20px;
+            margin-bottom: 10px;
             font-weight: bold;
-            line-height: 1.2;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         
         .invoice-info p {
-            color: #000;
-            font-size: 10px;
-            margin: 1px 0;
-            line-height: 1.2;
-            word-break: break-all;
+            color: #333;
+            font-size: 11px;
+            margin: 3px 0;
+            line-height: 1.4;
         }
         
-        .billing-section {
-            display: flex;
-            justify-content: space-between;
+        .guest-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .guest-section h3 {
+            color: #2c3e50;
+            font-size: 16px;
             margin-bottom: 15px;
-        }
-        
-        .billing-box {
-            flex: 1;
-            margin: 0 5px;
-            padding: 8px;
-            background: #fff;
-            border: 1px solid #000;
-        }
-        
-        .billing-box h3 {
-            color: #000;
-            font-size: 12px;
-            margin-bottom: 8px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
             font-weight: bold;
         }
         
-        .billing-box p {
-            color: #000;
+        .guest-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .guest-info p {
+            color: #333;
             font-size: 11px;
-            margin: 2px 0;
+            margin: 3px 0;
+            line-height: 1.4;
+        }
+        
+        .guest-info strong {
+            color: #2c3e50;
+            font-weight: bold;
         }
         
         .booking-details {
             background: #fff;
-            padding: 12px;
-            border: 1px solid #000;
-            margin-bottom: 15px;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border: 2px solid #e9ecef;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .booking-details h3 {
-            color: #000;
-            font-size: 14px;
-            margin-bottom: 10px;
+            color: #2c3e50;
+            font-size: 16px;
+            margin-bottom: 15px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
             font-weight: bold;
         }
         
         .details-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            gap: 15px;
         }
         
         .detail-item {
             display: flex;
             justify-content: space-between;
-            padding: 5px 0;
-            border-bottom: 1px solid #ccc;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
         }
         
         .detail-label {
             font-weight: 600;
-            color: #000;
+            color: #2c3e50;
             font-size: 11px;
         }
         
         .detail-value {
-            color: #000;
+            color: #333;
             font-size: 11px;
+            font-weight: 500;
         }
         
         .accommodation-details {
             background: #fff;
-            padding: 12px;
-            border: 1px solid #000;
-            margin-bottom: 15px;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border: 2px solid #e9ecef;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .accommodation-details h3 {
-            color: #000;
-            font-size: 14px;
-            margin-bottom: 10px;
+            color: #2c3e50;
+            font-size: 16px;
+            margin-bottom: 15px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
             font-weight: bold;
         }
         
         .accommodation-info {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            gap: 15px;
         }
         
         .financial-summary {
             background: #fff;
-            padding: 12px;
-            border: 1px solid #000;
-            margin-bottom: 15px;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border: 2px solid #e9ecef;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .financial-summary h3 {
-            color: #000;
-            font-size: 14px;
-            margin-bottom: 10px;
+            color: #2c3e50;
+            font-size: 16px;
+            margin-bottom: 15px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
             font-weight: bold;
         }
         
         .financial-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            gap: 15px;
         }
         
         .total-section {
-            background: #000;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
             color: white;
-            padding: 12px;
+            padding: 25px;
             text-align: center;
-            margin-bottom: 15px;
+            margin-bottom: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
         
         .total-section h3 {
-            font-size: 16px;
-            margin-bottom: 8px;
+            font-size: 18px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         
         .total-amount {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
         }
         
         .payment-status {
-            font-size: 12px;
+            font-size: 13px;
             opacity: 0.9;
         }
         
-        .b2b-section {
-            background: #fff;
-            border: 1px solid #000;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .b2b-section h3 {
-            color: #000;
-            font-size: 14px;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: bold;
-        }
-        
-        .commission-details {
-            background: #fff;
-            border: 1px solid #000;
-            padding: 12px;
-            margin-bottom: 15px;
-        }
-        
-        .commission-details h3 {
-            color: #000;
-            font-size: 14px;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: bold;
-        }
-        
         .footer {
-            margin-top: 15px;
-            padding-top: 10px;
-            border-top: 1px solid #000;
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 2px solid #e9ecef;
             text-align: center;
-            color: #000;
+            color: #666;
             font-size: 10px;
         }
         
@@ -267,37 +248,50 @@
         }
         
         .terms-section {
-            background: #fff;
-            padding: 12px;
-            border: 1px solid #000;
-            margin-top: 15px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            border-left: 4px solid #3498db;
         }
         
         .terms-section h4 {
-            color: #000;
+            color: #2c3e50;
             font-size: 12px;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
             font-weight: bold;
         }
         
         .terms-section p {
-            color: #000;
+            color: #666;
             font-size: 10px;
-            line-height: 1.4;
+            line-height: 1.5;
         }
         
         .status-badge {
             display: inline-block;
-            padding: 2px 8px;
-            border: 1px solid #000;
+            padding: 4px 12px;
+            border-radius: 15px;
             font-size: 10px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            background: #fff;
-            color: #000;
+            background: #3498db;
+            color: white;
+        }
+        
+        .status-confirmed {
+            background: #27ae60;
+        }
+        
+        .status-pending {
+            background: #f39c12;
+        }
+        
+        .status-cancelled {
+            background: #e74c3c;
         }
         
         @media print {
@@ -310,64 +304,48 @@
             .invoice-container {
                 width: 100%;
                 min-height: 100%;
-                padding: 8mm;
+                padding: 12mm;
                 margin: 0;
             }
             
             .header {
                 page-break-inside: avoid;
-                margin-bottom: 10px;
-                min-height: 100px;
+                margin-bottom: 15px;
             }
             
-            .company-info {
-                flex: 1;
-                margin-right: 15px;
-            }
-            
-            .invoice-info {
-                flex: 0 0 180px;
-                min-width: 180px;
-            }
-            
-            .billing-section {
+            .guest-section {
                 page-break-inside: avoid;
-                margin-bottom: 10px;
+                margin-bottom: 15px;
             }
             
             .booking-details {
                 page-break-inside: avoid;
-                margin-bottom: 10px;
+                margin-bottom: 15px;
             }
             
             .accommodation-details {
                 page-break-inside: avoid;
-                margin-bottom: 10px;
+                margin-bottom: 15px;
             }
             
             .financial-summary {
                 page-break-inside: avoid;
-                margin-bottom: 10px;
-            }
-            
-            .commission-details {
-                page-break-inside: avoid;
-                margin-bottom: 10px;
+                margin-bottom: 15px;
             }
             
             .total-section {
                 page-break-inside: avoid;
-                margin-bottom: 10px;
+                margin-bottom: 15px;
             }
             
             .terms-section {
                 page-break-inside: avoid;
-                margin-top: 10px;
+                margin-top: 15px;
             }
             
             .footer {
                 page-break-inside: avoid;
-                margin-top: 10px;
+                margin-top: 15px;
             }
         }
     </style>
@@ -393,30 +371,24 @@
             </div>
         </div>
 
-        <!-- Billing Information -->
-        <div class="billing-section">
-            <div class="billing-box">
-                <h3>Bill To</h3>
-                <p><strong>{{ $guest_details->name }}</strong></p>
-                <p>{{ $guest_details->email }}</p>
-                <p>{{ $guest_details->mobile_number }}</p>
-                @if($guest_details->address)
-                    <p>{{ $guest_details->address }}</p>
-                @endif
-                @if($guest_details->id_type && $guest_details->id_number)
-                    <p>ID: {{ $guest_details->id_type }} - {{ $guest_details->id_number }}</p>
-                @endif
+        <!-- Guest Information -->
+        <div class="guest-section">
+            <h3>Guest Information</h3>
+            <div class="guest-info">
+                <div>
+                    <p><strong>Name:</strong> {{ $guest_details->name }}</p>
+                    <p><strong>Email:</strong> {{ $guest_details->email }}</p>
+                    <p><strong>Mobile:</strong> {{ $guest_details->mobile_number }}</p>
+                </div>
+                <div>
+                    @if($guest_details->address)
+                        <p><strong>Address:</strong> {{ $guest_details->address }}</p>
+                    @endif
+                    @if($guest_details->id_type && $guest_details->id_number)
+                        <p><strong>ID:</strong> {{ $guest_details->id_type }} - {{ $guest_details->id_number }}</p>
+                    @endif
+                </div>
             </div>
-            
-            @if($is_b2b_booking && $b2b_partner)
-            <div class="billing-box">
-                <h3>B2B Partner</h3>
-                <p><strong>{{ $b2b_partner->partner_name }}</strong></p>
-                <p>{{ $b2b_partner->email }}</p>
-                <p>{{ $b2b_partner->phone }}</p>
-                <p>Commission Rate: {{ $b2b_partner->commission_rate }}%</p>
-            </div>
-            @endif
         </div>
 
         <!-- Booking Details -->
@@ -478,7 +450,7 @@
                 @endif
                 <div class="detail-item">
                     <span class="detail-label">Base Price:</span>
-                    <span class="detail-value">&#8377;{{ number_format($accommodation_details->base_price, 2) }}/night</span>
+                    <span class="detail-value">₹{{ number_format($accommodation_details->base_price, 2) }}/night</span>
                 </div>
                 @if($accommodation_details->description)
                 <div class="detail-item" style="grid-column: 1 / -1;">
@@ -495,25 +467,25 @@
             <div class="financial-grid">
                 <div class="detail-item">
                     <span class="detail-label">Base Amount ({{ $nights }} nights):</span>
-                    <span class="detail-value">&#8377;{{ number_format($accommodation_details->base_price * $nights, 2) }}</span>
+                    <span class="detail-value">₹{{ number_format($accommodation_details->base_price * $nights, 2) }}</span>
                 </div>
                 @if($booking->rate_override)
                 <div class="detail-item">
                     <span class="detail-label">Rate Override:</span>
-                    <span class="detail-value">&#8377;{{ number_format($booking->rate_override, 2) }}</span>
+                    <span class="detail-value">₹{{ number_format($booking->rate_override, 2) }}</span>
                 </div>
                 @endif
                 <div class="detail-item">
                     <span class="detail-label">Total Amount:</span>
-                    <span class="detail-value">&#8377;{{ number_format($booking->total_amount, 2) }}</span>
+                    <span class="detail-value">₹{{ number_format($booking->total_amount, 2) }}</span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Advance Paid:</span>
-                    <span class="detail-value">&#8377;{{ number_format($booking->advance_paid, 2) }}</span>
+                    <span class="detail-value">₹{{ number_format($booking->advance_paid, 2) }}</span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Balance Pending:</span>
-                    <span class="detail-value">&#8377;{{ number_format($booking->balance_pending, 2) }}</span>
+                    <span class="detail-value">₹{{ number_format($booking->balance_pending, 2) }}</span>
                 </div>
                 @if($booking->override_reason)
                 <div class="detail-item" style="grid-column: 1 / -1;">
@@ -528,10 +500,10 @@
         <!-- Total Section -->
         <div class="total-section">
             <h3>Total Amount</h3>
-            <div class="total-amount">&#8377;{{ number_format($booking->total_amount, 2) }}</div>
+            <div class="total-amount">₹{{ number_format($booking->total_amount, 2) }}</div>
             <div class="payment-status">
                 @if($booking->balance_pending > 0)
-                    Balance Due: &#8377;{{ number_format($booking->balance_pending, 2) }}
+                    Balance Due: ₹{{ number_format($booking->balance_pending, 2) }}
                 @else
                     Fully Paid
                 @endif
