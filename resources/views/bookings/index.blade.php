@@ -507,7 +507,9 @@ function bookingData() {
             selectedStatuses.forEach(status => params.append('statuses[]', status));
 
             const downloadUrl = `/bookings/bulk-invoice/download?${params.toString()}`;
-            window.open(downloadUrl, '_blank');
+            
+            // Use window.location for direct download without loading state
+            window.location.href = downloadUrl;
             
             this.closeBulkDownloadModal();
             this.showMessage('Bulk invoice download started successfully!', 'success');

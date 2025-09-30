@@ -30,14 +30,22 @@
                 </div>
             </div>
             
-            <!-- Add Button -->
-            @if($addRoute)
-            <a href="{{ $addRoute }}" class="group bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 flex items-center gap-2">
-                <i class="fas fa-plus text-sm"></i>
-                <span class="hidden sm:inline">{{ $addText }}</span>
-                <span class="sm:hidden">Add</span>
-            </a>
-            @endif
+            <!-- Action Buttons -->
+            <div class="flex items-center space-x-3">
+                <!-- Custom Actions Slot -->
+                @if(isset($actions))
+                    {{ $actions }}
+                @endif
+                
+                <!-- Add Button -->
+                @if($addRoute)
+                <a href="{{ $addRoute }}" class="group bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 flex items-center gap-2">
+                    <i class="fas fa-plus text-sm"></i>
+                    <span class="hidden sm:inline">{{ $addText }}</span>
+                    <span class="sm:hidden">Add</span>
+                </a>
+                @endif
+            </div>
         </div>
 
         <!-- Slot Content -->

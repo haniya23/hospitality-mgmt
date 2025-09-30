@@ -84,9 +84,10 @@
                             <i class="fas fa-edit mr-1"></i>
                             Edit
                         </a>
-                        <a :href="'/bookings/' + booking.uuid + '/invoice/preview'" 
+                        <a :href="'/bookings/' + booking.uuid + '/invoice/download'" 
+                           :download="'Invoice-' + booking.confirmation_number + '.pdf'"
                            class="bg-purple-500 text-white py-2 px-4 rounded-xl font-medium text-sm hover:bg-purple-600 transition text-center">
-                            <i class="fas fa-eye mr-1"></i>
+                            <i class="fas fa-file-pdf mr-1"></i>
                             Invoice
                         </a>
                         <button @click="shareToWhatsApp(booking)" 

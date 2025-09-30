@@ -1,550 +1,351 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Invoice - {{ $booking->confirmation_number }}</title>
+    
+    {{-- 
+        NOTE FOR DOMPDF: For the 'Poppins' font to work, you must install the TTF font files 
+        and configure them in your dompdf settings. The @import may not work directly.
+    --}}
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: 'Arial', sans-serif;
-            line-height: 1.3;
-            color: #333;
-            background: #fff;
+            font-family: 'Poppins', 'DejaVu Sans', sans-serif; /* DejaVu Sans is a good fallback for symbols */
+            background-color: #ffffff;
             font-size: 11px;
+            color: #555;
         }
-        
+
         .invoice-container {
-            width: 210mm;
-            min-height: 297mm;
-            margin: 0 auto;
-            padding: 15mm;
+            width: 100%;
+            position: relative;
             background: #fff;
         }
         
+        /* --- Header with Teal Curve --- */
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 3px solid #2c3e50;
+            color: #ffffff;
+            padding: 40px 50px;
+            position: relative;
+            z-index: 1;
+            height: 200px;
         }
-        
-        .company-info {
-            flex: 1;
+
+        .header-background {
+            position: absolute;
+            top: -100px;
+            left: -100px;
+            width: 450px;
+            height: 450px;
+            background-color: #00A99D; /* Main Teal Color */
+            border-bottom-right-radius: 200px;
+            z-index: -1;
         }
-        
-        .company-info h1 {
-            color: #2c3e50;
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+
+        .header h1 {
+            font-size: 42px;
+            margin: 0;
+            font-weight: 700;
         }
-        
-        .company-info p {
-            color: #666;
-            font-size: 11px;
-            margin: 2px 0;
-            line-height: 1.4;
-        }
-        
-        .invoice-info {
-            text-align: right;
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 5px;
-            min-width: 200px;
-        }
-        
-        .invoice-info h2 {
-            color: #2c3e50;
-            font-size: 20px;
-            margin-bottom: 10px;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .invoice-info p {
-            color: #333;
-            font-size: 11px;
-            margin: 3px 0;
-            line-height: 1.4;
-        }
-        
-        .guest-section {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 25px;
-            border-left: 4px solid #3498db;
-        }
-        
-        .guest-section h3 {
-            color: #2c3e50;
-            font-size: 16px;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: bold;
-        }
-        
-        .guest-info {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        
-        .guest-info p {
-            color: #333;
-            font-size: 11px;
-            margin: 3px 0;
-            line-height: 1.4;
-        }
-        
-        .guest-info strong {
-            color: #2c3e50;
-            font-weight: bold;
-        }
-        
-        .booking-details {
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 25px;
-            border: 2px solid #e9ecef;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .booking-details h3 {
-            color: #2c3e50;
-            font-size: 16px;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: bold;
-        }
-        
-        .details-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        
-        .detail-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #e9ecef;
-        }
-        
-        .detail-label {
-            font-weight: 600;
-            color: #2c3e50;
-            font-size: 11px;
-        }
-        
-        .detail-value {
-            color: #333;
-            font-size: 11px;
-            font-weight: 500;
-        }
-        
-        .accommodation-details {
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 25px;
-            border: 2px solid #e9ecef;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .accommodation-details h3 {
-            color: #2c3e50;
-            font-size: 16px;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: bold;
-        }
-        
-        .accommodation-info {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        
-        .financial-summary {
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 25px;
-            border: 2px solid #e9ecef;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .financial-summary h3 {
-            color: #2c3e50;
-            font-size: 16px;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: bold;
-        }
-        
-        .financial-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        
-        .total-section {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-            color: white;
-            padding: 25px;
-            text-align: center;
-            margin-bottom: 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-        
-        .total-section h3 {
-            font-size: 18px;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .total-amount {
-            font-size: 28px;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-        
-        .payment-status {
+
+        .header p {
+            margin: 5px 0 0;
             font-size: 13px;
-            opacity: 0.9;
         }
-        
-        .footer {
-            margin-top: 25px;
-            padding-top: 15px;
-            border-top: 2px solid #e9ecef;
-            text-align: center;
-            color: #666;
-            font-size: 10px;
+
+        .company-info {
+            position: absolute;
+            top: 40px;
+            right: 50px;
+            text-align: right;
         }
-        
-        .footer p {
-            margin: 3px 0;
+
+        .company-info h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0;
+            color: #333;
         }
-        
-        .terms-section {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 20px;
-            border-left: 4px solid #3498db;
+
+        .company-info p {
+            font-size: 11px;
+            color: #888;
+            margin: 0;
         }
-        
-        .terms-section h4 {
-            color: #2c3e50;
-            font-size: 12px;
+
+        /* --- Customer & Payment Details Table for Layout --- */
+        .details-section {
+            width: 100%;
+            padding: 20px 50px 0px;
+        }
+
+        .details-section td {
+            width: 50%;
+            vertical-align: top;
+        }
+
+        .details-section h3 {
+            font-size: 14px;
+            color: #00A99D;
             margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: bold;
-        }
-        
-        .terms-section p {
-            color: #666;
-            font-size: 10px;
-            line-height: 1.5;
-        }
-        
-        .status-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 15px;
-            font-size: 10px;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            background: #3498db;
-            color: white;
+        }
+
+        .details-section p {
+            font-size: 11px;
+            color: #555;
+            margin: 4px 0;
+            line-height: 1.6;
+        }
+
+        .details-section .label {
+            color: #333;
+            font-weight: 500;
+            display: inline-block;
+            width: 50px;
         }
         
-        .status-confirmed {
-            background: #27ae60;
+        /* --- Items Section --- */
+        .items-section {
+            padding: 30px 50px;
         }
         
-        .status-pending {
-            background: #f39c12;
+        .items-header {
+            background-color: #00A99D;
+            color: #ffffff;
+            padding: 10px 20px;
+            font-weight: 600;
+            font-size: 12px;
+            border-radius: 8px;
         }
         
-        .status-cancelled {
-            background: #e74c3c;
+        .items-header-table, .item-row-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .item-row {
+            background-color: #F0FDFB; /* Light teal for rows */
+            border-radius: 8px;
+            padding: 12px 20px;
+            margin-top: 10px;
         }
         
-        @media print {
-            body {
-                font-size: 10px;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            
-            .invoice-container {
-                width: 100%;
-                min-height: 100%;
-                padding: 12mm;
-                margin: 0;
-            }
-            
-            .header {
-                page-break-inside: avoid;
-                margin-bottom: 15px;
-            }
-            
-            .guest-section {
-                page-break-inside: avoid;
-                margin-bottom: 15px;
-            }
-            
-            .booking-details {
-                page-break-inside: avoid;
-                margin-bottom: 15px;
-            }
-            
-            .accommodation-details {
-                page-break-inside: avoid;
-                margin-bottom: 15px;
-            }
-            
-            .financial-summary {
-                page-break-inside: avoid;
-                margin-bottom: 15px;
-            }
-            
-            .total-section {
-                page-break-inside: avoid;
-                margin-bottom: 15px;
-            }
-            
-            .terms-section {
-                page-break-inside: avoid;
-                margin-top: 15px;
-            }
-            
-            .footer {
-                page-break-inside: avoid;
-                margin-top: 15px;
-            }
+        .items-section .col-1 { width: 5%; }
+        .items-section .col-2 { width: 45%; }
+        .items-section .col-3 { width: 15%; text-align: center; }
+        .items-section .col-4 { width: 15%; text-align: right; }
+        .items-section .col-5 { width: 20%; text-align: right; }
+        
+        .item-description { font-weight: 500; color: #333; }
+        
+        /* --- Totals Section --- */
+        .totals-section {
+            padding: 0 50px;
+            page-break-inside: avoid;
         }
+
+        .totals-table {
+            width: 300px;
+            float: right;
+            border-collapse: collapse;
+        }
+
+        .totals-table td {
+            padding: 8px 0;
+            font-size: 12px;
+            color: #555;
+        }
+        
+        .totals-table .grand-total-label {
+            font-weight: 600;
+            color: #333;
+            border-top: 1px solid #eee;
+        }
+
+        .totals-table .grand-total-value {
+            font-weight: 700;
+            color: #00A99D;
+            font-size: 16px;
+            text-align: right;
+            border-top: 1px solid #eee;
+        }
+
+        .totals-table .label { text-align: left; }
+        .totals-table .value { text-align: right; }
+        
+        /* --- Footer --- */
+        .footer {
+            padding: 40px 50px;
+            position: relative;
+            width: 100%;
+            page-break-before: auto;
+            page-break-inside: avoid;
+        }
+        
+        .footer-background {
+            position: absolute;
+            bottom: -50px;
+            right: -50px;
+            width: 200px;
+            height: 200px;
+            background-color: #00A99D;
+            border-top-left-radius: 100px;
+            z-index: 0;
+        }
+        
+        .footer-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer h3 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #333;
+            margin: 0 0 10px;
+        }
+        
+        .footer h4 {
+            font-size: 13px;
+            color: #00A99D;
+            margin: 15px 0 8px;
+            font-weight: 600;
+        }
+
+        .footer p {
+            font-size: 11px;
+            color: #666;
+            margin: 2px 0;
+            line-height: 1.6;
+        }
+        
+        .footer .footer-table { width: 100%; }
+        .footer .footer-table td { width: 50%; vertical-align: top; }
+
     </style>
 </head>
 <body>
+
     <div class="invoice-container">
-        <!-- Header -->
+        
         <div class="header">
+            <div class="header-background"></div>
+            <h1>INVOICE</h1>
+            <p>No. {{ $booking->confirmation_number }}</p>
+            <p>Date: {{ $invoice_date }}</p>
+
             <div class="company-info">
-                <h1>{{ $property_owner->name ?? 'Hospitality Management' }}</h1>
-                <p>{{ $property_location->address ?? 'Property Address' }}</p>
-                <p>{{ $property_location->city->name ?? 'City' }}, {{ $property_location->city->district->name ?? 'District' }}, {{ $property_location->city->district->state->name ?? 'State' }}</p>
-                <p>PIN: {{ $property_location->pincode ?? 'N/A' }}</p>
-                <p>Phone: {{ $property_owner->mobile_number ?? 'N/A' }}</p>
-                <p>Email: {{ $property_owner->email ?? 'N/A' }}</p>
-            </div>
-            <div class="invoice-info">
-                <h2>INVOICE</h2>
-                <p><strong>Invoice No:</strong><br>{{ $invoice_number }}</p>
-                <p><strong>Date:</strong><br>{{ $invoice_date }}</p>
-                <p><strong>Due Date:</strong><br>{{ $due_date }}</p>
-                <p><strong>Confirmation:</strong><br>{{ $booking->confirmation_number }}</p>
+                <h2>{{ $property_owner->name ?? 'Hospitality Management' }}</h2>
+                <p>Your Trusted Hospitality Partner</p>
             </div>
         </div>
 
-        <!-- Guest Information -->
-        <div class="guest-section">
-            <h3>Guest Information</h3>
-            <div class="guest-info">
-                <div>
-                    <p><strong>Name:</strong> {{ $guest_details->name }}</p>
-                    <p><strong>Email:</strong> {{ $guest_details->email }}</p>
-                    <p><strong>Mobile:</strong> {{ $guest_details->mobile_number }}</p>
-                </div>
-                <div>
+        <table class="details-section">
+            <tr>
+                <td>
+                    <h3>Bill to.</h3>
+                    <p><span class="label">Name</span>: {{ $guest_details->name }}</p>
+                    <p><span class="label">Phone</span>: {{ $guest_details->mobile_number }}</p>
+                    <p><span class="label">Mail</span>: {{ $guest_details->email }}</p>
                     @if($guest_details->address)
-                        <p><strong>Address:</strong> {{ $guest_details->address }}</p>
+                        <p><span class="label">Address</span>: {{ $guest_details->address }}</p>
                     @endif
-                    @if($guest_details->id_type && $guest_details->id_number)
-                        <p><strong>ID:</strong> {{ $guest_details->id_type }} - {{ $guest_details->id_number }}</p>
-                    @endif
-                </div>
+                </td>
+                <td>
+                    <h3>Payment Method.</h3>
+                    <p>Bank Transfer Recommended</p>
+                    <p style="color:#888;">(Details available on request)</p>
+                    <br>
+                    <p>Due Date: {{ $due_date }}</p>
+                </td>
+            </tr>
+        </table>
+
+        <div class="items-section">
+            <div class="items-header">
+                <table class="items-header-table">
+                    <tr>
+                        <td class="col-1">No.</td>
+                        <td class="col-2">ITEM DESCRIPTION</td>
+                        <td class="col-3">QTY</td>
+                        <td class="col-4">PRICE</td>
+                        <td class="col-5">TOTAL</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="item-row">
+                 <table class="item-row-table">
+                    <tr>
+                        <td class="col-1">1</td>
+                        <td class="col-2 item-description">
+                            {{ $accommodation_details->display_name }} Booking<br>
+                            <small style="color: #777;">({{ $nights }} Nights from {{ $booking->check_in_date->format('d/m/Y') }})</small>
+                        </td>
+                        <td class="col-3">1</td>
+                        <td class="col-4">&#8377;{{ number_format($booking->total_amount, 2) }}</td>
+                        <td class="col-5">&#8377;{{ number_format($booking->total_amount, 2) }}</td>
+                    </tr>
+                </table>
             </div>
         </div>
 
-        <!-- Booking Details -->
-        <div class="booking-details">
-            <h3>Booking Information</h3>
-            <div class="details-grid">
-                <div class="detail-item">
-                    <span class="detail-label">Check-in Date:</span>
-                    <span class="detail-value">{{ $booking->check_in_date->format('d/m/Y') }}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Check-out Date:</span>
-                    <span class="detail-value">{{ $booking->check_out_date->format('d/m/Y') }}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Duration:</span>
-                    <span class="detail-value">{{ $nights }} {{ $nights == 1 ? 'Night' : 'Nights' }}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Guests:</span>
-                    <span class="detail-value">{{ $booking->adults }} Adults, {{ $booking->children }} Children</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Status:</span>
-                    <span class="detail-value">
-                        <span class="status-badge status-{{ $booking->status }}">
-                            {{ ucfirst(str_replace('_', ' ', $booking->status)) }}
-                        </span>
-                    </span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Booking Date:</span>
-                    <span class="detail-value">{{ $booking->created_at->format('d/m/Y H:i') }}</span>
-                </div>
-            </div>
+        <div class="totals-section">
+            <table class="totals-table">
+                <tr>
+                    <td class="grand-total-label">Grand Total</td>
+                    <td class="grand-total-value">&#8377;{{ number_format($booking->total_amount, 2) }}</td>
+                </tr>
+                 <tr>
+                    <td class="label">Advance Paid</td>
+                    <td class="value">&#8377;{{ number_format($booking->advance_paid, 2) }}</td>
+                </tr>
+                <tr>
+                    <td class="label"><b>Balance Due</b></td>
+                    <td class="value"><b>&#8377;{{ number_format($booking->balance_pending, 2) }}</b></td>
+                </tr>
+            </table>
         </div>
 
-        <!-- Accommodation Details -->
-        <div class="accommodation-details">
-            <h3>Accommodation Details</h3>
-            <div class="accommodation-info">
-                <div class="detail-item">
-                    <span class="detail-label">Property:</span>
-                    <span class="detail-value">{{ $accommodation_details->property->name }}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Accommodation Type:</span>
-                    <span class="detail-value">{{ $accommodation_details->display_name }}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Max Occupancy:</span>
-                    <span class="detail-value">{{ $accommodation_details->max_occupancy }} Guests</span>
-                </div>
-                @if($accommodation_details->size)
-                <div class="detail-item">
-                    <span class="detail-label">Size:</span>
-                    <span class="detail-value">{{ $accommodation_details->size }} sq ft</span>
-                </div>
-                @endif
-                <div class="detail-item">
-                    <span class="detail-label">Base Price:</span>
-                    <span class="detail-value">₹{{ number_format($accommodation_details->base_price, 2) }}/night</span>
-                </div>
-                @if($accommodation_details->description)
-                <div class="detail-item" style="grid-column: 1 / -1;">
-                    <span class="detail-label">Description:</span>
-                    <span class="detail-value">{{ $accommodation_details->description }}</span>
-                </div>
-                @endif
-            </div>
-        </div>
+        <div style="clear: both;"></div>
 
-        <!-- Financial Summary -->
-        <div class="financial-summary">
-            <h3>Financial Summary</h3>
-            <div class="financial-grid">
-                <div class="detail-item">
-                    <span class="detail-label">Base Amount ({{ $nights }} nights):</span>
-                    <span class="detail-value">₹{{ number_format($accommodation_details->base_price * $nights, 2) }}</span>
-                </div>
-                @if($booking->rate_override)
-                <div class="detail-item">
-                    <span class="detail-label">Rate Override:</span>
-                    <span class="detail-value">₹{{ number_format($booking->rate_override, 2) }}</span>
-                </div>
-                @endif
-                <div class="detail-item">
-                    <span class="detail-label">Total Amount:</span>
-                    <span class="detail-value">₹{{ number_format($booking->total_amount, 2) }}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Advance Paid:</span>
-                    <span class="detail-value">₹{{ number_format($booking->advance_paid, 2) }}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Balance Pending:</span>
-                    <span class="detail-value">₹{{ number_format($booking->balance_pending, 2) }}</span>
-                </div>
-                @if($booking->override_reason)
-                <div class="detail-item" style="grid-column: 1 / -1;">
-                    <span class="detail-label">Override Reason:</span>
-                    <span class="detail-value">{{ $booking->override_reason }}</span>
-                </div>
-                @endif
-            </div>
-        </div>
-
-
-        <!-- Total Section -->
-        <div class="total-section">
-            <h3>Total Amount</h3>
-            <div class="total-amount">₹{{ number_format($booking->total_amount, 2) }}</div>
-            <div class="payment-status">
-                @if($booking->balance_pending > 0)
-                    Balance Due: ₹{{ number_format($booking->balance_pending, 2) }}
-                @else
-                    Fully Paid
-                @endif
-            </div>
-        </div>
-
-        <!-- Special Requests -->
-        @if($booking->special_requests)
-        <div class="terms-section">
-            <h4>Special Requests</h4>
-            <p>{{ $booking->special_requests }}</p>
-        </div>
-        @endif
-
-        <!-- Notes -->
-        @if($booking->notes)
-        <div class="terms-section">
-            <h4>Notes</h4>
-            <p>{{ $booking->notes }}</p>
-        </div>
-        @endif
-
-        <!-- Terms and Conditions -->
-        <div class="terms-section">
-            <h4>Terms & Conditions</h4>
-            <p>
-                • Check-in time: 2:00 PM | Check-out time: 11:00 AM<br>
-                • Cancellation policy applies as per booking terms<br>
-                • All payments are non-refundable unless otherwise specified<br>
-                • Guest is responsible for any damages to the property<br>
-                • This invoice is generated automatically and is valid for accounting purposes
-            </p>
-        </div>
-
-        <!-- Footer -->
         <div class="footer">
-            <p><strong>Thank you for choosing our hospitality services!</strong></p>
-            <p>For any queries, please contact us at {{ $property_owner->mobile_number ?? 'N/A' }}</p>
-            <p>This is a computer-generated invoice and does not require a signature.</p>
-            <p>Generated on {{ now()->format('d/m/Y H:i:s') }}</p>
+            <div class="footer-background"></div>
+            <div class="footer-content">
+                <table class="footer-table">
+                    <tr>
+                        <td>
+                             <h3>THANK YOU</h3>
+                            <p>Best Regards,</p>
+                            <p><b>{{ $property_owner->name ?? 'Management' }}</b></p>
+                            
+                            <h4>Contact.</h4>
+                            <p><b>Phone</b>: {{ $property_owner->mobile_number ?? 'N/A' }}</p>
+                            <p><b>Email</b>: {{ $property_owner->email ?? 'N/A' }}</p>
+                        </td>
+                        <td>
+                            <h4>Terms and Condition.</h4>
+                            <p>
+                                • Check-in time: 2:00 PM | Check-out time: 11:00 AM<br>
+                                • Cancellation policy applies as per booking terms.<br>
+                                • All payments are non-refundable unless otherwise specified.<br>
+                                • Guest is responsible for any damages to the property.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </div>
         </div>
     </div>
+
 </body>
 </html>
