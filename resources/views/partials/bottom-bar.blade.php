@@ -88,18 +88,6 @@
                             </div>
                         </div>
 
-                        <!-- Reports Section -->
-                        @if($canAccessAdvanced)
-                        <div class="px-3 py-2">
-                            <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Analytics</h4>
-                            <div class="space-y-1">
-                                <a href="{{ route('reports.analytics') }}" @click="showMoreMenu = false" class="flex items-center px-3 py-2 text-gray-700 hover:bg-green-50 hover:text-green-600 transition-colors rounded-lg {{ request()->routeIs('reports.*') ? 'bg-green-50 text-green-600' : '' }}">
-                                    <i class="fas fa-chart-bar w-4 mr-3"></i>
-                                    <span class="text-sm">Reports</span>
-                                </a>
-                            </div>
-                        </div>
-                        @endif
 
                         <!-- Account Section -->
                         <div class="px-3 py-2">

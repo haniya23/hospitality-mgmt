@@ -150,10 +150,6 @@ class Reservation extends Model
         return $this->belongsToMany(Room::class, 'reservation_rooms');
     }
 
-    public function invoice()
-    {
-        return $this->hasOne(Invoice::class);
-    }
 
     public function guestStay()
     {

@@ -164,10 +164,6 @@ Route::middleware('auth')->group(function () {
         return view('pricing.calendar');
     })->name('pricing.calendar');
     
-    // Reports & Analytics Routes
-    Route::get('/reports', function () {
-        return view('reports.analytics');
-    })->name('reports.analytics')->middleware('subscription:advanced_reports');
     
     // Onboarding Routes
     Route::get('/onboarding', function () {

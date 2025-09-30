@@ -97,17 +97,6 @@
                     </ul>
                 </div>
 
-                <!-- Analytics Section -->
-                @if($canAccessAdvanced)
-                <div class="mb-6">
-                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">Analytics</h3>
-                    <ul class="space-y-1">
-                        <li><a href="{{ route('reports.analytics') }}" class="flex gap-4 p-3 font-semibold rounded-lg hover:bg-green-100 {{ request()->routeIs('reports.*') ? 'bg-gradient-to-r from-green-400 to-green-600 text-white' : 'text-gray-700' }} transition-all">
-                            <i class="fas fa-chart-bar w-5"></i>Reports
-                        </a></li>
-                    </ul>
-                </div>
-                @endif
 
                 <!-- Account Section -->
                 <div class="mb-6">
@@ -280,23 +269,6 @@
             </a>
             @endif
 
-            <!-- Analytics Section -->
-            @if($canAccessAdvanced)
-            <div class="space-y-1">
-                <button @click="openSections.analytics = !openSections.analytics" class="w-full flex items-center justify-between p-3 text-left font-semibold text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
-                    <div class="flex items-center space-x-3">
-                        <i class="fas fa-chart-bar w-5 text-gray-500"></i>
-                        <span>Analytics</span>
-                    </div>
-                    <i class="fas fa-chevron-down w-4 text-gray-400 transition-transform" :class="openSections.analytics ? 'rotate-180' : ''"></i>
-                </button>
-                <div x-show="openSections.analytics" x-transition class="ml-8 space-y-1">
-                    <a href="{{ route('reports.analytics') }}" @click="sidebarOpen = false" class="block p-2 text-sm text-gray-600 hover:text-green-600 hover:bg-green-50 rounded transition-colors {{ request()->routeIs('reports.*') ? 'text-green-600 bg-green-50' : '' }}">
-                        Reports & Analytics
-                    </a>
-                </div>
-            </div>
-            @endif
 
             <!-- Subscription -->
             <a href="{{ route('subscription.plans') }}" @click="sidebarOpen = false" class="flex gap-4 p-3 font-semibold rounded-lg hover:bg-green-100 {{ request()->routeIs('subscription.*') ? 'bg-gradient-to-r from-green-400 to-green-600 text-white' : 'text-gray-700' }} transition-all">
