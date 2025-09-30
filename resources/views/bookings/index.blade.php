@@ -454,6 +454,21 @@ function bookingData() {
             window.open(whatsappUrl, '_blank');
         },
 
+        downloadInvoice(booking) {
+            const downloadUrl = `/bookings/${booking.uuid}/invoice/download`;
+            
+            // Create a temporary iframe for silent download
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = downloadUrl;
+            document.body.appendChild(iframe);
+            
+            // Remove iframe after download starts
+            setTimeout(() => {
+                document.body.removeChild(iframe);
+            }, 1000);
+        },
+
         // Bulk Download Functions
         openBulkDownloadModal() {
             this.showBulkDownloadModal = true;
@@ -508,8 +523,16 @@ function bookingData() {
 
             const downloadUrl = `/bookings/bulk-invoice/download?${params.toString()}`;
             
-            // Use window.location for direct download without loading state
-            window.location.href = downloadUrl;
+            // Create a temporary iframe for silent download
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = downloadUrl;
+            document.body.appendChild(iframe);
+            
+            // Remove iframe after download starts
+            setTimeout(() => {
+                document.body.removeChild(iframe);
+            }, 1000);
             
             this.closeBulkDownloadModal();
             this.showMessage('Bulk invoice download started successfully!', 'success');

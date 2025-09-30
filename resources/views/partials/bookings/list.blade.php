@@ -84,12 +84,11 @@
                             <i class="fas fa-edit mr-1"></i>
                             Edit
                         </a>
-                        <a :href="'/bookings/' + booking.uuid + '/invoice/download'" 
-                           :download="'Invoice-' + booking.confirmation_number + '.pdf'"
-                           class="bg-purple-500 text-white py-2 px-4 rounded-xl font-medium text-sm hover:bg-purple-600 transition text-center">
+                        <button @click="downloadInvoice(booking)" 
+                                class="bg-purple-500 text-white py-2 px-4 rounded-xl font-medium text-sm hover:bg-purple-600 transition text-center">
                             <i class="fas fa-file-pdf mr-1"></i>
                             Invoice
-                        </a>
+                        </button>
                         <button @click="shareToWhatsApp(booking)" 
                                 class="bg-green-500 text-white py-2 px-4 rounded-xl font-medium text-sm hover:bg-green-600 transition text-center">
                             <i class="fab fa-whatsapp mr-1"></i>
