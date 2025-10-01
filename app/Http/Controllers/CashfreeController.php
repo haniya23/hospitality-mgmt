@@ -144,7 +144,9 @@ class CashfreeController extends Controller
         Log::info('Cashfree success callback received', [
             'order_id' => $orderId,
             'session_order_id' => $sessionOrderId,
-            'all_params' => $request->all()
+            'all_params' => $request->all(),
+            'query_params' => $request->query(),
+            'referer' => $request->header('referer')
         ]);
 
         // If no order_id in request, try to get from session
@@ -179,6 +181,25 @@ class CashfreeController extends Controller
                 Log::info('Found order_id from recent webhook', [
                     'order_id' => $orderId,
                     'webhook_id' => $recentWebhook->id,
+                    'user_id' => $user->id
+                ]);
+            }
+        }
+
+        // If still no order_id, try to get from recent subscription orders
+        if (!$orderId && auth()->check()) {
+            $user = auth()->user();
+            $recentSubscription = \App\Models\Subscription::where('user_id', $user->id)
+                ->where('created_at', '>=', now()->subMinutes(10))
+                ->whereNotNull('cashfree_order_id')
+                ->orderBy('created_at', 'desc')
+                ->first();
+                
+            if ($recentSubscription) {
+                $orderId = $recentSubscription->cashfree_order_id;
+                Log::info('Found order_id from recent subscription', [
+                    'order_id' => $orderId,
+                    'subscription_id' => $recentSubscription->id,
                     'user_id' => $user->id
                 ]);
             }
@@ -343,8 +364,10 @@ class CashfreeController extends Controller
         $orderType = $orderMeta['type'] ?? 'subscription';
         $plan = $orderMeta['plan'] ?? session('cashfree_plan');
         $billing = $orderMeta['billing'] ?? session('cashfree_billing');
+        $billingInterval = $orderMeta['billing_interval'] ?? $billing;
         $additionalAccommodations = $orderMeta['additional_accommodations'] ?? session('cashfree_additional_accommodations', 0);
         $userId = $orderMeta['user_id'] ?? $user->id;
+        $subscriptionId = $orderMeta['subscription_id'] ?? null;
 
         // Handle accommodation add-on payments
         if ($orderType === 'accommodation_addon') {
@@ -352,6 +375,35 @@ class CashfreeController extends Controller
             return;
         }
 
+        // If we have a subscription_id, update the subscription record instead of user directly
+        if ($subscriptionId) {
+            $subscription = \App\Models\Subscription::find($subscriptionId);
+            if ($subscription) {
+                // Activate the subscription
+                $subscription->update(['status' => 'active']);
+                
+                // Update user's subscription status from the subscription record
+                $user->update([
+                    'subscription_status' => $subscription->plan_slug,
+                    'subscription_ends_at' => $subscription->current_period_end,
+                    'is_trial_active' => false,
+                    'properties_limit' => $subscription->plan_slug === 'starter' ? 1 : 5,
+                ]);
+
+                Log::info('User subscription updated from subscription record', [
+                    'user_id' => $user->id,
+                    'subscription_id' => $subscription->id,
+                    'plan' => $subscription->plan_slug,
+                    'billing_interval' => $subscription->billing_interval,
+                ]);
+
+                // Clear any cached user data
+                $user->refresh();
+                return;
+            }
+        }
+
+        // Fallback to old logic for backward compatibility
         // If plan is still not found, try to extract from order_note
         if (!$plan && isset($orderData['order_note'])) {
             $orderNote = $orderData['order_note'];
@@ -368,8 +420,8 @@ class CashfreeController extends Controller
         }
 
         // Default to monthly if billing not found
-        if (!$billing) {
-            $billing = 'monthly';
+        if (!$billingInterval) {
+            $billingInterval = 'month';
         }
 
         Log::info('Subscription update data', [
@@ -377,27 +429,28 @@ class CashfreeController extends Controller
             'session_plan' => session('cashfree_plan'),
             'session_billing' => session('cashfree_billing'),
             'plan' => $plan,
-            'billing' => $billing,
-            'user_id' => $userId
+            'billing_interval' => $billingInterval,
+            'user_id' => $userId,
+            'subscription_id' => $subscriptionId
         ]);
 
         // Plan and billing should now have defaults, but log if they're still missing
-        if (!$plan || !$billing) {
+        if (!$plan || !$billingInterval) {
             Log::error('Missing plan or billing information after fallbacks', [
                 'plan' => $plan,
-                'billing' => $billing,
+                'billing_interval' => $billingInterval,
                 'order_meta' => $orderMeta,
                 'order_note' => $orderData['order_note'] ?? null
             ]);
             // Don't return, use defaults
             $plan = $plan ?: 'professional';
-            $billing = $billing ?: 'monthly';
+            $billingInterval = $billingInterval ?: 'month';
         }
 
         // Update user subscription
         $updateData = [
             'subscription_status' => $plan,
-            'subscription_ends_at' => $billing === 'yearly' ? now()->addYear() : now()->addMonth(),
+            'subscription_ends_at' => $billingInterval === 'year' ? now()->addYear() : now()->addMonth(),
             'is_trial_active' => false,
             'properties_limit' => $plan === 'starter' ? 1 : 5,
         ];
@@ -415,7 +468,7 @@ class CashfreeController extends Controller
         Log::info('User subscription updated successfully', [
             'user_id' => $user->id,
             'plan' => $plan,
-            'billing' => $billing,
+            'billing_interval' => $billingInterval,
             'additional_accommodations' => $additionalAccommodations,
             'update_data' => $updateData
         ]);
@@ -537,7 +590,7 @@ class CashfreeController extends Controller
             $addon = \App\Models\SubscriptionAddon::create([
                 'subscription_id' => $subscription->id,
                 'qty' => $quantity,
-                'unit_price' => 99, // ₹99 in rupees
+                'unit_price_cents' => 9900, // ₹99 in cents
                 'cycle_start' => now(),
                 'cycle_end' => now()->addDays(30), // 30-day expiry
             ]);
@@ -546,15 +599,16 @@ class CashfreeController extends Controller
             $subscription->increment('addon_count', $quantity);
 
             // Update subscription total amount to include addon costs
-            $addonAmount = $quantity * 99; // ₹99 per accommodation in rupees
-            $subscription->increment('price', $addonAmount);
+            $addonAmountCents = $quantity * 9900; // ₹99 per accommodation in cents
+            $subscription->increment('price_cents', $addonAmountCents);
 
             // Create payment record
             \App\Models\Payment::create([
                 'subscription_id' => $subscription->id,
                 'cashfree_order_id' => $orderData['order_id'],
                 'payment_id' => $orderData['cf_order_id'] ?? null,
-                'amount' => $quantity * 99,
+                'amount' => $quantity * 99, // Keep in rupees for display
+                'amount_cents' => $addonAmountCents, // Store in cents
                 'currency' => 'INR',
                 'method' => 'card',
                 'status' => 'completed',
@@ -567,7 +621,9 @@ class CashfreeController extends Controller
                 'addon_id' => $addon->id,
                 'quantity' => $quantity,
                 'user_id' => $user->id,
-                'expires_at' => $addon->cycle_end
+                'expires_at' => $addon->cycle_end,
+                'addon_count_after' => $subscription->fresh()->addon_count,
+                'total_addons' => $subscription->fresh()->addons()->where('cycle_end', '>', now())->sum('qty')
             ]);
 
         } catch (\Exception $e) {

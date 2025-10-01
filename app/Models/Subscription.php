@@ -19,7 +19,7 @@ class Subscription extends Model
         'start_at',
         'current_period_end',
         'billing_interval',
-        'price',
+        'price_cents',
         'currency',
         'cashfree_order_id',
     ];
@@ -78,6 +78,11 @@ class Subscription extends Model
         return $this->addons()->where('cycle_end', '>', now())->get()->sum(function($addon) {
             return $addon->qty * $addon->unit_price;
         });
+    }
+
+    public function getPriceAttribute(): float
+    {
+        return $this->price_cents / 100; // Convert cents to rupees
     }
 
     public function getTotalSubscriptionAmountAttribute(): float

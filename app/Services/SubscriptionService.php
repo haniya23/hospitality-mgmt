@@ -36,7 +36,7 @@ class SubscriptionService
                 'start_at' => $startAt,
                 'current_period_end' => $endAt,
                 'billing_interval' => $planConfig['interval'],
-                'price_cents' => $planConfig['amount'] * 100,
+                'price_cents' => $planConfig['amount'] * 100, // Convert to cents
                 'currency' => $planConfig['currency'],
                 'cashfree_order_id' => $options['cashfree_order_id'] ?? null,
             ]);
@@ -66,7 +66,7 @@ class SubscriptionService
                 'plan_slug' => $newPlanSlug,
                 'plan_name' => $newPlanConfig['name'],
                 'base_accommodation_limit' => $newPlanConfig['accommodation_limit'],
-                'price_cents' => $newPlanConfig['amount'] * 100,
+                'price_cents' => $newPlanConfig['amount'] * 100, // Convert to cents
                 'cashfree_order_id' => $options['cashfree_order_id'] ?? $subscription->cashfree_order_id,
             ]);
             
@@ -96,7 +96,7 @@ class SubscriptionService
             $addon = SubscriptionAddon::create([
                 'subscription_id' => $subscription->id,
                 'qty' => $quantity,
-                'unit_price_cents' => $unitPrice,
+                'unit_price_cents' => $unitPrice, // Keep in cents
                 'cycle_start' => $cycleStart,
                 'cycle_end' => $cycleEnd,
             ]);

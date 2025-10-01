@@ -10,7 +10,7 @@ class SubscriptionAddon extends Model
     protected $fillable = [
         'subscription_id',
         'qty',
-        'unit_price',
+        'unit_price_cents',
         'cycle_start',
         'cycle_end',
     ];
@@ -23,6 +23,11 @@ class SubscriptionAddon extends Model
     public function subscription(): BelongsTo
     {
         return $this->belongsTo(Subscription::class);
+    }
+
+    public function getUnitPriceAttribute(): float
+    {
+        return $this->unit_price_cents / 100; // Convert cents to rupees
     }
 
     public function getTotalPriceAttribute(): float

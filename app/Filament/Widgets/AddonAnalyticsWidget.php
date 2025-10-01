@@ -32,7 +32,7 @@ class AddonAnalyticsWidget extends ChartWidget
                 end: now(),
             )
             ->perDay()
-            ->sum('unit_price');
+            ->sum('unit_price_cents');
 
         return [
             'datasets' => [
@@ -45,7 +45,7 @@ class AddonAnalyticsWidget extends ChartWidget
                 ],
                 [
                     'label' => 'Add-on Revenue (₹)',
-                    'data' => $addonRevenueData->map(fn (TrendValue $value) => $value->aggregate),
+                    'data' => $addonRevenueData->map(fn (TrendValue $value) => $value->aggregate / 100), // Convert cents to rupees
                     'borderColor' => 'rgb(139, 69, 19)',
                     'backgroundColor' => 'rgba(139, 69, 19, 0.1)',
                     'tension' => 0.4,

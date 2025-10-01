@@ -75,9 +75,17 @@ class ProcessCashfreeWebhook implements ShouldQueue
         $orderId = $payload['data']['order']['order_id'] ?? null;
         $paymentId = $payload['data']['payment']['cf_payment_id'] ?? null;
         $amount = $payload['data']['payment']['payment_amount'] ?? 0;
+        $orderMeta = $payload['data']['order']['order_meta'] ?? [];
+        $orderType = $orderMeta['type'] ?? 'subscription';
         
         if (!$orderId) {
             throw new \Exception('Missing order_id in payment success webhook');
+        }
+
+        // Handle accommodation addon payments
+        if ($orderType === 'accommodation_addon') {
+            $this->handleAccommodationAddonWebhook($payload);
+            return;
         }
 
         // Find subscription by order ID
@@ -202,6 +210,67 @@ class ProcessCashfreeWebhook implements ShouldQueue
         Log::info('Payment dropped by user', [
             'order_id' => $orderId,
             'subscription_id' => $subscription->id,
+        ]);
+    }
+
+    private function handleAccommodationAddonWebhook(array $payload): void
+    {
+        $orderId = $payload['data']['order']['order_id'] ?? null;
+        $paymentId = $payload['data']['payment']['cf_payment_id'] ?? null;
+        $amount = $payload['data']['payment']['payment_amount'] ?? 0;
+        $orderMeta = $payload['data']['order']['order_meta'] ?? [];
+        $subscriptionId = $orderMeta['subscription_id'] ?? null;
+        $quantity = $orderMeta['quantity'] ?? 0;
+        $userId = $orderMeta['user_id'] ?? null;
+
+        if (!$subscriptionId || !$quantity || !$userId) {
+            throw new \Exception('Missing required data for accommodation addon webhook');
+        }
+
+        $subscription = Subscription::find($subscriptionId);
+        if (!$subscription) {
+            throw new \Exception("Subscription not found for subscription_id: {$subscriptionId}");
+        }
+
+        // Create accommodation add-on with 30-day expiry
+        $addon = \App\Models\SubscriptionAddon::create([
+            'subscription_id' => $subscription->id,
+            'qty' => $quantity,
+            'unit_price_cents' => 9900, // ₹99 in cents
+            'cycle_start' => now(),
+            'cycle_end' => now()->addDays(30), // 30-day expiry
+        ]);
+
+        // Update subscription addon count
+        $subscription->increment('addon_count', $quantity);
+
+        // Update subscription total amount to include addon costs
+        $addonAmountCents = $quantity * 9900; // ₹99 per accommodation in cents
+        $subscription->increment('price_cents', $addonAmountCents);
+
+        // Create payment record
+        Payment::create([
+            'subscription_id' => $subscription->id,
+            'cashfree_order_id' => $orderId,
+            'payment_id' => $paymentId,
+            'amount' => $quantity * 99, // Keep in rupees for display
+            'amount_cents' => $addonAmountCents, // Store in cents
+            'currency' => 'INR',
+            'method' => 'card',
+            'status' => 'completed',
+            'paid_at' => now(),
+            'raw_response' => $payload,
+        ]);
+
+        Log::info('Accommodation add-on payment processed via webhook', [
+            'subscription_id' => $subscription->id,
+            'addon_id' => $addon->id,
+            'quantity' => $quantity,
+            'user_id' => $userId,
+            'order_id' => $orderId,
+            'expires_at' => $addon->cycle_end,
+            'addon_count_after' => $subscription->fresh()->addon_count,
+            'total_addons' => $subscription->fresh()->addons()->where('cycle_end', '>', now())->sum('qty')
         ]);
     }
 }

@@ -34,6 +34,7 @@ function subscriptionPage() {
             const urlParams = new URLSearchParams(window.location.search);
             console.log('URL params:', urlParams.toString());
             console.log('Payment param:', urlParams.get('payment'));
+            console.log('All URL params:', Object.fromEntries(urlParams.entries()));
             
             if (urlParams.get('payment') === 'success') {
                 console.log('Showing success animation');
@@ -45,7 +46,7 @@ function subscriptionPage() {
                 setTimeout(() => {
                     console.log('Auto-refreshing page to show updated accommodation data');
                     window.location.reload();
-                }, 3000);
+                }, 2000); // Reduced to 2 seconds for faster feedback
             }
         },
         
@@ -53,7 +54,9 @@ function subscriptionPage() {
         openUpgradeModal() {
             console.log('Opening upgrade modal...');
             this.showUpgradeModal = true;
+            this.additionalAccommodations = 1; // Set default to 1 accommodation
             console.log('showUpgradeModal set to:', this.showUpgradeModal);
+            console.log('additionalAccommodations set to:', this.additionalAccommodations);
         },
         
         closeUpgradeModal() {
