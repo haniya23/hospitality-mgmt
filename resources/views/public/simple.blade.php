@@ -478,14 +478,9 @@
                     <a href="#analytics" class="nav-button">Analytics</a>
                 </div>
                 
-                <div class="auth-dropdown" onclick="toggleDropdown(this)">
-                    <button class="dropdown-toggle">
-                        Account
-                    </button>
-                    <div class="dropdown-menu">
-                        <a href="{{ route('login') }}" class="dropdown-item">Sign In</a>
-                        <a href="{{ route('register') }}" class="dropdown-item">Register</a>
-                    </div>
+                <div class="nav-button-group">
+                    <a href="{{ route('login') }}" class="nav-button">Sign In</a>
+                    <a href="{{ route('register') }}" class="nav-button">Register</a>
                 </div>
             </div>
 
@@ -727,30 +722,6 @@
     </div>
 
     <script>
-        // Dropdown toggle function
-        function toggleDropdown(element) {
-            const dropdown = element.querySelector('.dropdown-menu');
-            const isOpen = dropdown.classList.contains('show');
-            
-            // Close all other dropdowns
-            document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
-                menu.classList.remove('show');
-            });
-            
-            // Toggle current dropdown
-            if (!isOpen) {
-                dropdown.classList.add('show');
-            }
-        }
-        
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function(event) {
-            if (!event.target.closest('.auth-dropdown')) {
-                document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
-                    menu.classList.remove('show');
-                });
-            }
-        });
 
         // Smooth scrolling for navigation links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {

@@ -221,49 +221,6 @@
   .booking-details { color: #6b7280; margin-bottom: 1rem; font-size: 0.9rem; }
   .booking-amount { font-size: 1.25rem; font-weight: 700; color: #1f2937; }
   
-  /* Auth Dropdown (for Desktop) */
-  .auth-dropdown { position: relative; }
-  .dropdown-toggle { 
-    background: #3b82f6; 
-    color: white; 
-    border: none; 
-    border-radius: 0.5rem; 
-    padding: 0.5rem 1rem; 
-    font-weight: 500; 
-    cursor: pointer; 
-    transition: background-color 0.2s ease; 
-  }
-  .dropdown-toggle:hover { background: #2563eb; }
-  .dropdown-menu { 
-    position: absolute; 
-    top: calc(100% + 0.5rem); 
-    right: 0; 
-    background: white; 
-    border-radius: 0.5rem; 
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); 
-    padding: 0.5rem; 
-    min-width: 150px; 
-    z-index: 10; 
-    display: none;
-    opacity: 0;
-    transform: translateY(-10px);
-    transition: all 0.2s ease;
-  }
-  .dropdown-menu.show { 
-    display: block;
-    opacity: 1;
-    transform: translateY(0);
-  }
-  .dropdown-item { 
-    display: block; 
-    width: 100%; 
-    padding: 0.5rem 0.75rem; 
-    color: #374151; 
-    text-decoration: none; 
-    border-radius: 0.25rem; 
-    transition: background-color 0.2s ease; 
-  }
-  .dropdown-item:hover { background: #f3f4f6; }
   
   /* Sidebar (Mobile Navigation) */
   .sidebar {
