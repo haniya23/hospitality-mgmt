@@ -125,39 +125,8 @@
                     </label>
                 </div>
 
-                <!-- Subscription Choice -->
-                <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                        <i class="fas fa-crown text-yellow-500 mr-2"></i>
-                        Choose Your Plan
-                    </h3>
-                    <div class="space-y-4">
-                        <div class="flex items-start">
-                            <input id="trial" name="subscription_choice" type="radio" value="trial" checked
-                                   class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 mt-1">
-                            <label for="trial" class="ml-3 block text-sm font-medium text-gray-700">
-                                <span class="font-semibold text-green-600">15-Day Free Trial</span>
-                                <span class="text-gray-500 block text-xs">Start with Professional features, then choose your plan</span>
-                            </label>
-                        </div>
-                        <div class="flex items-start">
-                            <input id="starter" name="subscription_choice" type="radio" value="starter"
-                                   class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 mt-1">
-                            <label for="starter" class="ml-3 block text-sm font-medium text-gray-700">
-                                <span class="font-semibold">Starter Plan - ₹299/month</span>
-                                <span class="text-gray-500 block text-xs">1 Property • 3 Accommodations • Basic features</span>
-                            </label>
-                        </div>
-                        <div class="flex items-start">
-                            <input id="professional" name="subscription_choice" type="radio" value="professional"
-                                   class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 mt-1">
-                            <label for="professional" class="ml-3 block text-sm font-medium text-gray-700">
-                                <span class="font-semibold">Professional Plan - ₹999/month</span>
-                                <span class="text-gray-500 block text-xs">5 Properties • 15 Accommodations • All features</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
+                <!-- Hidden default subscription choice -->
+                <input type="hidden" name="subscription_choice" value="trial">
 
                 <!-- Submit Button -->
                 <div>

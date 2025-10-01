@@ -7,10 +7,13 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
+use Laravel\Sanctum\HasApiTokens;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasApiTokens;
 
     protected $fillable = [
         'name',
@@ -237,6 +240,17 @@ class User extends Authenticatable
         return $this->hasMany(SubscriptionRequest::class);
     }
 
+    public function subscriptions()
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    public function activeSubscription()
+    {
+        return $this->hasOne(Subscription::class)->where('status', 'active')
+                    ->where('current_period_end', '>', now());
+    }
+
     public function hasPendingRequest()
     {
         return $this->subscriptionRequests()->where('status', 'pending')->exists();
@@ -272,5 +286,13 @@ class User extends Authenticatable
                 $model->properties_limit = 1;
             }
         });
+    }
+
+    /**
+     * Check if user can access Filament admin panel
+     */
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $this->is_admin;
     }
 }

@@ -12,6 +12,7 @@ Route::post('/login', [MobileAuthController::class, 'login']);
 Route::get('/register', [MobileAuthController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [MobileAuthController::class, 'register']);
 Route::post('/logout', [MobileAuthController::class, 'logout'])->name('logout');
+Route::get('/cashfree/success', [App\Http\Controllers\CashfreeController::class, 'success'])->name('cashfree.success');
 
 // Protected Routes
 Route::middleware('auth')->group(function () {
@@ -214,16 +215,32 @@ Route::middleware('auth')->group(function () {
         return view('bookings.enhanced-create', compact('properties', 'b2bPartners'));
     })->name('bookings.enhanced-create');
     Route::get('/subscription/plans', [App\Http\Controllers\SubscriptionController::class, 'plans'])->name('subscription.plans');
-    Route::post('/subscription/subscribe', [App\Http\Controllers\SubscriptionController::class, 'subscribe'])->name('subscription.subscribe');
     Route::get('/welcome-trial', function () {
         return view('welcome-trial');
     })->name('welcome.trial');
     
     // Cashfree Payment Routes
     Route::post('/cashfree/create-order', [App\Http\Controllers\CashfreeController::class, 'createOrder'])->name('cashfree.create-order');
-    Route::get('/cashfree/success', [App\Http\Controllers\CashfreeController::class, 'success'])->name('cashfree.success');
-    Route::post('/cashfree/webhook', [App\Http\Controllers\CashfreeController::class, 'webhook'])->name('cashfree.webhook');
     
     
     // Admin panel is now handled by Filament at /admin
+    
+    // Test payment success endpoint
+    Route::get('/test-payment-success', function () {
+        $user = auth()->user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+        
+        // Simulate successful payment
+        $user->update([
+            'subscription_status' => 'professional',
+            'subscription_ends_at' => now()->addMonth(),
+            'is_trial_active' => false,
+            'properties_limit' => 5,
+        ]);
+        
+        return redirect()->route('subscription.plans', ['payment' => 'success'])
+            ->with('success', 'Test payment successful! Your subscription has been activated.');
+    })->name('test.payment.success');
 });

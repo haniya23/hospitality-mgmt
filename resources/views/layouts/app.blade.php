@@ -223,5 +223,11 @@
     </script>
     
     @stack('scripts')
+    
+    <!-- Toast Notifications -->
+    <x-toast-notification />
+    
+    <!-- Subscription Upgrade Modal -->
+    <x-subscription-upgrade-modal />
 </body>
 </html>

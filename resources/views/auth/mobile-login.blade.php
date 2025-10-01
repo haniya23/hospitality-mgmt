@@ -33,9 +33,45 @@
                 <p class="text-lg sm:text-xl text-gray-600">
                     Sign in to your account
                 </p>
+                
+                @if(session('success'))
+                <div class="mt-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    {{ session('success') }}
+                </div>
+                @endif
             </div>
         </div>
     </header>
+
+    <!-- Trial Banner -->
+    @if(auth()->check() && auth()->user()->subscription_status === 'trial' && auth()->user()->is_trial_active)
+        <div class="max-w-md mx-auto px-4 mb-6">
+            <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-4 rounded-xl shadow-lg">
+                <div class="flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-3 flex-1 min-w-0">
+                        <div class="bg-white/20 rounded-full p-2 flex-shrink-0">
+                            <i class="fas fa-gift text-white text-sm"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <span class="text-sm font-semibold leading-tight block">
+                                <span class="text-blue-100">{{ auth()->user()->remaining_trial_days }} days left</span>
+                            </span>
+                            <span class="text-xs text-blue-100 font-medium block mt-0.5">
+                                Professional trial • Choose your plan
+                            </span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                        <span class="text-xs font-bold bg-white/25 px-3 py-2 rounded-full">
+                            Start Trial
+                        </span>
+                        <i class="fas fa-arrow-right text-white/70 text-sm"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 
     <!-- Main Content -->
     <div class="max-w-md mx-auto px-4 pb-8" x-data="{ showPin: false }">

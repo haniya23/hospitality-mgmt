@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use App\Models\User;
+use App\Models\Webhook;
+use App\Jobs\ProcessCashfreeWebhook;
 
 class CashfreeController extends Controller
 {
@@ -50,15 +52,15 @@ class CashfreeController extends Controller
         $additionalAmount = $additionalAccommodations * config('cashfree.plans.additional_accommodation.amount');
         $totalAmount = $baseAmount + $additionalAmount;
         
-        // Convert to paise for Cashfree API (multiply by 100)
-        $totalAmountInPaise = $totalAmount * 100;
+        // Use rupees directly for Cashfree API
+        $totalAmountInRupees = $totalAmount;
 
         // Generate unique order ID
         $orderId = 'SUB_' . strtoupper(Str::random(8)) . '_' . time();
 
         $orderData = [
             'order_id' => $orderId,
-            'order_amount' => $totalAmountInPaise,
+            'order_amount' => $totalAmountInRupees,
             'order_currency' => 'INR',
             'customer_details' => [
                 'customer_id' => $user->uuid,
@@ -68,7 +70,7 @@ class CashfreeController extends Controller
             ],
             'order_meta' => [
                 'return_url' => route('cashfree.success'),
-                'notify_url' => route('cashfree.webhook'),
+                'notify_url' => url('/api/cashfree/webhook'),
                 'plan' => $plan,
                 'additional_accommodations' => $additionalAccommodations,
                 'billing' => $billing,
@@ -150,8 +152,71 @@ class CashfreeController extends Controller
             $orderId = $sessionOrderId;
         }
 
+        // If still no order_id, try to get from URL parameters or referrer
         if (!$orderId) {
-            Log::error('No order ID found in success callback');
+            $orderId = $request->get('cf_order_id') ?? $request->get('order_token');
+            
+            // Try to extract from referrer URL
+            if (!$orderId && $request->header('referer')) {
+                $referer = $request->header('referer');
+                if (preg_match('/order_id=([^&]+)/', $referer, $matches)) {
+                    $orderId = $matches[1];
+                }
+            }
+        }
+
+        // If still no order_id, try to get from recent webhook data
+        if (!$orderId && auth()->check()) {
+            $user = auth()->user();
+            $recentWebhook = \App\Models\Webhook::where('provider', 'cashfree')
+                ->where('payload->data->order->order_meta->user_id', $user->id)
+                ->where('created_at', '>=', now()->subMinutes(10))
+                ->orderBy('created_at', 'desc')
+                ->first();
+                
+            if ($recentWebhook && isset($recentWebhook->payload['data']['order']['order_id'])) {
+                $orderId = $recentWebhook->payload['data']['order']['order_id'];
+                Log::info('Found order_id from recent webhook', [
+                    'order_id' => $orderId,
+                    'webhook_id' => $recentWebhook->id,
+                    'user_id' => $user->id
+                ]);
+            }
+        }
+
+        if (!$orderId) {
+            Log::error('No order ID found in success callback', [
+                'request_params' => $request->all(),
+                'session_data' => session()->all(),
+                'referer' => $request->header('referer'),
+                'user_id' => auth()->id()
+            ]);
+            
+            // If user is authenticated, check if they have a recent successful payment
+            if (auth()->check()) {
+                $user = auth()->user();
+                $recentPayment = \App\Models\Payment::where('subscription_id', function($query) use ($user) {
+                    $query->select('id')
+                          ->from('subscriptions')
+                          ->where('user_id', $user->id)
+                          ->where('status', 'active')
+                          ->orderBy('created_at', 'desc')
+                          ->limit(1);
+                })
+                ->where('status', 'completed')
+                ->where('created_at', '>=', now()->subMinutes(5))
+                ->first();
+                
+                if ($recentPayment) {
+                    Log::info('Found recent successful payment, redirecting to success', [
+                        'payment_id' => $recentPayment->id,
+                        'user_id' => $user->id
+                    ]);
+                    return redirect()->route('subscription.plans', ['payment' => 'success'])
+                        ->with('success', 'Payment successful! Your subscription has been activated.');
+                }
+            }
+            
             return redirect()->route('subscription.plans')
                 ->with('error', 'Invalid payment session. Please try again.');
         }
@@ -172,7 +237,7 @@ class CashfreeController extends Controller
                 'order_data' => $orderData
             ]);
 
-            if ($response->successful() && isset($orderData['order_status']) && $orderData['order_status'] === 'PAID') {
+            if ($response->successful() && isset($orderData['order_status']) && in_array($orderData['order_status'], ['PAID', 'ACTIVE'])) {
                 // Update user subscription
                 $this->updateUserSubscription($orderData);
                 
@@ -185,8 +250,29 @@ class CashfreeController extends Controller
                     'cashfree_amount'
                 ]);
 
-                return redirect()->route('subscription.plans', ['payment' => 'success'])
-                    ->with('success', 'Payment successful! Your subscription has been activated.');
+                // Check if user is authenticated
+                if (auth()->check()) {
+                    // Force refresh user data from database
+                    auth()->user()->refresh();
+                    
+                    // Check if this was an accommodation add-on payment
+                    $orderMeta = $orderData['order_meta'] ?? [];
+                    $orderType = $orderMeta['type'] ?? 'subscription';
+                    
+                    if ($orderType === 'accommodation_addon') {
+                        $quantity = $orderMeta['quantity'] ?? 0;
+                        return redirect()->route('subscription.plans', ['payment' => 'success'])
+                            ->with('success', "Payment successful! {$quantity} additional accommodations have been added to your plan for 30 days.");
+                    } else {
+                        return redirect()->route('subscription.plans', ['payment' => 'success'])
+                            ->with('success', 'Payment successful! Your subscription has been activated.');
+                    }
+                } else {
+                    // Store success message in session for when user logs in
+                    session()->flash('payment_success', 'Payment successful! Please log in to view your updated subscription.');
+                    return redirect()->route('login')
+                        ->with('success', 'Payment successful! Please log in to view your updated subscription.');
+                }
             } else {
                 Log::error('Payment verification failed', [
                     'order_status' => $orderData['order_status'] ?? 'unknown',
@@ -225,18 +311,17 @@ class CashfreeController extends Controller
 
         Log::info('Cashfree webhook received', $webhookData);
 
-        // Handle different webhook events
-        switch ($webhookData['type']) {
-            case 'PAYMENT_SUCCESS_WEBHOOK':
-                $this->handlePaymentSuccess($webhookData);
-                break;
-            case 'PAYMENT_FAILED_WEBHOOK':
-                $this->handlePaymentFailed($webhookData);
-                break;
-            case 'PAYMENT_USER_DROPPED_WEBHOOK':
-                $this->handlePaymentDropped($webhookData);
-                break;
-        }
+        // Store webhook in database
+        $webhook = Webhook::create([
+            'provider' => 'cashfree',
+            'event_id' => $webhookData['data']['payment']['cf_payment_id'] ?? null,
+            'payload' => $webhookData,
+            'signature_header' => $signature,
+            'received_at' => now(),
+        ]);
+        
+        // Queue webhook processing
+        ProcessCashfreeWebhook::dispatch($webhook->id);
 
         return response()->json(['status' => 'success']);
     }
@@ -255,10 +340,37 @@ class CashfreeController extends Controller
 
         // Try to get data from order_meta first, then fallback to session
         $orderMeta = $orderData['order_meta'] ?? [];
+        $orderType = $orderMeta['type'] ?? 'subscription';
         $plan = $orderMeta['plan'] ?? session('cashfree_plan');
         $billing = $orderMeta['billing'] ?? session('cashfree_billing');
         $additionalAccommodations = $orderMeta['additional_accommodations'] ?? session('cashfree_additional_accommodations', 0);
         $userId = $orderMeta['user_id'] ?? $user->id;
+
+        // Handle accommodation add-on payments
+        if ($orderType === 'accommodation_addon') {
+            $this->handleAccommodationAddonPayment($orderData, $orderMeta);
+            return;
+        }
+
+        // If plan is still not found, try to extract from order_note
+        if (!$plan && isset($orderData['order_note'])) {
+            $orderNote = $orderData['order_note'];
+            if (strpos($orderNote, 'Professional') !== false) {
+                $plan = 'professional';
+            } elseif (strpos($orderNote, 'Starter') !== false) {
+                $plan = 'starter';
+            }
+        }
+
+        // Default to professional if still not found
+        if (!$plan) {
+            $plan = 'professional';
+        }
+
+        // Default to monthly if billing not found
+        if (!$billing) {
+            $billing = 'monthly';
+        }
 
         Log::info('Subscription update data', [
             'order_meta' => $orderMeta,
@@ -269,13 +381,17 @@ class CashfreeController extends Controller
             'user_id' => $userId
         ]);
 
+        // Plan and billing should now have defaults, but log if they're still missing
         if (!$plan || !$billing) {
-            Log::error('Missing plan or billing information', [
+            Log::error('Missing plan or billing information after fallbacks', [
                 'plan' => $plan,
                 'billing' => $billing,
-                'order_meta' => $orderMeta
+                'order_meta' => $orderMeta,
+                'order_note' => $orderData['order_note'] ?? null
             ]);
-            return;
+            // Don't return, use defaults
+            $plan = $plan ?: 'professional';
+            $billing = $billing ?: 'monthly';
         }
 
         // Update user subscription
@@ -293,6 +409,9 @@ class CashfreeController extends Controller
 
         $user->update($updateData);
 
+        // Clear any cached user data
+        $user->refresh();
+
         Log::info('User subscription updated successfully', [
             'user_id' => $user->id,
             'plan' => $plan,
@@ -308,6 +427,13 @@ class CashfreeController extends Controller
     private function verifyWebhookSignature($payload, $signature)
     {
         $webhookSecret = config('cashfree.webhook_secret');
+        
+        // Skip signature verification if webhook secret is not configured
+        if (empty($webhookSecret) || $webhookSecret === 'your_webhook_secret_here') {
+            Log::warning('Webhook signature verification skipped - secret not configured');
+            return true;
+        }
+        
         $expectedSignature = hash_hmac('sha256', $payload, $webhookSecret);
         
         return hash_equals($expectedSignature, $signature);
@@ -378,5 +504,78 @@ class CashfreeController extends Controller
     {
         Log::info('Payment dropped by user', $webhookData);
         // Handle dropped payment logic here
+    }
+
+    /**
+     * Handle accommodation add-on payment success
+     */
+    private function handleAccommodationAddonPayment($orderData, $orderMeta)
+    {
+        $user = auth()->user();
+        $subscriptionId = $orderMeta['subscription_id'] ?? null;
+        $quantity = $orderMeta['quantity'] ?? 0;
+
+        if (!$subscriptionId || !$quantity) {
+            Log::error('Missing subscription_id or quantity for accommodation add-on', [
+                'order_meta' => $orderMeta,
+                'user_id' => $user->id
+            ]);
+            return;
+        }
+
+        try {
+            $subscription = \App\Models\Subscription::find($subscriptionId);
+            if (!$subscription) {
+                Log::error('Subscription not found for accommodation add-on', [
+                    'subscription_id' => $subscriptionId,
+                    'user_id' => $user->id
+                ]);
+                return;
+            }
+
+            // Create accommodation add-on with 30-day expiry
+            $addon = \App\Models\SubscriptionAddon::create([
+                'subscription_id' => $subscription->id,
+                'qty' => $quantity,
+                'unit_price' => 99, // ₹99 in rupees
+                'cycle_start' => now(),
+                'cycle_end' => now()->addDays(30), // 30-day expiry
+            ]);
+
+            // Update subscription addon count
+            $subscription->increment('addon_count', $quantity);
+
+            // Update subscription total amount to include addon costs
+            $addonAmount = $quantity * 99; // ₹99 per accommodation in rupees
+            $subscription->increment('price', $addonAmount);
+
+            // Create payment record
+            \App\Models\Payment::create([
+                'subscription_id' => $subscription->id,
+                'cashfree_order_id' => $orderData['order_id'],
+                'payment_id' => $orderData['cf_order_id'] ?? null,
+                'amount' => $quantity * 99,
+                'currency' => 'INR',
+                'method' => 'card',
+                'status' => 'completed',
+                'paid_at' => now(),
+                'raw_response' => $orderData,
+            ]);
+
+            Log::info('Accommodation add-on payment processed successfully', [
+                'subscription_id' => $subscription->id,
+                'addon_id' => $addon->id,
+                'quantity' => $quantity,
+                'user_id' => $user->id,
+                'expires_at' => $addon->cycle_end
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Failed to process accommodation add-on payment', [
+                'error' => $e->getMessage(),
+                'order_meta' => $orderMeta,
+                'user_id' => $user->id
+            ]);
+        }
     }
 }

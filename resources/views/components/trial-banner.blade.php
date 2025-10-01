@@ -1,23 +1,27 @@
-@if(auth()->user()->subscription_status === 'trial' && auth()->user()->is_trial_active)
-<div class="mb-6 mt-4 sm:mt-6 mx-4 sm:mx-6 lg:mx-8">
+@if(auth()->user()->subscription_status === 'trial' && auth()->user()->is_trial_active && request()->routeIs('login'))
+<div class="mb-6 mt-4 sm:mt-6 mx-4 sm:mx-6 lg:mx-8" x-data="trialBanner()" x-init="init()">
     <a href="{{ route('subscription.plans') }}" class="block w-full rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6 shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:scale-[1.02]">
         <div class="flex items-center justify-between gap-3 sm:gap-4">
             <div class="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
                 <div class="bg-white/20 rounded-full p-2 sm:p-2.5 flex-shrink-0">
-                    <i class="fas fa-gift text-white text-sm sm:text-base"></i>
+                    <i class="fas fa-gift text-white text-sm sm:text-base" :class="{'animate-pulse': daysLeft <= 3}"></i>
                 </div>
                 <div class="flex-1 min-w-0">
                     <span class="text-sm sm:text-base font-semibold leading-tight block">
-                        <span class="text-blue-100">{{ auth()->user()->remaining_trial_days }} days left</span>
+                        <span class="text-blue-100" x-text="daysLeft + ' days left'"></span>
+                        <span x-show="daysLeft <= 3" class="text-yellow-300 ml-2">⚠️</span>
                     </span>
                     <span class="text-xs sm:text-sm text-blue-100 font-medium block mt-0.5">
-                        Professional trial • Tap to upgrade
+                        <span x-show="daysLeft > 7">Professional trial • Choose your plan</span>
+                        <span x-show="daysLeft <= 7 && daysLeft > 3">Trial ending soon • Upgrade to continue</span>
+                        <span x-show="daysLeft <= 3" class="text-yellow-200">Trial ending very soon • Upgrade now!</span>
                     </span>
                 </div>
             </div>
             <div class="hidden sm:flex items-center gap-2 flex-shrink-0">
-                <span class="text-xs font-bold bg-white/25 hover:bg-white/35 px-3 py-2 rounded-full transition-colors backdrop-blur-sm border border-white/20">
-                    Upgrade Now
+                <span class="text-xs font-bold bg-white/25 hover:bg-white/35 px-3 py-2 rounded-full transition-colors backdrop-blur-sm border border-white/20" :class="{'bg-yellow-400/30 text-yellow-100': daysLeft <= 3}">
+                    <span x-show="daysLeft > 3">Upgrade Now</span>
+                    <span x-show="daysLeft <= 3">Upgrade Now!</span>
                 </span>
                 <i class="fas fa-arrow-right text-white/70 text-sm"></i>
             </div>
@@ -25,7 +29,27 @@
     </a>
 </div>
 
-@elseif(auth()->user()->isTrialExpired())
+<script>
+function trialBanner() {
+    return {
+        daysLeft: {{ auth()->user()->remaining_trial_days }},
+        
+        init() {
+            // Update countdown every hour
+            setInterval(() => {
+                this.updateCountdown();
+            }, 3600000); // 1 hour
+        },
+        
+        updateCountdown() {
+            // This would typically fetch from server, but for demo we'll use the initial value
+            // In production, you might want to make an AJAX call to get the latest countdown
+        }
+    }
+}
+</script>
+
+@elseif(auth()->user()->isTrialExpired() && request()->routeIs('login'))
 <div class="mb-6 mt-4 sm:mt-6 mx-4 sm:mx-6 lg:mx-8">
     <div class="bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6 rounded-xl shadow-lg border-l-4 border-red-300">
         <div class="flex items-center justify-between gap-3 sm:gap-4">
@@ -50,7 +74,7 @@
     </div>
 </div>
 
-@elseif(auth()->user()->subscription_status === 'active')
+@elseif(auth()->user()->subscription_status === 'active' && request()->routeIs('login'))
 <div class="mb-6 mt-4 sm:mt-6 mx-4 sm:mx-6 lg:mx-8">
     <div class="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6 rounded-xl shadow-lg border-l-4 border-green-300">
         <div class="flex items-center justify-between gap-3 sm:gap-4">
