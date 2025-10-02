@@ -226,6 +226,16 @@ class User extends Authenticatable implements FilamentUser
         return max(0, $maxProperties - $this->properties()->count());
     }
 
+    public function getPropertyLimit()
+    {
+        return $this->getMaxProperties();
+    }
+
+    public function getAccommodationLimit()
+    {
+        return $this->getMaxAccommodations();
+    }
+
     public function hasFeature($feature)
     {
         // Professional trial: allow all features

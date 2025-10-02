@@ -27,8 +27,10 @@
 <script>
 function propertyManager() {
     return {
-        properties: @json($properties ?? []),
+        properties: @json($activeProperties ?? []),
+        archivedProperties: @json($archivedProperties ?? []),
         activeFilter: 'all',
+        showArchive: false,
         
         // Booking modal state
         showBookingModal: false,
@@ -49,8 +51,9 @@ function propertyManager() {
         b2bCommissionValue: 10,
 
         get filteredProperties() {
-            if (this.activeFilter === 'all') return this.properties;
-            return this.properties.filter(p => p.status === this.activeFilter);
+            const currentProperties = this.showArchive ? this.archivedProperties : this.properties;
+            if (this.activeFilter === 'all') return currentProperties;
+            return currentProperties.filter(p => p.status === this.activeFilter);
         },
 
         get stats() {
@@ -63,7 +66,7 @@ function propertyManager() {
         },
 
         init() {
-            console.log('Properties loaded:', this.properties.length);
+            // Properties loaded
             this.loadB2BPartners();
         },
         
@@ -77,7 +80,7 @@ function propertyManager() {
                 const accommodations = await response.json();
                 this.propertyAccommodations = accommodations;
             } catch (error) {
-                console.error('Error loading accommodations:', error);
+                // Error loading accommodations
                 this.propertyAccommodations = [];
             }
         },
@@ -101,7 +104,7 @@ function propertyManager() {
                 const partners = await response.json();
                 this.b2bPartners = partners;
             } catch (error) {
-                console.error('Error loading B2B partners:', error);
+                // Error loading B2B partners
                 this.b2bPartners = [];
             }
         },
@@ -120,7 +123,7 @@ function propertyManager() {
                 const accommodations = await response.json();
                 this.b2bPropertyAccommodations = accommodations;
             } catch (error) {
-                console.error('Error loading accommodations:', error);
+                // Error loading accommodations
                 this.b2bPropertyAccommodations = [];
             }
         },
@@ -143,6 +146,79 @@ function propertyManager() {
         
         selectB2BAccommodation(accommodation) {
             this.selectedB2BAccommodation = accommodation;
+        },
+        
+        // Archive functionality
+        toggleArchiveView() {
+            this.showArchive = !this.showArchive;
+            this.activeFilter = 'all'; // Reset filter when switching views
+        },
+        
+        // Property delete request functionality
+        async requestPropertyDeletion(property) {
+            // Show confirmation dialog with reason input
+            const reason = prompt('Please provide a reason for deleting this property (optional):');
+            
+            // If user cancelled the prompt
+            if (reason === null) {
+                return;
+            }
+            
+            // Confirm the action
+            if (!confirm(`Are you sure you want to request deletion of "${property.name}"? This will send a request to the admin for review.`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/property-delete-requests', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        property_id: property.id,
+                        reason: reason || null
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Show success message
+                    this.showNotification('Delete request submitted successfully! An admin will review your request.', 'success');
+                    
+                    // Optionally reload the page to show updated status
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                } else {
+                    this.showNotification(data.message || 'Failed to submit delete request', 'error');
+                }
+            } catch (error) {
+                this.showNotification('An error occurred while submitting the delete request', 'error');
+            }
+        },
+        
+        showNotification(message, type = 'info') {
+            // Create a simple notification
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm ${
+                type === 'success' ? 'bg-green-500 text-white' : 
+                type === 'error' ? 'bg-red-500 text-white' : 
+                'bg-blue-500 text-white'
+            }`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 5000);
         }
     }
 }
@@ -161,7 +237,7 @@ function propertyStats() {
         },
 
         init() {
-            console.log('Property stats initialized');
+            // Property stats initialized
         },
 
         // Navigation functions for clickable stats

@@ -217,7 +217,6 @@ async function savePhotos(propertyUuid) {
             showToast(data.message || 'Error updating photos', 'error');
         }
     } catch (error) {
-        console.error('Error saving photos:', error);
         showToast('Error updating photos. Please try again.', 'error');
     } finally {
         saveButton.textContent = originalText;
@@ -248,7 +247,6 @@ async function deletePhoto(propertyUuid, photoId) {
             showToast(data.message || 'Error deleting photo', 'error');
         }
     } catch (error) {
-        console.error('Error deleting photo:', error);
         showToast('Error deleting photo. Please try again.', 'error');
     }
 }

@@ -4,11 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
 class Property extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'owner_id',
@@ -100,5 +101,30 @@ class Property extends Model
     public function reservations()
     {
         return $this->hasManyThrough(Reservation::class, PropertyAccommodation::class);
+    }
+
+    public function deleteRequests()
+    {
+        return $this->hasMany(PropertyDeleteRequest::class);
+    }
+
+    public function pendingDeleteRequest()
+    {
+        return $this->hasOne(PropertyDeleteRequest::class)->where('status', 'pending');
+    }
+
+    public function hasPendingDeleteRequest(): bool
+    {
+        return $this->pendingDeleteRequest()->exists();
+    }
+
+    public function hasBookings(): bool
+    {
+        return $this->reservations()->exists();
+    }
+
+    public function canBeDeleted(): bool
+    {
+        return !$this->hasBookings();
     }
 }

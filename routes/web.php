@@ -134,12 +134,19 @@ Route::middleware('auth')->group(function () {
         Route::get('/guests', [App\Http\Controllers\BookingController::class, 'getGuests']);
         Route::get('/partners', [App\Http\Controllers\BookingController::class, 'getPartners']);
         Route::get('/partners/{partnerId}/reserved-customer', [App\Http\Controllers\BookingController::class, 'getPartnerReservedCustomer']);
+        Route::get('/accommodations/{accommodationId}/reserved-customer', [App\Http\Controllers\BookingController::class, 'getAccommodationReservedCustomer']);
         Route::get('/bookings', [App\Http\Controllers\BookingController::class, 'index']);
 
         Route::patch('/bookings/{booking}/toggle-status', [App\Http\Controllers\BookingController::class, 'toggleStatus']);
         Route::patch('/bookings/{booking}/confirm', [App\Http\Controllers\BookingController::class, 'confirm']);
         Route::patch('/bookings/{booking}/cancel', [App\Http\Controllers\BookingController::class, 'cancel']);
         Route::patch('/bookings/{booking}/reactivate', [App\Http\Controllers\BookingController::class, 'reactivate']);
+        
+        // Property Delete Request Routes
+        Route::post('/property-delete-requests', [App\Http\Controllers\PropertyDeleteRequestController::class, 'store']);
+        Route::get('/property-delete-requests', [App\Http\Controllers\PropertyDeleteRequestController::class, 'index']);
+        Route::get('/property-delete-requests/{deleteRequest}', [App\Http\Controllers\PropertyDeleteRequestController::class, 'show']);
+        Route::delete('/property-delete-requests/{deleteRequest}', [App\Http\Controllers\PropertyDeleteRequestController::class, 'cancel']);
     });
     
     // Customer Management Routes

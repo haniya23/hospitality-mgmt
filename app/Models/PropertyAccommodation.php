@@ -51,6 +51,36 @@ class PropertyAccommodation extends Model
         return $this->hasMany(PropertyPhoto::class, 'accommodation_id');
     }
 
+    public function reservedCustomer()
+    {
+        return $this->hasOne(Guest::class, 'accommodation_id')->where('is_reserved', true);
+    }
+
+    public function getReservedCustomerAttribute()
+    {
+        return $this->reservedCustomer()->first();
+    }
+
+    // Get or create reserved customer for this accommodation
+    public function getOrCreateReservedCustomer()
+    {
+        if (!$this->reservedCustomer) {
+            return Guest::createReservedCustomerForAccommodation($this);
+        }
+        
+        return $this->reservedCustomer;
+    }
+
+    // Update reserved customer name when accommodation name changes
+    public function updateReservedCustomerName()
+    {
+        if ($this->reservedCustomer) {
+            $this->reservedCustomer->update([
+                'name' => "Reserved – {$this->display_name}"
+            ]);
+        }
+    }
+
     public function getDisplayNameAttribute()
     {
         if ($this->predefinedType && $this->predefinedType->name === 'Custom') {

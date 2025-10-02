@@ -283,17 +283,13 @@ async function loadAccommodationData(propertyUuid, accommodationId) {
             });
         }
     } catch (error) {
-        console.error('Error loading accommodation:', error);
         showToast('Error loading accommodation data', 'error');
     }
 }
 
 async function saveAccommodation(propertyUuid) {
-    console.log('saveAccommodation called with UUID:', propertyUuid);
-    
     const form = document.getElementById('accommodationForm');
     if (!form) {
-        console.error('Accommodation form not found!');
         showToast('Form not found. Please refresh the page.', 'error');
         return;
     }
@@ -310,10 +306,6 @@ async function saveAccommodation(propertyUuid) {
         amenities: Array.from(form.querySelectorAll('input[name="amenities[]"]:checked')).map(cb => parseInt(cb.value))
     };
     
-    // Debug: Log form data
-    console.log('Accommodation form data being sent:', formData);
-    console.log('JSON stringified:', JSON.stringify(formData));
-    
     const saveButton = event.target;
     const originalText = saveButton.textContent;
     saveButton.textContent = 'Saving...';
@@ -322,8 +314,6 @@ async function saveAccommodation(propertyUuid) {
     const url = currentAccommodationId 
         ? `/properties/${propertyUuid}/accommodations/${currentAccommodationId}/update`
         : `/properties/${propertyUuid}/accommodations/store`;
-    
-    console.log('Making request to:', url);
     
     try {
         const response = await fetch(url, {
@@ -347,7 +337,6 @@ async function saveAccommodation(propertyUuid) {
             showToast(data.message || 'Error saving accommodation', 'error');
         }
     } catch (error) {
-        console.error('Error saving accommodation:', error);
         showToast('Error saving accommodation. Please try again.', 'error');
     } finally {
         saveButton.textContent = originalText;
@@ -378,7 +367,6 @@ async function deleteAccommodation(propertyUuid, accommodationId) {
             showToast(data.message || 'Error deleting accommodation', 'error');
         }
     } catch (error) {
-        console.error('Error deleting accommodation:', error);
         showToast('Error deleting accommodation. Please try again.', 'error');
     }
 }

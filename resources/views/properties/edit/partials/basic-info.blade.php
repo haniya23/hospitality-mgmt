@@ -151,11 +151,8 @@ function closeBasicInfoModal() {
 }
 
 async function saveBasicInfo(propertyUuid) {
-    console.log('saveBasicInfo called with UUID:', propertyUuid);
-    
     const form = document.getElementById('basicInfoForm');
     if (!form) {
-        console.error('Form not found!');
         showToast('Form not found. Please refresh the page.', 'error');
         return;
     }
@@ -169,10 +166,6 @@ async function saveBasicInfo(propertyUuid) {
         owner_name: form.querySelector('[name="owner_name"]').value || null
     };
     
-    // Debug: Log form data
-    console.log('Form data being sent:', formData);
-    console.log('JSON stringified:', JSON.stringify(formData));
-    
     const saveButton = event.target;
     const originalText = saveButton.textContent;
     saveButton.textContent = 'Saving...';
@@ -180,7 +173,6 @@ async function saveBasicInfo(propertyUuid) {
     
     // Test with test endpoint first
     const testUrl = `/properties/${propertyUuid}/test-ajax`;
-    console.log('Testing with URL:', testUrl);
     
     try {
         // First test the test endpoint
@@ -195,9 +187,7 @@ async function saveBasicInfo(propertyUuid) {
             body: JSON.stringify(formData)
         });
         
-        console.log('Test response status:', testResponse.status);
         const testData = await testResponse.json();
-        console.log('Test response data:', testData);
         
         if (!testData.success) {
             showToast('Test failed: ' + testData.message, 'error');
@@ -206,7 +196,6 @@ async function saveBasicInfo(propertyUuid) {
         
         // If test passes, proceed with actual update
         const url = `/properties/${propertyUuid}/update-section`;
-        console.log('Making actual request to:', url);
         
         const response = await fetch(url, {
             method: 'PATCH',
@@ -219,18 +208,13 @@ async function saveBasicInfo(propertyUuid) {
             body: JSON.stringify(formData)
         });
         
-        console.log('Response status:', response.status);
-        console.log('Response ok:', response.ok);
-        
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('Response error:', errorText);
             showToast('Server error: ' + response.status, 'error');
             return;
         }
         
         const data = await response.json();
-        console.log('Response data:', data);
         
         if (data.success) {
             showToast('Basic information updated successfully!', 'success');
@@ -240,7 +224,6 @@ async function saveBasicInfo(propertyUuid) {
             showToast(data.message || 'Error updating basic information', 'error');
         }
     } catch (error) {
-        console.error('Error saving basic info:', error);
         showToast('Error updating basic information. Please try again.', 'error');
     } finally {
         saveButton.textContent = originalText;

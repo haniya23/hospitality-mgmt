@@ -401,7 +401,7 @@ function enhancedBookingForm() {
         },
 
         init() {
-            console.log('Enhanced booking form initialized');
+            // Enhanced booking form initialized
         },
 
         setBookingType(type) {
@@ -441,7 +441,7 @@ function enhancedBookingForm() {
                     this.selectedPropertyAccommodations = accommodations;
                 }
             } catch (error) {
-                console.error('Error loading accommodations:', error);
+                // Error loading accommodations
             }
         },
 
@@ -465,7 +465,7 @@ function enhancedBookingForm() {
                     this.availableRooms = await response.json();
                 }
             } catch (error) {
-                console.error('Error finding available rooms:', error);
+                // Error finding available rooms
             }
         },
 
@@ -506,7 +506,7 @@ function enhancedBookingForm() {
                     alert('Error creating booking: ' + (error.message || 'Unknown error'));
                 }
             } catch (error) {
-                console.error('Error:', error);
+                // Error occurred
                 alert('Error creating booking. Please try again.');
             }
         },

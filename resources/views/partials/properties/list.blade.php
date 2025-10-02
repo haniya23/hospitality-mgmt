@@ -32,77 +32,140 @@
     .action-btn:hover {
         transform: translateY(-1px);
     }
+    
+    /* Professional toggle styling */
+    .toggle-container {
+        background: linear-gradient(145deg, #f8fafc, #e2e8f0);
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+    }
+    
+    .toggle-button-active {
+        background: linear-gradient(145deg, #ffffff, #f8fafc);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+    
+    .toggle-button-inactive {
+        background: transparent;
+    }
+    
+    .toggle-button-inactive:hover {
+        background: rgba(255, 255, 255, 0.5);
+    }
 </style>
 @endpush
 
 <div class="space-y-4 overflow-y-auto">
     <template x-for="property in filteredProperties" :key="property.id">
         <div class="property-card p-4 sm:p-6">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
-                <div class="flex items-center space-x-3 mb-3 sm:mb-0">
-                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl property-icon flex items-center justify-center text-white font-bold">
+            <!-- Action buttons moved to top for better mobile experience -->
+            <div class="flex justify-between items-start mb-4">
+                <div class="flex items-center space-x-3 flex-1 min-w-0">
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl property-icon flex items-center justify-center text-white font-bold flex-shrink-0">
                         <i class="fas fa-building text-lg sm:text-xl"></i>
                     </div>
-                    <div class="flex-1">
-                        <h3 class="font-semibold text-gray-800 text-lg" x-text="property.name"></h3>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="font-semibold text-gray-800 text-lg truncate" x-text="property.name"></h3>
                         <div class="flex flex-wrap items-center gap-2 mt-1">
                             <span class="text-xs px-3 py-1 rounded-full font-medium"
                                   :class="'status-' + property.status"
                                   x-text="property.status.charAt(0).toUpperCase() + property.status.slice(1)"></span>
                             <span class="text-xs text-gray-500" x-text="property.category?.name"></span>
+                            <!-- Archive status badge -->
+                            <template x-if="showArchive">
+                                <span class="text-xs px-3 py-1 rounded-full font-medium bg-red-100 text-red-800">
+                                    <i class="fas fa-trash mr-1"></i>
+                                    Deleted
+                                </span>
+                            </template>
                         </div>
                     </div>
                 </div>
-                <div class="text-left sm:text-right">
-                    <div class="text-xl font-bold text-gray-800" x-text="property.property_accommodations_count + ' accommodations'"></div>
-                    <div class="text-sm text-gray-500" x-text="property.bookings_count + ' bookings'"></div>
-                </div>
-            </div>
-
-            <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-4 mb-4">
-                <div class="flex items-center space-x-2 mb-3">
-                    <i class="fas fa-map-marker-alt text-gray-500"></i>
-                    <span class="text-sm text-gray-600 font-medium" x-text="property.location?.city?.name + ', ' + property.location?.city?.district?.state?.name"></span>
-                </div>
-                <div class="grid grid-cols-2 gap-4 text-center">
-                    <div class="text-center">
-                        <div class="text-lg font-bold text-gray-800" x-text="property.property_accommodations_count"></div>
-                        <div class="text-xs text-gray-500">Accommodations</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-lg font-bold text-gray-800" x-text="property.bookings_count || 0"></div>
-                        <div class="text-xs text-gray-500">Bookings</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex flex-col sm:flex-row gap-2">
-                <div class="flex-1 flex gap-2">
-                    <button @click="openBookingModal(property)" class="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white py-3 px-4 rounded-xl font-medium text-sm hover:from-green-600 hover:to-green-700 transition text-center action-btn">
-                        <i class="fas fa-calendar-plus mr-2"></i>
-                        Add Booking
-                    </button>
-                    @if($hasB2bPartners)
-                    <button @click="openB2BBookingModal(property)" class="flex-1 bg-gradient-to-r from-purple-500 to-purple-600 text-white py-3 px-4 rounded-xl font-medium text-sm hover:from-purple-600 hover:to-purple-700 transition text-center action-btn">
-                        <i class="fas fa-handshake mr-2"></i>
-                        B2B Booking
-                    </button>
-                    @else
-                    <a href="{{ route('b2b.create') }}" class="flex-1 bg-gradient-to-r from-gray-400 to-gray-500 text-white py-3 px-4 rounded-xl font-medium text-sm hover:from-gray-500 hover:to-gray-600 transition text-center action-btn">
-                        <i class="fas fa-plus mr-2"></i>
-                        Add B2B Partner
-                    </a>
-                    @endif
-                </div>
-                <div class="flex gap-2">
-                    <a :href="'/properties/' + property.uuid + '/edit'" class="bg-gradient-to-r from-blue-100 to-blue-200 text-blue-700 py-3 px-4 rounded-xl font-medium text-sm hover:from-blue-200 hover:to-blue-300 transition action-btn">
+                <!-- Edit and Delete buttons moved to top right -->
+                <div class="flex gap-2 flex-shrink-0 ml-3">
+                    <!-- Edit button - disabled for archived properties -->
+                    <a :href="!showArchive ? '/properties/' + property.uuid + '/edit' : '#'" 
+                       :class="!showArchive ? 'bg-gradient-to-r from-blue-100 to-blue-200 text-blue-700 hover:from-blue-200 hover:to-blue-300' : 'bg-gray-100 text-gray-400 cursor-not-allowed'"
+                       class="w-10 h-10 rounded-xl font-medium text-sm transition action-btn flex items-center justify-center"
+                       :title="!showArchive ? 'Edit Property' : 'Cannot edit archived property'">
                         <i class="fas fa-edit"></i>
                     </a>
-                    <button class="bg-gradient-to-r from-red-100 to-red-200 text-red-700 py-3 px-4 rounded-xl font-medium text-sm hover:from-red-200 hover:to-red-300 transition action-btn">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                    
+                    <!-- Delete/Status button -->
+                    <template x-if="!showArchive">
+                        <button @click="requestPropertyDeletion(property)" 
+                                class="w-10 h-10 bg-gradient-to-r from-red-100 to-red-200 text-red-700 rounded-xl font-medium text-sm hover:from-red-200 hover:to-red-300 transition action-btn flex items-center justify-center"
+                                title="Request Deletion">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </template>
+                    
+                    <template x-if="showArchive">
+                        <div class="w-10 h-10 bg-gradient-to-r from-red-100 to-red-200 text-red-700 rounded-xl font-medium text-sm flex items-center justify-center"
+                             title="Property deleted">
+                            <i class="fas fa-trash"></i>
+                        </div>
+                    </template>
                 </div>
             </div>
+            
+            <!-- Content based on view type -->
+            <template x-if="!showArchive">
+                <div>
+                    <!-- Property stats for active properties -->
+                    <div class="flex justify-between items-center mb-4 text-center sm:text-left">
+                        <div>
+                            <div class="text-xl font-bold text-gray-800" x-text="property.property_accommodations_count + ' accommodations'"></div>
+                            <div class="text-sm text-gray-500" x-text="property.bookings_count + ' bookings'"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-4 mb-4">
+                        <div class="flex items-center space-x-2 mb-3">
+                            <i class="fas fa-map-marker-alt text-gray-500"></i>
+                            <span class="text-sm text-gray-600 font-medium" x-text="property.location?.city?.name + ', ' + property.location?.city?.district?.state?.name"></span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 text-center">
+                            <div class="text-center">
+                                <div class="text-lg font-bold text-gray-800" x-text="property.property_accommodations_count"></div>
+                                <div class="text-xs text-gray-500">Accommodations</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-lg font-bold text-gray-800" x-text="property.bookings_count || 0"></div>
+                                <div class="text-xs text-gray-500">Bookings</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action buttons for bookings -->
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <button @click="openBookingModal(property)" class="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white py-3 px-4 rounded-xl font-medium text-sm hover:from-green-600 hover:to-green-700 transition text-center action-btn">
+                            <i class="fas fa-calendar-plus mr-2"></i>
+                            Add Booking
+                        </button>
+                        @if($hasB2bPartners)
+                        <button @click="openB2BBookingModal(property)" class="flex-1 bg-gradient-to-r from-purple-500 to-purple-600 text-white py-3 px-4 rounded-xl font-medium text-sm hover:from-purple-600 hover:to-purple-700 transition text-center action-btn">
+                            <i class="fas fa-handshake mr-2"></i>
+                            B2B Booking
+                        </button>
+                        @else
+                        <a href="{{ route('b2b.create') }}" class="flex-1 bg-gradient-to-r from-gray-400 to-gray-500 text-white py-3 px-4 rounded-xl font-medium text-sm hover:from-gray-500 hover:to-gray-600 transition text-center action-btn">
+                            <i class="fas fa-plus mr-2"></i>
+                            Add B2B Partner
+                        </a>
+                        @endif
+                    </div>
+                </div>
+            </template>
+            
+            <!-- Simplified view for archived properties -->
+            <template x-if="showArchive">
+                <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-4">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-map-marker-alt text-gray-500"></i>
+                        <span class="text-sm text-gray-600 font-medium" x-text="property.location?.city?.name + ', ' + property.location?.city?.district?.state?.name"></span>
+                    </div>
+                </div>
+            </template>
         </div>
     </template>
 
@@ -111,14 +174,50 @@
             <div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-r from-blue-400 to-purple-400 rounded-2xl flex items-center justify-center text-white text-3xl">
                 <i class="fas fa-building"></i>
             </div>
-            <h3 class="text-lg font-semibold text-gray-800 mb-2">No Properties Found</h3>
-            <p class="text-gray-500 text-sm mb-4">Start by adding your first property.</p>
-            <a href="{{ route('properties.create') }}" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl font-medium">
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">
+                <span x-show="!showArchive">No Properties Found</span>
+                <span x-show="showArchive">No Archived Properties</span>
+            </h3>
+            <p class="text-gray-500 text-sm mb-4">
+                <span x-show="!showArchive">Start by adding your first property.</span>
+                <span x-show="showArchive">No deleted properties found.</span>
+            </p>
+            <a x-show="!showArchive" href="{{ route('properties.create') }}" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl font-medium">
                 <i class="fas fa-plus mr-2"></i>
                 Add Property
             </a>
         </div>
     </template>
+    
+    <!-- Professional Toggle at Bottom -->
+    <div class="mt-8 border-t border-gray-200 pt-6">
+        <div class="flex justify-center">
+            <div class="toggle-container p-1 rounded-xl inline-flex">
+                <button @click="showArchive = false" 
+                        :class="!showArchive ? 'toggle-button-active text-gray-900' : 'toggle-button-inactive text-gray-500'"
+                        class="px-6 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 flex items-center space-x-2">
+                    <i class="fas fa-building text-sm"></i>
+                    <span>Active</span>
+                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full ml-1 font-semibold" x-text="properties.length"></span>
+                </button>
+                <button @click="showArchive = true" 
+                        :class="showArchive ? 'toggle-button-active text-gray-900' : 'toggle-button-inactive text-gray-500'"
+                        class="px-6 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 flex items-center space-x-2">
+                    <i class="fas fa-archive text-sm"></i>
+                    <span>Archive</span>
+                    <span class="bg-orange-100 text-orange-800 text-xs px-2 py-0.5 rounded-full ml-1 font-semibold" x-text="archivedProperties.length"></span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Subtle description -->
+        <div class="text-center mt-3">
+            <p class="text-xs text-gray-500">
+                <span x-show="!showArchive">Manage your active properties</span>
+                <span x-show="showArchive">Deleted properties (archived)</span>
+            </p>
+        </div>
+    </div>
 </div>
 
 <!-- Property Booking Modal -->

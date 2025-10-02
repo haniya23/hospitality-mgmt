@@ -155,7 +155,7 @@
 function accommodationForm() {
     return {
         init() {
-            console.log('Accommodation form initialized');
+            // Accommodation form initialized
         }
     }
 }

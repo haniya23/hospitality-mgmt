@@ -42,7 +42,7 @@ function cancelledBookingData() {
                 const data = await response.json();
                 this.properties = data.properties || [];
             } catch (error) {
-                console.error('Error loading properties:', error);
+                // Error loading properties
             }
         },
 
@@ -207,7 +207,7 @@ function cancelledBookingData() {
                     this.showMessage(data.message || 'Error reactivating booking', 'error');
                 }
             } catch (error) {
-                console.error('Error reactivating booking:', error);
+                // Error reactivating booking
                 this.showMessage('Error reactivating booking', 'error');
             }
         },

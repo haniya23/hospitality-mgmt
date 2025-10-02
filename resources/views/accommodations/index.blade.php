@@ -170,7 +170,7 @@ function accommodationData() {
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
+                    // Error occurred
                     alert('Error deleting accommodation');
                 });
             }

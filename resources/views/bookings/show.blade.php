@@ -212,7 +212,7 @@ function confirmBooking(uuid) {
             }
         })
         .catch(error => {
-            console.error('Error:', error);
+            // Error occurred
             alert('An error occurred while confirming the booking.');
         });
     }
@@ -238,7 +238,7 @@ function cancelBooking(uuid) {
             }
         })
         .catch(error => {
-            console.error('Error:', error);
+            // Error occurred
             alert('An error occurred while cancelling the booking.');
         });
     }

@@ -179,7 +179,7 @@
 function accommodationForm() {
     return {
         init() {
-            console.log('Accommodation edit form initialized');
+            // Accommodation edit form initialized
         }
     }
 }

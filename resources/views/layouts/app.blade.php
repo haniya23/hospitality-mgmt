@@ -972,7 +972,7 @@
                                 }
                             }
                             
-                            console.log('Sidebar toggled:', isCollapsed ? 'expanded' : 'collapsed');
+                            // Sidebar toggled
                         });
                     });
                 }

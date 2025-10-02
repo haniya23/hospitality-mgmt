@@ -64,17 +64,27 @@ class BookingController extends Controller
             'b2b_partner_id' => 'nullable|exists:b2b_partners,uuid',
             'commission_percentage' => 'nullable|numeric|min:0|max:100',
             'commission_amount' => 'nullable|numeric|min:0',
-            'use_b2b_reserved_customer' => 'nullable|in:0,1,true,false'
+            'use_b2b_reserved_customer' => 'nullable|in:0,1,true,false',
+            'use_accommodation_reserved_customer' => 'nullable|in:0,1,true,false'
         ]);
 
         try {
-            // Convert string boolean to actual boolean
-            $useB2BReservedCustomer = filter_var($validated['use_b2b_reserved_customer'], FILTER_VALIDATE_BOOLEAN);
+            // Initialize partner variable
+            $partner = null;
             
-            // Handle B2B reserved customer
+            // Convert string booleans to actual booleans
+            $useB2BReservedCustomer = filter_var($validated['use_b2b_reserved_customer'], FILTER_VALIDATE_BOOLEAN);
+            $useAccommodationReservedCustomer = filter_var($validated['use_accommodation_reserved_customer'] ?? false, FILTER_VALIDATE_BOOLEAN);
+            
+            // Handle reserved customers
             if ($useB2BReservedCustomer && $validated['b2b_partner_id']) {
+                // B2B reserved customer
                 $partner = \App\Models\B2bPartner::where('uuid', $validated['b2b_partner_id'])->first();
                 $guest = $partner->getOrCreateReservedCustomer();
+            } elseif ($useAccommodationReservedCustomer && $validated['accommodation_id']) {
+                // Accommodation reserved customer
+                $accommodation = PropertyAccommodation::find($validated['accommodation_id']);
+                $guest = $accommodation->getOrCreateReservedCustomer();
             } else {
                 // Regular customer creation
                 $guest = Guest::firstOrCreate(
@@ -300,6 +310,33 @@ class BookingController extends Controller
         }
 
         $reservedCustomer = $partner->reservedCustomer;
+        
+        if (!$reservedCustomer) {
+            return response()->json(['error' => 'Reserved customer not found'], 404);
+        }
+
+        return response()->json([
+            'id' => $reservedCustomer->id,
+            'name' => $reservedCustomer->name,
+            'email' => $reservedCustomer->email,
+            'mobile_number' => $reservedCustomer->mobile_number
+        ]);
+    }
+
+    public function getAccommodationReservedCustomer($accommodationId)
+    {
+        $accommodation = PropertyAccommodation::find($accommodationId);
+        
+        if (!$accommodation) {
+            return response()->json(['error' => 'Accommodation not found'], 404);
+        }
+
+        // Check if user owns this accommodation
+        if ($accommodation->property->owner_id !== auth()->id()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $reservedCustomer = $accommodation->reservedCustomer;
         
         if (!$reservedCustomer) {
             return response()->json(['error' => 'Reserved customer not found'], 404);

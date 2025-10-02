@@ -129,11 +129,8 @@ function closePoliciesModal() {
 }
 
 async function savePolicies(propertyUuid) {
-    console.log('savePolicies called with UUID:', propertyUuid);
-    
     const form = document.getElementById('policiesForm');
     if (!form) {
-        console.error('Policies form not found!');
         showToast('Form not found. Please refresh the page.', 'error');
         return;
     }
@@ -147,10 +144,6 @@ async function savePolicies(propertyUuid) {
         house_rules: form.querySelector('[name="house_rules"]').value || null
     };
     
-    // Debug: Log form data
-    console.log('Policies form data being sent:', formData);
-    console.log('JSON stringified:', JSON.stringify(formData));
-    
     const saveButton = event.target;
     const originalText = saveButton.textContent;
     saveButton.textContent = 'Saving...';
@@ -158,7 +151,6 @@ async function savePolicies(propertyUuid) {
     
     // Test with test endpoint first
     const testUrl = `/properties/${propertyUuid}/test-ajax`;
-    console.log('Testing with URL:', testUrl);
     
     try {
         // First test the test endpoint
@@ -173,9 +165,7 @@ async function savePolicies(propertyUuid) {
             body: JSON.stringify(formData)
         });
         
-        console.log('Test response status:', testResponse.status);
         const testData = await testResponse.json();
-        console.log('Test response data:', testData);
         
         if (!testData.success) {
             showToast('Test failed: ' + testData.message, 'error');
@@ -184,7 +174,6 @@ async function savePolicies(propertyUuid) {
         
         // If test passes, proceed with actual update
         const url = `/properties/${propertyUuid}/update-section`;
-        console.log('Making actual request to:', url);
         
         const response = await fetch(url, {
             method: 'PATCH',
@@ -197,18 +186,13 @@ async function savePolicies(propertyUuid) {
             body: JSON.stringify(formData)
         });
         
-        console.log('Response status:', response.status);
-        console.log('Response ok:', response.ok);
-        
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('Response error:', errorText);
             showToast('Server error: ' + response.status, 'error');
             return;
         }
         
         const data = await response.json();
-        console.log('Response data:', data);
         
         if (data.success) {
             showToast('Policies updated successfully!', 'success');
@@ -218,7 +202,6 @@ async function savePolicies(propertyUuid) {
             showToast(data.message || 'Error updating policies', 'error');
         }
     } catch (error) {
-        console.error('Error saving policies:', error);
         showToast('Error updating policies. Please try again.', 'error');
     } finally {
         saveButton.textContent = originalText;

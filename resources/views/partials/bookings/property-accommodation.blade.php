@@ -247,6 +247,7 @@
     <template x-if="showPropertyAccommodationSelection && !showPropertySelection">
         <div>
             <input type="hidden" name="property_id" x-model="defaultPropertyId">
+            <!-- No hidden accommodation_id here since the select dropdown handles it -->
         </div>
     </template>
 </div>

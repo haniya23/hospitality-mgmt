@@ -223,11 +223,8 @@ function closeLocationModal() {
 }
 
 async function saveLocation(propertyUuid) {
-    console.log('saveLocation called with UUID:', propertyUuid);
-    
     const form = document.getElementById('locationForm');
     if (!form) {
-        console.error('Location form not found!');
         showToast('Form not found. Please refresh the page.', 'error');
         return;
     }
@@ -245,10 +242,6 @@ async function saveLocation(propertyUuid) {
         longitude: form.querySelector('[name="longitude"]').value || null
     };
     
-    // Debug: Log form data
-    console.log('Location form data being sent:', formData);
-    console.log('JSON stringified:', JSON.stringify(formData));
-    
     const saveButton = event.target;
     const originalText = saveButton.textContent;
     saveButton.textContent = 'Saving...';
@@ -256,7 +249,6 @@ async function saveLocation(propertyUuid) {
     
     // Test with test endpoint first
     const testUrl = `/properties/${propertyUuid}/test-ajax`;
-    console.log('Testing with URL:', testUrl);
     
     try {
         // First test the test endpoint
@@ -271,9 +263,7 @@ async function saveLocation(propertyUuid) {
             body: JSON.stringify(formData)
         });
         
-        console.log('Test response status:', testResponse.status);
         const testData = await testResponse.json();
-        console.log('Test response data:', testData);
         
         if (!testData.success) {
             showToast('Test failed: ' + testData.message, 'error');
@@ -282,7 +272,6 @@ async function saveLocation(propertyUuid) {
         
         // If test passes, proceed with actual update
         const url = `/properties/${propertyUuid}/update-section`;
-        console.log('Making actual request to:', url);
         
         const response = await fetch(url, {
             method: 'PATCH',
@@ -295,18 +284,13 @@ async function saveLocation(propertyUuid) {
             body: JSON.stringify(formData)
         });
         
-        console.log('Response status:', response.status);
-        console.log('Response ok:', response.ok);
-        
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('Response error:', errorText);
             showToast('Server error: ' + response.status, 'error');
             return;
         }
         
         const data = await response.json();
-        console.log('Response data:', data);
         
         if (data.success) {
             showToast('Location updated successfully!', 'success');
@@ -316,7 +300,6 @@ async function saveLocation(propertyUuid) {
             showToast(data.message || 'Error updating location', 'error');
         }
     } catch (error) {
-        console.error('Error saving location:', error);
         showToast('Error updating location. Please try again.', 'error');
     } finally {
         saveButton.textContent = originalText;

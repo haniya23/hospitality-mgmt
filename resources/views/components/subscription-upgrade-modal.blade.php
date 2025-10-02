@@ -133,7 +133,7 @@ function subscriptionUpgradeModal() {
                     await this.defaultUpgrade();
                 }
             } catch (error) {
-                console.error('Upgrade error:', error);
+                // Upgrade error
                 showError('Upgrade Failed', 'Something went wrong. Please try again.');
             } finally {
                 this.loading = false;

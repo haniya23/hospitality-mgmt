@@ -176,7 +176,7 @@ function bookingDashboard() {
         },
 
         init() {
-            console.log('Booking dashboard initialized');
+            // Booking dashboard initialized
             
             // Check if accommodation was pre-selected from accommodations page
             const urlParams = new URLSearchParams(window.location.search);
@@ -187,7 +187,7 @@ function bookingDashboard() {
                 if (selectedAccommodation) {
                     try {
                         const accommodation = JSON.parse(selectedAccommodation);
-                        console.log('Pre-selected accommodation:', accommodation);
+                        // Pre-selected accommodation
                         
                         // Show a notification about the pre-selected accommodation
                         this.showPreSelectedAccommodation(accommodation);
@@ -197,7 +197,7 @@ function bookingDashboard() {
                             this.startNormalBookingWithAccommodation(accommodation);
                         }, 2000);
                     } catch (error) {
-                        console.error('Error parsing selected accommodation:', error);
+                        // Error parsing selected accommodation
                     }
                 }
             }

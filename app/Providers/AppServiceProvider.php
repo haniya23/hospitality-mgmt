@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Models\B2bPartner;
+use App\Models\PropertyAccommodation;
 use App\Observers\B2bPartnerObserver;
+use App\Observers\PropertyAccommodationObserver;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -23,5 +25,6 @@ class AppServiceProvider extends ServiceProvider
     {
         // Register model observers
         B2bPartner::observe(B2bPartnerObserver::class);
+        PropertyAccommodation::observe(PropertyAccommodationObserver::class);
     }
 }

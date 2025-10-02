@@ -29,7 +29,7 @@
                        @change="updateCheckOutDate(); checkPastBooking()" 
                        @input="updateCheckOutDate(); checkPastBooking()"
                        class="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-white hover:border-gray-300 font-semibold text-gray-800 datepicker-input text-sm sm:text-base" 
-                       placeholder="Select check-in date" readonly required>
+                       placeholder="In" readonly required>
                 @error('check_in_date')
                     <p class="text-red-500 text-sm mt-2 flex items-center gap-1">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -52,7 +52,7 @@
                        @change="calculateDaysNights()" 
                        @input="calculateDaysNights()"
                        class="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-white hover:border-gray-300 font-semibold text-gray-800 datepicker-input text-sm sm:text-base" 
-                       placeholder="Select check-out date" readonly required>
+                       placeholder="Out" readonly required>
                 @error('check_out_date')
                     <p class="text-red-500 text-sm mt-2 flex items-center gap-1">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

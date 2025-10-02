@@ -593,7 +593,7 @@ function bookingCalendar() {
                 // Regenerate calendar with actual booking data
                 this.generateCalendar();
             } catch (error) {
-                console.error('Error loading bookings:', error);
+                // Error loading bookings
                 // Keep the demo data if API fails
             }
         },
@@ -618,7 +618,7 @@ function bookingCalendar() {
                 // Show the first booking's details
                 this.showBookingDetails(bookingsOnDate[0]);
             } else {
-                console.log('No bookings found for date:', date);
+                // No bookings found for date
             }
         },
 
@@ -633,7 +633,7 @@ function bookingCalendar() {
 
         confirmBooking(booking) {
             // Implementation for confirming a booking
-            console.log('Confirming booking:', booking);
+            // Confirming booking
             
             // Update booking status via API using UUID
             fetch(`/api/bookings/${booking.uuid}/toggle-status`, {
@@ -654,16 +654,16 @@ function bookingCalendar() {
                 // Regenerate calendar
                 this.generateCalendar();
                 
-                console.log('Booking confirmed successfully');
+                // Booking confirmed successfully
             })
             .catch(error => {
-                console.error('Error confirming booking:', error);
+                // Error confirming booking
             });
         },
 
         cancelBooking(booking) {
             // Implementation for cancelling a booking
-            console.log('Cancelling booking:', booking);
+            // Cancelling booking
             
             // Prompt for cancellation reason
             const reason = prompt('Please enter the reason for cancellation:');
@@ -695,13 +695,13 @@ function bookingCalendar() {
                     // Regenerate calendar
                     this.generateCalendar();
                     
-                    console.log('Booking cancelled successfully');
+                    // Booking cancelled successfully
                 } else {
                     alert('Error: ' + data.message);
                 }
             })
             .catch(error => {
-                console.error('Error cancelling booking:', error);
+                // Error cancelling booking
                 alert('An error occurred while cancelling the booking.');
             });
         },

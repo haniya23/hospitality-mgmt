@@ -604,7 +604,7 @@ function b2bCreateData() {
                     } catch (error) {
                         resetBtn();
                         alert('Form submission failed. Please try again.');
-                        console.error('Form submission error:', error);
+                        // Form submission error
                     }
                 }, 100);
             });

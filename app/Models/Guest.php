@@ -24,6 +24,7 @@ class Guest extends Model
         'total_stays',
         'last_stay_at',
         'partner_id',
+        'accommodation_id',
         'is_reserved',
     ];
 
@@ -66,6 +67,11 @@ class Guest extends Model
     public function partner()
     {
         return $this->belongsTo(B2bPartner::class, 'partner_id');
+    }
+
+    public function accommodation()
+    {
+        return $this->belongsTo(PropertyAccommodation::class, 'accommodation_id');
     }
 
     // Loyalty system methods
@@ -137,6 +143,21 @@ class Guest extends Model
             'is_reserved' => true,
             'id_type' => 'aadhar',
             'id_number' => "RESERVED-{$partner->id}",
+        ]);
+    }
+
+    // Create reserved customer for accommodation
+    public static function createReservedCustomerForAccommodation(PropertyAccommodation $accommodation)
+    {
+        return static::create([
+            'name' => "Reserved – {$accommodation->display_name}",
+            'email' => "reserved-acc-{$accommodation->id}@accommodation.local",
+            'phone' => "0000000000", // Default phone for accommodation reserved customers
+            'mobile_number' => "0000000000",
+            'accommodation_id' => $accommodation->id,
+            'is_reserved' => true,
+            'id_type' => 'aadhar',
+            'id_number' => "RESERVED-ACC-{$accommodation->id}",
         ]);
     }
 }

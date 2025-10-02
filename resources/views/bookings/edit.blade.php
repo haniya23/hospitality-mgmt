@@ -594,7 +594,7 @@ function bookingEditForm() {
                 const response = await fetch('/api/guests');
                 this.guests = await response.json();
             } catch (error) {
-                console.error('Error loading guests:', error);
+                // Error loading guests
             }
         },
         
@@ -603,7 +603,7 @@ function bookingEditForm() {
                 const response = await fetch('/api/partners');
                 this.partners = await response.json();
             } catch (error) {
-                console.error('Error loading partners:', error);
+                // Error loading partners
             }
         },
         
@@ -649,7 +649,7 @@ function bookingEditForm() {
                 const data = await response.json();
                 this.selectedPartnerReservedCustomer = data.name;
             } catch (error) {
-                console.error('Error loading reserved customer:', error);
+                // Error loading reserved customer
             }
         },
         
@@ -755,7 +755,7 @@ function bookingEditForm() {
                 
                 this.selectedAccommodation = '';
             } catch (error) {
-                console.error('Error loading accommodations:', error);
+                // Error loading accommodations
             }
         },
         

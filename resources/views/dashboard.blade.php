@@ -46,7 +46,7 @@ function dashboardData() {
         },
 
         init() {
-            console.log('Dashboard initialized');
+            // Dashboard initialized
             // Set quote based on day of year (one quote per day)
             const today = new Date();
             const startOfYear = new Date(today.getFullYear(), 0, 0);

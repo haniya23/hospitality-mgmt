@@ -57,25 +57,15 @@ class PropertyController extends Controller
             throw $e;
         }
 
-        \Log::info('PropertyController store method called', [
-            'url' => $request->url(),
-            'path' => $request->path(),
-            'is_api' => $request->is('api/*'),
-            'expects_json' => $request->expectsJson(),
-            'accept_header' => $request->header('Accept'),
-            'content_type' => $request->header('Content-Type'),
-            'method' => $request->method()
-        ]);
+        // PropertyController store method called
         
         // Always return JSON for API routes
         if ($request->is('api/*') || str_contains($request->path(), 'api/')) {
-            \Log::info('API request detected, returning JSON response');
             return response()->json($property->load('category'));
         }
         
         // Check if request expects JSON
         if ($request->expectsJson()) {
-            \Log::info('JSON request detected, returning JSON response');
             return response()->json($property->load('category'));
         }
         
@@ -148,19 +138,38 @@ class PropertyController extends Controller
 
     public function index()
     {
-        $properties = auth()->user()->properties()
+        // Get active (non-deleted) properties
+        $activeProperties = auth()->user()->properties()
+            ->with([
+                'category', 
+                'location.city.district.state.country',
+                'propertyAccommodations',
+                'pendingDeleteRequest'
+            ])
+            ->withCount(['propertyAccommodations', 'reservations as bookings_count'])
+            ->latest()
+            ->get();
+            
+        // Get deleted (archived) properties
+        $archivedProperties = auth()->user()->properties()
+            ->onlyTrashed()
             ->with([
                 'category', 
                 'location.city.district.state.country',
                 'propertyAccommodations'
             ])
             ->withCount(['propertyAccommodations', 'reservations as bookings_count'])
-            ->latest()
+            ->latest('deleted_at')
             ->get();
+        
+        // All properties for backward compatibility
+        $properties = $activeProperties;
+        
         $hasB2bPartners = \App\Models\B2bPartner::where('status', 'active')
             ->where('requested_by', auth()->id())
             ->exists();
-        return view('properties.index', compact('properties', 'hasB2bPartners'));
+            
+        return view('properties.index', compact('properties', 'activeProperties', 'archivedProperties', 'hasB2bPartners'));
     }
 
     public function edit(Property $property)
@@ -182,46 +191,25 @@ class PropertyController extends Controller
     {
         $section = $request->input('section');
         
-        // Debug logging
-        \Log::info('Property update request', [
-            'property_id' => $property->id,
-            'section' => $section,
-            'request_data' => $request->all(),
-            'validated_data' => $request->validated(),
-            'user_id' => auth()->id(),
-            'method' => $request->method(),
-            'content_type' => $request->header('Content-Type'),
-            'is_ajax' => $request->ajax(),
-            'raw_input' => $request->getContent(),
-            'input_keys' => array_keys($request->all()),
-            'post_data' => $request->post(),
-            'get_data' => $request->query(),
-            'files' => $request->files->all()
-        ]);
+        // Property update request
         
         if ($section === 'basic') {
             $updateData = $request->only(['name', 'property_category_id', 'description']);
-            \Log::info('Updating property with data', $updateData);
-            
             $result = $property->update($updateData);
-            \Log::info('Property update result', ['success' => $result]);
             
             // Update owner name if provided
             if ($request->filled('owner_name')) {
                 $ownerResult = $property->owner()->update(['name' => $request->owner_name]);
-                \Log::info('Owner update result', ['success' => $ownerResult]);
+                // Owner updated
             }
         }
         
         if ($section === 'location') {
             $locationData = $request->only(['address', 'country_id', 'state_id', 'district_id', 'city_id', 'pincode_id', 'latitude', 'longitude']);
-            \Log::info('Updating location with data', $locationData);
-            
             $result = $property->location()->updateOrCreate(
                 ['property_id' => $property->id],
                 $locationData
             );
-            \Log::info('Location update result', ['success' => $result]);
         }
         
         if ($section === 'accommodation') {
@@ -252,21 +240,15 @@ class PropertyController extends Controller
         
         if ($section === 'amenities') {
             $amenityIds = $request->input('amenities', []);
-            \Log::info('Updating amenities with data', ['amenities' => $amenityIds]);
-            
             $result = $property->amenities()->sync($amenityIds);
-            \Log::info('Amenities update result', ['success' => $result]);
         }
         
         if ($section === 'policies') {
             $policyData = $request->only(['check_in_time', 'check_out_time', 'cancellation_policy', 'house_rules']);
-            \Log::info('Updating policies with data', $policyData);
-            
             $result = $property->policy()->updateOrCreate(
                 ['property_id' => $property->id],
                 $policyData
             );
-            \Log::info('Policies update result', ['success' => $result]);
         }
 
         return response()->json([
@@ -282,14 +264,7 @@ class PropertyController extends Controller
      */
     public function testAjax(PropertyUpdateRequest $request, Property $property)
     {
-        \Log::info('Test AJAX endpoint called', [
-            'property_id' => $property->id,
-            'request_data' => $request->all(),
-            'method' => $request->method(),
-            'content_type' => $request->header('Content-Type'),
-            'is_ajax' => $request->ajax(),
-            'raw_input' => $request->getContent()
-        ]);
+        // Test AJAX endpoint called
 
         return response()->json([
             'success' => true,

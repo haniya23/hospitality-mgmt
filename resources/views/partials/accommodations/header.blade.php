@@ -67,7 +67,7 @@ function accommodationStats() {
         },
 
         init() {
-            console.log('Accommodation stats initialized');
+            // Accommodation stats initialized
         },
 
         // Navigation functions for clickable stats

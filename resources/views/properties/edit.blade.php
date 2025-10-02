@@ -124,7 +124,7 @@ async function makeAjaxRequest(url, options = {}) {
         
         return data;
     } catch (error) {
-        console.error('AJAX Error:', error);
+        // AJAX Error
         showToast(error.message || 'An error occurred', 'error');
         throw error;
     }

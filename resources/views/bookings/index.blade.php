@@ -294,7 +294,7 @@ function bookingData() {
                 const data = await response.json();
                 this.bookings = [...data.pending, ...data.active, ...data.cancelled];
             } catch (error) {
-                console.error('Error loading bookings:', error);
+                // Error loading bookings
                 this.showMessage('Error loading bookings', 'error');
             }
         },
@@ -304,7 +304,7 @@ function bookingData() {
                 const response = await fetch('/api/properties');
                 this.properties = await response.json();
             } catch (error) {
-                console.error('Error loading properties:', error);
+                // Error loading properties
             }
         },
 

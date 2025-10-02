@@ -32,19 +32,17 @@ function subscriptionPage() {
         init() {
             // Check if we just returned from a successful payment
             const urlParams = new URLSearchParams(window.location.search);
-            console.log('URL params:', urlParams.toString());
-            console.log('Payment param:', urlParams.get('payment'));
-            console.log('All URL params:', Object.fromEntries(urlParams.entries()));
+            // Check URL params for payment status
             
             if (urlParams.get('payment') === 'success') {
-                console.log('Showing success animation');
+                // Showing success animation
                 this.showSuccessAnimation = true;
                 // Clean up URL
                 window.history.replaceState({}, document.title, window.location.pathname);
                 
                 // Force page refresh after a short delay to ensure updated subscription status
                 setTimeout(() => {
-                    console.log('Auto-refreshing page to show updated accommodation data');
+                    // Auto-refreshing page to show updated accommodation data
                     window.location.reload();
                 }, 2000); // Reduced to 2 seconds for faster feedback
             }
@@ -52,11 +50,9 @@ function subscriptionPage() {
         
         // Upgrade Modal Methods
         openUpgradeModal() {
-            console.log('Opening upgrade modal...');
+            // Opening upgrade modal
             this.showUpgradeModal = true;
             this.additionalAccommodations = 1; // Set default to 1 accommodation
-            console.log('showUpgradeModal set to:', this.showUpgradeModal);
-            console.log('additionalAccommodations set to:', this.additionalAccommodations);
         },
         
         closeUpgradeModal() {
@@ -68,7 +64,7 @@ function subscriptionPage() {
         selectPlan(plan) {
             this.selectedPlan = plan;
             // Handle plan selection logic here
-            console.log('Selected plan:', plan, 'Additional accommodations:', this.additionalAccommodations);
+            // Selected plan and additional accommodations
         },
         
         // Payment Methods
@@ -100,7 +96,7 @@ function subscriptionPage() {
                     this.showError(data.message || 'Failed to create payment order');
                 }
             } catch (error) {
-                console.error('Subscription error:', error);
+                // Subscription error
                 this.showError('Payment service temporarily unavailable. Please try again later.');
             } finally {
                 this.loading = false;
@@ -143,7 +139,7 @@ function subscriptionPage() {
                     this.showError(data.message || 'Failed to create payment order');
                 }
             } catch (error) {
-                console.error('Add accommodations error:', error);
+                // Add accommodations error
                 this.showError('Service temporarily unavailable. Please try again later.');
             } finally {
                 this.loading = false;

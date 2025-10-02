@@ -271,6 +271,8 @@ function bookingCreateForm() {
         customerType: '{{ request('b2b_partner_uuid') ? 'b2b' : 'new' }}',
         isB2B: {{ request('b2b_partner_uuid') ? 'true' : 'false' }},
         useB2BReservedCustomer: {{ request('b2b_partner_uuid') ? 'true' : 'false' }},
+        useAccommodationReservedCustomer: false,
+        selectedAccommodationReservedCustomer: null,
         guestSearch: '',
         guestName: '{{ old('guest_name') }}',
         guestMobile: '{{ old('guest_mobile') }}',
@@ -345,14 +347,12 @@ function bookingCreateForm() {
             
             // Add event listeners for datepicker custom events
             document.addEventListener('checkin-date-changed', (e) => {
-                console.log('Custom checkin event received:', e.detail.date);
                 this.checkInDate = e.detail.date;
                 this.updateCheckOutDate();
                 this.checkPastBooking();
             });
             
             document.addEventListener('checkout-date-changed', (e) => {
-                console.log('Custom checkout event received:', e.detail.date);
                 this.checkOutDate = e.detail.date;
                 this.calculateDaysNights();
             });
@@ -405,7 +405,7 @@ function bookingCreateForm() {
                 const response = await fetch('/api/guests');
                 this.guests = await response.json();
             } catch (error) {
-                console.error('Error loading guests:', error);
+                // Error loading guests
             }
         },
         
@@ -414,7 +414,7 @@ function bookingCreateForm() {
                 const response = await fetch('/api/partners');
                 this.partners = await response.json();
             } catch (error) {
-                console.error('Error loading partners:', error);
+                // Error loading partners
             }
         },
 
@@ -436,9 +436,31 @@ function bookingCreateForm() {
                     this.useB2BReservedCustomer = false;
                 }
             } catch (error) {
-                console.error('Error loading partner reserved customer:', error);
                 this.selectedPartnerReservedCustomer = 'Error loading reserved customer';
                 this.useB2BReservedCustomer = false;
+            }
+        },
+
+        async loadAccommodationReservedCustomer(accommodationId) {
+            if (!accommodationId) {
+                this.selectedAccommodationReservedCustomer = null;
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/accommodations/${accommodationId}/reserved-customer`);
+                const data = await response.json();
+                
+                if (response.ok && data.name) {
+                    this.selectedAccommodationReservedCustomer = data.name;
+                } else {
+                    // Accommodation doesn't have a reserved customer
+                    this.selectedAccommodationReservedCustomer = 'No reserved customer found for this accommodation';
+                    this.useAccommodationReservedCustomer = false;
+                }
+            } catch (error) {
+                this.selectedAccommodationReservedCustomer = 'Error loading reserved customer';
+                this.useAccommodationReservedCustomer = false;
             }
         },
         
@@ -521,13 +543,12 @@ function bookingCreateForm() {
                 
                 this.selectedAccommodation = '';
             } catch (error) {
-                console.error('Error loading accommodations:', error);
+                // Error loading accommodations
             }
         },
         
         // Date and calculation methods
         updateCheckOutDate() {
-            console.log('updateCheckOutDate called with checkInDate:', this.checkInDate);
             if (this.checkInDate) {
                 const checkIn = new Date(this.checkInDate);
                 const checkOut = new Date(checkIn);
@@ -539,13 +560,11 @@ function bookingCreateForm() {
                 nextDay.setDate(nextDay.getDate() + 1);
                 $('input[name="check_out_date"]').datepicker('option', 'minDate', nextDay);
                 
-                console.log('Auto-set checkout to:', this.checkOutDate);
                 this.calculateDaysNights();
             }
         },
         
         calculateDaysNights() {
-            console.log('calculateDaysNights called with:', this.checkInDate, this.checkOutDate);
             if (this.checkInDate && this.checkOutDate) {
                 const checkIn = new Date(this.checkInDate);
                 const checkOut = new Date(this.checkOutDate);
@@ -571,7 +590,6 @@ function bookingCreateForm() {
                     this.nights = 0;
                 }
                 
-                console.log('Calculated days:', this.days, 'nights:', this.nights);
                 this.calculateTotalGuests();
                 this.calculateAmount();
             } else {
@@ -691,11 +709,24 @@ function bookingCreateForm() {
         },
         
         updateAccommodationPrice() {
-            const accommodation = this.accommodations.find(acc => acc.id == this.selectedAccommodation);
+            // Check both accommodations arrays
+            let accommodation = this.accommodations.find(acc => acc.id == this.selectedAccommodation);
+            if (!accommodation) {
+                accommodation = this.singlePropertyAccommodations.find(acc => acc.id == this.selectedAccommodation);
+            }
+            
             if (accommodation) {
                 this.selectedAccommodationPrice = accommodation.base_price;
                 this.selectedAccommodationInfo = accommodation;
                 this.calculateAmount();
+                
+                // Load accommodation reserved customer
+                this.loadAccommodationReservedCustomer(accommodation.id);
+                
+                // If customer type is accommodation, automatically enable reserved customer
+                if (this.customerType === 'accommodation') {
+                    this.useAccommodationReservedCustomer = true;
+                }
             }
         },
         
@@ -714,6 +745,12 @@ function bookingCreateForm() {
                     this.selectedAccommodation = data.defaultAccommodationId; // Set selectedAccommodation for form validation
                     this.selectedAccommodationPrice = data.defaultPrice;
                     this.selectedAccommodationInfo = data.defaultAccommodation;
+                    // Load accommodation reserved customer
+                    this.loadAccommodationReservedCustomer(data.defaultAccommodationId);
+                    // If customer type is accommodation, automatically enable reserved customer
+                    if (this.customerType === 'accommodation') {
+                        this.useAccommodationReservedCustomer = true;
+                    }
                     // Recalculate amount after setting accommodation price
                     this.calculateAmount();
                 } 
@@ -723,6 +760,8 @@ function bookingCreateForm() {
                     this.showPropertySelection = false;
                     this.defaultPropertyId = data.defaultPropertyId;
                     this.singlePropertyAccommodations = data.accommodations;
+                    // Also populate the main accommodations array for consistency
+                    this.accommodations = data.accommodations;
                 } 
                 // If multiple properties, show both property and accommodation selection
                 else {
@@ -730,7 +769,6 @@ function bookingCreateForm() {
                     this.showPropertySelection = true;
                 }
             } catch (error) {
-                console.error('Error checking property logic:', error);
                 this.showPropertyAccommodationSelection = true;
                 this.showPropertySelection = true;
             }
@@ -787,9 +825,8 @@ function bookingCreateForm() {
                 const response = await fetch(`/api/properties/${propertyId}/accommodations`);
                 const accommodations = await response.json();
                 this.modalAccommodations = accommodations;
-            } catch (error) {
-                console.error('Error loading accommodations:', error);
-                this.modalAccommodations = [];
+                } catch (error) {
+                    this.modalAccommodations = [];
             }
         },
         
@@ -801,6 +838,14 @@ function bookingCreateForm() {
             // Set accommodation info
             this.selectedAccommodationInfo = accommodation;
             this.selectedAccommodationPrice = accommodation.base_price;
+            
+            // Load accommodation reserved customer
+            this.loadAccommodationReservedCustomer(accommodation.id);
+            
+            // If customer type is accommodation, automatically enable reserved customer
+            if (this.customerType === 'accommodation') {
+                this.useAccommodationReservedCustomer = true;
+            }
             
             // Hide the property/accommodation selection since we've made a selection
             this.showPropertyAccommodationSelection = false;
@@ -835,7 +880,7 @@ function bookingCreateForm() {
                     const property = await response.json();
                     this.selectedPropertyInfo = property;
                 } catch (error) {
-                    console.error('Error loading property info:', error);
+                    // Error loading property info
                 }
             }
         },
@@ -848,6 +893,12 @@ function bookingCreateForm() {
                     this.selectedAccommodation = accommodation.id;
                     this.selectedAccommodationPrice = accommodation.base_price;
                     this.selectedAccommodationInfo = accommodation;
+                    // Load accommodation reserved customer
+                    this.loadAccommodationReservedCustomer(accommodation.id);
+                    // If customer type is accommodation, automatically enable reserved customer
+                    if (this.customerType === 'accommodation') {
+                        this.useAccommodationReservedCustomer = true;
+                    }
                     this.calculateAmount();
                 }
             }
@@ -857,17 +908,12 @@ function bookingCreateForm() {
 
 // Initialize datepickers when document is ready
 $(document).ready(function() {
-    console.log('Document ready, initializing datepickers');
-    
     // Wait for Alpine.js to be fully loaded
     function initializeDatepickers() {
         if (typeof Alpine === 'undefined' || !document.querySelector('[x-data*="bookingCreateForm"]')) {
-            console.log('Waiting for Alpine.js to load...');
             setTimeout(initializeDatepickers, 100);
             return;
         }
-        
-        console.log('Alpine.js loaded, initializing datepickers');
         
     // Common datepicker options with overflow fixes
     const datepickerOptions = {
@@ -912,7 +958,6 @@ $(document).ready(function() {
     $('input[name="check_in_date"]').datepicker($.extend({}, datepickerOptions, {
         minDate: 0, // Disable past dates
         onSelect: function(dateText) {
-            console.log('Check-in date selected:', dateText);
             $(this).addClass('datepicker-active');
             
             // Update the input value first
@@ -929,13 +974,12 @@ $(document).ready(function() {
                         alpineComponent.checkPastBooking();
                         // Force Alpine.js reactivity update
                         Alpine.nextTick(() => {
-                            console.log('Alpine reactivity updated for check-in');
+                            // Alpine reactivity updated for check-in
                         });
-                        console.log('Alpine updated via $data method');
                         return;
                     }
                 } catch (e) {
-                    console.log('$data method failed, trying _x_dataStack');
+                    // $data method failed, trying _x_dataStack
                 }
                 
                 // Method 2: Try _x_dataStack
@@ -945,7 +989,6 @@ $(document).ready(function() {
                     alpineComponent.checkInDate = dateText;
                     alpineComponent.updateCheckOutDate();
                     alpineComponent.checkPastBooking();
-                    console.log('Alpine updated via _x_dataStack method');
                     return;
                 }
                 
@@ -954,7 +997,6 @@ $(document).ready(function() {
                     detail: { date: dateText } 
                 });
                 document.dispatchEvent(event);
-                console.log('Dispatched custom event as fallback');
             }, 10);
         }
     }));
@@ -963,7 +1005,6 @@ $(document).ready(function() {
     $('input[name="check_out_date"]').datepicker($.extend({}, datepickerOptions, {
         minDate: 1, // At least tomorrow
         onSelect: function(dateText) {
-            console.log('Check-out date selected:', dateText);
             $(this).addClass('datepicker-active');
             
             // Update the input value first
@@ -979,13 +1020,12 @@ $(document).ready(function() {
                         alpineComponent.calculateDaysNights();
                         // Force Alpine.js reactivity update
                         Alpine.nextTick(() => {
-                            console.log('Alpine reactivity updated for check-out');
+                            // Alpine reactivity updated for check-out
                         });
-                        console.log('Alpine checkout updated via $data method');
                         return;
                     }
                 } catch (e) {
-                    console.log('$data method failed for checkout, trying _x_dataStack');
+                    // $data method failed for checkout, trying _x_dataStack
                 }
                 
                 // Method 2: Try _x_dataStack
@@ -994,7 +1034,6 @@ $(document).ready(function() {
                     const alpineComponent = alpineElement._x_dataStack[0];
                     alpineComponent.checkOutDate = dateText;
                     alpineComponent.calculateDaysNights();
-                    console.log('Alpine checkout updated via _x_dataStack method');
                     return;
                 }
                 
@@ -1003,7 +1042,6 @@ $(document).ready(function() {
                     detail: { date: dateText } 
                 });
                 document.dispatchEvent(event);
-                console.log('Dispatched checkout custom event as fallback');
             }, 10);
         }
     }));
@@ -1017,9 +1055,8 @@ $(document).ready(function() {
             $('input[name="check_out_date"]').datepicker('option', 'minDate', nextDay);
         }
     });
-    
-    console.log('Datepickers initialized successfully');
     }
+    
     
     // Start the initialization process
     initializeDatepickers();

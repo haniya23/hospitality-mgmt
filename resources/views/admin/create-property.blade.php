@@ -99,7 +99,7 @@
         document.getElementById('owner_id').addEventListener('change', function() {
             const selectedOption = this.options[this.selectedIndex];
             if (selectedOption.value) {
-                console.log('Selected user:', selectedOption.text);
+                // Selected user
             }
         });
     </script>

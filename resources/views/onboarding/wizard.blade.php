@@ -174,7 +174,7 @@ function onboardingWizard() {
         },
 
         init() {
-            console.log('Onboarding wizard initialized');
+            // Onboarding wizard initialized
             
             // Initialize Select2 after Alpine.js is ready
             this.$nextTick(() => {
@@ -213,8 +213,7 @@ function onboardingWizard() {
         },
 
         async createProperty() {
-            console.log('Creating property with data:', this.propertyData);
-            console.log('CSRF Token:', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+            // Creating property with data
             
             try {
                 const response = await fetch('/api/properties', {
@@ -231,20 +230,19 @@ function onboardingWizard() {
                     })
                 });
 
-                console.log('Response status:', response.status);
-                console.log('Response headers:', response.headers);
+                // Check response status
 
                 if (response.ok) {
                     const responseText = await response.text();
-                    console.log('Response text:', responseText);
+                    // Check response text
                     
                     try {
                         const property = JSON.parse(responseText);
-                        console.log('Parsed property:', property);
+                        // Property created successfully
                         this.createdProperty = property;
                         this.currentStep = 2;
                     } catch (parseError) {
-                        console.error('JSON parse error:', parseError);
+                        // JSON parse error
                         alert('Error parsing response: ' + parseError.message);
                     }
                 } else {
@@ -256,11 +254,11 @@ function onboardingWizard() {
                         const text = await response.text();
                         errorMessage = `HTTP ${response.status}: ${text.substring(0, 200)}`;
                     }
-                    console.error('Property creation failed:', response.status, errorMessage);
+                    // Property creation failed
                     alert('Error creating property: ' + errorMessage);
                 }
             } catch (error) {
-                console.error('Error:', error);
+                // Error occurred
                 alert('Error creating property. Please try again.');
             }
         },
