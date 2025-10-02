@@ -194,10 +194,8 @@ function b2bCreateData() {
         },
         
         init() {
-            // Initialize any needed functionality
-            console.log('B2B Create page initialized');
             this.initializeSelect2();
-            this.setupFormDebugging();
+            this.setupFormSubmission();
         },
 
         initializeSelect2() {
@@ -207,96 +205,26 @@ function b2bCreateData() {
                 allowClear: false,
                 width: '100%'
             });
-
-            // Handle Select2 change event and sync with form validation
-            $('#partner_type').on('change', function() {
-                console.log('🔍 DEBUG: Select2 partner_type changed to:', $(this).val());
-                
-                // Trigger validation check
-                const form = document.getElementById('b2bCreateForm');
-                if (form) {
-                    const isFormValid = form.checkValidity();
-                    console.log('🔍 DEBUG: Form valid after Select2 change:', isFormValid);
-                }
-            });
-
-            console.log('✅ DEBUG: Select2 initialized for partner_type');
         },
 
-        setupFormDebugging() {
+        setupFormSubmission() {
             const form = document.getElementById('b2bCreateForm');
             const submitBtn = document.getElementById('submitBtn');
             const submitBtnText = document.getElementById('submitBtnText');
             const submitBtnLoader = document.getElementById('submitBtnLoader');
-            const debugStatus = document.getElementById('debugStatus');
-            const formValidationStatus = document.getElementById('formValidationStatus');
-            const submitButtonStatus = document.getElementById('submitButtonStatus');
 
-            console.log('🔍 DEBUG: Form elements found:', {
-                form: !!form,
-                submitBtn: !!submitBtn,
-                submitBtnText: !!submitBtnText,
-                submitBtnLoader: !!submitBtnLoader
-            });
-
-            // Update debug status
-            if (debugStatus) {
-                debugStatus.innerHTML = `✅ Debug mode active - Form: ${!!form ? '✅' : '❌'}, Submit Button: ${!!submitBtn ? '✅' : '❌'}`;
-            }
-
-            if (!form) {
-                console.error('❌ DEBUG: Form not found!');
-                if (debugStatus) debugStatus.innerHTML = '❌ Form element not found!';
-                return;
-            }
-
-            if (!submitBtn) {
-                console.error('❌ DEBUG: Submit button not found!');
-                if (debugStatus) debugStatus.innerHTML = '❌ Submit button not found!';
-                return;
-            }
-
-            // Update submit button status
-            if (submitButtonStatus) {
-                submitButtonStatus.innerHTML = `Submit button status: ${submitBtn.disabled ? 'Disabled' : 'Enabled'}`;
-            }
+            if (!form || !submitBtn) return;
 
             // Add click event listener to submit button
             submitBtn.addEventListener('click', (e) => {
-                console.log('🖱️ DEBUG: Submit button clicked!');
-                console.log('🔍 DEBUG: Event details:', {
-                    type: e.type,
-                    target: e.target,
-                    defaultPrevented: e.defaultPrevented
-                });
-
-                if (submitButtonStatus) {
-                    submitButtonStatus.innerHTML = '🖱️ Submit button clicked!';
-                }
-
                 // Prevent default to handle validation first
                 e.preventDefault();
 
                 // Check if form is valid
                 const isValid = form.checkValidity();
-                console.log('✅ DEBUG: Form validity:', isValid);
-
-                if (formValidationStatus) {
-                    formValidationStatus.innerHTML = `Form validation: ${isValid ? '✅ Valid' : '❌ Invalid'}`;
-                }
 
                 if (!isValid) {
-                    console.log('❌ DEBUG: Form is invalid, showing validation errors');
                     form.reportValidity();
-                    
-                    // Show which fields are invalid
-                    const invalidFields = form.querySelectorAll(':invalid');
-                    console.log('❌ DEBUG: Invalid fields:', Array.from(invalidFields).map(f => f.name));
-                    
-                    if (formValidationStatus) {
-                        const fieldNames = Array.from(invalidFields).map(f => f.name).join(', ');
-                        formValidationStatus.innerHTML = `❌ Invalid fields: ${fieldNames}`;
-                    }
                     return;
                 }
 
@@ -305,161 +233,33 @@ function b2bCreateData() {
                 submitBtnLoader.classList.remove('hidden');
                 submitBtn.disabled = true;
 
-                console.log('⏳ DEBUG: Loading state activated');
-                console.log('📤 DEBUG: About to submit form programmatically');
-                
-                if (submitButtonStatus) {
-                    submitButtonStatus.innerHTML = '⏳ Loading state activated - Submitting form...';
-                }
-
                 // Submit the form programmatically
                 setTimeout(() => {
-                    console.log('📤 DEBUG: Submitting form now...');
                     try {
                         form.submit();
                         
-                        // Set a timeout to detect if submission hangs
+                        // Set a timeout to reset button if submission hangs
                         setTimeout(() => {
-                            console.log('⚠️ DEBUG: Form submission timeout - checking if still on same page');
-                            if (window.location.href === 'http://hospitality-mgmt.test/b2b/create') {
-                                console.error('❌ DEBUG: Form submission appears to have failed - still on create page');
-                                
-                                // Reset button state
+                            if (window.location.href.includes('/b2b/create')) {
+                                // Reset button state if still on create page
                                 submitBtnText.classList.remove('hidden');
                                 submitBtnLoader.classList.add('hidden');
                                 submitBtn.disabled = false;
-                                
-                                if (submitButtonStatus) {
-                                    submitButtonStatus.innerHTML = '❌ Form submission timed out!';
-                                }
                             }
-                        }, 5000); // 5 second timeout
+                        }, 5000);
                         
                     } catch (error) {
-                        console.error('❌ DEBUG: Form submission error:', error);
-                        
                         // Reset button state on error
                         submitBtnText.classList.remove('hidden');
                         submitBtnLoader.classList.add('hidden');
                         submitBtn.disabled = false;
                         
-                        if (submitButtonStatus) {
-                            submitButtonStatus.innerHTML = '❌ Form submission failed!';
-                        }
-                        
                         alert('Form submission failed. Please try again.');
                     }
-                }, 100); // Small delay to ensure UI updates
+                }, 100);
             });
-
-            // Add form submit event listener
-            form.addEventListener('submit', (e) => {
-                console.log('📤 DEBUG: Form submit event triggered!');
-                console.log('🔍 DEBUG: Form data:', new FormData(form));
-                
-                if (submitButtonStatus) {
-                    submitButtonStatus.innerHTML = '📤 Form submit event triggered!';
-                }
-                
-                // Log all form fields
-                const formData = new FormData(form);
-                console.log('📋 DEBUG: Form fields:');
-                for (let [key, value] of formData.entries()) {
-                    console.log(`  ${key}: ${value}`);
-                }
-
-                // Check for required fields
-                const requiredFields = form.querySelectorAll('[required]');
-                console.log('🔍 DEBUG: Required fields check:');
-                requiredFields.forEach(field => {
-                    console.log(`  ${field.name}: ${field.value ? '✅ filled' : '❌ empty'}`);
-                });
-            });
-
-            // Add error handling for failed submissions
-            form.addEventListener('error', (e) => {
-                console.error('❌ DEBUG: Form error:', e);
-                
-                if (submitButtonStatus) {
-                    submitButtonStatus.innerHTML = '❌ Form submission error occurred!';
-                }
-                
-                // Reset button state
-                submitBtnText.classList.remove('hidden');
-                submitBtnLoader.classList.add('hidden');
-                submitBtn.disabled = false;
-            });
-
-            // Add real-time validation checker
-            const requiredFields = form.querySelectorAll('[required]');
-            requiredFields.forEach(field => {
-                field.addEventListener('input', () => {
-                    const isFormValid = form.checkValidity();
-                    if (formValidationStatus) {
-                        formValidationStatus.innerHTML = `Real-time validation: ${isFormValid ? '✅ Valid' : '❌ Invalid'}`;
-                    }
-                });
-
-                // Special handling for select fields
-                if (field.tagName === 'SELECT') {
-                    field.addEventListener('change', () => {
-                        console.log(`🔍 DEBUG: Select field ${field.name} changed to: "${field.value}"`);
-                        const isFormValid = form.checkValidity();
-                        if (formValidationStatus) {
-                            formValidationStatus.innerHTML = `Select changed - Form valid: ${isFormValid ? '✅ Valid' : '❌ Invalid'}`;
-                        }
-                    });
-                }
-            });
-
-            // Specific debugging for partner_type field
-            const partnerTypeField = document.getElementById('partner_type');
-            if (partnerTypeField) {
-                console.log('🔍 DEBUG: Partner type field found:', {
-                    value: partnerTypeField.value,
-                    required: partnerTypeField.required,
-                    validity: partnerTypeField.validity,
-                    validationMessage: partnerTypeField.validationMessage
-                });
-
-                // Log when partner type changes
-                partnerTypeField.addEventListener('change', () => {
-                    console.log('🔍 DEBUG: Partner type changed:', {
-                        newValue: partnerTypeField.value,
-                        isValid: partnerTypeField.checkValidity(),
-                        validationMessage: partnerTypeField.validationMessage
-                    });
-                });
-            } else {
-                console.error('❌ DEBUG: Partner type field not found!');
-            }
-
-            console.log('✅ DEBUG: Form debugging setup complete');
         }
     }
 }
-
-// Additional debugging - check if page loads correctly
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 DEBUG: DOM Content Loaded');
-    console.log('🔍 DEBUG: Current URL:', window.location.href);
-    console.log('🔍 DEBUG: Form action URL:', document.getElementById('b2bCreateForm')?.action);
-    
-    // Check for any JavaScript errors
-    window.addEventListener('error', function(e) {
-        console.error('💥 DEBUG: JavaScript Error:', {
-            message: e.message,
-            filename: e.filename,
-            lineno: e.lineno,
-            colno: e.colno,
-            error: e.error
-        });
-    });
-
-    // Check for network errors
-    window.addEventListener('unhandledrejection', function(e) {
-        console.error('🌐 DEBUG: Unhandled Promise Rejection:', e.reason);
-    });
-});
 </script>
 @endpush
