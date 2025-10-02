@@ -67,17 +67,39 @@ function trialBanner(initialDays) {
             this.progressPercentage = (this.daysLeft / 14) * 100; // Assuming a 14-day trial
             setTimeout(() => { this.visible = true; }, 50);
 
-            // Animate the number change
-            let current = { value: initialDays };
-            gsap.to(current, {
-                duration: 1.0,
-                value: this.daysLeft,
-                round: true,
-                onUpdate: () => {
-                    this.$refs.daysCount.textContent = current.value;
-                },
-                ease: "power2.out"
-            });
+            // Animate the number change with GSAP if available, fallback to simple animation
+            if (typeof gsap !== 'undefined') {
+                let current = { value: initialDays };
+                gsap.to(current, {
+                    duration: 1.0,
+                    value: this.daysLeft,
+                    round: true,
+                    onUpdate: () => {
+                        this.$refs.daysCount.textContent = current.value;
+                    },
+                    ease: "power2.out"
+                });
+            } else {
+                // Fallback: Simple counter animation without GSAP
+                let current = initialDays;
+                const target = this.daysLeft;
+                const increment = target > current ? 1 : -1;
+                const duration = 1000; // 1 second
+                const steps = Math.abs(target - current);
+                const stepDuration = steps > 0 ? duration / steps : 0;
+                
+                const animate = () => {
+                    if (current !== target) {
+                        current += increment;
+                        this.$refs.daysCount.textContent = current;
+                        setTimeout(animate, stepDuration);
+                    }
+                };
+                
+                if (steps > 0) {
+                    animate();
+                }
+            }
         }
     }
 }
