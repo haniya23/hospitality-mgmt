@@ -40,7 +40,6 @@
                     </div>
                     <span class="font-semibold">Partner Registration Form</span>
                 </div>
-                <span class="text-sm bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm">Step 1 of 1</span>
             </div>
         </div>
 
@@ -277,41 +276,7 @@
                 </div>
             </div>
 
-            <!-- Info Box -->
-            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-5 mb-8">
-                <div class="flex gap-4">
-                    <div class="flex-shrink-0">
-                        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-sm">
-                            <svg class="w-5 h-5 text-white" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="flex-1">
-                        <h3 class="text-sm font-bold text-blue-900 mb-2">Automatic Features</h3>
-                        <div class="space-y-2">
-                            <div class="flex items-start gap-2 text-sm text-blue-800">
-                                <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                <span>A reserved customer will be automatically created for this partner</span>
-                            </div>
-                            <div class="flex items-start gap-2 text-sm text-blue-800">
-                                <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                <span>The partner will receive a default PIN (0000) for login</span>
-                            </div>
-                            <div class="flex items-start gap-2 text-sm text-blue-800">
-                                <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                <span>Partner status will be set to "Pending" until activated</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+          
 
             <!-- Action Buttons -->
             <div class="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 pt-6 border-t-2 border-gray-200 pb-8 lg:pb-0">

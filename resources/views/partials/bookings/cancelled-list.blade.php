@@ -1,14 +1,26 @@
 @push('styles')
 <style>
-    .cancelled-booking-card { background: white; transition: all 0.3s ease; }
-    .cancelled-booking-card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-    .status-cancelled { background: #fee2e2; color: #dc2626; }
+    .cancelled-booking-card { 
+        background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%); 
+        transition: all 0.3s ease; 
+        border: 1px solid #e5e7eb;
+    }
+    .cancelled-booking-card:hover { 
+        transform: translateY(-2px); 
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); 
+        border-color: #d1d5db;
+    }
+    .status-cancelled { 
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); 
+        color: #dc2626; 
+        border: 1px solid #fca5a5;
+    }
 </style>
 @endpush
 
-<div class="space-y-4">
+<div class="space-y-6">
     <template x-for="booking in filteredBookings" :key="booking.id">
-        <div class="cancelled-booking-card rounded-2xl p-4 shadow-sm">
+        <div class="cancelled-booking-card rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300">
             <!-- Booking Header -->
             <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center space-x-3">
@@ -84,46 +96,53 @@
             </div>
 
             <!-- Action Buttons -->
-            <div class="flex space-x-2">
+            <div class="flex flex-col sm:flex-row gap-3">
                 <button @click="reactivateBooking(booking.reservation.uuid, 'pending')" 
-                        class="flex-1 bg-yellow-500 text-white py-2 px-4 rounded-xl font-medium text-sm hover:bg-yellow-600 transition">
-                    <i class="fas fa-clock mr-1"></i>
-                    Reactivate as Pending
+                        class="flex-1 bg-gradient-to-r from-yellow-500 to-amber-500 text-white py-3 px-6 rounded-xl font-semibold text-sm hover:from-yellow-600 hover:to-amber-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center space-x-2">
+                    <i class="fas fa-clock"></i>
+                    <span>Reactivate as Pending</span>
                 </button>
                 <button @click="reactivateBooking(booking.reservation.uuid, 'confirmed')" 
-                        class="flex-1 bg-green-500 text-white py-2 px-4 rounded-xl font-medium text-sm hover:bg-green-600 transition">
-                    <i class="fas fa-check mr-1"></i>
-                    Reactivate as Confirmed
+                        class="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white py-3 px-6 rounded-xl font-semibold text-sm hover:from-green-600 hover:to-emerald-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center space-x-2">
+                    <i class="fas fa-check"></i>
+                    <span>Reactivate as Confirmed</span>
                 </button>
             </div>
         </div>
     </template>
     
     <template x-if="filteredBookings.length === 0">
-        <div class="text-center py-12">
-            <div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-r from-red-400 to-pink-400 rounded-2xl flex items-center justify-center text-white text-3xl">
-                <i class="fas fa-times"></i>
+        <div class="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border border-gray-200 p-12 text-center">
+            <div class="w-24 h-24 mx-auto mb-6 bg-gradient-to-r from-red-400 to-pink-500 rounded-3xl flex items-center justify-center text-white text-4xl shadow-lg">
+                <i class="fas fa-times-circle"></i>
             </div>
-            <h3 class="text-lg font-medium text-gray-900 mb-2">No cancelled bookings found</h3>
-            <p class="text-gray-500">There are no cancelled bookings matching your criteria.</p>
+            <h3 class="text-2xl font-bold text-gray-900 mb-3">No Cancelled Bookings Found</h3>
+            <p class="text-gray-600 mb-6 max-w-md mx-auto">There are no cancelled bookings matching your current search criteria. Try adjusting your filters or search terms.</p>
+            <button @click="search = ''; selectedProperty = ''; filterBookings();" 
+                    class="bg-gradient-to-r from-red-600 to-pink-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-red-700 hover:to-pink-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
+                <i class="fas fa-refresh mr-2"></i>
+                Clear Filters
+            </button>
         </div>
     </template>
 </div>
 
 <!-- Pagination -->
-<div x-show="lastPage > 1" class="mt-8 flex items-center justify-between">
-    <div class="text-sm text-gray-700">
-        Showing <span x-text="from"></span> to <span x-text="to"></span> of <span x-text="total"></span> results
-    </div>
-    
-    <div class="flex items-center space-x-2">
-        <template x-for="link in paginationLinks" :key="link.page">
-            <button @click="goToPage(link.page)" 
-                    :disabled="link.disabled"
-                    :class="link.active ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
-                    class="px-3 py-2 text-sm font-medium rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed">
-                <span x-text="link.label"></span>
-            </button>
-        </template>
+<div x-show="lastPage > 1" class="mt-8 bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-md border border-gray-200 p-6">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="text-sm font-medium text-gray-700">
+            Showing <span class="font-bold text-red-600" x-text="from"></span> to <span class="font-bold text-red-600" x-text="to"></span> of <span class="font-bold text-red-600" x-text="total"></span> results
+        </div>
+        
+        <div class="flex items-center space-x-2">
+            <template x-for="link in paginationLinks" :key="link.page">
+                <button @click="goToPage(link.page)" 
+                        :disabled="link.disabled"
+                        :class="link.active ? 'bg-gradient-to-r from-red-600 to-pink-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'"
+                        class="px-4 py-2 text-sm font-semibold rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-md">
+                    <span x-text="link.label"></span>
+                </button>
+            </template>
+        </div>
     </div>
 </div>

@@ -9,7 +9,7 @@
 @endsection
 
 @section('content')
-<div x-data="cancelledBookingData()" x-init="init()" class="space-y-6">
+<div x-data="cancelledBookingData()" x-init="init()" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
     @include('partials.bookings.cancelled-filters')
     @include('partials.bookings.cancelled-list')
 </div>
@@ -233,6 +233,42 @@ function cancelledBookingData() {
                     messageDiv.parentNode.removeChild(messageDiv);
                 }
             }, 5000);
+        },
+
+        exportCancelledBookings() {
+            // Create CSV content
+            const headers = ['Guest Name', 'Property', 'Accommodation', 'Check-in', 'Check-out', 'Cancelled Date', 'Reason', 'Total Amount'];
+            const csvContent = [
+                headers.join(','),
+                ...this.filteredBookings.map(booking => [
+                    `"${booking.reservation.guest.name}"`,
+                    `"${booking.reservation.accommodation.property.name}"`,
+                    `"${booking.reservation.accommodation.custom_name}"`,
+                    booking.reservation.check_in_date,
+                    booking.reservation.check_out_date,
+                    booking.cancelled_at,
+                    `"${booking.reason || 'N/A'}"`,
+                    booking.reservation.total_amount
+                ].join(','))
+            ].join('\n');
+
+            // Create and download file
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `cancelled-bookings-${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            this.showMessage('Cancelled bookings exported successfully!', 'success');
+            
+            // Redirect to same page after download
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
         }
     }
 }
