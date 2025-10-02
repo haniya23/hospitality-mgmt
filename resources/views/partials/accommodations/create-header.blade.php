@@ -16,9 +16,9 @@
                 </div>
                 <div>
                     <h1 class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                        Accommodations
+                        Create Accommodation
                     </h1>
-                    <p class="text-gray-600 text-sm sm:text-base">Manage your rooms and accommodations</p>
+                    <p class="text-gray-600 text-sm sm:text-base">Add a new room or accommodation to your property</p>
                 </div>
             </div>
             
@@ -64,13 +64,13 @@
                     <i class="fas fa-arrow-up mr-2"></i>
                     Upgrade Plan
                 </a>
-            @else
-                <a href="{{ route('accommodations.create') }}" 
-                   class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 font-semibold">
-                    <i class="fas fa-plus mr-2"></i>
-                    Add Accommodation
-                </a>
             @endif
+            
+            <a href="{{ route('accommodations.index') }}" 
+               class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 rounded-xl hover:from-gray-200 hover:to-gray-300 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 font-semibold border border-gray-300">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Back to Accommodations
+            </a>
         </div>
     </div>
 
@@ -92,89 +92,4 @@
             </div>
         </div>
     @endif
-    
-    <div x-data="accommodationStats()" x-init="init()" class="mt-6">
-        <x-stat-cards :cards="[
-            [
-                'value' => 'stats.total', 
-                'label' => 'Total Accommodations',
-                'icon' => 'fas fa-bed',
-                'bgGradient' => 'from-blue-50 to-indigo-50',
-                'accentColor' => 'bg-blue-500',
-                'clickable' => true,
-                'action' => 'navigateToAllAccommodations()'
-            ],
-            [
-                'value' => 'stats.active', 
-                'label' => 'Active Properties',
-                'icon' => 'fas fa-check-circle',
-                'bgGradient' => 'from-green-50 to-emerald-50',
-                'accentColor' => 'bg-green-500',
-                'clickable' => true,
-                'action' => 'navigateToActiveAccommodations()'
-            ],
-            [
-                'value' => 'stats.totalPrice', 
-                'label' => 'Total Value',
-                'icon' => 'fas fa-rupee-sign',
-                'bgGradient' => 'from-purple-50 to-violet-50',
-                'accentColor' => 'bg-purple-500',
-                'clickable' => true,
-                'action' => 'navigateToProperties()',
-                'prefix' => '₹',
-                'suffix' => ''
-            ],
-            [
-                'value' => 'stats.avgPrice', 
-                'label' => 'Average Price',
-                'icon' => 'fas fa-chart-line',
-                'bgGradient' => 'from-orange-50 to-amber-50',
-                'accentColor' => 'bg-orange-500',
-                'clickable' => true,
-                'action' => 'navigateToBookings()',
-                'prefix' => '₹',
-                'suffix' => ''
-            ]
-        ]" />
-    </div>
 </div>
-
-@push('scripts')
-<script>
-function accommodationStats() {
-    return {
-        accommodations: @json($accommodations->items() ?? []),
-        
-        get stats() {
-            return {
-                total: this.accommodations.length,
-                active: this.accommodations.filter(a => a.property.status === 'active').length,
-                totalPrice: this.accommodations.reduce((sum, a) => sum + parseFloat(a.base_price), 0),
-                avgPrice: this.accommodations.length > 0 ? this.accommodations.reduce((sum, a) => sum + parseFloat(a.base_price), 0) / this.accommodations.length : 0
-            };
-        },
-
-        init() {
-            // Accommodation stats initialized
-        },
-
-        // Navigation functions for clickable stats
-        navigateToAllAccommodations() {
-            window.location.href = '/accommodations';
-        },
-
-        navigateToActiveAccommodations() {
-            window.location.href = '/accommodations?status=active';
-        },
-
-        navigateToProperties() {
-            window.location.href = '/properties';
-        },
-
-        navigateToBookings() {
-            window.location.href = '/bookings';
-        }
-    }
-}
-</script>
-@endpush
