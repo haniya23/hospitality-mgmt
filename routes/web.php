@@ -230,7 +230,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/cashfree/create-order', [App\Http\Controllers\CashfreeController::class, 'createOrder'])->name('cashfree.create-order');
     
     
-    // Admin panel is now handled by Filament at /admin
     
     // Test payment success endpoint
     Route::get('/test-payment-success', function () {
