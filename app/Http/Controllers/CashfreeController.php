@@ -388,6 +388,7 @@ class CashfreeController extends Controller
                     'subscription_ends_at' => $subscription->current_period_end,
                     'is_trial_active' => false,
                     'properties_limit' => $subscription->plan_slug === 'starter' ? 1 : 5,
+                    'billing_cycle' => $subscription->billing_interval === 'year' ? 'yearly' : 'monthly',
                 ]);
 
                 Log::info('User subscription updated from subscription record', [
@@ -453,6 +454,7 @@ class CashfreeController extends Controller
             'subscription_ends_at' => $billingInterval === 'year' ? now()->addYear() : now()->addMonth(),
             'is_trial_active' => false,
             'properties_limit' => $plan === 'starter' ? 1 : 5,
+            'billing_cycle' => $billingInterval === 'year' ? 'yearly' : 'monthly',
         ];
 
         // Store additional accommodations if any

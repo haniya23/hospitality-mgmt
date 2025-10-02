@@ -92,6 +92,7 @@ class AdminController extends Controller
             'properties_limit' => $request->requested_plan === 'professional' ? 5 : 1,
             'subscription_ends_at' => now()->addMonths($duration),
             'is_trial_active' => false,
+            'billing_cycle' => $request->billing_cycle,
         ]);
         
         $request->update([

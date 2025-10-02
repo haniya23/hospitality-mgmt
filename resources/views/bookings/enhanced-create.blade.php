@@ -116,13 +116,15 @@
                 <div class="grid md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Check-in Date</label>
-                        <input type="date" x-model="bookingData.check_in_date" required
-                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                        <input type="text" x-model="bookingData.check_in_date" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 datepicker-input"
+                               placeholder="Select check-in date" readonly>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Check-out Date</label>
-                        <input type="date" x-model="bookingData.check_out_date" required
-                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                        <input type="text" x-model="bookingData.check_out_date" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 datepicker-input"
+                               placeholder="Select check-out date" readonly>
                     </div>
                 </div>
                 
@@ -155,12 +157,12 @@
                 <div class="grid md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Check-in Date</label>
-                        <input type="date" x-model="bookingData.check_in_date" @change="findAvailableRooms()" required
+                        <input type="text" x-model="bookingData.check_in_date" @change="findAvailableRooms()" required
                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Check-out Date</label>
-                        <input type="date" x-model="bookingData.check_out_date" @change="findAvailableRooms()" required
+                        <input type="text" x-model="bookingData.check_out_date" @change="findAvailableRooms()" required
                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
                     </div>
                 </div>
@@ -284,13 +286,15 @@
                 <div class="grid md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Check-in Date</label>
-                        <input type="date" x-model="bookingData.check_in_date" required
-                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                        <input type="text" x-model="bookingData.check_in_date" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 datepicker-input"
+                               placeholder="Select check-in date" readonly>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Check-out Date</label>
-                        <input type="date" x-model="bookingData.check_out_date" required
-                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                        <input type="text" x-model="bookingData.check_out_date" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 datepicker-input"
+                               placeholder="Select check-out date" readonly>
                     </div>
                 </div>
                 

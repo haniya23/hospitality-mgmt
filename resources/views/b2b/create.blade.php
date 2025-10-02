@@ -41,7 +41,7 @@
                             Partner Type <span class="text-red-500">*</span>
                         </label>
                         <select id="partner_type" name="partner_type" 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('partner_type') border-red-500 @enderror" required>
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent select2-dropdown @error('partner_type') border-red-500 @enderror" required>
                             <option value="">Select Type</option>
                             <option value="Travel Agent" {{ old('partner_type') == 'Travel Agent' ? 'selected' : '' }}>Travel Agent</option>
                             <option value="OTA" {{ old('partner_type') == 'OTA' ? 'selected' : '' }}>OTA (Online Travel Agency)</option>

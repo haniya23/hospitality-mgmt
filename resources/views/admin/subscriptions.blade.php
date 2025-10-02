@@ -43,7 +43,7 @@
                                 <form method="POST" action="{{ route('admin.subscriptions.approve', $request) }}" class="flex space-x-3">
                                     @csrf
                                     @method('PATCH')
-                                    <select name="months" class="flex-1 rounded-lg border-gray-300 text-sm">
+                                    <select name="months" class="flex-1 rounded-lg border-gray-300 text-sm select2-dropdown">
                                         <option value="1">1 Month</option>
                                         <option value="3">3 Months</option>
                                         <option value="6">6 Months</option>
@@ -94,7 +94,7 @@
                                 <form method="POST" action="{{ route('admin.users.subscription.update', $user) }}" class="grid grid-cols-3 gap-2">
                                     @csrf
                                     @method('PATCH')
-                                    <select name="subscription_status" class="rounded-lg border-gray-300 text-sm">
+                                    <select name="subscription_status" class="rounded-lg border-gray-300 text-sm select2-dropdown">
                                         <option value="trial" {{ $user->subscription_status === 'trial' ? 'selected' : '' }}>Trial</option>
                                         <option value="starter" {{ $user->subscription_status === 'starter' ? 'selected' : '' }}>Starter</option>
                                         <option value="professional" {{ $user->subscription_status === 'professional' ? 'selected' : '' }}>Professional</option>

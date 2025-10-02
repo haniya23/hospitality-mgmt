@@ -6,12 +6,88 @@
     <div class="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:bg-white lg:shadow-md lg:shadow-green-200/50 lg:flex lg:flex-col lg:overflow-y-auto transition-all duration-300" 
          :class="sidebarCollapsed ? 'lg:w-16 lg:p-2' : 'lg:w-72 lg:p-5'">
         
-        <!-- When collapsed, show only the expand button -->
+        <!-- When collapsed, show only the expand button and plan indicator -->
         <template x-if="sidebarCollapsed">
-            <div class="flex items-center justify-center h-16">
+            <div class="flex flex-col items-center justify-center h-full py-4 space-y-4">
                 <button @click="sidebarCollapsed = !sidebarCollapsed" class="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-100 transition-colors" title="Expand sidebar">
                     <i class="fas fa-chevron-right text-gray-500"></i>
                 </button>
+                
+                <!-- Circular Plan Indicator -->
+                @php
+                    $user = auth()->user();
+                    $remainingDays = 0;
+                    $planName = '';
+                    $strokeColor = '#10b981'; // green-500
+                    $bgColor = '#10b981'; // green-500
+                    
+                    if ($user->subscription_status === 'trial') {
+                        $totalDays = 15; // Trial period
+                        $remainingDays = $user->remaining_trial_days;
+                        $planName = 'Trial';
+                        $strokeColor = '#3b82f6'; // blue-500
+                        $bgColor = '#3b82f6'; // blue-500
+                    } elseif (in_array($user->subscription_status, ['starter', 'professional'])) {
+                        $remainingDays = $user->remaining_subscription_days;
+                        $planName = ucfirst($user->subscription_status);
+                        // Dynamic billing cycle: 30 days for monthly, 365 days for yearly
+                        $totalDays = ($user->billing_cycle === 'yearly') ? 365 : 30;
+                        if ($user->subscription_status === 'professional') {
+                            $strokeColor = '#f59e0b'; // amber-500
+                            $bgColor = '#f59e0b'; // amber-500
+                        }
+                    } else {
+                        $totalDays = 30; // Default fallback
+                    }
+                    
+                    // Battery shows remaining percentage based on actual billing cycle
+                    $percentage = $totalDays > 0 ? min(100, max(0, ($remainingDays / $totalDays) * 100)) : 0;
+                @endphp
+                
+                <div class="relative w-12 h-12" 
+                     x-data="{ 
+                         percentage: {{ $percentage }}, 
+                         animatedPercentage: 0,
+                         init() {
+                             setTimeout(() => {
+                                 this.animatedPercentage = this.percentage;
+                             }, 100);
+                         }
+                     }" 
+                     title="{{ $planName }} - {{ $remainingDays }} days left">
+                    <!-- Background Circle -->
+                    <svg class="w-12 h-12 transform -rotate-90" viewBox="0 0 36 36">
+                        <path stroke="#e5e7eb" stroke-width="3" fill="transparent" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+                        <!-- Progress Circle -->
+                        <path stroke="{{ $strokeColor }}" 
+                              stroke-width="3" 
+                              fill="transparent" 
+                              stroke-linecap="round"
+                              class="transition-all duration-2000 ease-out"
+                              :stroke-dasharray="animatedPercentage + ' 100'"
+                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831">
+                        </path>
+                    </svg>
+                    
+                    <!-- Center Content -->
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div class="text-center">
+                            <div class="text-xs font-bold text-gray-700">{{ $remainingDays }}</div>
+                            <div class="text-xs text-gray-500 leading-none">days</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Plan Badge -->
+                    <div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center" style="background-color: {{ $bgColor }}">
+                        @if($user->subscription_status === 'trial')
+                            <i class="fas fa-gift text-white text-xs"></i>
+                        @elseif($user->subscription_status === 'professional')
+                            <i class="fas fa-crown text-white text-xs"></i>
+                        @else
+                            <i class="fas fa-star text-white text-xs"></i>
+                        @endif
+                    </div>
+                </div>
             </div>
         </template>
 
@@ -109,29 +185,131 @@
                 </div>
                 </div>
                 
-                <!-- Plan Details -->
-                <div class="mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200">
+                <!-- Plan Details with Battery Indicator -->
+                @php
+                    $user = auth()->user();
+                    $remainingDays = 0;
+                    $planName = '';
+                    $strokeColor = '#10b981'; // green-500
+                    $bgColor = '#10b981'; // green-500
+                    $bgGradient = 'from-green-50 to-emerald-50';
+                    $borderColor = 'border-green-200';
+                    $badgeColor = 'bg-green-100 text-green-600';
+                    
+                    if ($user->subscription_status === 'trial') {
+                        $totalDays = 15; // Trial period
+                        $remainingDays = $user->remaining_trial_days;
+                        $planName = 'Trial - Professional';
+                        $strokeColor = '#3b82f6'; // blue-500
+                        $bgColor = '#3b82f6'; // blue-500
+                        $bgGradient = 'from-blue-50 to-indigo-50';
+                        $borderColor = 'border-blue-200';
+                        $badgeColor = 'bg-blue-100 text-blue-600';
+                    } elseif (in_array($user->subscription_status, ['starter', 'professional'])) {
+                        $remainingDays = $user->remaining_subscription_days;
+                        $billingCycle = $user->billing_cycle ?? 'monthly';
+                        $planName = ucfirst($user->subscription_status) . ' Plan (' . ucfirst($billingCycle) . ')';
+                        // Dynamic billing cycle: 30 days for monthly, 365 days for yearly
+                        $totalDays = ($billingCycle === 'yearly') ? 365 : 30;
+                        if ($user->subscription_status === 'professional') {
+                            $strokeColor = '#f59e0b'; // amber-500
+                            $bgColor = '#f59e0b'; // amber-500
+                            $bgGradient = 'from-amber-50 to-yellow-50';
+                            $borderColor = 'border-amber-200';
+                            $badgeColor = 'bg-amber-100 text-amber-600';
+                        }
+                    } else {
+                        $totalDays = 30; // Default fallback
+                    }
+                    
+                    // Battery shows remaining percentage based on actual billing cycle
+                    $percentage = $totalDays > 0 ? min(100, max(0, ($remainingDays / $totalDays) * 100)) : 0;
+                @endphp
+                
+                <div class="mt-4 p-4 bg-gradient-to-r {{ $bgGradient }} rounded-xl border {{ $borderColor }}">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-3">
+                            <span class="text-sm font-medium text-gray-600">Current Plan</span>
+                            <!-- Battery Indicator -->
+                            <div class="relative w-8 h-8" 
+                                 x-data="{ 
+                                     percentage: {{ $percentage }}, 
+                                     animatedPercentage: 0,
+                                     init() {
+                                         setTimeout(() => {
+                                             this.animatedPercentage = this.percentage;
+                                         }, 300);
+                                     }
+                                 }" 
+                                 title="{{ $remainingDays }} days remaining">
+                                <!-- Background Circle -->
+                                <svg class="w-8 h-8 transform -rotate-90" viewBox="0 0 36 36">
+                                    <path stroke="#e5e7eb" stroke-width="4" fill="transparent" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+                                    <!-- Progress Circle -->
+                                    <path stroke="{{ $strokeColor }}" 
+                                          stroke-width="4" 
+                                          fill="transparent" 
+                                          stroke-linecap="round"
+                                          class="transition-all duration-2000 ease-out"
+                                          :stroke-dasharray="animatedPercentage + ' 100'"
+                                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831">
+                                    </path>
+                                </svg>
+                                
+                                <!-- Center Percentage -->
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <span class="text-xs font-bold text-gray-700" x-text="Math.round(animatedPercentage) + '%'"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        @if(auth()->user()->subscription_status === 'trial')
+                            <span class="text-xs {{ $badgeColor }} px-2 py-1 rounded-full">Trial</span>
+                        @else
+                            <span class="text-xs {{ $badgeColor }} px-2 py-1 rounded-full">Active</span>
+                        @endif
+                    </div>
+                    
                     <div class="flex items-center justify-between mb-2">
-                        <span class="text-sm font-medium text-gray-600">Current Plan</span>
-                        @if(auth()->user()->subscription_status === 'trial')
-                            <span class="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">Trial</span>
-                        @else
-                            <span class="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">Active</span>
-                        @endif
+                        <div class="text-lg font-bold text-gray-900">
+                            {{ $planName }}
+                        </div>
+                        
+                        <!-- Plan Icon -->
+                        <div class="w-6 h-6 rounded-full flex items-center justify-center" style="background-color: {{ $bgColor }}">
+                            @if($user->subscription_status === 'trial')
+                                <i class="fas fa-gift text-white text-xs"></i>
+                            @elseif($user->subscription_status === 'professional')
+                                <i class="fas fa-crown text-white text-xs"></i>
+                            @else
+                                <i class="fas fa-star text-white text-xs"></i>
+                            @endif
+                        </div>
                     </div>
-                    <div class="text-lg font-bold text-gray-900 mb-1">
-                        @if(auth()->user()->subscription_status === 'trial')
-                            Trial - Professional
-                        @else
-                            {{ ucfirst(auth()->user()->subscription_status) }} Plan
-                        @endif
-                    </div>
-                    <div class="text-sm text-gray-600 mb-3">
-                        @if(auth()->user()->subscription_status === 'trial')
-                            {{ auth()->user()->remaining_trial_days }} days left
-                        @else
-                            {{ auth()->user()->properties_limit }} {{ Str::plural('property', auth()->user()->properties_limit) }}
-                        @endif
+                    
+                    <div class="flex items-center justify-between text-sm text-gray-600">
+                        <div>
+                            @if(auth()->user()->subscription_status === 'trial')
+                                {{ $remainingDays }} days left
+                            @elseif(auth()->user()->subscription_ends_at)
+                                {{ $remainingDays }} days remaining
+                            @else
+                                {{ auth()->user()->properties_limit }} {{ Str::plural('property', auth()->user()->properties_limit) }}
+                            @endif
+                        </div>
+                        
+                        <!-- Progress Bar -->
+                        <div class="flex items-center gap-2">
+                            <div class="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div class="h-full transition-all duration-2000 ease-out rounded-full" 
+                                     style="background-color: {{ $strokeColor }}; width: {{ $percentage }}%"
+                                     x-data="{ width: 0 }"
+                                     x-init="setTimeout(() => { width = {{ $percentage }} }, 500)"
+                                     :style="'width: ' + width + '%'">
+                                </div>
+                            </div>
+                            <span class="text-xs font-medium text-gray-500">{{ round($percentage) }}%</span>
+                        </div>
                     </div>
                 </div>
                 
@@ -278,29 +456,131 @@
         </div>
         
         
-        <!-- Plan Details -->
-        <div class="mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200">
+        <!-- Plan Details with Battery Indicator (Mobile) -->
+        @php
+            $user = auth()->user();
+            $remainingDays = 0;
+            $planName = '';
+            $strokeColor = '#10b981'; // green-500
+            $bgColor = '#10b981'; // green-500
+            $bgGradient = 'from-green-50 to-emerald-50';
+            $borderColor = 'border-green-200';
+            $badgeColor = 'bg-green-100 text-green-600';
+            
+            if ($user->subscription_status === 'trial') {
+                $totalDays = 15; // Trial period
+                $remainingDays = $user->remaining_trial_days;
+                $planName = 'Trial - Professional';
+                $strokeColor = '#3b82f6'; // blue-500
+                $bgColor = '#3b82f6'; // blue-500
+                $bgGradient = 'from-blue-50 to-indigo-50';
+                $borderColor = 'border-blue-200';
+                $badgeColor = 'bg-blue-100 text-blue-600';
+            } elseif (in_array($user->subscription_status, ['starter', 'professional'])) {
+                $remainingDays = $user->remaining_subscription_days;
+                $billingCycle = $user->billing_cycle ?? 'monthly';
+                $planName = ucfirst($user->subscription_status) . ' Plan (' . ucfirst($billingCycle) . ')';
+                // Dynamic billing cycle: 30 days for monthly, 365 days for yearly
+                $totalDays = ($billingCycle === 'yearly') ? 365 : 30;
+                if ($user->subscription_status === 'professional') {
+                    $strokeColor = '#f59e0b'; // amber-500
+                    $bgColor = '#f59e0b'; // amber-500
+                    $bgGradient = 'from-amber-50 to-yellow-50';
+                    $borderColor = 'border-amber-200';
+                    $badgeColor = 'bg-amber-100 text-amber-600';
+                }
+            } else {
+                $totalDays = 30; // Default fallback
+            }
+            
+            // Battery shows remaining percentage based on actual billing cycle
+            $percentage = $totalDays > 0 ? min(100, max(0, ($remainingDays / $totalDays) * 100)) : 0;
+        @endphp
+        
+        <div class="mt-4 p-4 bg-gradient-to-r {{ $bgGradient }} rounded-xl border {{ $borderColor }}">
+            <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-3">
+                    <span class="text-sm font-medium text-gray-600">Current Plan</span>
+                    <!-- Battery Indicator -->
+                    <div class="relative w-8 h-8" 
+                         x-data="{ 
+                             percentage: {{ $percentage }}, 
+                             animatedPercentage: 0,
+                             init() {
+                                 setTimeout(() => {
+                                     this.animatedPercentage = this.percentage;
+                                 }, 400);
+                             }
+                         }" 
+                         title="{{ $remainingDays }} days remaining">
+                        <!-- Background Circle -->
+                        <svg class="w-8 h-8 transform -rotate-90" viewBox="0 0 36 36">
+                            <path stroke="#e5e7eb" stroke-width="4" fill="transparent" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+                            <!-- Progress Circle -->
+                            <path stroke="{{ $strokeColor }}" 
+                                  stroke-width="4" 
+                                  fill="transparent" 
+                                  stroke-linecap="round"
+                                  class="transition-all duration-2000 ease-out"
+                                  :stroke-dasharray="animatedPercentage + ' 100'"
+                                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831">
+                            </path>
+                        </svg>
+                        
+                        <!-- Center Percentage -->
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span class="text-xs font-bold text-gray-700" x-text="Math.round(animatedPercentage) + '%'"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                @if(auth()->user()->subscription_status === 'trial')
+                    <span class="text-xs {{ $badgeColor }} px-2 py-1 rounded-full">Trial</span>
+                @else
+                    <span class="text-xs {{ $badgeColor }} px-2 py-1 rounded-full">Active</span>
+                @endif
+            </div>
+            
             <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-medium text-gray-600">Current Plan</span>
-                @if(auth()->user()->subscription_status === 'trial')
-                    <span class="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">Trial</span>
-                @else
-                    <span class="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">Active</span>
-                @endif
+                <div class="text-lg font-bold text-gray-900">
+                    {{ $planName }}
+                </div>
+                
+                <!-- Plan Icon -->
+                <div class="w-6 h-6 rounded-full flex items-center justify-center" style="background-color: {{ $bgColor }}">
+                    @if($user->subscription_status === 'trial')
+                        <i class="fas fa-gift text-white text-xs"></i>
+                    @elseif($user->subscription_status === 'professional')
+                        <i class="fas fa-crown text-white text-xs"></i>
+                    @else
+                        <i class="fas fa-star text-white text-xs"></i>
+                    @endif
+                </div>
             </div>
-            <div class="text-lg font-bold text-gray-900 mb-1">
-                @if(auth()->user()->subscription_status === 'trial')
-                    Trial - Professional
-                @else
-                    {{ ucfirst(auth()->user()->subscription_status) }} Plan
-                @endif
-            </div>
-            <div class="text-sm text-gray-600 mb-3">
-                @if(auth()->user()->subscription_status === 'trial')
-                    {{ auth()->user()->remaining_trial_days }} days left
-                @else
-                    {{ auth()->user()->properties_limit }} {{ Str::plural('property', auth()->user()->properties_limit) }}
-                @endif
+            
+            <div class="flex items-center justify-between text-sm text-gray-600">
+                <div>
+                    @if(auth()->user()->subscription_status === 'trial')
+                        {{ $remainingDays }} days left
+                    @elseif(auth()->user()->subscription_ends_at)
+                        {{ $remainingDays }} days remaining
+                    @else
+                        {{ auth()->user()->properties_limit }} {{ Str::plural('property', auth()->user()->properties_limit) }}
+                    @endif
+                </div>
+                
+                <!-- Progress Bar -->
+                <div class="flex items-center gap-2">
+                    <div class="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div class="h-full transition-all duration-2000 ease-out rounded-full" 
+                             style="background-color: {{ $strokeColor }}; width: {{ $percentage }}%"
+                             x-data="{ width: 0 }"
+                             x-init="setTimeout(() => { width = {{ $percentage }} }, 600)"
+                             :style="'width: ' + width + '%'">
+                        </div>
+                    </div>
+                    <span class="text-xs font-medium text-gray-500">{{ round($percentage) }}%</span>
+                </div>
             </div>
         </div>
         

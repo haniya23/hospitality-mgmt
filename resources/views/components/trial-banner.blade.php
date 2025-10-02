@@ -1,4 +1,4 @@
-@if(auth()->user()->subscription_status === 'trial' && auth()->user()->is_trial_active && request()->routeIs('login'))
+@if(auth()->user()->subscription_status === 'trial' && auth()->user()->is_trial_active)
 <div class="mb-6 mt-4 sm:mt-6 mx-4 sm:mx-6 lg:mx-8" x-data="trialBanner()" x-init="init()">
     <a href="{{ route('subscription.plans') }}" class="block w-full rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6 shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:scale-[1.02]">
         <div class="flex items-center justify-between gap-3 sm:gap-4">
@@ -49,7 +49,7 @@ function trialBanner() {
 }
 </script>
 
-@elseif(auth()->user()->isTrialExpired() && request()->routeIs('login'))
+@elseif(auth()->user()->isTrialExpired())
 <div class="mb-6 mt-4 sm:mt-6 mx-4 sm:mx-6 lg:mx-8">
     <div class="bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6 rounded-xl shadow-lg border-l-4 border-red-300">
         <div class="flex items-center justify-between gap-3 sm:gap-4">
@@ -74,7 +74,7 @@ function trialBanner() {
     </div>
 </div>
 
-@elseif(auth()->user()->subscription_status === 'active' && request()->routeIs('login'))
+@elseif(in_array(auth()->user()->subscription_status, ['starter', 'professional']))
 <div class="mb-6 mt-4 sm:mt-6 mx-4 sm:mx-6 lg:mx-8">
     <div class="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6 rounded-xl shadow-lg border-l-4 border-green-300">
         <div class="flex items-center justify-between gap-3 sm:gap-4">
@@ -87,7 +87,11 @@ function trialBanner() {
                         {{ auth()->user()->plan_name }} Plan
                     </span>
                     <span class="text-xs sm:text-sm text-green-100 font-medium block mt-0.5">
-                        Active subscription • Full access
+                        @if(auth()->user()->subscription_ends_at)
+                            {{ auth()->user()->remaining_subscription_days }} days remaining • Full access
+                        @else
+                            Active subscription • Full access
+                        @endif
                     </span>
                 </div>
             </div>

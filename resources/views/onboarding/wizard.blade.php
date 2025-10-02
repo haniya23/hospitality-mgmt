@@ -3,6 +3,64 @@
 @section('title', 'Setup Your Stay loops Account')
 
 @section('content')
+<style>
+    /* Custom Select2 styling for onboarding wizard */
+    .select2-container--default .select2-selection--single {
+        height: 50px !important;
+        border: 1px solid #d1d5db !important;
+        border-radius: 0.75rem !important;
+        padding: 0 16px !important;
+        background: white !important;
+    }
+    
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 48px !important;
+        padding-left: 0 !important;
+        color: #374151 !important;
+        font-size: 16px !important;
+    }
+    
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 48px !important;
+        right: 12px !important;
+    }
+    
+    .select2-container--default.select2-container--focus .select2-selection--single {
+        border-color: #10b981 !important;
+        box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1) !important;
+        outline: none !important;
+    }
+    
+    .select2-dropdown {
+        border: 1px solid #d1d5db !important;
+        border-radius: 0.75rem !important;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+        margin-top: 4px !important;
+    }
+    
+    .select2-container--default .select2-results__option--highlighted[aria-selected] {
+        background-color: #10b981 !important;
+        color: white !important;
+    }
+    
+    .select2-container--default .select2-results__option[aria-selected=true] {
+        background-color: #ecfdf5 !important;
+        color: #065f46 !important;
+    }
+    
+    .select2-container--default .select2-results__option {
+        padding: 12px 16px !important;
+        font-size: 16px !important;
+    }
+    
+    .select2-container--default .select2-search--dropdown .select2-search__field {
+        border: 1px solid #d1d5db !important;
+        border-radius: 0.5rem !important;
+        padding: 8px 12px !important;
+        font-size: 16px !important;
+    }
+</style>
+
 <div x-data="onboardingWizard()" x-init="init()" class="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 py-8">
     <div class="max-w-4xl mx-auto px-4">
         <!-- Progress Header -->
@@ -47,8 +105,8 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Property Type *</label>
-                    <select x-model="propertyData.category_id" required
-                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                    <select id="property_category_select" x-model="propertyData.category_id" required
+                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 select2-dropdown">
                         <option value="">Select property type</option>
                         @foreach($propertyCategories as $category)
                             <option value="{{ $category->id }}">{{ $category->name }}</option>
@@ -93,7 +151,7 @@
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
                 <button @click="addAccommodation()" 
                         class="px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl">
-                    <i class="fas fa-plus mr-2"></i>Add Accommodation
+                    <i class="fas fa-plus mr-2"></i>Update Property
                 </button>
                 <button @click="completeSetup()" 
                         class="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all duration-200 shadow-lg hover:shadow-xl">
@@ -117,6 +175,41 @@ function onboardingWizard() {
 
         init() {
             console.log('Onboarding wizard initialized');
+            
+            // Initialize Select2 after Alpine.js is ready
+            this.$nextTick(() => {
+                this.initializeSelect2();
+            });
+        },
+
+        initializeSelect2() {
+            // Initialize Select2 for property category dropdown
+            $('#property_category_select').select2({
+                placeholder: 'Search and select property type...',
+                allowClear: true,
+                width: '100%',
+                theme: 'default',
+                minimumResultsForSearch: 0, // Always show search box
+                searchInputPlaceholder: 'Type to search...',
+                language: {
+                    noResults: function() {
+                        return "No property types found";
+                    },
+                    searching: function() {
+                        return "Searching...";
+                    }
+                }
+            });
+
+            // Handle Select2 change event and sync with Alpine.js
+            $('#property_category_select').on('change', (e) => {
+                this.propertyData.category_id = e.target.value;
+            });
+
+            // Watch for Alpine.js changes and update Select2
+            this.$watch('propertyData.category_id', (value) => {
+                $('#property_category_select').val(value).trigger('change.select2');
+            });
         },
 
         async createProperty() {

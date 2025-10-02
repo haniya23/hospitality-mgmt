@@ -209,8 +209,9 @@
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Check-in Date</label>
-                    <input type="date" name="check_in_date" x-model="checkInDate" @change="updateCheckOutDate(); checkPastBooking()" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+                    <input type="text" name="check_in_date" x-model="checkInDate" @change="updateCheckOutDate(); checkPastBooking()" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent datepicker-input" 
+                           placeholder="Select check-in date" readonly required>
                     @error('check_in_date')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror
@@ -226,8 +227,9 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Check-out Date</label>
-                    <input type="date" name="check_out_date" x-model="checkOutDate" @change="calculateDaysNights()" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+                    <input type="text" name="check_out_date" x-model="checkOutDate" @change="calculateDaysNights()" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent datepicker-input" 
+                           placeholder="Select check-out date" readonly required>
                     @error('check_out_date')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror
@@ -1170,5 +1172,53 @@ function bookingCreateForm() {
         }
     }
 }
+
+// Initialize datepickers when document is ready
+$(document).ready(function() {
+    // Initialize check-in date picker
+    $('input[name="check_in_date"]').datepicker({
+        dateFormat: 'yy-mm-dd',
+        minDate: 0, // Disable past dates
+        changeMonth: true,
+        changeYear: true,
+        showAnim: 'slideDown',
+        onSelect: function(dateText) {
+            // Update Alpine.js model
+            const alpineComponent = Alpine.$data(document.querySelector('[x-data*="bookingCreateForm"]'));
+            if (alpineComponent) {
+                alpineComponent.checkInDate = dateText;
+                alpineComponent.updateCheckOutDate();
+                alpineComponent.checkPastBooking();
+            }
+        }
+    });
+    
+    // Initialize check-out date picker
+    $('input[name="check_out_date"]').datepicker({
+        dateFormat: 'yy-mm-dd',
+        minDate: 1, // At least tomorrow
+        changeMonth: true,
+        changeYear: true,
+        showAnim: 'slideDown',
+        onSelect: function(dateText) {
+            // Update Alpine.js model
+            const alpineComponent = Alpine.$data(document.querySelector('[x-data*="bookingCreateForm"]'));
+            if (alpineComponent) {
+                alpineComponent.checkOutDate = dateText;
+                alpineComponent.calculateDaysNights();
+            }
+        }
+    });
+    
+    // Update check-out date minimum when check-in date changes
+    $('input[name="check_in_date"]').on('change', function() {
+        const checkInDate = $(this).datepicker('getDate');
+        if (checkInDate) {
+            const nextDay = new Date(checkInDate);
+            nextDay.setDate(nextDay.getDate() + 1);
+            $('input[name="check_out_date"]').datepicker('option', 'minDate', nextDay);
+        }
+    });
+});
 </script>
 @endpush

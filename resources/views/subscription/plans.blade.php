@@ -86,7 +86,7 @@ function subscriptionPage() {
                     credentials: 'same-origin',
                     body: JSON.stringify({
                         plan: plan,
-                        billing_interval: this.yearly ? 'year' : 'month',
+                        billing: this.yearly ? 'yearly' : 'monthly',
                         quantity: 1
                     })
                 });
@@ -217,17 +217,17 @@ function subscriptionPage() {
         <div class="bg-gradient-to-r from-green-500 to-blue-600 rounded-2xl p-6 mb-8 text-white">
             <div class="flex items-center justify-between">
                 <div>
-                    <h3 class="text-xl font-bold mb-2">Current Plan: {{ ucfirst(auth()->user()->subscription_status) }}</h3>
+                    <h3 class="text-xl font-bold mb-2">Current Plan: {{ ucfirst(auth()->user()->subscription_status) }}
+                        @if(auth()->user()->billing_cycle)
+                            ({{ ucfirst(auth()->user()->billing_cycle) }})
+                        @endif
+                    </h3>
                     <p class="opacity-90">You have an active subscription</p>
                 </div>
                 <div class="text-right">
                     <div class="text-2xl font-bold">
                         @if(auth()->user()->subscription_ends_at)
-                            @php
-                                $daysRemaining = now()->diffInDays(auth()->user()->subscription_ends_at, false);
-                                $daysRemaining = max(0, (int) $daysRemaining);
-                            @endphp
-                            {{ $daysRemaining }}
+                            {{ auth()->user()->remaining_subscription_days }}
                         @else
                             0
                         @endif
@@ -435,8 +435,11 @@ function subscriptionPage() {
                 </div>
                 
                 <div class="text-center">
-                    <div class="text-3xl font-bold mb-2">₹999<span class="text-lg opacity-75">/month</span></div>
-                    <div class="text-sm opacity-75 mb-4">Special offer from ₹9,999</div>
+                    <div class="text-3xl font-bold mb-2">
+                        <span x-text="yearly ? '₹9,990' : '₹999'"></span>
+                        <span class="text-lg opacity-75" x-text="yearly ? '/year' : '/month'"></span>
+                    </div>
+                    <div class="text-sm opacity-75 mb-4" x-text="yearly ? 'Special offer from ₹119,988' : 'Special offer from ₹9,999'"></div>
                     <button @click="subscribeToPlan('professional')" 
                             :disabled="loading"
                             class="bg-white text-purple-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
@@ -497,15 +500,17 @@ function subscriptionPage() {
     </div>
     @endif
     
-    @if(auth()->user()->subscription_status === 'trial')
-    <!-- Billing Toggle -->
+    <!-- Billing Toggle - Show for all users who can see plans -->
+    @if(auth()->user()->subscription_status === 'trial' || auth()->user()->subscription_status === 'starter')
     <div class="text-center mb-8">
         <div class="inline-flex items-center bg-gray-100 rounded-full p-1">
             <button @click="yearly = false" :class="!yearly ? 'bg-white shadow-sm' : ''" class="px-4 py-2 rounded-full text-sm font-medium transition-all">Monthly</button>
             <button @click="yearly = true" :class="yearly ? 'bg-white shadow-sm' : ''" class="px-4 py-2 rounded-full text-sm font-medium transition-all">Yearly <span class="text-green-600 text-xs ml-1">(2 months free)</span></button>
         </div>
     </div>
+    @endif
     
+    @if(auth()->user()->subscription_status === 'trial')
     <!-- Starter Plan Section -->
     <div class="mb-12">
         <div class="text-center mb-6">
@@ -518,14 +523,17 @@ function subscriptionPage() {
                 <div class="text-center mb-6">
                     <h3 class="text-2xl font-bold text-gray-900 mb-2">Starter</h3>
                     <div class="flex items-center justify-center space-x-2 mb-2">
-                        <span class="text-2xl text-gray-400 line-through">₹2,999</span>
+                        <span class="text-2xl text-gray-400 line-through" x-text="yearly ? '₹35,988' : '₹2,999'"></span>
                         <div class="text-4xl font-bold text-blue-600">
-                            <span>₹299</span>
-                            <span class="text-lg text-gray-500">/month</span>
+                            <span x-text="yearly ? '₹2,990' : '₹299'"></span>
+                            <span class="text-lg text-gray-500" x-text="yearly ? '/year' : '/month'"></span>
                         </div>
                     </div>
-                    <div class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm font-medium inline-block mb-2">
+                    <div class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm font-medium inline-block mb-2" x-show="!yearly">
                         Special Offer
+                    </div>
+                    <div class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm font-medium inline-block mb-2" x-show="yearly">
+                        Save ₹598 (2 months free!)
                     </div>
                 </div>
                 
@@ -575,7 +583,9 @@ function subscriptionPage() {
             </div>
         </div>
     </div>
+    @endif
 
+    @if(auth()->user()->subscription_status === 'trial' || auth()->user()->subscription_status === 'starter')
     <!-- Professional Plan Section -->
     <div class="mb-12">
         <div class="text-center mb-6">
@@ -594,14 +604,17 @@ function subscriptionPage() {
                 <div class="text-center mb-6">
                     <h3 class="text-2xl font-bold text-gray-900 mb-2">Professional</h3>
                     <div class="flex items-center justify-center space-x-2 mb-2">
-                        <span class="text-2xl text-gray-400 line-through">₹9,999</span>
+                        <span class="text-2xl text-gray-400 line-through" x-text="yearly ? '₹119,988' : '₹9,999'"></span>
                         <div class="text-4xl font-bold text-purple-600">
-                            <span>₹999</span>
-                            <span class="text-lg text-gray-500">/month</span>
+                            <span x-text="yearly ? '₹9,990' : '₹999'"></span>
+                            <span class="text-lg text-gray-500" x-text="yearly ? '/year' : '/month'"></span>
                         </div>
                     </div>
-                    <div class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm font-medium inline-block mb-2">
+                    <div class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm font-medium inline-block mb-2" x-show="!yearly">
                         Special Offer
+                    </div>
+                    <div class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm font-medium inline-block mb-2" x-show="yearly">
+                        Save ₹1,998 (2 months free!)
                     </div>
                 </div>
                 
@@ -659,7 +672,9 @@ function subscriptionPage() {
             </div>
         </div>
     </div>
+    @endif
     
+    @if(auth()->user()->subscription_status === 'trial')
     <!-- Extra Accommodations Section -->
     <div class="mb-12">
         <div class="text-center mb-6">

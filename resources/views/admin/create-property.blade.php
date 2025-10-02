@@ -18,7 +18,7 @@
                 <div>
                     <label for="owner_id" class="block text-sm font-medium text-gray-700 mb-2">Select User</label>
                     <select id="owner_id" name="owner_id" required
-                            class="w-full rounded-xl border-gray-300 focus:border-blue-500 focus:ring-blue-500 @error('owner_id') border-red-500 @enderror">
+                            class="w-full rounded-xl border-gray-300 focus:border-blue-500 focus:ring-blue-500 select2-dropdown @error('owner_id') border-red-500 @enderror">
                         <option value="">Choose a user...</option>
                         @foreach($users as $user)
                             <option value="{{ $user->id }}" {{ old('owner_id') == $user->id ? 'selected' : '' }}>
@@ -44,7 +44,7 @@
                 <div>
                     <label for="category_id" class="block text-sm font-medium text-gray-700 mb-2">Property Category</label>
                     <select id="category_id" name="category_id" required
-                            class="w-full rounded-xl border-gray-300 focus:border-blue-500 focus:ring-blue-500 @error('category_id') border-red-500 @enderror">
+                            class="w-full rounded-xl border-gray-300 focus:border-blue-500 focus:ring-blue-500 select2-dropdown @error('category_id') border-red-500 @enderror">
                         <option value="">Choose a category...</option>
                         @foreach($categories as $category)
                             <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>

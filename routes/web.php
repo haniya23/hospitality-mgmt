@@ -7,10 +7,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [App\Http\Controllers\PublicController::class, 'simple'])->name('public.index');
 
 // Authentication Routes
-Route::get('/login', [MobileAuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [MobileAuthController::class, 'login']);
-Route::get('/register', [MobileAuthController::class, 'showRegistrationForm'])->name('register');
-Route::post('/register', [MobileAuthController::class, 'register']);
+Route::get('/login', [MobileAuthController::class, 'showLoginForm'])->name('login')->middleware('guest');
+Route::post('/login', [MobileAuthController::class, 'login'])->middleware('guest');
+Route::get('/register', [MobileAuthController::class, 'showRegistrationForm'])->name('register')->middleware('guest');
+Route::post('/register', [MobileAuthController::class, 'register'])->middleware('guest');
 Route::post('/logout', [MobileAuthController::class, 'logout'])->name('logout');
 Route::get('/cashfree/success', [App\Http\Controllers\CashfreeController::class, 'success'])->name('cashfree.success');
 
@@ -238,6 +238,7 @@ Route::middleware('auth')->group(function () {
             'subscription_ends_at' => now()->addMonth(),
             'is_trial_active' => false,
             'properties_limit' => 5,
+            'billing_cycle' => 'monthly',
         ]);
         
         return redirect()->route('subscription.plans', ['payment' => 'success'])

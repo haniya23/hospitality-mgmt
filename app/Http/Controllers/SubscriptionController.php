@@ -56,13 +56,14 @@ class SubscriptionController extends Controller
         $request->validate([
             'plan' => 'required|in:starter,professional,additional_accommodation',
             'quantity' => 'integer|min:1|max:50',
-            'billing_interval' => 'in:month,year',
+            'billing' => 'in:monthly,yearly',
         ]);
 
         $user = auth()->user();
         $plan = $request->plan;
         $quantity = $request->quantity ?? 1;
-        $billingInterval = $request->billing_interval ?? 'month';
+        $billing = $request->billing ?? 'monthly';
+        $billingInterval = $billing === 'yearly' ? 'year' : 'month';
 
         // Check if user can subscribe to this plan
         if (!$this->canSubscribeToPlan($user, $plan)) {

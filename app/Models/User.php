@@ -31,6 +31,7 @@ class User extends Authenticatable implements FilamentUser
         'is_trial_active',
         'referred_by',
         'user_id',
+        'billing_cycle',
     ];
 
     protected $hidden = [
@@ -85,6 +86,26 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(Reservation::class, 'created_by');
     }
 
+    public function subscriptions()
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    public function activeSubscription()
+    {
+        return $this->hasOne(Subscription::class)->where('status', 'active')->where('current_period_end', '>', now());
+    }
+
+    public function subscriptionRequests()
+    {
+        return $this->hasMany(SubscriptionRequest::class);
+    }
+
+    public function hasPendingRequest()
+    {
+        return $this->subscriptionRequests()->where('status', 'pending')->exists();
+    }
+
     public function approvedProperties()
     {
         return $this->hasMany(Property::class, 'approved_by');
@@ -96,6 +117,14 @@ class User extends Authenticatable implements FilamentUser
             return 0;
         }
         return max(0, (int) now()->diffInDays($this->trial_ends_at, false));
+    }
+
+    public function getRemainingSubscriptionDaysAttribute()
+    {
+        if (!$this->subscription_ends_at) {
+            return 0;
+        }
+        return max(0, (int) now()->diffInDays($this->subscription_ends_at, false));
     }
 
     public function isTrialExpired()
@@ -140,16 +169,30 @@ class User extends Authenticatable implements FilamentUser
 
     public function getMaxAccommodations()
     {
+        $baseLimit = 3; // Default for starter
+        
         switch ($this->subscription_status) {
             case 'starter':
-                return 3;
+                $baseLimit = 3;
+                break;
             case 'professional':
-                return 15;
+                $baseLimit = 15;
+                break;
             case 'trial':
-                return 15; // Trial users get professional limits
+                $baseLimit = 15; // Trial users get professional limits
+                break;
             default:
-                return 3;
+                $baseLimit = 3;
         }
+        
+        // Add active accommodation addons
+        $activeSubscription = $this->activeSubscription;
+        if ($activeSubscription) {
+            $activeAddons = $activeSubscription->addons()->where('cycle_end', '>', now())->sum('qty');
+            $baseLimit += $activeAddons;
+        }
+        
+        return $baseLimit;
     }
 
     public function getUsagePercentage()
@@ -234,28 +277,6 @@ class User extends Authenticatable implements FilamentUser
     {
         return $this->subscription_status !== 'trial';
     }
-
-    public function subscriptionRequests()
-    {
-        return $this->hasMany(SubscriptionRequest::class);
-    }
-
-    public function subscriptions()
-    {
-        return $this->hasMany(Subscription::class);
-    }
-
-    public function activeSubscription()
-    {
-        return $this->hasOne(Subscription::class)->where('status', 'active')
-                    ->where('current_period_end', '>', now());
-    }
-
-    public function hasPendingRequest()
-    {
-        return $this->subscriptionRequests()->where('status', 'pending')->exists();
-    }
-
 
     protected static function boot()
     {

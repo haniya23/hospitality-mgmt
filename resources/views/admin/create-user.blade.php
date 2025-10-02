@@ -53,7 +53,7 @@
                 <div>
                     <label for="subscription_status" class="block text-sm font-medium text-gray-700 mb-2">Subscription Plan</label>
                     <select id="subscription_status" name="subscription_status" required
-                            class="w-full rounded-xl border-gray-300 focus:border-blue-500 focus:ring-blue-500 @error('subscription_status') border-red-500 @enderror">
+                            class="w-full rounded-xl border-gray-300 focus:border-blue-500 focus:ring-blue-500 select2-dropdown @error('subscription_status') border-red-500 @enderror">
                         <option value="trial" {{ old('subscription_status') === 'trial' ? 'selected' : '' }}>Trial</option>
                         <option value="starter" {{ old('subscription_status') === 'starter' ? 'selected' : '' }}>Starter</option>
                         <option value="professional" {{ old('subscription_status') === 'professional' ? 'selected' : '' }}>Professional</option>

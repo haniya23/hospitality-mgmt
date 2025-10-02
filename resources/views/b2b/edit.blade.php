@@ -40,7 +40,7 @@
                             Partner Type <span class="text-red-500">*</span>
                         </label>
                         <select id="partner_type" name="partner_type" 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('partner_type') border-red-500 @enderror" required>
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent select2-dropdown @error('partner_type') border-red-500 @enderror" required>
                             <option value="">Select Type</option>
                             <option value="Travel Agent" {{ old('partner_type', $b2b->partner_type) == 'Travel Agent' ? 'selected' : '' }}>Travel Agent</option>
                             <option value="OTA" {{ old('partner_type', $b2b->partner_type) == 'OTA' ? 'selected' : '' }}>OTA (Online Travel Agency)</option>
@@ -138,7 +138,7 @@
                         Partner Status <span class="text-red-500">*</span>
                     </label>
                     <select id="status" name="status" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('status') border-red-500 @enderror" required>
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent select2-dropdown @error('status') border-red-500 @enderror" required>
                         <option value="pending" {{ old('status', $b2b->status) == 'pending' ? 'selected' : '' }}>Pending</option>
                         <option value="active" {{ old('status', $b2b->status) == 'active' ? 'selected' : '' }}>Active</option>
                         <option value="inactive" {{ old('status', $b2b->status) == 'inactive' ? 'selected' : '' }}>Inactive</option>
