@@ -66,6 +66,7 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(Property::class, 'owner_id');
     }
 
+
     public function staffAssignments()
     {
         return $this->hasMany(StaffAssignment::class);
@@ -326,4 +327,5 @@ class User extends Authenticatable implements FilamentUser
     {
         return $this->is_admin;
     }
+
 }

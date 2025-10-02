@@ -50,10 +50,10 @@ class ListSubscriptionPlans extends ListRecords
             
             'trial' => Tab::make('Trial Plans')
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('plan_slug', 'trial'))
-                ->badge(fn () => 
-                    $this->getModel()::where('plan_slug', 'trial')->count() + 
-                    \App\Models\User::where('subscription_status', 'trial')->where('is_trial_active', true)->count()
-                )
+                ->badge(function () { 
+                    return $this->getModel()::where('plan_slug', 'trial')->count() + 
+                           \App\Models\User::where('subscription_status', 'trial')->where('is_trial_active', true)->count();
+                })
                 ->icon('heroicon-o-gift'),
             
             'starter' => Tab::make('Starter Plans')
@@ -71,11 +71,11 @@ class ListSubscriptionPlans extends ListRecords
                     $query->where('plan_slug', 'starter')
                           ->where('addon_count', '>', 0)
                 )
-                ->badge(fn () => 
-                    $this->getModel()::where('plan_slug', 'starter')
-                                   ->where('addon_count', '>', 0)
-                                   ->count()
-                )
+                ->badge(function () { 
+                    return $this->getModel()::where('plan_slug', 'starter')
+                                           ->where('addon_count', '>', 0)
+                                           ->count();
+                })
                 ->icon('heroicon-o-plus-circle'),
             
             'professional_with_addons' => Tab::make('Professional + Add-ons')
@@ -83,11 +83,11 @@ class ListSubscriptionPlans extends ListRecords
                     $query->where('plan_slug', 'professional')
                           ->where('addon_count', '>', 0)
                 )
-                ->badge(fn () => 
-                    $this->getModel()::where('plan_slug', 'professional')
-                                   ->where('addon_count', '>', 0)
-                                   ->count()
-                )
+                ->badge(function () { 
+                    return $this->getModel()::where('plan_slug', 'professional')
+                                           ->where('addon_count', '>', 0)
+                                           ->count();
+                })
                 ->icon('heroicon-o-star'),
             
             'active' => Tab::make('Active')
@@ -101,21 +101,21 @@ class ListSubscriptionPlans extends ListRecords
                           ->where('current_period_end', '>', now())
                           ->where('status', 'active')
                 )
-                ->badge(fn () => 
-                    $this->getModel()::where('current_period_end', '<=', now()->addDays(30))
-                                   ->where('current_period_end', '>', now())
-                                   ->where('status', 'active')
-                                   ->count()
-                )
+                ->badge(function () { 
+                    return $this->getModel()::where('current_period_end', '<=', now()->addDays(30))
+                                           ->where('current_period_end', '>', now())
+                                           ->where('status', 'active')
+                                           ->count();
+                })
                 ->icon('heroicon-o-exclamation-triangle'),
             
             'expired' => Tab::make('Expired')
                 ->modifyQueryUsing(fn (Builder $query) => 
                     $query->where('current_period_end', '<', now())
                 )
-                ->badge(fn () => 
-                    $this->getModel()::where('current_period_end', '<', now())->count()
-                )
+                ->badge(function () { 
+                    return $this->getModel()::where('current_period_end', '<', now())->count();
+                })
                 ->icon('heroicon-o-x-circle'),
         ];
     }
