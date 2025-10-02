@@ -441,8 +441,8 @@ window.updateCheckoutFromDays = function(newDays) {
 function bookingCreateForm() {
     return {
         // Form data
-        selectedProperty: '{{ old('property_id', request('property_uuid') ? \App\Models\Property::where('uuid', request('property_uuid'))->first()?->id : '') }}',
-        selectedAccommodation: '',
+        selectedProperty: '{{ old('property_id', request('accommodation_uuid') ? \App\Models\PropertyAccommodation::where('uuid', request('accommodation_uuid'))->first()?->property_id : (request('property_uuid') ? \App\Models\Property::where('uuid', request('property_uuid'))->first()?->id : '')) }}',
+        selectedAccommodation: '{{ old('accommodation_id', request('accommodation_uuid') ? \App\Models\PropertyAccommodation::where('uuid', request('accommodation_uuid'))->first()?->id : '') }}',
         selectedPartner: '{{ old('b2b_partner_id', request('b2b_partner_uuid') ? \App\Models\B2bPartner::where('uuid', request('b2b_partner_uuid'))->first()?->uuid : '') }}',
         
         customerType: '{{ request('b2b_partner_uuid') ? 'b2b' : 'new' }}',
@@ -534,17 +534,24 @@ function bookingCreateForm() {
                 this.calculateDaysNights();
             });
             
-            // If property and accommodation are provided via URL, load accommodations
-            if (this.selectedProperty && '{{ request('accommodation_uuid') }}') {
-                await this.loadAccommodations();
-                await this.findAccommodationByUuid();
-                await this.loadPropertyInfo();
-                
-                // Apply custom price if provided
-                if (this.customPrice) {
-                    this.selectedAccommodationPrice = this.customPrice;
-                    this.calculateAmount();
+            // If accommodation is provided via URL, load accommodations and set property
+            if ('{{ request('accommodation_uuid') }}') {
+                if (this.selectedProperty) {
+                    await this.loadAccommodations();
+                    await this.findAccommodationByUuid();
+                    await this.loadPropertyInfo();
+                    
+                    // Apply custom price if provided
+                    if (this.customPrice) {
+                        this.selectedAccommodationPrice = this.customPrice;
+                        this.calculateAmount();
+                    }
                 }
+            }
+            // Legacy support: If only property_uuid is provided
+            else if (this.selectedProperty && '{{ request('property_uuid') }}') {
+                await this.loadAccommodations();
+                await this.loadPropertyInfo();
             }
             
             // If B2B partner is provided via URL, auto-select it

@@ -26,4 +26,55 @@ Route::middleware('auth:web')->group(function () {
     Route::post('/subscription/create-order', [App\Http\Controllers\SubscriptionController::class, 'createOrder']);
     Route::post('/subscription/addons', [App\Http\Controllers\SubscriptionController::class, 'addAccommodations']);
     Route::get('/subscription/status', [App\Http\Controllers\SubscriptionController::class, 'status']);
+    
+    // Properties API routes
+    Route::get('/properties', function () {
+        return auth()->user()->properties()
+            ->with(['category', 'location.city.district.state'])
+            ->where('status', 'active')
+            ->get()
+            ->map(function ($property) {
+                return [
+                    'id' => $property->id,
+                    'uuid' => $property->uuid,
+                    'name' => $property->name,
+                    'property_accommodations_count' => $property->propertyAccommodations()->count(),
+                    'location' => $property->location,
+                    'category' => $property->category,
+                ];
+            });
+    });
+    
+    Route::get('/properties/{id}/accommodations', function ($id) {
+        $property = auth()->user()->properties()->findOrFail($id);
+        return $property->propertyAccommodations()
+            ->with('predefinedType')
+            ->get()
+            ->map(function ($accommodation) {
+                return [
+                    'id' => $accommodation->id,
+                    'uuid' => $accommodation->uuid,
+                    'display_name' => $accommodation->display_name,
+                    'base_price' => $accommodation->base_price,
+                    'max_occupancy' => $accommodation->max_occupancy,
+                    'predefined_type' => $accommodation->predefinedType,
+                ];
+            });
+    });
+    
+    // B2B Partners API route
+    Route::get('/partners', function () {
+        return auth()->user()->b2bPartners()
+            ->where('status', 'active')
+            ->get()
+            ->map(function ($partner) {
+                return [
+                    'id' => $partner->id,
+                    'uuid' => $partner->uuid,
+                    'partner_name' => $partner->partner_name,
+                    'commission_rate' => $partner->commission_rate,
+                    'partner_type' => $partner->partner_type,
+                ];
+            });
+    });
 });
