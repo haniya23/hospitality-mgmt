@@ -727,6 +727,11 @@ function bookingCreateForm() {
                 if (this.customerType === 'accommodation') {
                     this.useAccommodationReservedCustomer = true;
                 }
+                
+                // Force Alpine.js reactivity update to show the submit button
+                this.$nextTick(() => {
+                    // Button state should now be updated
+                });
             }
         },
         
@@ -871,6 +876,11 @@ function bookingCreateForm() {
             
             // Close the modal
             this.closePropertySelectionModal();
+            
+            // Force Alpine.js reactivity update to show the submit button
+            this.$nextTick(() => {
+                // Button state should now be updated
+            });
         },
         
         async loadPropertyInfo() {

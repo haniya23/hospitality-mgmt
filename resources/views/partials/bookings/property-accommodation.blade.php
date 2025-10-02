@@ -14,10 +14,21 @@
             </div>
         </div>
         
-        <button @click="openPropertySelectionModal()" 
+        <!-- Dynamic Plus/Submit Button -->
+        <button x-show="!selectedProperty && !selectedAccommodation" 
+                @click="openPropertySelectionModal()" 
                 class="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 active:scale-95 group">
             <svg class="w-6 h-6 text-white transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+            </svg>
+        </button>
+        
+        <!-- Submit Button (when property is selected) -->
+        <button x-show="selectedProperty && selectedAccommodation" 
+                type="submit"
+                class="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 active:scale-95 group">
+            <svg class="w-6 h-6 text-white transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
             </svg>
         </button>
     </div>
