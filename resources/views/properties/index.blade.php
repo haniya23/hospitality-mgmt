@@ -1,6 +1,17 @@
 @extends('layouts.app')
 
 @section('title', 'Properties Management')
+@section('page-title', 'Properties')
+@section('page-subtitle', 'Manage your properties and accommodations')
+
+@section('breadcrumbs')
+    <a href="{{ route('dashboard') }}" class="text-green-600 hover:text-green-800">
+        <i class="fas fa-home text-xs mr-1"></i>
+        Home
+    </a>
+    <i class="fas fa-chevron-right text-xs text-gray-400"></i>
+    <span class="text-gray-900 font-medium">Properties</span>
+@endsection
 
 @section('header')
     @include('partials.properties.header')

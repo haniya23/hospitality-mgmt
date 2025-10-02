@@ -13,11 +13,6 @@
         <!-- Header Row -->
         <div class="flex items-center justify-between mb-6">
             <div class="flex items-center space-x-3 sm:space-x-4">
-                <!-- Mobile Menu Button -->
-                <button @click="sidebarOpen = !sidebarOpen" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/80 backdrop-blur-sm border border-white/30 flex items-center justify-center hover:bg-white/90 hover:scale-105 transition-all duration-200 shadow-sm lg:hidden">
-                    <i class="fas fa-bars text-gray-600 text-sm sm:text-base"></i>
-                </button>
-                
                 <!-- Icon -->
                 <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg">
                     <i class="fas fa-{{ $icon }} text-white text-lg sm:text-xl"></i>

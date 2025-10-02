@@ -19,7 +19,7 @@
 </style>
 @endpush
 
-<div class="space-y-3 sm:space-y-4">
+<div class="space-y-3 sm:space-y-4 overflow-y-auto">
     <template x-for="accommodation in filteredAccommodations" :key="accommodation.id">
         <div class="accommodation-card rounded-2xl overflow-hidden shadow-sm">
             <!-- Accommodation Image -->

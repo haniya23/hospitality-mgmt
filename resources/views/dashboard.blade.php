@@ -1,6 +1,14 @@
 @extends('layouts.app')
 
 @section('title', 'Dashboard - Stay loops')
+@section('page-title', 'Dashboard')
+
+@section('breadcrumbs')
+    <a href="{{ route('dashboard') }}" class="text-green-600 hover:text-green-800">
+        <i class="fas fa-home text-xs mr-1"></i>
+        Home
+    </a>
+@endsection
 
 @section('header')
     @include('partials.dashboard.header')

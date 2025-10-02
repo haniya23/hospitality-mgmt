@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
 @section('title', 'Accommodations')
+@section('page-title', 'Accommodations')
+@section('page-subtitle', 'Manage your rooms and accommodations')
 
 @section('header')
 <div x-data="accommodationData()" x-init="init()">

@@ -35,7 +35,7 @@
 </style>
 @endpush
 
-<div class="space-y-4">
+<div class="space-y-4 overflow-y-auto">
     <template x-for="property in filteredProperties" :key="property.id">
         <div class="property-card p-4 sm:p-6">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">

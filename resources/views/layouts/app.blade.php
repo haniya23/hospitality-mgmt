@@ -267,7 +267,7 @@
     <div class="lg:ml-72 transition-all duration-300" :class="{ 'lg:ml-16': sidebarCollapsed }">
         @yield('header')
         
-        <main class="px-4 pt-20 pb-40 lg:pt-6 lg:pb-32">
+        <main class="px-4 pt-20 pb-40 lg:pt-16 lg:pb-8 overflow-y-auto">
             @yield('content')
         </main>
     </div>
