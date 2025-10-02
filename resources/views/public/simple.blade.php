@@ -513,7 +513,7 @@
         </ul>
     </div>
     <!-- Overlay for when sidebar is open -->
-    <div x-show="sidebarOpen" @click="sidebarOpen = false" x-transition.opacity class="fixed inset-0 bg-black/30 z-50"></div>
+    <div x-show="sidebarOpen" @click="sidebarOpen = false" x-transition.opacity class="fixed inset-0 bg-black/30" style="z-index: 99998 !important;"></div>
 
 
     <main>

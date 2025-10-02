@@ -5,7 +5,8 @@
      x-transition:leave="ease-in duration-200" 
      x-transition:leave-start="opacity-100" 
      x-transition:leave-end="opacity-0" 
-     class="fixed inset-0 z-50 overflow-y-auto"
+     class="fixed inset-0 overflow-y-auto"
+     style="z-index: 99999 !important;"
      x-cloak
      style="background-color: rgba(0,0,0,0.5);">
     <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0" @click="close()">

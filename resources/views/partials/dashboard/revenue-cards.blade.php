@@ -1,5 +1,6 @@
-<div class="grid grid-cols-2 gap-4">
+<div class="grid grid-cols-2 gap-4" style="z-index: 1 !important;">
     <div class="bg-gradient-to-br from-yellow-100 to-orange-100 rounded-2xl p-4 shadow-lg cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:scale-105 border border-yellow-200" 
+         style="z-index: 1 !important;"
          @click="navigateToPendingBookings()">
         <div class="flex items-center justify-between mb-2">
             <div class="w-10 h-10 rounded-xl bg-white bg-opacity-50 flex items-center justify-center shadow-sm">
@@ -14,6 +15,7 @@
     </div>
 
     <div class="bg-gradient-to-br from-green-100 to-emerald-100 rounded-2xl p-4 shadow-lg cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:scale-105 border border-green-200" 
+         style="z-index: 1 !important;"
          @click="navigateToActiveBookings()">
         <div class="flex items-center justify-between mb-2">
             <div class="w-10 h-10 rounded-xl bg-white bg-opacity-50 flex items-center justify-center shadow-sm">

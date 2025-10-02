@@ -1,6 +1,6 @@
 @props(['title', 'subtitle', 'icon', 'addRoute' => null, 'addText' => 'Add'])
 
-<header class="relative overflow-hidden mb-6">
+<header class="relative overflow-hidden mb-6" style="z-index: 1 !important;">
     <!-- Modern Gradient Background -->
     <div class="absolute inset-0 bg-gradient-to-br from-white via-green-50/30 to-emerald-50/40 rounded-2xl"></div>
     <div class="absolute inset-0 bg-gradient-to-r from-green-500/5 via-emerald-500/5 to-green-500/5 rounded-2xl"></div>

@@ -1,19 +1,19 @@
 <div class="space-y-6">
     <!-- Stats Cards -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl p-4 text-white">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4" style="z-index: 1 !important;">
+        <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl p-4 text-white" style="z-index: 1 !important;">
             <div class="text-2xl font-bold">{{ $stats['total_received'] }}</div>
             <div class="text-sm opacity-90">Received Bookings</div>
         </div>
-        <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-2xl p-4 text-white">
+        <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-2xl p-4 text-white" style="z-index: 1 !important;">
             <div class="text-2xl font-bold">{{ $stats['total_sent'] }}</div>
             <div class="text-sm opacity-90">Sent Bookings</div>
         </div>
-        <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-2xl p-4 text-white">
+        <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-2xl p-4 text-white" style="z-index: 1 !important;">
             <div class="text-2xl font-bold">₹{{ number_format($stats['pending_commissions']) }}</div>
             <div class="text-sm opacity-90">Pending Payouts</div>
         </div>
-        <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-2xl p-4 text-white">
+        <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-2xl p-4 text-white" style="z-index: 1 !important;">
             <div class="text-2xl font-bold">₹{{ number_format($stats['receivable_commissions']) }}</div>
             <div class="text-sm opacity-90">Receivable</div>
         </div>

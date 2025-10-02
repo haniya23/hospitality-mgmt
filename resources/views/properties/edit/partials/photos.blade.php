@@ -73,7 +73,7 @@
 </div>
 
 <!-- Photos Modal -->
-<div id="photosModal" class="fixed inset-0 z-50 overflow-y-auto backdrop-blur-sm bg-black/40 hidden">
+<div id="photosModal" class="fixed inset-0 overflow-y-auto backdrop-blur-sm bg-black/40 hidden" style="z-index: 99999 !important;">
     <div class="flex min-h-full items-center justify-center p-4">
         <div class="relative w-full max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl ring-1 ring-black/5 max-h-[95vh] flex flex-col">
             <!-- Modal Header -->

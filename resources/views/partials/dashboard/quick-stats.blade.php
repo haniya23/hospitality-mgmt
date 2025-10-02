@@ -1,5 +1,6 @@
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4" style="z-index: 1 !important;">
     <div class="bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl p-4 shadow-lg cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:scale-105 border border-purple-200" 
+         style="z-index: 1 !important;"
          @click="nextQuote()">
         <div class="w-10 h-10 rounded-xl bg-white bg-opacity-50 flex items-center justify-center mb-3 shadow-sm">
             <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -12,6 +13,7 @@
     </div>
 
     <div class="bg-gradient-to-br from-cyan-100 to-blue-100 rounded-2xl p-4 shadow-lg cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:scale-105 border border-cyan-200" 
+         style="z-index: 1 !important;"
          @click="navigateToB2bPartners()">
         <div class="w-10 h-10 rounded-xl bg-white bg-opacity-50 flex items-center justify-center mb-3 shadow-sm">
             <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

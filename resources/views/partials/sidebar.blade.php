@@ -1,6 +1,6 @@
 <div>
     <!-- Mobile Sidebar Overlay -->
-    <div x-show="sidebarOpen" x-transition.opacity class="fixed inset-0 z-40 bg-black/50 lg:hidden" @click="sidebarOpen = false"></div>
+    <div x-show="sidebarOpen" x-transition.opacity class="fixed inset-0 bg-black/50 lg:hidden" style="z-index: 99998 !important;" @click="sidebarOpen = false"></div>
 
     <!-- Desktop Sidebar -->
     <div class="sidebar-desktop hidden lg:fixed lg:top-16 lg:bottom-0 lg:left-0 lg:z-40 lg:bg-white lg:shadow-md lg:shadow-green-200/50 lg:flex lg:flex-col lg:overflow-y-auto transition-all duration-300" 
@@ -329,7 +329,7 @@
     </div>
 
     <!-- Mobile Sidebar -->
-    <div x-show="sidebarOpen" x-transition:enter="transform transition ease-in-out duration-300" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transform transition ease-in-out duration-300" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full" class="fixed inset-y-0 left-0 z-50 w-72 bg-white p-5 shadow-xl lg:hidden" x-data="{ 
+    <div x-show="sidebarOpen" x-transition:enter="transform transition ease-in-out duration-300" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transform transition ease-in-out duration-300" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full" class="fixed inset-y-0 left-0 w-72 bg-white p-5 shadow-xl lg:hidden" style="z-index: 99998 !important;" x-data="{ 
             openSections: {
                 overview: false,
                 properties: false,

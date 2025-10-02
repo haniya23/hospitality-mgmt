@@ -25,7 +25,9 @@
                     <span class="hidden sm:inline">Check-in Date</span>
                     <span class="sm:hidden">Check-in</span>
                 </label>
-                <input type="text" name="check_in_date" x-model="checkInDate" @change="updateCheckOutDate(); checkPastBooking()" 
+                <input type="text" name="check_in_date" x-model="checkInDate" 
+                       @change="updateCheckOutDate(); checkPastBooking()" 
+                       @input="updateCheckOutDate(); checkPastBooking()"
                        class="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-white hover:border-gray-300 font-semibold text-gray-800 datepicker-input text-sm sm:text-base" 
                        placeholder="Select check-in date" readonly required>
                 @error('check_in_date')
@@ -46,7 +48,9 @@
                     <span class="hidden sm:inline">Check-out Date</span>
                     <span class="sm:hidden">Check-out</span>
                 </label>
-                <input type="text" name="check_out_date" x-model="checkOutDate" @change="calculateDaysNights()" 
+                <input type="text" name="check_out_date" x-model="checkOutDate" 
+                       @change="calculateDaysNights()" 
+                       @input="calculateDaysNights()"
                        class="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-white hover:border-gray-300 font-semibold text-gray-800 datepicker-input text-sm sm:text-base" 
                        placeholder="Select check-out date" readonly required>
                 @error('check_out_date')

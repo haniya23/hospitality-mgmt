@@ -1,4 +1,4 @@
-<div x-show="showCreateModal" x-transition class="fixed inset-0 z-50 overflow-y-auto bg-black/50">
+<div x-show="showCreateModal" x-transition class="fixed inset-0 overflow-y-auto bg-black/50" style="z-index: 99999 !important;">
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Add New B2B Partner</h3>

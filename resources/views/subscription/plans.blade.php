@@ -194,7 +194,8 @@ function subscriptionPage() {
          x-transition:leave="ease-in duration-200" 
          x-transition:leave-start="opacity-100 scale-100" 
          x-transition:leave-end="opacity-0 scale-95"
-         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+         class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+         style="z-index: 99999 !important;"
          x-cloak
          style="display: none;">
         <div class="bg-white rounded-2xl p-8 max-w-md mx-4 text-center shadow-2xl">
@@ -736,7 +737,8 @@ function subscriptionPage() {
      x-transition:leave="ease-in duration-200" 
      x-transition:leave-start="opacity-100" 
      x-transition:leave-end="opacity-0" 
-     class="fixed inset-0 z-50 overflow-y-auto"
+     class="fixed inset-0 overflow-y-auto"
+     style="z-index: 99999 !important;"
      x-cloak
      style="background-color: rgba(0,0,0,0.5);">
     <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0" @click="closeUpgradeModal()">
