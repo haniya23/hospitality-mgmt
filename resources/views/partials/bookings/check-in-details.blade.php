@@ -26,8 +26,9 @@
                     <span class="sm:hidden">Check-in</span>
                 </label>
                 <input type="text" name="check_in_date" x-model="checkInDate" 
-                       @change="updateCheckOutDate(); checkPastBooking()" 
-                       @input="updateCheckOutDate(); checkPastBooking()"
+                       @change="updateCheckOutDate(); checkPastBooking(); calculateAmount()" 
+                       @input="updateCheckOutDate(); checkPastBooking(); calculateAmount()"
+                       onchange="if(typeof updateCheckoutToNextDay === 'function') updateCheckoutToNextDay(this.value)"
                        class="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-white hover:border-gray-300 font-semibold text-gray-800 datepicker-input text-sm sm:text-base" 
                        placeholder="In" readonly required>
                 @error('check_in_date')
@@ -51,6 +52,7 @@
                 <input type="text" name="check_out_date" x-model="checkOutDate" 
                        @change="calculateDaysNights()" 
                        @input="calculateDaysNights()"
+                       onchange="if(typeof updateDaysFromCheckout === 'function') updateDaysFromCheckout(this.value)"
                        class="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-white hover:border-gray-300 font-semibold text-gray-800 datepicker-input text-sm sm:text-base" 
                        placeholder="Out" readonly required>
                 @error('check_out_date')

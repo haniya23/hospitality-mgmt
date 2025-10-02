@@ -261,6 +261,183 @@ body.modal-open {
 
 @push('scripts')
 <script>
+// Global function available immediately
+window.updateCheckoutToNextDay = function(checkInDateText) {
+    if (!checkInDateText) return;
+    
+    try {
+        // Parse check-in date and add 1 day
+        const checkIn = new Date(checkInDateText);
+        const checkOut = new Date(checkIn);
+        checkOut.setDate(checkOut.getDate() + 1);
+        
+        // Format as YYYY-MM-DD
+        const checkOutFormatted = checkOut.toISOString().split('T')[0];
+        
+        // Calculate days and nights
+        const diffTime = Math.abs(checkOut - checkIn);
+        const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const nights = days > 0 ? days - 1 : 0;
+        
+        // Update the checkout input field directly
+        const checkOutInput = document.querySelector('input[name="check_out_date"]');
+        if (checkOutInput) {
+            checkOutInput.value = checkOutFormatted;
+            
+            // Trigger events
+            checkOutInput.dispatchEvent(new Event('input', { bubbles: true }));
+            checkOutInput.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        
+        // Update Alpine.js model if available
+        try {
+            const alpineElement = document.querySelector('[x-data*="bookingCreateForm"]');
+            if (alpineElement && alpineElement._x_dataStack && alpineElement._x_dataStack[0]) {
+                const alpineComponent = alpineElement._x_dataStack[0];
+                
+                // Update values
+                alpineComponent.checkInDate = checkInDateText;
+                alpineComponent.checkOutDate = checkOutFormatted;
+                alpineComponent.days = days;
+                alpineComponent.nights = nights;
+                
+                // Trigger amount calculation
+                if (typeof alpineComponent.calculateAmount === 'function') {
+                    alpineComponent.calculateAmount();
+                }
+                
+                // Force Alpine.js reactivity update
+                if (typeof Alpine !== 'undefined' && Alpine.nextTick) {
+                    Alpine.nextTick(() => {});
+                }
+            }
+        } catch (e) {
+            // Alpine.js update failed
+        }
+        
+        // Update jQuery datepicker if available
+        setTimeout(() => {
+            if (typeof $ !== 'undefined') {
+                const $checkOut = $('input[name="check_out_date"]');
+                if ($checkOut.length) {
+                    try {
+                        $checkOut.datepicker('setDate', checkOut);
+                        $checkOut.datepicker('option', 'minDate', checkOut);
+                    } catch (e) {
+                        // jQuery datepicker update failed
+                    }
+                }
+            }
+        }, 50);
+        
+    } catch (error) {
+        // Error in updateCheckoutToNextDay
+    }
+};
+
+
+// Function to handle checkout date changes and update days
+window.updateDaysFromCheckout = function(checkOutDateText) {
+    if (!checkOutDateText) return;
+    
+    try {
+        // Get check-in date
+        const checkInInput = document.querySelector('input[name="check_in_date"]');
+        if (!checkInInput || !checkInInput.value) return;
+        
+        const checkInDateText = checkInInput.value;
+        
+        // Parse dates
+        const checkIn = new Date(checkInDateText);
+        const checkOut = new Date(checkOutDateText);
+        
+        // Ensure checkout is after checkin
+        if (checkOut <= checkIn) return;
+        
+        // Calculate days and nights
+        const diffTime = Math.abs(checkOut - checkIn);
+        const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const nights = days > 0 ? days - 1 : 0;
+        
+        // Update Alpine.js model if available
+        try {
+            const alpineElement = document.querySelector('[x-data*="bookingCreateForm"]');
+            if (alpineElement && alpineElement._x_dataStack && alpineElement._x_dataStack[0]) {
+                const alpineComponent = alpineElement._x_dataStack[0];
+                
+                // Update values
+                alpineComponent.checkOutDate = checkOutDateText;
+                alpineComponent.days = days;
+                alpineComponent.nights = nights;
+                
+                // Trigger amount calculation
+                if (typeof alpineComponent.calculateAmount === 'function') {
+                    alpineComponent.calculateAmount();
+                }
+                
+                // Force Alpine.js reactivity update
+                if (typeof Alpine !== 'undefined' && Alpine.nextTick) {
+                    Alpine.nextTick(() => {});
+                }
+            }
+        } catch (e) {
+            // Alpine.js update failed
+        }
+        
+    } catch (error) {
+        // Error in updateDaysFromCheckout
+    }
+};
+
+// Function to handle days changes and update checkout date
+window.updateCheckoutFromDays = function(newDays) {
+    if (!newDays || newDays < 1) return;
+    
+    try {
+        // Get check-in date
+        const checkInInput = document.querySelector('input[name="check_in_date"]');
+        if (!checkInInput || !checkInInput.value) return;
+        
+        const checkInDateText = checkInInput.value;
+        
+        // Parse check-in date and calculate new checkout
+        const checkIn = new Date(checkInDateText);
+        const checkOut = new Date(checkIn);
+        checkOut.setDate(checkOut.getDate() + newDays);
+        
+        const checkOutFormatted = checkOut.toISOString().split('T')[0];
+        
+        // Update the checkout input field
+        const checkOutInput = document.querySelector('input[name="check_out_date"]');
+        if (checkOutInput) {
+            checkOutInput.value = checkOutFormatted;
+            
+            // Trigger events
+            checkOutInput.dispatchEvent(new Event('input', { bubbles: true }));
+            checkOutInput.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        
+        // Update jQuery datepicker
+        setTimeout(() => {
+            if (typeof $ !== 'undefined') {
+                const $checkOut = $('input[name="check_out_date"]');
+                if ($checkOut.length) {
+                    try {
+                        $checkOut.datepicker('setDate', checkOut);
+                    } catch (e) {
+                        // jQuery datepicker update failed
+                    }
+                }
+            }
+        }, 50);
+        
+    } catch (error) {
+        // Error in updateCheckoutFromDays
+    }
+};
+
+</script>
+<script>
 function bookingCreateForm() {
     return {
         // Form data
@@ -549,17 +726,13 @@ function bookingCreateForm() {
         
         // Date and calculation methods
         updateCheckOutDate() {
+            // This method is now primarily handled by vanilla JS
+            // Just update the Alpine.js model if needed
             if (this.checkInDate) {
                 const checkIn = new Date(this.checkInDate);
                 const checkOut = new Date(checkIn);
                 checkOut.setDate(checkOut.getDate() + 1);
                 this.checkOutDate = checkOut.toISOString().split('T')[0];
-                
-                // Update the checkout datepicker's minDate
-                const nextDay = new Date(checkIn);
-                nextDay.setDate(nextDay.getDate() + 1);
-                $('input[name="check_out_date"]').datepicker('option', 'minDate', nextDay);
-                
                 this.calculateDaysNights();
             }
         },
@@ -612,7 +785,14 @@ function bookingCreateForm() {
                 if (proposedCheckOut <= maxCheckOut) {
                     this.days = this.days + 1;
                     this.nights = this.days - 1;
-                    this.updateCheckOutDateFromDays();
+                    
+                    // Use our new function to update checkout date
+                    if (typeof updateCheckoutFromDays === 'function') {
+                        updateCheckoutFromDays(this.days);
+                    } else {
+                        this.updateCheckOutDateFromDays();
+                    }
+                    
                     this.calculateTotalGuests();
                     this.calculateAmount();
                 }
@@ -631,7 +811,14 @@ function bookingCreateForm() {
             if (this.days > 1) {
                 this.days = this.days - 1;
                 this.nights = this.days - 1;
-                this.updateCheckOutDateFromDays();
+                
+                // Use our new function to update checkout date
+                if (typeof updateCheckoutFromDays === 'function') {
+                    updateCheckoutFromDays(this.days);
+                } else {
+                    this.updateCheckOutDateFromDays();
+                }
+                
                 this.calculateTotalGuests();
                 this.calculateAmount();
             }
@@ -779,21 +966,6 @@ function bookingCreateForm() {
             }
         },
 
-        // Watch for partner selection changes
-        watch: {
-            selectedPartner(newValue) {
-                if (this.customerType === 'b2b' && this.useB2BReservedCustomer) {
-                    this.loadPartnerReservedCustomer(newValue);
-                }
-            },
-            useB2BReservedCustomer(newValue) {
-                if (newValue && this.selectedPartner) {
-                    this.loadPartnerReservedCustomer(this.selectedPartner);
-                } else {
-                    this.selectedPartnerReservedCustomer = null;
-                }
-            }
-        },
         
         // Property selection modal methods
         openPropertySelectionModal() {
@@ -916,6 +1088,61 @@ function bookingCreateForm() {
     }
 }
 
+// Simple function to update checkout date to next day (fallback)
+function updateCheckoutToNextDay(checkInDateText) {
+    if (!checkInDateText) return;
+    
+    // Parse check-in date and add 1 day
+    const checkIn = new Date(checkInDateText);
+    const checkOut = new Date(checkIn);
+    checkOut.setDate(checkOut.getDate() + 1);
+    
+    // Format as YYYY-MM-DD
+    const checkOutFormatted = checkOut.toISOString().split('T')[0];
+    
+    // Calculate days and nights
+    const diffTime = Math.abs(checkOut - checkIn);
+    const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const nights = days > 0 ? days - 1 : 0;
+    
+    // Update the checkout input field directly
+    const checkOutInput = document.querySelector('input[name="check_out_date"]');
+    if (checkOutInput) {
+        checkOutInput.value = checkOutFormatted;
+    }
+    
+    // Update Alpine.js if available
+    try {
+        const alpineElement = document.querySelector('[x-data*="bookingCreateForm"]');
+        if (alpineElement && alpineElement._x_dataStack && alpineElement._x_dataStack[0]) {
+            const alpineComponent = alpineElement._x_dataStack[0];
+            
+            // Update Alpine.js model
+            alpineComponent.checkInDate = checkInDateText;
+            alpineComponent.checkOutDate = checkOutFormatted;
+            alpineComponent.days = days;
+            alpineComponent.nights = nights;
+            
+            if (typeof alpineComponent.calculateAmount === 'function') {
+                alpineComponent.calculateAmount();
+            }
+        }
+    } catch (e) {
+        // Alpine.js fallback update failed
+    }
+    
+    // Update datepicker
+    setTimeout(() => {
+        if (typeof $ !== 'undefined') {
+            const $checkOut = $('input[name="check_out_date"]');
+            if ($checkOut.length && $checkOut.datepicker) {
+                $checkOut.datepicker('setDate', checkOut);
+                $checkOut.datepicker('option', 'minDate', checkOut);
+            }
+        }
+    }, 100);
+}
+
 // Initialize datepickers when document is ready
 $(document).ready(function() {
     // Wait for Alpine.js to be fully loaded
@@ -964,7 +1191,7 @@ $(document).ready(function() {
         }
     };
     
-    // Initialize check-in date picker
+    // Initialize check-in date picker with vanilla JS checkout update
     $('input[name="check_in_date"]').datepicker($.extend({}, datepickerOptions, {
         minDate: 0, // Disable past dates
         onSelect: function(dateText) {
@@ -973,6 +1200,9 @@ $(document).ready(function() {
             // Update the input value first
             $(this).val(dateText).trigger('input');
             
+            // Update checkout date
+            updateCheckoutToNextDay(dateText);
+            
             // Update Alpine.js model with multiple approaches for better compatibility
             setTimeout(() => {
                 // Method 1: Try Alpine.$data
@@ -980,8 +1210,9 @@ $(document).ready(function() {
                     const alpineComponent = Alpine.$data(document.querySelector('[x-data*="bookingCreateForm"]'));
                     if (alpineComponent) {
                         alpineComponent.checkInDate = dateText;
-                        alpineComponent.updateCheckOutDate();
                         alpineComponent.checkPastBooking();
+                        alpineComponent.calculateDaysNights();
+                        alpineComponent.calculateAmount();
                         // Force Alpine.js reactivity update
                         Alpine.nextTick(() => {
                             // Alpine reactivity updated for check-in
@@ -997,8 +1228,9 @@ $(document).ready(function() {
                 if (alpineElement && alpineElement._x_dataStack && alpineElement._x_dataStack[0]) {
                     const alpineComponent = alpineElement._x_dataStack[0];
                     alpineComponent.checkInDate = dateText;
-                    alpineComponent.updateCheckOutDate();
                     alpineComponent.checkPastBooking();
+                    alpineComponent.calculateDaysNights();
+                    alpineComponent.calculateAmount();
                     return;
                 }
                 
@@ -1019,6 +1251,11 @@ $(document).ready(function() {
             
             // Update the input value first
             $(this).val(dateText).trigger('input');
+            
+            // Update days from checkout date
+            if (typeof updateDaysFromCheckout === 'function') {
+                updateDaysFromCheckout(dateText);
+            }
             
             // Update Alpine.js model with multiple approaches for better compatibility
             setTimeout(() => {
@@ -1070,6 +1307,38 @@ $(document).ready(function() {
     
     // Start the initialization process
     initializeDatepickers();
+    
+    // Direct event listener for check-in date changes
+    const checkInInput = document.querySelector('input[name="check_in_date"]');
+    if (checkInInput) {
+        checkInInput.addEventListener('change', function(e) {
+            if (e.target.value) {
+                updateCheckoutToNextDay(e.target.value);
+            }
+        });
+        
+        checkInInput.addEventListener('input', function(e) {
+            if (e.target.value) {
+                updateCheckoutToNextDay(e.target.value);
+            }
+        });
+    }
+    
+    // Direct event listener for check-out date changes
+    const checkOutInput = document.querySelector('input[name="check_out_date"]');
+    if (checkOutInput) {
+        checkOutInput.addEventListener('change', function(e) {
+            if (e.target.value && typeof updateDaysFromCheckout === 'function') {
+                updateDaysFromCheckout(e.target.value);
+            }
+        });
+        
+        checkOutInput.addEventListener('input', function(e) {
+            if (e.target.value && typeof updateDaysFromCheckout === 'function') {
+                updateDaysFromCheckout(e.target.value);
+            }
+        });
+    }
 });
 </script>
 @endpush
