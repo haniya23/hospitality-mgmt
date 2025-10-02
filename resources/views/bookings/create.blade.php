@@ -393,7 +393,7 @@
                     <div class="relative">
                         <input type="text" x-model="partnerSearch" @input="searchPartners()" placeholder="Search partners..." 
                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                        <div x-show="filteredPartners.length > 0" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-40 overflow-y-auto">
+                        <div x-show="filteredPartners.length > 0" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-40 overflow-y-auto shadow-lg">
                             <template x-for="partner in filteredPartners" :key="partner.id">
                                 <div @click="selectPartner(partner)" class="px-3 py-2 hover:bg-gray-100 cursor-pointer">
                                     <div class="font-medium" x-text="partner.partner_name"></div>
@@ -477,7 +477,7 @@
                 <div class="relative">
                     <input type="text" x-model="guestSearch" @input="searchGuests()" placeholder="Search by name or mobile..." 
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                    <div x-show="filteredGuests.length > 0" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-40 overflow-y-auto">
+                    <div x-show="filteredGuests.length > 0" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-40 overflow-y-auto shadow-lg">
                         <template x-for="guest in filteredGuests" :key="guest.id">
                             <div @click="selectGuest(guest)" class="px-3 py-2 hover:bg-gray-100 cursor-pointer">
                                 <div class="font-medium" x-text="guest.name"></div>
@@ -627,6 +627,149 @@
     </form>
 </div>
 @endsection
+
+@push('styles')
+<style>
+/* Date picker overflow fixes */
+.ui-datepicker {
+    z-index: 9999 !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 0.75rem !important;
+    overflow: hidden !important;
+}
+
+.ui-datepicker-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border: none !important;
+    color: white !important;
+    border-radius: 0 !important;
+    padding: 0.75rem !important;
+}
+
+.ui-datepicker-title {
+    color: white !important;
+    font-weight: 600 !important;
+}
+
+.ui-datepicker-prev, .ui-datepicker-next {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border: none !important;
+    border-radius: 0.375rem !important;
+    color: white !important;
+    cursor: pointer !important;
+}
+
+.ui-datepicker-prev:hover, .ui-datepicker-next:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+}
+
+.ui-datepicker table {
+    width: 100% !important;
+    margin: 0 !important;
+}
+
+.ui-datepicker td {
+    border: none !important;
+    padding: 0 !important;
+}
+
+.ui-datepicker td a {
+    display: block !important;
+    padding: 0.5rem !important;
+    text-align: center !important;
+    text-decoration: none !important;
+    color: #374151 !important;
+    border-radius: 0.375rem !important;
+    margin: 0.125rem !important;
+    transition: all 0.2s ease !important;
+}
+
+.ui-datepicker td a:hover {
+    background-color: #f3f4f6 !important;
+    color: #1f2937 !important;
+}
+
+.ui-datepicker td .ui-state-active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+    font-weight: 600 !important;
+}
+
+.ui-datepicker .ui-datepicker-today a {
+    background-color: #fef3c7 !important;
+    color: #92400e !important;
+    font-weight: 600 !important;
+}
+
+/* Dropdown overflow fixes */
+.relative {
+    position: relative !important;
+}
+
+.absolute {
+    position: absolute !important;
+}
+
+/* Ensure dropdowns appear above other content */
+.absolute.z-10 {
+    z-index: 1000 !important;
+}
+
+/* Partner search dropdown */
+.absolute.z-10.w-full.bg-white.border.border-gray-300.rounded-lg.mt-1.max-h-40.overflow-y-auto {
+    z-index: 1001 !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Guest search dropdown */
+.absolute.z-10.w-full.bg-white.border.border-gray-300.rounded-lg.mt-1.max-h-40.overflow-y-auto {
+    z-index: 1002 !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Property selection modal */
+.fixed.inset-0.z-50 {
+    z-index: 9998 !important;
+}
+
+/* Select2 dropdown fixes */
+.select2-container {
+    z-index: 1003 !important;
+}
+
+.select2-dropdown {
+    z-index: 1004 !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Ensure form sections don't clip dropdowns */
+.bg-white.rounded-xl.shadow-sm.border.border-gray-200 {
+    overflow: visible !important;
+}
+
+/* Mobile responsive fixes */
+@media (max-width: 640px) {
+    .ui-datepicker {
+        width: 90% !important;
+        left: 5% !important;
+        right: 5% !important;
+        margin: 0 !important;
+    }
+    
+    .absolute.z-10.w-full {
+        left: 0 !important;
+        right: 0 !important;
+        max-width: 100% !important;
+    }
+}
+
+/* Prevent body scroll when modal is open */
+body.modal-open {
+    overflow: hidden !important;
+}
+</style>
+@endpush
 
 @push('scripts')
 <script>
@@ -1086,12 +1229,16 @@ function bookingCreateForm() {
             this.showPropertySelectionModal = true;
             this.selectedModalProperty = null;
             this.modalAccommodations = [];
+            // Prevent body scroll when modal is open
+            document.body.classList.add('modal-open');
         },
         
         closePropertySelectionModal() {
             this.showPropertySelectionModal = false;
             this.selectedModalProperty = null;
             this.modalAccommodations = [];
+            // Restore body scroll when modal is closed
+            document.body.classList.remove('modal-open');
         },
         
         async selectModalProperty(propertyId, propertyUuid, propertyName) {
@@ -1175,14 +1322,50 @@ function bookingCreateForm() {
 
 // Initialize datepickers when document is ready
 $(document).ready(function() {
-    // Initialize check-in date picker
-    $('input[name="check_in_date"]').datepicker({
+    // Common datepicker options with overflow fixes
+    const datepickerOptions = {
         dateFormat: 'yy-mm-dd',
-        minDate: 0, // Disable past dates
         changeMonth: true,
         changeYear: true,
-        showAnim: 'slideDown',
+        showAnim: 'fadeIn',
+        showOptions: { duration: 200 },
+        beforeShow: function(input, inst) {
+            // Ensure datepicker appears above other elements
+            setTimeout(function() {
+                inst.dpDiv.css({
+                    'z-index': 9999,
+                    'position': 'absolute'
+                });
+                
+                // Handle mobile positioning
+                if (window.innerWidth <= 640) {
+                    const inputOffset = $(input).offset();
+                    const inputHeight = $(input).outerHeight();
+                    const windowHeight = $(window).height();
+                    const pickerHeight = inst.dpDiv.outerHeight();
+                    
+                    // Position above input if not enough space below
+                    if (inputOffset.top + inputHeight + pickerHeight > windowHeight) {
+                        inst.dpDiv.css({
+                            'top': inputOffset.top - pickerHeight - 10,
+                            'left': '5%',
+                            'width': '90%'
+                        });
+                    }
+                }
+            }, 1);
+        },
+        onClose: function() {
+            // Clean up any positioning classes
+            $(this).removeClass('datepicker-active');
+        }
+    };
+    
+    // Initialize check-in date picker
+    $('input[name="check_in_date"]').datepicker($.extend({}, datepickerOptions, {
+        minDate: 0, // Disable past dates
         onSelect: function(dateText) {
+            $(this).addClass('datepicker-active');
             // Update Alpine.js model
             const alpineComponent = Alpine.$data(document.querySelector('[x-data*="bookingCreateForm"]'));
             if (alpineComponent) {
@@ -1191,16 +1374,13 @@ $(document).ready(function() {
                 alpineComponent.checkPastBooking();
             }
         }
-    });
+    }));
     
     // Initialize check-out date picker
-    $('input[name="check_out_date"]').datepicker({
-        dateFormat: 'yy-mm-dd',
+    $('input[name="check_out_date"]').datepicker($.extend({}, datepickerOptions, {
         minDate: 1, // At least tomorrow
-        changeMonth: true,
-        changeYear: true,
-        showAnim: 'slideDown',
         onSelect: function(dateText) {
+            $(this).addClass('datepicker-active');
             // Update Alpine.js model
             const alpineComponent = Alpine.$data(document.querySelector('[x-data*="bookingCreateForm"]'));
             if (alpineComponent) {
@@ -1208,7 +1388,7 @@ $(document).ready(function() {
                 alpineComponent.calculateDaysNights();
             }
         }
-    });
+    }));
     
     // Update check-out date minimum when check-in date changes
     $('input[name="check_in_date"]').on('change', function() {

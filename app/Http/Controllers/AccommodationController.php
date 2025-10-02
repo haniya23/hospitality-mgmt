@@ -15,7 +15,7 @@ class AccommodationController extends Controller
     use AuthorizesRequests;
     public function index(Request $request)
     {
-        $query = PropertyAccommodation::with(['property', 'predefinedType', 'amenities'])
+        $query = PropertyAccommodation::with(['property', 'predefinedType', 'amenities', 'photos'])
             ->whereHas('property', function($q) {
                 $q->where('owner_id', auth()->id());
             });

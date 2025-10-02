@@ -1,29 +1,58 @@
 @push('styles')
 <style>
-    .accommodation-card { background: white; transition: all 0.3s ease; }
-    .accommodation-card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+    .accommodation-card { 
+        background: white; 
+        transition: all 0.3s ease; 
+        border: 1px solid #e5e7eb;
+    }
+    .accommodation-card:hover { 
+        transform: translateY(-4px); 
+        box-shadow: 0 20px 40px rgba(0,0,0,0.12); 
+        border-color: #d1d5db;
+    }
+    .accommodation-card img {
+        transition: transform 0.3s ease;
+    }
+    .accommodation-card:hover img {
+        transform: scale(1.05);
+    }
 </style>
 @endpush
 
 <div class="space-y-3 sm:space-y-4">
     <template x-for="accommodation in filteredAccommodations" :key="accommodation.id">
-        <div class="accommodation-card rounded-2xl p-3 sm:p-4 lg:p-6 shadow-sm">
-            <!-- Accommodation Header -->
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-3">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold">
-                        <i class="fas fa-bed text-sm sm:text-base"></i>
+        <div class="accommodation-card rounded-2xl overflow-hidden shadow-sm">
+            <!-- Accommodation Image -->
+            <div class="relative h-48 sm:h-56 lg:h-64 bg-gray-200">
+                <template x-if="accommodation.photos && accommodation.photos.length > 0">
+                    <img :src="'/storage/' + accommodation.photos[0].file_path" 
+                         :alt="accommodation.custom_name + ' photo'"
+                         class="w-full h-full object-cover">
+                </template>
+                <template x-if="!accommodation.photos || accommodation.photos.length === 0">
+                    <div class="w-full h-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
+                        <div class="text-center text-white">
+                            <i class="fas fa-bed text-4xl sm:text-5xl mb-2 opacity-80"></i>
+                            <p class="text-sm sm:text-base font-medium opacity-90">No Image Available</p>
+                        </div>
                     </div>
-                    <div class="flex-1 min-w-0">
-                        <h3 class="font-semibold text-gray-900 text-sm sm:text-base truncate" x-text="accommodation.custom_name"></h3>
-                        <p class="text-xs sm:text-sm text-gray-500 truncate" x-text="accommodation.property.name"></p>
-                    </div>
-                </div>
-                <div class="text-left sm:text-right">
-                    <div class="text-base sm:text-lg font-bold text-gray-900" x-text="'₹' + accommodation.base_price"></div>
-                    <div class="text-xs sm:text-sm text-gray-500">per night</div>
+                </template>
+                <!-- Price Badge -->
+                <div class="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-lg px-3 py-2 shadow-lg">
+                    <div class="text-lg font-bold text-gray-900" x-text="'₹' + accommodation.base_price"></div>
+                    <div class="text-xs text-gray-600">per night</div>
                 </div>
             </div>
+            
+            <!-- Card Content -->
+            <div class="p-3 sm:p-4 lg:p-6">
+                <!-- Accommodation Header -->
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex-1 min-w-0">
+                        <h3 class="font-semibold text-gray-900 text-base sm:text-lg truncate" x-text="accommodation.custom_name"></h3>
+                        <p class="text-sm text-gray-500 truncate" x-text="accommodation.property.name"></p>
+                    </div>
+                </div>
 
             <!-- Accommodation Details -->
             <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4 mb-3 sm:mb-4">
