@@ -17,9 +17,6 @@
     <div class="relative px-4 py-6">
         <div class="flex items-center justify-between">
             <div class="flex items-center space-x-3">
-                <button @click="window.dispatchEvent(new CustomEvent('toggle-sidebar'))" class="w-10 h-10 rounded-full soft-glass-card flex items-center justify-center hover:bg-opacity-60 transition-all lg:hidden">
-                    <i class="fas fa-bars text-pink-500"></i>
-                </button>
                 <div class="w-10 h-10 rounded-full soft-glass-card flex items-center justify-center">
                     <i class="fas fa-plus text-teal-600"></i>
                 </div>

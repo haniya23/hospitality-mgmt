@@ -518,12 +518,6 @@ function bookingCreateForm() {
                 const checkOut = new Date(checkIn);
                 checkOut.setDate(checkOut.getDate() + 1);
                 this.checkOutDate = checkOut.toISOString().split('T')[0];
-                
-                // Update the checkout datepicker's minDate
-                const nextDay = new Date(checkIn);
-                nextDay.setDate(nextDay.getDate() + 1);
-                $('input[name="check_out_date"]').datepicker('option', 'minDate', nextDay);
-                
                 this.calculateDaysNights();
             }
         },
@@ -532,26 +526,13 @@ function bookingCreateForm() {
             if (this.checkInDate && this.checkOutDate) {
                 const checkIn = new Date(this.checkInDate);
                 const checkOut = new Date(this.checkOutDate);
-                
-                // Ensure checkout is after checkin
-                if (checkOut <= checkIn) {
-                    const nextDay = new Date(checkIn);
-                    nextDay.setDate(nextDay.getDate() + 1);
-                    this.checkOutDate = nextDay.toISOString().split('T')[0];
-                    const correctedCheckOut = new Date(this.checkOutDate);
-                    const diffTime = Math.abs(correctedCheckOut - checkIn);
-                    this.days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                } else {
-                    const diffTime = Math.abs(checkOut - checkIn);
-                    this.days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                }
-                
+                const diffTime = Math.abs(checkOut - checkIn);
+                this.days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 this.nights = this.days > 0 ? this.days - 1 : 0;
                 
                 // Ensure minimum 1 day
                 if (this.days === 0) {
                     this.days = 1;
-                    this.nights = 0;
                 }
                 
                 this.calculateTotalGuests();
@@ -576,7 +557,7 @@ function bookingCreateForm() {
                 if (proposedCheckOut <= maxCheckOut) {
                     this.days = this.days + 1;
                     this.nights = this.days - 1;
-                    this.updateCheckOutDateFromDays();
+                    this.updateCheckOutDate();
                     this.calculateTotalGuests();
                     this.calculateAmount();
                 }
@@ -595,13 +576,13 @@ function bookingCreateForm() {
             if (this.days > 1) {
                 this.days = this.days - 1;
                 this.nights = this.days - 1;
-                this.updateCheckOutDateFromDays();
+                this.updateCheckOutDate();
                 this.calculateTotalGuests();
                 this.calculateAmount();
             }
         },
         
-        updateCheckOutDateFromDays() {
+        updateCheckOutDate() {
             if (this.checkInDate) {
                 const checkIn = new Date(this.checkInDate);
                 const checkOut = new Date(checkIn);

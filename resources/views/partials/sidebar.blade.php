@@ -3,8 +3,10 @@
     <div x-show="sidebarOpen" x-transition.opacity class="fixed inset-0 z-40 bg-black/50 lg:hidden" @click="sidebarOpen = false"></div>
 
     <!-- Desktop Sidebar -->
-    <div class="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:bg-white lg:shadow-md lg:shadow-green-200/50 lg:flex lg:flex-col lg:overflow-y-auto transition-all duration-300" 
-         :class="sidebarCollapsed ? 'lg:w-16 lg:p-2' : 'lg:w-72 lg:p-5'">
+    <div class="sidebar-desktop hidden lg:fixed lg:top-16 lg:bottom-0 lg:left-0 lg:z-40 lg:bg-white lg:shadow-md lg:shadow-green-200/50 lg:flex lg:flex-col lg:overflow-y-auto transition-all duration-300" 
+         :class="sidebarCollapsed ? 'sidebar-collapsed' : 'sidebar-expanded'"
+         x-data="{ collapsed: false }"
+         x-init="$watch('sidebarCollapsed', value => collapsed = value)">
         
         <!-- When collapsed, show only the expand button and plan indicator -->
         <template x-if="sidebarCollapsed">

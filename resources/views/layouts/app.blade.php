@@ -20,6 +20,515 @@
     <style>
         [x-cloak] { display: none !important; }
         
+        /* SCROLL FIX: Ensure proper scrolling behavior */
+        html, body {
+            height: auto !important;
+            min-height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto !important;
+        }
+        
+        /* Ensure body scroll is never disabled */
+        body.modal-open {
+            overflow-y: auto !important;
+            padding-right: 0 !important;
+        }
+        
+        /* TOP BAR SCROLL FIX: Ensure top bar doesn't interfere with body scroll */
+        .fixed {
+            will-change: auto;
+            pointer-events: auto;
+        }
+        
+        /* Ensure main content area allows natural scrolling */
+        main {
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Force body scroll to always work */
+        body {
+            touch-action: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+        }
+        
+        /* Prevent any fixed elements from blocking scroll */
+        .fixed {
+            pointer-events: auto !important;
+        }
+        
+        .fixed * {
+            pointer-events: auto !important;
+        }
+        
+        /* ===================================
+           PROFESSIONAL TOP BAR STYLES
+           Future-proof, responsive, scroll-friendly
+           =================================== */
+        
+        /* Top Bar Container */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            will-change: transform;
+            contain: layout style;
+            height: 4rem; /* Fixed height for consistent spacing */
+        }
+        
+        /* Mobile Navigation */
+        .top-bar__mobile {
+            display: block;
+        }
+        
+        .top-bar__mobile-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1rem;
+            min-height: 4rem;
+        }
+        
+        .top-bar__menu-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 0.5rem;
+            background: #f3f4f6;
+            border: none;
+            color: #4b5563;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .top-bar__menu-btn:hover {
+            background: #e5e7eb;
+        }
+        
+        .top-bar__brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1;
+            justify-content: center;
+        }
+        
+        .top-bar__logo {
+            width: 2rem;
+            height: 2rem;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 0.875rem;
+        }
+        
+        .top-bar__brand-text {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .top-bar__title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #111827;
+            margin: 0;
+            line-height: 1.2;
+        }
+        
+        .top-bar__greeting {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin: 0;
+            display: none;
+        }
+        
+        .top-bar__actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .top-bar__user-info {
+            display: none;
+            text-align: right;
+        }
+        
+        .top-bar__user-name {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #111827;
+        }
+        
+        .top-bar__user-plan {
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .top-bar__dropdown {
+            position: relative;
+        }
+        
+        .top-bar__avatar {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .top-bar__avatar:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: translateY(-1px);
+        }
+        
+        .top-bar__menu {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 0.5rem);
+            width: 12rem;
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e5e7eb;
+            padding: 0.25rem;
+            z-index: 60;
+        }
+        
+        .top-bar__menu-header {
+            padding: 0.75rem;
+            border-bottom: 1px solid #f3f4f6;
+            margin-bottom: 0.25rem;
+        }
+        
+        .top-bar__menu-user {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #111827;
+        }
+        
+        .top-bar__menu-plan {
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-top: 0.125rem;
+        }
+        
+        .top-bar__menu-form {
+            width: 100%;
+        }
+        
+        .top-bar__menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            color: #374151;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            transition: all 0.15s ease;
+            border: none;
+            background: none;
+            cursor: pointer;
+            text-align: left;
+        }
+        
+        .top-bar__menu-item:hover {
+            background: #f9fafb;
+            color: #111827;
+        }
+        
+        .top-bar__menu-item--danger {
+            color: #dc2626;
+        }
+        
+        .top-bar__menu-item--danger:hover {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+        
+        /* Desktop Navigation */
+        .top-bar__desktop {
+            display: none;
+        }
+        
+        .top-bar__desktop-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1.5rem;
+            min-height: 4rem;
+            margin-left: 18rem;
+            transition: margin-left 0.3s ease;
+        }
+        
+        .top-bar__page-info {
+            flex: 1;
+        }
+        
+        .top-bar__page-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #111827;
+            margin: 0;
+        }
+        
+        .top-bar__breadcrumbs {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+        
+        .top-bar__desktop-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .top-bar__user-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .top-bar__user-details {
+            text-align: right;
+        }
+        
+        .top-bar__user-name {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #111827;
+        }
+        
+        .top-bar__user-status {
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .top-bar__user-dropdown {
+            position: relative;
+        }
+        
+        .top-bar__user-avatar {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .top-bar__user-avatar:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: translateY(-1px);
+        }
+        
+        .top-bar__user-menu {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 0.5rem);
+            width: 12rem;
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e5e7eb;
+            padding: 0.25rem;
+            z-index: 60;
+        }
+        
+        .top-bar__user-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            color: #374151;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            transition: all 0.15s ease;
+            border: none;
+            background: none;
+            cursor: pointer;
+            text-align: left;
+        }
+        
+        .top-bar__user-menu-item:hover {
+            background: #f9fafb;
+            color: #111827;
+        }
+        
+        .top-bar__user-menu-item--danger {
+            color: #dc2626;
+        }
+        
+        .top-bar__user-menu-item--danger:hover {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+        
+        /* Responsive Breakpoints */
+        @media (min-width: 640px) {
+            .top-bar__greeting {
+                display: block;
+            }
+            
+            .top-bar__user-info {
+                display: block;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .top-bar__mobile {
+                display: none;
+            }
+            
+            .top-bar__desktop {
+                display: block;
+            }
+        }
+        
+        /* Sidebar Collapsed State */
+        .sidebar-collapsed .top-bar__desktop-content {
+            margin-left: 4rem;
+        }
+        
+        /* Main container when sidebar is collapsed */
+        @media (min-width: 1024px) {
+            .lg\:ml-72.sidebar-collapsed {
+                margin-left: 4rem !important;
+            }
+        }
+        
+        /* Layout Spacing Fixes */
+        
+        /* Ensure main content starts below top bar on mobile */
+        @media (max-width: 1023px) {
+            body {
+                padding-top: 4rem; /* Match top bar height */
+            }
+            
+            main {
+                padding-bottom: 6rem !important; /* Space for bottom nav */
+            }
+        }
+        
+        /* Desktop Layout */
+        @media (min-width: 1024px) {
+            /* Main content container - starts below top bar */
+            .lg\:ml-72 {
+                margin-left: 18rem;
+                padding-top: 4rem; /* Top bar height */
+            }
+            
+            /* When sidebar is collapsed */
+            body:has([x-data*="sidebarCollapsed"]:is([x-data*="true"])) .lg\:ml-72 {
+                margin-left: 4rem;
+            }
+        }
+        
+        /* Sidebar positioning - below top bar */
+        @media (min-width: 1024px) {
+            .sidebar,
+            [class*="lg:fixed"][class*="lg:top-16"] {
+                top: 4rem;
+                height: calc(100vh - 4rem);
+            }
+            
+            /* Sidebar width transitions */
+            .sidebar-desktop.sidebar-expanded {
+                width: 18rem !important;
+                padding: 1.25rem !important;
+            }
+            
+            .sidebar-desktop.sidebar-collapsed {
+                width: 4rem !important;
+                padding: 0.5rem !important;
+            }
+            
+            .sidebar-desktop {
+                transition: width 0.3s ease, padding 0.3s ease;
+            }
+            
+            /* Visual feedback for sidebar state */
+            
+            /* When collapsed - hide expanded content, show collapsed content */
+            .sidebar-desktop.sidebar-collapsed [x-show="!sidebarCollapsed"],
+            .sidebar-desktop.sidebar-collapsed template[x-if="!sidebarCollapsed"] + *,
+            .sidebar-desktop.sidebar-collapsed .sidebar-expanded-content {
+                display: none !important;
+            }
+            
+            .sidebar-desktop.sidebar-collapsed [x-show="sidebarCollapsed"],
+            .sidebar-desktop.sidebar-collapsed template[x-if="sidebarCollapsed"] + *,
+            .sidebar-desktop.sidebar-collapsed .sidebar-collapsed-content {
+                display: flex !important;
+            }
+            
+            /* When expanded - show expanded content, hide collapsed content */
+            .sidebar-desktop.sidebar-expanded [x-show="sidebarCollapsed"],
+            .sidebar-desktop.sidebar-expanded template[x-if="sidebarCollapsed"] + *,
+            .sidebar-desktop.sidebar-expanded .sidebar-collapsed-content {
+                display: none !important;
+            }
+            
+            .sidebar-desktop.sidebar-expanded [x-show="!sidebarCollapsed"],
+            .sidebar-desktop.sidebar-expanded template[x-if="!sidebarCollapsed"] + *,
+            .sidebar-desktop.sidebar-expanded .sidebar-expanded-content {
+                display: block !important;
+            }
+            
+            /* Force Alpine templates to respect our CSS state */
+            .sidebar-desktop.sidebar-collapsed template[x-if="sidebarCollapsed"] {
+                display: block !important;
+            }
+            
+            .sidebar-desktop.sidebar-expanded template[x-if="!sidebarCollapsed"] {
+                display: block !important;
+            }
+        }
+        
+        /* Screen Reader Only */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        
         .select2-container--default .select2-selection--single {
             height: 42px;
             border: 1px solid #d1d5db;
@@ -267,7 +776,7 @@
     <div class="lg:ml-72 transition-all duration-300" :class="{ 'lg:ml-16': sidebarCollapsed }">
         @yield('header')
         
-        <main class="px-4 pt-20 pb-40 lg:pt-16 lg:pb-8 overflow-y-auto">
+        <main class="px-4 pt-16 pb-20 lg:pt-4 lg:pb-8 sm:pb-24">
             @yield('content')
         </main>
     </div>
@@ -296,6 +805,21 @@
     <script>
         // Listen for sidebar toggle events
         document.addEventListener('DOMContentLoaded', function() {
+            // SCROLL FIX: Ensure body scroll is never permanently disabled
+            // Remove any stuck modal-open class that might prevent scrolling
+            document.body.classList.remove('modal-open');
+            
+            // Ensure body can always scroll
+            if (document.body.style.overflow === 'hidden') {
+                document.body.style.overflow = '';
+            }
+            
+            // PROFESSIONAL TOP BAR: Initialize responsive behavior
+            initializeTopBar();
+            
+            // SIDEBAR FIX: Ensure sidebar toggle works
+            initializeSidebarToggle();
+            
             window.addEventListener('toggle-sidebar', function() {
                 // Find the Alpine.js component and toggle sidebar
                 const body = document.body;
@@ -304,6 +828,156 @@
                 }
             });
         });
+        
+        // PROFESSIONAL TOP BAR: Performance-optimized initialization
+        function initializeTopBar() {
+            const topBar = document.querySelector('.top-bar');
+            if (!topBar) return;
+            
+            // Optimize scroll performance with throttling
+            let ticking = false;
+            
+            function updateTopBarOnScroll() {
+                if (!ticking) {
+                    requestAnimationFrame(() => {
+                        // Add scroll-based effects here if needed
+                        ticking = false;
+                    });
+                    ticking = true;
+                }
+            }
+            
+            // Passive scroll listener for better performance
+            window.addEventListener('scroll', updateTopBarOnScroll, { passive: true });
+            
+            // Handle sidebar collapsed state
+            const body = document.body;
+            if (body._x_dataStack && body._x_dataStack[0]) {
+                const alpineData = body._x_dataStack[0];
+                
+                // Initialize collapsed state if not set
+                if (typeof alpineData.sidebarCollapsed === 'undefined') {
+                    alpineData.sidebarCollapsed = false;
+                }
+                
+                // Watch for sidebar collapse changes with proper getter/setter
+                let _sidebarCollapsed = alpineData.sidebarCollapsed || false;
+                
+                Object.defineProperty(alpineData, 'sidebarCollapsed', {
+                    get() { 
+                        return _sidebarCollapsed; 
+                    },
+                    set(value) {
+                        _sidebarCollapsed = value;
+                        
+                        // Update top bar
+                        topBar.classList.toggle('sidebar-collapsed', value);
+                        
+                        // Update main content margin
+                        const mainContainer = document.querySelector('.lg\\:ml-72');
+                        if (mainContainer) {
+                            if (value) {
+                                mainContainer.classList.add('sidebar-collapsed');
+                            } else {
+                                mainContainer.classList.remove('sidebar-collapsed');
+                            }
+                        }
+                        
+                        // Trigger Alpine reactivity
+                        if (window.Alpine) {
+                            window.Alpine.store('sidebar', { collapsed: value });
+                        }
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+            }
+            
+            // Optimize dropdown interactions
+            const dropdowns = topBar.querySelectorAll('[x-data*="open"]');
+            dropdowns.forEach(dropdown => {
+                const button = dropdown.querySelector('button');
+                const menu = dropdown.querySelector('[x-show="open"]');
+                
+                if (button && menu) {
+                    // Preload dropdown positioning
+                    button.addEventListener('mouseenter', () => {
+                        menu.style.visibility = 'hidden';
+                        menu.style.display = 'block';
+                        // Force layout calculation
+                        menu.offsetHeight;
+                        menu.style.display = '';
+                        menu.style.visibility = '';
+                    }, { once: true });
+                }
+            });
+            
+            // Accessibility improvements
+            const menuButtons = topBar.querySelectorAll('[aria-expanded]');
+            menuButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const expanded = button.getAttribute('aria-expanded') === 'true';
+                    button.setAttribute('aria-expanded', !expanded);
+                });
+            });
+        }
+        
+        // SIDEBAR TOGGLE FIX: Ensure sidebar collapse works properly
+        function initializeSidebarToggle() {
+            // Simple approach: directly handle the toggle
+            setTimeout(() => {
+                const sidebar = document.querySelector('.sidebar-desktop');
+                const mainContainer = document.querySelector('.lg\\:ml-72');
+                const topBar = document.querySelector('.top-bar');
+                
+                if (sidebar) {
+                    // Initialize as expanded
+                    sidebar.classList.add('sidebar-expanded');
+                    
+                    // Find toggle buttons and add event listeners
+                    const toggleButtons = document.querySelectorAll('button[title*="sidebar"], button[title*="Sidebar"]');
+                    
+                    toggleButtons.forEach(button => {
+                        button.addEventListener('click', function() {
+                            const isCollapsed = sidebar.classList.contains('sidebar-collapsed');
+                            const newState = !isCollapsed;
+                            
+                            // Update CSS classes
+                            if (isCollapsed) {
+                                // Expand
+                                sidebar.classList.remove('sidebar-collapsed');
+                                sidebar.classList.add('sidebar-expanded');
+                                mainContainer?.classList.remove('sidebar-collapsed');
+                                topBar?.classList.remove('sidebar-collapsed');
+                            } else {
+                                // Collapse
+                                sidebar.classList.remove('sidebar-expanded');
+                                sidebar.classList.add('sidebar-collapsed');
+                                mainContainer?.classList.add('sidebar-collapsed');
+                                topBar?.classList.add('sidebar-collapsed');
+                            }
+                            
+                            // Update Alpine.js state for x-if templates
+                            const body = document.body;
+                            if (body._x_dataStack && body._x_dataStack[0]) {
+                                body._x_dataStack[0].sidebarCollapsed = newState;
+                                
+                                // Force Alpine.js to re-evaluate templates
+                                if (window.Alpine) {
+                                    window.Alpine.nextTick(() => {
+                                        // Trigger reactivity
+                                        const event = new CustomEvent('alpine:updated');
+                                        document.dispatchEvent(event);
+                                    });
+                                }
+                            }
+                            
+                            console.log('Sidebar toggled:', isCollapsed ? 'expanded' : 'collapsed');
+                        });
+                    });
+                }
+            }, 500);
+        }
         
         // Global loader functions
         window.showGlobalLoader = function(message = 'Loading...') {
