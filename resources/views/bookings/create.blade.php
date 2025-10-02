@@ -211,7 +211,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Check-in Date</label>
                     <input type="text" name="check_in_date" x-model="checkInDate" @change="updateCheckOutDate(); checkPastBooking()" 
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent datepicker-input" 
-                           placeholder="Select check-in date" readonly required>
+                           placeholder="Check-in" readonly required>
                     @error('check_in_date')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror
@@ -229,7 +229,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Check-out Date</label>
                     <input type="text" name="check_out_date" x-model="checkOutDate" @change="calculateDaysNights()" 
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent datepicker-input" 
-                           placeholder="Select check-out date" readonly required>
+                           placeholder="Check-out" readonly required>
                     @error('check_out_date')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror
@@ -276,40 +276,130 @@
                 <p class="text-xs text-gray-500 mt-1">Default: ₹1,000 per person per day</p>
             </div>
             <!-- Days and Nights Display -->
-            <div x-show="days > 0" class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-4">
-                        <div class="text-center">
-                            <div class="flex items-center justify-center space-x-2">
-                                <button type="button" @click="decreaseDays()" 
-                                        x-show="days > 1"
-                                        class="w-8 h-8 bg-blue-600 text-white rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center justify-center">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
-                                    </svg>
-                                </button>
-                                <div class="text-2xl font-bold text-blue-600 min-w-[2rem] text-center" x-text="days"></div>
-                                <button type="button" @click="increaseDays()" 
-                                        x-show="canIncreaseDays()"
-                                        class="w-8 h-8 bg-blue-600 text-white rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center justify-center">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                            <div class="text-sm text-blue-500">Days</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="text-2xl font-bold text-blue-600" x-text="nights"></div>
-                            <div class="text-sm text-blue-500">Nights</div>
-                        </div>
+            <div x-show="days > 0" 
+     x-transition:enter="transition ease-out duration-200"
+     x-transition:enter-start="opacity-0 transform scale-95"
+     x-transition:enter-end="opacity-100 transform scale-100"
+     class="mt-4 p-3 sm:p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+    
+    <!-- Desktop Layout -->
+    <div class="hidden sm:flex items-center justify-between gap-6">
+        <!-- Days & Nights Section -->
+        <div class="flex items-center gap-6">
+            <!-- Days Counter -->
+            <div class="relative">
+                <div class="flex items-center gap-3 bg-white rounded-lg px-4 py-2 shadow-sm">
+                    <button type="button" 
+                            @click="decreaseDays()" 
+                            x-show="days > 1"
+                            class="group w-9 h-9 bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 shadow-sm">
+                        <svg class="w-4 h-4 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"></path>
+                        </svg>
+                    </button>
+                    
+                    <div class="text-center min-w-[3rem]">
+                        <div class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent" x-text="days"></div>
+                        <div class="text-xs font-medium text-blue-600 uppercase tracking-wider mt-0.5">Days</div>
                     </div>
-                    <div class="text-right">
-                        <div class="text-sm text-gray-600">Total Guests</div>
-                        <div class="text-lg font-semibold text-gray-800" x-text="totalGuests"></div>
-                    </div>
+                    
+                    <button type="button" 
+                            @click="increaseDays()" 
+                            x-show="canIncreaseDays()"
+                            class="group w-9 h-9 bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 shadow-sm">
+                        <svg class="w-4 h-4 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                    </button>
                 </div>
             </div>
+            
+            <!-- Nights Display -->
+            <div class="flex items-center gap-3 bg-white rounded-lg px-5 py-3 shadow-sm">
+                <div class="w-10 h-10 bg-gradient-to-br from-indigo-100 to-blue-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                    </svg>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-gray-800" x-text="nights"></div>
+                    <div class="text-xs font-medium text-gray-500 uppercase tracking-wider">Nights</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Total Guests Section -->
+        <div class="flex items-center gap-3 bg-white rounded-lg px-5 py-3 shadow-sm">
+            <div class="w-10 h-10 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+            </div>
+            <div class="text-center">
+                <div class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-0.5">Total Guests</div>
+                <div class="text-2xl font-bold text-gray-800" x-text="totalGuests"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Layout -->
+    <div class="sm:hidden space-y-3">
+        <!-- Days Counter - Mobile -->
+        <div class="flex items-center gap-2 bg-white rounded-lg px-3 py-2.5 shadow-sm">
+            <button type="button" 
+                    @click="decreaseDays()" 
+                    x-show="days > 1"
+                    class="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-lg active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-center shadow-sm transition-all">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"></path>
+                </svg>
+            </button>
+            
+            <div class="flex-1 text-center">
+                <div class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent" x-text="days"></div>
+                <div class="text-xs font-medium text-blue-600 uppercase tracking-wider">Days</div>
+            </div>
+            
+            <button type="button" 
+                    @click="increaseDays()" 
+                    x-show="canIncreaseDays()"
+                    class="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-lg active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-center shadow-sm transition-all">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Nights & Guests - Mobile -->
+        <div class="grid grid-cols-2 gap-3">
+            <!-- Nights -->
+            <div class="flex items-center gap-2 bg-white rounded-lg px-3 py-2.5 shadow-sm">
+                <div class="w-8 h-8 bg-gradient-to-br from-indigo-100 to-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                    </svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="text-xs font-medium text-gray-500 uppercase tracking-wider truncate">Nights</div>
+                    <div class="text-xl font-bold text-gray-800" x-text="nights"></div>
+                </div>
+            </div>
+
+            <!-- Total Guests -->
+            <div class="flex items-center gap-2 bg-white rounded-lg px-3 py-2.5 shadow-sm">
+                <div class="w-8 h-8 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="text-xs font-medium text-gray-500 uppercase tracking-wider truncate">Guests</div>
+                    <div class="text-xl font-bold text-gray-800" x-text="totalGuests"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
             
             <!-- Special Requests -->
             <div class="mt-4">
@@ -369,83 +459,219 @@
         </div>
 
         <!-- 3. Commission Section -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-900">Commission</h3>
-                @if($hasB2bPartners)
-                <div class="flex bg-gray-100 rounded-lg p-1">
-                    <button type="button" @click="isB2B = false" :class="!isB2B ? 'bg-white shadow-sm' : ''" class="px-3 py-1 text-sm font-medium rounded-md transition-colors">Direct</button>
-                    <button type="button" @click="isB2B = true; calculateCommission()" :class="isB2B ? 'bg-white shadow-sm' : ''" class="px-3 py-1 text-sm font-medium rounded-md transition-colors">B2B</button>
+<div class="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-md hover:shadow-lg border border-gray-200 p-4 sm:p-6 transition-shadow duration-300">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-6">
+        <div class="flex items-center gap-2">
+            <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-sm">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <h3 class="text-lg sm:text-xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">Commission</h3>
+        </div>
+        
+        @if($hasB2bPartners)
+        <div class="flex bg-gradient-to-r from-gray-100 to-gray-50 rounded-xl p-1 shadow-inner w-full sm:w-auto">
+            <button type="button" 
+                    @click="isB2B = false" 
+                    :class="!isB2B ? 'bg-white shadow-md scale-105' : 'hover:bg-white/50'" 
+                    class="flex-1 sm:flex-initial px-4 py-2.5 sm:py-2 text-sm font-semibold rounded-lg transition-all duration-200 active:scale-95">
+                <span :class="!isB2B ? 'text-purple-600' : 'text-gray-600'">Direct</span>
+            </button>
+            <button type="button" 
+                    @click="isB2B = true; calculateCommission()" 
+                    :class="isB2B ? 'bg-white shadow-md scale-105' : 'hover:bg-white/50'" 
+                    class="flex-1 sm:flex-initial px-4 py-2.5 sm:py-2 text-sm font-semibold rounded-lg transition-all duration-200 active:scale-95">
+                <span :class="isB2B ? 'text-purple-600' : 'text-gray-600'">B2B</span>
+            </button>
+        </div>
+        @else
+        <div class="flex flex-col sm:flex-row sm:items-center gap-2 p-3 sm:p-0 bg-blue-50 sm:bg-transparent rounded-lg sm:rounded-none border border-blue-100 sm:border-0">
+            <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span class="text-sm text-gray-700 font-medium">Direct booking only</span>
+            </div>
+            <a href="{{ route('b2b.create') }}" 
+               class="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 font-semibold group">
+                <svg class="w-4 h-4 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                Add B2B Partner
+            </a>
+        </div>
+        @endif
+    </div>
+    
+    <div x-show="isB2B && {{ $hasB2bPartners ? 'true' : 'false' }}" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 transform -translate-y-2"
+         x-transition:enter-end="opacity-100 transform translate-y-0"
+         class="space-y-5">
+        
+        <!-- Partner Search -->
+        <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+                B2B Partner
+            </label>
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
                 </div>
-                @else
-                <div class="flex items-center space-x-2">
-                    <div class="text-sm text-gray-500">Direct booking only</div>
-                    <a href="{{ route('b2b.create') }}" class="text-xs text-blue-600 hover:text-blue-800 underline">
-                        Add B2B Partner
-                    </a>
+                <input type="text" 
+                       x-model="partnerSearch" 
+                       @input="searchPartners()" 
+                       placeholder="Search partners..." 
+                       class="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-white hover:border-gray-300">
+                
+                <div x-show="filteredPartners.length > 0" 
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 scale-95"
+                     x-transition:enter-end="opacity-100 scale-100"
+                     class="absolute z-10 w-full bg-white border-2 border-purple-200 rounded-xl mt-2 max-h-60 overflow-y-auto shadow-xl">
+                    <template x-for="partner in filteredPartners" :key="partner.id">
+                        <div @click="selectPartner(partner)" 
+                             class="px-4 py-3 hover:bg-gradient-to-r hover:from-purple-50 hover:to-indigo-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-all duration-150 group">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1">
+                                    <div class="font-semibold text-gray-800 group-hover:text-purple-600 transition-colors" x-text="partner.partner_name"></div>
+                                    <div class="flex items-center gap-1 mt-1">
+                                        <svg class="w-3.5 h-3.5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        <span class="text-sm text-gray-600" x-text="partner.commission_rate + '% commission'"></span>
+                                    </div>
+                                </div>
+                                <svg class="w-5 h-5 text-gray-400 group-hover:text-purple-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </template>
                 </div>
-                @endif
+            </div>
+            <input type="hidden" name="b2b_partner_id" x-model="selectedPartner">
+        </div>
+        
+        <!-- Commission Type & Value -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                    </svg>
+                    Commission Type
+                </label>
+                <div class="flex bg-gradient-to-r from-gray-100 to-gray-50 rounded-xl p-1 shadow-inner">
+                    <button type="button" 
+                            @click="commissionType = 'percentage'; calculateCommission()" 
+                            :class="commissionType === 'percentage' ? 'bg-white shadow-md scale-105' : 'hover:bg-white/50'" 
+                            class="flex-1 px-3 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200 active:scale-95">
+                        <span :class="commissionType === 'percentage' ? 'text-purple-600' : 'text-gray-600'">Percentage</span>
+                    </button>
+                    <button type="button" 
+                            @click="commissionType = 'amount'; calculateCommission()" 
+                            :class="commissionType === 'amount' ? 'bg-white shadow-md scale-105' : 'hover:bg-white/50'" 
+                            class="flex-1 px-3 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200 active:scale-95">
+                        <span :class="commissionType === 'amount' ? 'text-purple-600' : 'text-gray-600'">Amount</span>
+                    </button>
+                </div>
             </div>
             
-            <div x-show="isB2B && {{ $hasB2bPartners ? 'true' : 'false' }}" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">B2B Partner</label>
-                    <div class="relative">
-                        <input type="text" x-model="partnerSearch" @input="searchPartners()" placeholder="Search partners..." 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                        <div x-show="filteredPartners.length > 0" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-40 overflow-y-auto shadow-lg">
-                            <template x-for="partner in filteredPartners" :key="partner.id">
-                                <div @click="selectPartner(partner)" class="px-3 py-2 hover:bg-gray-100 cursor-pointer">
-                                    <div class="font-medium" x-text="partner.partner_name"></div>
-                                    <div class="text-sm text-gray-500" x-text="partner.commission_rate + '% commission'"></div>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-                    <input type="hidden" name="b2b_partner_id" x-model="selectedPartner">
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
+                    </svg>
+                    Commission <span class="text-purple-600 font-bold" x-text="commissionType === 'percentage' ? '(%)' : '(₹)'"></span>
+                </label>
+                <div class="relative">
+                    <input type="number" 
+                           x-model="commissionValue" 
+                           @input="calculateCommission()" 
+                           :step="commissionType === 'percentage' ? '0.01' : '1'"
+                           :min="commissionType === 'percentage' ? '0' : '0'"
+                           :max="commissionType === 'percentage' ? '100' : ''"
+                           class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-white hover:border-gray-300 font-semibold text-gray-800"
+                           placeholder="Enter value">
                 </div>
-                
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Commission Type</label>
-                        <div class="flex bg-gray-100 rounded-lg p-1">
-                            <button type="button" @click="commissionType = 'percentage'; calculateCommission()" 
-                                    :class="commissionType === 'percentage' ? 'bg-white shadow-sm' : ''" 
-                                    class="px-3 py-1 text-sm font-medium rounded-md transition-colors">Percentage</button>
-                            <button type="button" @click="commissionType = 'amount'; calculateCommission()" 
-                                    :class="commissionType === 'amount' ? 'bg-white shadow-sm' : ''" 
-                                    class="px-3 py-1 text-sm font-medium rounded-md transition-colors">Amount</button>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Commission <span x-text="commissionType === 'percentage' ? '(%)' : '(₹)'"></span>
-                        </label>
-                        <input type="number" x-model="commissionValue" @input="calculateCommission()" 
-                               :step="commissionType === 'percentage' ? '0.01' : '1'"
-                               :min="commissionType === 'percentage' ? '0' : '0'"
-                               :max="commissionType === 'percentage' ? '100' : ''"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                    </div>
-                </div>
-                
-                <!-- Commission Calculation Display -->
-                <div x-show="commissionAmount > 0" class="p-4 bg-orange-50 rounded-lg border border-orange-200">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-sm font-medium text-gray-700">Commission Amount</span>
-                        <span class="text-lg font-bold text-orange-600" x-text="'₹' + commissionAmount.toLocaleString()"></span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm font-medium text-gray-700">Net Amount (After Commission)</span>
-                        <span class="text-lg font-bold text-green-600" x-text="'₹' + netAmount.toLocaleString()"></span>
-                    </div>
-                </div>
-                
-                <!-- Hidden inputs for form submission -->
-                <input type="hidden" name="commission_percentage" x-model="commissionPercentage">
-                <input type="hidden" name="commission_amount" x-model="commissionAmount">
             </div>
         </div>
+        
+        <!-- Commission Calculation Display -->
+        <div x-show="commissionAmount > 0" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             class="p-4 sm:p-5 bg-gradient-to-br from-orange-50 to-red-50 rounded-xl border-2 border-orange-200 shadow-sm">
+            
+            <!-- Mobile Layout -->
+            <div class="sm:hidden space-y-3">
+                <div class="flex items-center justify-between p-3 bg-white rounded-lg shadow-sm">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                            </svg>
+                        </div>
+                        <span class="text-sm font-semibold text-gray-700">Commission</span>
+                    </div>
+                    <span class="text-lg font-bold text-orange-600" x-text="'₹' + commissionAmount.toLocaleString()"></span>
+                </div>
+                
+                <div class="flex items-center justify-between p-3 bg-white rounded-lg shadow-sm">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        <span class="text-sm font-semibold text-gray-700">Net Amount</span>
+                    </div>
+                    <span class="text-lg font-bold text-green-600" x-text="'₹' + netAmount.toLocaleString()"></span>
+                </div>
+            </div>
+            
+            <!-- Desktop Layout -->
+            <div class="hidden sm:block space-y-3">
+                <div class="flex items-center justify-between pb-3 border-b border-orange-200">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center shadow-sm">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                            </svg>
+                        </div>
+                        <span class="text-sm font-semibold text-gray-700">Commission Amount</span>
+                    </div>
+                    <span class="text-2xl font-bold text-orange-600" x-text="'₹' + commissionAmount.toLocaleString()"></span>
+                </div>
+                
+                <div class="flex items-center justify-between pt-1">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center shadow-sm">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        <span class="text-sm font-semibold text-gray-700">Net Amount (After Commission)</span>
+                    </div>
+                    <span class="text-2xl font-bold text-green-600" x-text="'₹' + netAmount.toLocaleString()"></span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Hidden inputs for form submission -->
+        <input type="hidden" name="commission_percentage" x-model="commissionPercentage">
+        <input type="hidden" name="commission_amount" x-model="commissionAmount">
+    </div>
+</div>
 
         <!-- 4. Customer Information -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
