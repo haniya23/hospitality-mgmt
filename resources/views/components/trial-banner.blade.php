@@ -73,9 +73,8 @@ function trialBanner(initialDays) {
                 gsap.to(current, {
                     duration: 1.0,
                     value: this.daysLeft,
-                    round: true,
                     onUpdate: () => {
-                        this.$refs.daysCount.textContent = current.value;
+                        this.$refs.daysCount.textContent = Math.round(current.value);
                     },
                     ease: "power2.out"
                 });

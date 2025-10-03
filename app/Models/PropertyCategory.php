@@ -15,4 +15,9 @@ class PropertyCategory extends Model
     {
         return $this->hasMany(Property::class);
     }
+
+    public function predefinedAccommodationTypes()
+    {
+        return $this->hasMany(PredefinedAccommodationType::class);
+    }
 }

@@ -74,68 +74,6 @@
             pointer-events: auto !important;
         }
         
-        /* ===================================
-           TESTING BANNER STYLES
-           =================================== */
-        
-        .testing-banner {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 60;
-            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-            color: white;
-            text-align: center;
-            padding: 0.5rem 1rem;
-            font-weight: 600;
-            font-size: 0.875rem;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            border-bottom: 2px solid #c23616;
-        }
-        
-        .testing-banner::before {
-            content: "⚠️ ";
-            margin-right: 0.5rem;
-        }
-        
-        .testing-banner .close-btn {
-            position: absolute;
-            right: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            width: 1.5rem;
-            height: 1.5rem;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 0.75rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.2s ease;
-        }
-        
-        .testing-banner .close-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-        
-        /* Adjust body padding when banner is visible */
-        body.banner-visible {
-            padding-top: 2rem;
-        }
-        
-        /* Adjust top bar position when banner is visible */
-        .top-bar.banner-visible {
-            top: 2rem;
-        }
-        
-        /* Ensure banner works with existing styles */
-        .testing-banner.hidden {
-            display: none;
-        }
         
         /* ===================================
            PROFESSIONAL TOP BAR STYLES
@@ -845,14 +783,7 @@
     
     @stack('styles')
 </head>
-<body class="bg-gray-50" x-data="{ sidebarOpen: false, sidebarCollapsed: false, globalLoading: false, loadingMessage: 'Loading...', bannerVisible: !localStorage.getItem('bannerDismissed') }" :class="{ 'banner-visible': bannerVisible }">
-    <!-- Testing Banner -->
-    <div class="testing-banner" x-show="bannerVisible" x-transition @click.away="bannerVisible = false">
-        <span>TESTING APP - NOT PRODUCTION READY</span>
-        <button class="close-btn" @click="bannerVisible = false; localStorage.setItem('bannerDismissed', 'true')" title="Dismiss banner">
-            ×
-        </button>
-    </div>
+<body class="bg-gray-50" x-data="{ sidebarOpen: false, sidebarCollapsed: false, globalLoading: false, loadingMessage: 'Loading...' }">
     
     @include('partials.top-bar')
     @include('partials.sidebar')
@@ -1063,32 +994,6 @@
             }, 500);
         }
         
-        // Banner and loader functions
-        window.toggleBannerVisibility = function() {
-            const banner = document.querySelector('.testing-banner');
-            const topBar = document.querySelector('.top-bar');
-            const body = document.body;
-            
-            if (banner && banner.style.display !== 'none') {
-                // Banner is visible, adjust positioning
-                topBar?.classList.add('banner-visible');
-                body.classList.add('banner-visible');
-            } else {
-                // Banner is hidden, reset positioning
-                topBar?.classList.remove('banner-visible');
-                body.classList.remove('banner-visible');
-            }
-        };
-        
-        // Reset banner (for development/testing)
-        window.resetBanner = function() {
-            localStorage.removeItem('bannerDismissed');
-            const body = document.body;
-            if (body._x_dataStack && body._x_dataStack[0]) {
-                body._x_dataStack[0].bannerVisible = true;
-            }
-            toggleBannerVisibility();
-        };
         
         // Global loader functions
         window.showGlobalLoader = function(message = 'Loading...') {
@@ -1109,10 +1014,9 @@
         // Show loader immediately on page load
         showGlobalLoader('Loading page...');
         
-        // Initialize banner positioning on load
+        // Initialize on load
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
-                toggleBannerVisibility();
                 hideGlobalLoader();
             }, 500);
         });
@@ -1121,7 +1025,6 @@
         window.addEventListener('load', function() {
             setTimeout(() => {
                 hideGlobalLoader();
-                toggleBannerVisibility();
             }, 800);
         });
         
@@ -1185,7 +1088,6 @@
     
     <!-- Development Utilities (only in debug mode) -->
     @if(config('app.debug'))
-        <script src="{{ asset('js/dev-utils.js') }}"></script>
     @endif
     
     <!-- Toast Notifications -->

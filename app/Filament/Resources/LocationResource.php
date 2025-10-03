@@ -48,7 +48,6 @@ class LocationResource extends Resource
                         Forms\Components\Tabs\Tab::make('Countries')
                             ->schema([
                                 Forms\Components\Repeater::make('countries')
-                                    ->relationship('countries')
                                     ->schema([
                                         Forms\Components\Grid::make(2)
                                             ->schema([
@@ -242,32 +241,63 @@ class LocationResource extends Resource
                         Forms\Components\Tabs\Tab::make('Bulk Import')
                             ->schema([
                                 Forms\Components\Section::make('Import Locations')
-                                    ->description('Import locations from CSV files. Each file should have appropriate columns.')
+                                    ->description('Import locations from JSON files. Use the sample format below as a template.')
                                     ->schema([
-                                        Forms\Components\FileUpload::make('countries_csv')
-                                            ->label('Import Countries')
-                                            ->acceptedFileTypes(['text/csv', 'application/csv'])
-                                            ->helperText('CSV format: name, code'),
+                                        Forms\Components\FileUpload::make('locations_json')
+                                            ->label('Import All Locations')
+                                            ->acceptedFileTypes(['application/json'])
+                                            ->helperText('Upload a JSON file with the complete location hierarchy'),
 
-                                        Forms\Components\FileUpload::make('states_csv')
-                                            ->label('Import States')
-                                            ->acceptedFileTypes(['text/csv', 'application/csv'])
-                                            ->helperText('CSV format: country_id, name, code'),
-
-                                        Forms\Components\FileUpload::make('districts_csv')
-                                            ->label('Import Districts')
-                                            ->acceptedFileTypes(['text/csv', 'application/csv'])
-                                            ->helperText('CSV format: state_id, name'),
-
-                                        Forms\Components\FileUpload::make('cities_csv')
-                                            ->label('Import Cities')
-                                            ->acceptedFileTypes(['text/csv', 'application/csv'])
-                                            ->helperText('CSV format: district_id, name'),
-
-                                        Forms\Components\FileUpload::make('pincodes_csv')
-                                            ->label('Import Pincodes')
-                                            ->acceptedFileTypes(['text/csv', 'application/csv'])
-                                            ->helperText('CSV format: city_id, code'),
+                                        Forms\Components\ViewField::make('sample_format')
+                                            ->view('admin.location-sample-format')
+                                            ->viewData([
+                                                'sampleData' => [
+                                                    'countries' => [
+                                                        [
+                                                            'name' => 'India',
+                                                            'code' => 'IN',
+                                                            'states' => [
+                                                                [
+                                                                    'name' => 'Maharashtra',
+                                                                    'code' => 'MH',
+                                                                    'districts' => [
+                                                                        [
+                                                                            'name' => 'Mumbai',
+                                                                            'cities' => [
+                                                                                [
+                                                                                    'name' => 'Mumbai',
+                                                                                    'pincodes' => [
+                                                                                        ['code' => '400001'],
+                                                                                        ['code' => '400002'],
+                                                                                    ]
+                                                                                ]
+                                                                            ]
+                                                                        ]
+                                                                    ]
+                                                                ],
+                                                                [
+                                                                    'name' => 'Karnataka',
+                                                                    'code' => 'KA',
+                                                                    'districts' => [
+                                                                        [
+                                                                            'name' => 'Bangalore Urban',
+                                                                            'cities' => [
+                                                                                [
+                                                                                    'name' => 'Bangalore',
+                                                                                    'pincodes' => [
+                                                                                        ['code' => '560001'],
+                                                                                        ['code' => '560002'],
+                                                                                    ]
+                                                                                ]
+                                                                            ]
+                                                                        ]
+                                                                    ]
+                                                                ]
+                                                            ]
+                                                        ]
+                                                    ]
+                                                ]
+                                            ]),
                                     ])
                                     ->columnSpanFull(),
                             ]),

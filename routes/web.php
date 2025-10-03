@@ -250,4 +250,59 @@ Route::middleware('auth')->group(function () {
         return redirect()->route('subscription.plans', ['payment' => 'success'])
             ->with('success', 'Test payment successful! Your subscription has been activated.');
     })->name('test.payment.success');
+    
+    // Admin sample download route
+    Route::get('/admin/download-sample-locations', function () {
+        $sampleData = [
+            'countries' => [
+                [
+                    'name' => 'India',
+                    'code' => 'IN',
+                    'states' => [
+                        [
+                            'name' => 'Maharashtra',
+                            'code' => 'MH',
+                            'districts' => [
+                                [
+                                    'name' => 'Mumbai',
+                                    'cities' => [
+                                        [
+                                            'name' => 'Mumbai',
+                                            'pincodes' => [
+                                                ['code' => '400001'],
+                                                ['code' => '400002'],
+                                            ]
+                                        ]
+                                    ]
+                                ]
+                            ]
+                        ],
+                        [
+                            'name' => 'Karnataka',
+                            'code' => 'KA',
+                            'districts' => [
+                                [
+                                    'name' => 'Bangalore Urban',
+                                    'cities' => [
+                                        [
+                                            'name' => 'Bangalore',
+                                            'pincodes' => [
+                                                ['code' => '560001'],
+                                                ['code' => '560002'],
+                                            ]
+                                        ]
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ];
+
+        return response()->json($sampleData, 200, [
+            'Content-Type' => 'application/json',
+            'Content-Disposition' => 'attachment; filename="sample-locations.json"'
+        ]);
+    })->name('admin.download-sample-locations');
 });

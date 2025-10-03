@@ -1,0 +1,144 @@
+{
+    "countries": [
+        {
+            "name": "India",
+            "code": "IN",
+            "states": [
+                {
+                    "name": "Maharashtra",
+                    "code": "MH",
+                    "districts": [
+                        {
+                            "name": "Mumbai",
+                            "cities": [
+                                {
+                                    "name": "Mumbai",
+                                    "pincodes": [
+                                        {"code": "400001"},
+                                        {"code": "400002"},
+                                        {"code": "400003"}
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "name": "Pune",
+                            "cities": [
+                                {
+                                    "name": "Pune",
+                                    "pincodes": [
+                                        {"code": "411001"},
+                                        {"code": "411002"}
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "Karnataka",
+                    "code": "KA",
+                    "districts": [
+                        {
+                            "name": "Bangalore Urban",
+                            "cities": [
+                                {
+                                    "name": "Bangalore",
+                                    "pincodes": [
+                                        {"code": "560001"},
+                                        {"code": "560002"},
+                                        {"code": "560003"}
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "name": "Mysore",
+                            "cities": [
+                                {
+                                    "name": "Mysore",
+                                    "pincodes": [
+                                        {"code": "570001"},
+                                        {"code": "570002"}
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "Tamil Nadu",
+                    "code": "TN",
+                    "districts": [
+                        {
+                            "name": "Chennai",
+                            "cities": [
+                                {
+                                    "name": "Chennai",
+                                    "pincodes": [
+                                        {"code": "600001"},
+                                        {"code": "600002"}
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "name": "Madurai",
+                            "cities": [
+                                {
+                                    "name": "Madurai",
+                                    "pincodes": [
+                                        {"code": "625001"},
+                                        {"code": "625002"}
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "United States",
+            "code": "US",
+            "states": [
+                {
+                    "name": "California",
+                    "code": "CA",
+                    "districts": [
+                        {
+                            "name": "Los Angeles",
+                            "cities": [
+                                {
+                                    "name": "Los Angeles",
+                                    "pincodes": [
+                                        {"code": "90210"},
+                                        {"code": "90211"}
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "New York",
+                    "code": "NY",
+                    "districts": [
+                        {
+                            "name": "New York City",
+                            "cities": [
+                                {
+                                    "name": "Manhattan",
+                                    "pincodes": [
+                                        {"code": "10001"},
+                                        {"code": "10002"}
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
