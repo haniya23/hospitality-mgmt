@@ -15,8 +15,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             BasicDataSeeder::class,
-            WayanadDataSeeder::class,
-            TrialFixSeeder::class,
+            SouthIndiaLocationSeeder::class,
             PropertySeeder::class,
             AccommodationSeeder::class,
             BookingSeeder::class,

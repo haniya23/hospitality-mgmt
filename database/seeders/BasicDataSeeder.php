@@ -5,11 +5,6 @@ namespace Database\Seeders;
 use App\Models\PropertyCategory;
 use App\Models\PredefinedAccommodationType;
 use App\Models\User;
-use App\Models\Country;
-use App\Models\State;
-use App\Models\District;
-use App\Models\City;
-use App\Models\Pincode;
 use App\Models\Amenity;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -79,80 +74,6 @@ class BasicDataSeeder extends Seeder
             }
         }
 
-        // Create countries
-        $india = Country::firstOrCreate(['code' => 'IN'], ['name' => 'India']);
-        $usa = Country::firstOrCreate(['code' => 'US'], ['name' => 'United States']);
-        $uk = Country::firstOrCreate(['code' => 'GB'], ['name' => 'United Kingdom']);
-
-        // Create states for India
-        $kerala = State::firstOrCreate(['country_id' => $india->id, 'name' => 'Kerala'], ['code' => 'KL']);
-        $karnataka = State::firstOrCreate(['country_id' => $india->id, 'name' => 'Karnataka'], ['code' => 'KA']);
-        $tamilnadu = State::firstOrCreate(['country_id' => $india->id, 'name' => 'Tamil Nadu'], ['code' => 'TN']);
-        $maharashtra = State::firstOrCreate(['country_id' => $india->id, 'name' => 'Maharashtra'], ['code' => 'MH']);
-        $goa = State::firstOrCreate(['country_id' => $india->id, 'name' => 'Goa'], ['code' => 'GA']);
-
-        // Kerala Districts
-        $wayanad = District::firstOrCreate(['state_id' => $kerala->id, 'name' => 'Wayanad']);
-        $kochi = District::firstOrCreate(['state_id' => $kerala->id, 'name' => 'Ernakulam']);
-        $trivandrum = District::firstOrCreate(['state_id' => $kerala->id, 'name' => 'Thiruvananthapuram']);
-        $kozhikode = District::firstOrCreate(['state_id' => $kerala->id, 'name' => 'Kozhikode']);
-
-        // Karnataka Districts
-        $bangalore = District::firstOrCreate(['state_id' => $karnataka->id, 'name' => 'Bangalore Urban']);
-        $mysore = District::firstOrCreate(['state_id' => $karnataka->id, 'name' => 'Mysuru']);
-        $coorg = District::firstOrCreate(['state_id' => $karnataka->id, 'name' => 'Kodagu']);
-
-        // Tamil Nadu Districts
-        $chennai = District::firstOrCreate(['state_id' => $tamilnadu->id, 'name' => 'Chennai']);
-        $ooty = District::firstOrCreate(['state_id' => $tamilnadu->id, 'name' => 'Nilgiris']);
-
-        // Maharashtra Districts
-        $mumbai = District::firstOrCreate(['state_id' => $maharashtra->id, 'name' => 'Mumbai']);
-        $pune = District::firstOrCreate(['state_id' => $maharashtra->id, 'name' => 'Pune']);
-
-        // Goa Districts
-        $northgoa = District::firstOrCreate(['state_id' => $goa->id, 'name' => 'North Goa']);
-        $southgoa = District::firstOrCreate(['state_id' => $goa->id, 'name' => 'South Goa']);
-
-        // Cities in Wayanad
-        $kalpetta = City::firstOrCreate(['district_id' => $wayanad->id, 'name' => 'Kalpetta']);
-        $sultanbathery = City::firstOrCreate(['district_id' => $wayanad->id, 'name' => 'Sultan Bathery']);
-        $mananthavady = City::firstOrCreate(['district_id' => $wayanad->id, 'name' => 'Mananthavady']);
-        $vythiri = City::firstOrCreate(['district_id' => $wayanad->id, 'name' => 'Vythiri']);
-
-        // Cities in Ernakulam
-        $kochi_city = City::firstOrCreate(['district_id' => $kochi->id, 'name' => 'Kochi']);
-        $munnar = City::firstOrCreate(['district_id' => $kochi->id, 'name' => 'Munnar']);
-
-        // Cities in Bangalore
-        $bangalore_city = City::firstOrCreate(['district_id' => $bangalore->id, 'name' => 'Bangalore']);
-        
-        // Cities in North Goa
-        $panaji = City::firstOrCreate(['district_id' => $northgoa->id, 'name' => 'Panaji']);
-        $calangute = City::firstOrCreate(['district_id' => $northgoa->id, 'name' => 'Calangute']);
-
-        // Pincodes for Wayanad
-        Pincode::firstOrCreate(['city_id' => $kalpetta->id, 'code' => '673121']);
-        Pincode::firstOrCreate(['city_id' => $kalpetta->id, 'code' => '673122']);
-        Pincode::firstOrCreate(['city_id' => $sultanbathery->id, 'code' => '673592']);
-        Pincode::firstOrCreate(['city_id' => $sultanbathery->id, 'code' => '673593']);
-        Pincode::firstOrCreate(['city_id' => $mananthavady->id, 'code' => '670645']);
-        Pincode::firstOrCreate(['city_id' => $mananthavady->id, 'code' => '670646']);
-        Pincode::firstOrCreate(['city_id' => $vythiri->id, 'code' => '673576']);
-        Pincode::firstOrCreate(['city_id' => $vythiri->id, 'code' => '673577']);
-
-        // Pincodes for Kochi
-        Pincode::firstOrCreate(['city_id' => $kochi_city->id, 'code' => '682001']);
-        Pincode::firstOrCreate(['city_id' => $kochi_city->id, 'code' => '682016']);
-        Pincode::firstOrCreate(['city_id' => $munnar->id, 'code' => '685612']);
-
-        // Pincodes for Bangalore
-        Pincode::firstOrCreate(['city_id' => $bangalore_city->id, 'code' => '560001']);
-        Pincode::firstOrCreate(['city_id' => $bangalore_city->id, 'code' => '560025']);
-
-        // Pincodes for Goa
-        Pincode::firstOrCreate(['city_id' => $panaji->id, 'code' => '403001']);
-        Pincode::firstOrCreate(['city_id' => $calangute->id, 'code' => '403516']);
 
         // Create amenities
         $amenities = [

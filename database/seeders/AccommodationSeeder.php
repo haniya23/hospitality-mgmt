@@ -108,6 +108,7 @@ class AccommodationSeeder extends Seeder
                 'custom_name' => $accommodationNames[$i],
                 'max_occupancy' => rand(2, 8),
                 'base_price' => rand(1500, 15000), // Random price between 1500-15000
+                'size' => rand(25, 150), // Random size in sqm between 25-150
                 'description' => $descriptions[$i],
                 'features' => $features[$i],
                 'is_active' => rand(0, 1) ? true : false,
