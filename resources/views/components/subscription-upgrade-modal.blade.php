@@ -1,4 +1,6 @@
-<div x-data="subscriptionUpgradeModal()" x-show="show" 
+<div x-data="{ ...subscriptionUpgradeModal(), ...simpleModalScrollLock() }" 
+     x-init="setupScrollLock('show')"
+     x-show="show" 
      x-transition:enter="ease-out duration-300" 
      x-transition:enter-start="opacity-0" 
      x-transition:enter-end="opacity-100" 

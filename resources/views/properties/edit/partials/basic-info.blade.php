@@ -62,7 +62,7 @@
 </div>
 
 <!-- Basic Information Modal -->
-<div id="basicInfoModal" class="fixed inset-0 overflow-y-auto backdrop-blur-sm bg-black/40 hidden" style="z-index: 99999 !important;">
+<div id="basicInfoModal" class="fixed inset-0 overflow-y-auto backdrop-blur-sm bg-black/40 hidden" style="z-index: 99999 !important;" x-data x-init="$el.addEventListener('show', () => lockBodyScroll()); $el.addEventListener('hide', () => unlockBodyScroll());">
     <div class="flex min-h-full items-center justify-center p-2 sm:p-4">
         <div class="relative w-full max-w-2xl mx-auto bg-white rounded-xl sm:rounded-2xl shadow-2xl ring-1 ring-black/5 max-h-[95vh] flex flex-col">
             <!-- Modal Header -->
@@ -133,7 +133,9 @@
 
 <script>
 function openBasicInfoModal(propertyUuid) {
-    document.getElementById('basicInfoModal').classList.remove('hidden');
+    const modal = document.getElementById('basicInfoModal');
+    modal.classList.remove('hidden');
+    modal.dispatchEvent(new CustomEvent('show'));
     
     // Initialize Select2 for property category dropdown
     $('#property_category_id').select2({
@@ -147,7 +149,9 @@ function openBasicInfoModal(propertyUuid) {
 function closeBasicInfoModal() {
     // Destroy Select2 instance before closing modal
     $('#property_category_id').select2('destroy');
-    document.getElementById('basicInfoModal').classList.add('hidden');
+    const modal = document.getElementById('basicInfoModal');
+    modal.classList.add('hidden');
+    modal.dispatchEvent(new CustomEvent('hide'));
 }
 
 async function saveBasicInfo(propertyUuid) {

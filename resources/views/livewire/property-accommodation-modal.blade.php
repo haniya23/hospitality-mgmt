@@ -1,4 +1,4 @@
-<div x-data="{ show: @entangle('showModal') }" x-show="show" x-on:keydown.escape.window="show = false" style="display: none; z-index: 99999 !important;" class="fixed inset-0 overflow-y-auto backdrop-blur-sm bg-black/40">
+<div x-data="{ show: @entangle('showModal'), ...simpleModalScrollLock() }" x-init="setupScrollLock('show')" x-show="show" x-on:keydown.escape.window="show = false" style="display: none; z-index: 99999 !important;" class="fixed inset-0 overflow-y-auto backdrop-blur-sm bg-black/40">
     <div class="flex items-center justify-center min-h-screen p-4 sm:p-6">
         <div x-show="show" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 scale-95 translate-y-4" x-transition:enter-end="opacity-100 scale-100 translate-y-0" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 scale-100 translate-y-0" x-transition:leave-end="opacity-0 scale-95 translate-y-4" class="relative w-full max-w-md sm:max-w-lg mx-auto bg-white rounded-2xl shadow-2xl ring-1 ring-black/5 max-h-[95vh] flex flex-col">
             

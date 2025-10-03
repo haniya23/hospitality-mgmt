@@ -82,7 +82,7 @@
 </div>
 
 <!-- Accommodation Modal -->
-<div id="accommodationModal" class="fixed inset-0 overflow-y-auto backdrop-blur-sm bg-black/40 hidden" style="z-index: 99999 !important;">
+<div id="accommodationModal" class="fixed inset-0 overflow-y-auto backdrop-blur-sm bg-black/40 hidden" style="z-index: 99999 !important;" x-data x-init="$el.addEventListener('show', () => lockBodyScroll()); $el.addEventListener('hide', () => unlockBodyScroll());">
     <div class="flex min-h-full items-center justify-center p-4">
         <div class="relative w-full max-w-2xl mx-auto bg-white rounded-2xl shadow-2xl ring-1 ring-black/5 max-h-[95vh] flex flex-col">
             <!-- Modal Header -->
@@ -220,6 +220,7 @@ let currentAccommodationId = null;
 function openAccommodationModal(propertyUuid, accommodationId = null) {
     currentAccommodationId = accommodationId;
     const modal = document.getElementById('accommodationModal');
+    modal.dispatchEvent(new CustomEvent('show'));
     const title = document.getElementById('accommodationModalTitle');
     const form = document.getElementById('accommodationForm');
     
@@ -247,7 +248,9 @@ function openAccommodationModal(propertyUuid, accommodationId = null) {
 function closeAccommodationModal() {
     // Destroy Select2 instance before closing modal
     $('select[name="predefined_type_id"]').select2('destroy');
-    document.getElementById('accommodationModal').classList.add('hidden');
+    const modal = document.getElementById('accommodationModal');
+    modal.classList.add('hidden');
+    modal.dispatchEvent(new CustomEvent('hide'));
     currentAccommodationId = null;
 }
 

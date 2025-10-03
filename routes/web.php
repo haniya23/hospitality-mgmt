@@ -16,6 +16,11 @@ Route::get('/cashfree/success', [App\Http\Controllers\CashfreeController::class,
 
 // Protected Routes
 Route::middleware('auth')->group(function () {
+    // Test route for modal scroll lock
+    Route::get('/test-modal-scroll', function () {
+        return view('test-modal-scroll');
+    })->name('test.modal.scroll');
+    
     Route::get('/dashboard', function () {
         $user = auth()->user();
         $properties = $user->properties()->with(['category', 'location'])->latest()->get();

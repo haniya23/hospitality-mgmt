@@ -79,7 +79,7 @@
 </div>
 
 <!-- Location Modal -->
-<div id="locationModal" class="fixed inset-0 overflow-y-auto backdrop-blur-sm bg-black/40 hidden" style="z-index: 99999 !important;">
+<div id="locationModal" class="fixed inset-0 overflow-y-auto backdrop-blur-sm bg-black/40 hidden" style="z-index: 99999 !important;" x-data x-init="$el.addEventListener('show', () => lockBodyScroll()); $el.addEventListener('hide', () => unlockBodyScroll());">
     <div class="flex min-h-full items-center justify-center p-2 sm:p-4">
         <div class="relative w-full max-w-2xl mx-auto bg-white rounded-xl sm:rounded-2xl shadow-2xl ring-1 ring-black/5 max-h-[95vh] flex flex-col">
             <!-- Modal Header -->
@@ -205,7 +205,9 @@
 
 <script>
 function openLocationModal(propertyUuid) {
-    document.getElementById('locationModal').classList.remove('hidden');
+    const modal = document.getElementById('locationModal');
+    modal.classList.remove('hidden');
+    modal.dispatchEvent(new CustomEvent('show'));
     
     // Initialize Select2 for all location dropdowns
     $('#country_id, #state_id, #district_id, #city_id, #pincode_id').select2({
@@ -219,7 +221,9 @@ function openLocationModal(propertyUuid) {
 function closeLocationModal() {
     // Destroy Select2 instances before closing modal
     $('#country_id, #state_id, #district_id, #city_id, #pincode_id').select2('destroy');
-    document.getElementById('locationModal').classList.add('hidden');
+    const modal = document.getElementById('locationModal');
+    modal.classList.add('hidden');
+    modal.dispatchEvent(new CustomEvent('hide'));
 }
 
 async function saveLocation(propertyUuid) {

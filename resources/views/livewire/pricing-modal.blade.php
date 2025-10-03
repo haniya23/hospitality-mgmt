@@ -1,5 +1,6 @@
 <div
-    x-data="{ show: @entangle('isOpen'), mode: @entangle('mode') }"
+    x-data="{ show: @entangle('isOpen'), mode: @entangle('mode'), ...simpleModalScrollLock() }"
+    x-init="setupScrollLock('show')"
     x-show="show"
     x-on:keydown.escape.window="show = false"
     style="display: none; z-index: 99999 !important;"
