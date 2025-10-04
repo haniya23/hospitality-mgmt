@@ -144,6 +144,22 @@
                     </ul>
                 </div>
 
+                <!-- Check-in/Check-out Section -->
+                <div class="mb-6">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">Guest Services</h3>
+                    <ul class="space-y-1">
+                        <li><a href="{{ route('checkin.confirmed-bookings') }}" class="flex gap-4 p-3 font-semibold rounded-lg hover:bg-green-100 {{ request()->routeIs('checkin.confirmed-bookings') ? 'bg-gradient-to-r from-green-400 to-green-600 text-white' : 'text-gray-700' }} transition-all">
+                            <i class="fas fa-calendar-check w-5"></i>Ready for Check-in
+                        </a></li>
+                        <li><a href="{{ route('checkin.index') }}" class="flex gap-4 p-3 font-semibold rounded-lg hover:bg-green-100 {{ request()->routeIs('checkin.index') ? 'bg-gradient-to-r from-green-400 to-green-600 text-white' : 'text-gray-700' }} transition-all">
+                            <i class="fas fa-sign-in-alt w-5"></i>Check-in Records
+                        </a></li>
+                        <li><a href="{{ route('checkout.index') }}" class="flex gap-4 p-3 font-semibold rounded-lg hover:bg-green-100 {{ request()->routeIs('checkout.*') ? 'bg-gradient-to-r from-green-400 to-green-600 text-white' : 'text-gray-700' }} transition-all">
+                            <i class="fas fa-sign-out-alt w-5"></i>Check-out Records
+                        </a></li>
+                    </ul>
+                </div>
+
                 <!-- Properties Section -->
                 <div class="mb-6">
                     <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">Properties</h3>
@@ -334,6 +350,7 @@
                 overview: false,
                 properties: false,
                 bookings: false,
+                guestServices: false,
                 customers: false,
                 business: false,
                 analytics: false
@@ -405,6 +422,28 @@
                     </a>
                     <a href="{{ route('bookings.cancelled') }}" @click="sidebarOpen = false" class="block p-2 text-sm text-gray-600 hover:text-green-600 hover:bg-green-50 rounded transition-colors {{ request()->routeIs('bookings.cancelled') ? 'text-green-600 bg-green-50' : '' }}">
                         Cancelled Bookings
+                    </a>
+                </div>
+            </div>
+
+            <!-- Guest Services Section -->
+            <div class="space-y-1">
+                <button @click="openSections.guestServices = !openSections.guestServices" class="w-full flex items-center justify-between p-3 text-left font-semibold text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-concierge-bell w-5 text-gray-500"></i>
+                        <span>Guest Services</span>
+                    </div>
+                    <i class="fas fa-chevron-down w-4 text-gray-400 transition-transform" :class="openSections.guestServices ? 'rotate-180' : ''"></i>
+                </button>
+                <div x-show="openSections.guestServices" x-transition class="ml-8 space-y-1">
+                    <a href="{{ route('checkin.confirmed-bookings') }}" @click="sidebarOpen = false" class="block p-2 text-sm text-gray-600 hover:text-green-600 hover:bg-green-50 rounded transition-colors {{ request()->routeIs('checkin.confirmed-bookings') ? 'text-green-600 bg-green-50' : '' }}">
+                        Ready for Check-in
+                    </a>
+                    <a href="{{ route('checkin.index') }}" @click="sidebarOpen = false" class="block p-2 text-sm text-gray-600 hover:text-green-600 hover:bg-green-50 rounded transition-colors {{ request()->routeIs('checkin.index') ? 'text-green-600 bg-green-50' : '' }}">
+                        Check-in Records
+                    </a>
+                    <a href="{{ route('checkout.index') }}" @click="sidebarOpen = false" class="block p-2 text-sm text-gray-600 hover:text-green-600 hover:bg-green-50 rounded transition-colors {{ request()->routeIs('checkout.*') ? 'text-green-600 bg-green-50' : '' }}">
+                        Check-out Records
                     </a>
                 </div>
             </div>

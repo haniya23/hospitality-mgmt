@@ -126,6 +126,24 @@ Route::middleware(['auth', 'subscription.limits'])->group(function () {
     Route::get('/bookings/{booking}/invoice/download', [App\Http\Controllers\InvoiceController::class, 'download'])->name('bookings.invoice.download');
     Route::get('/bookings/bulk-invoice/download', [App\Http\Controllers\InvoiceController::class, 'bulkDownload'])->name('bookings.bulk-invoice.download');
     
+    // Check-in/Check-out Routes
+    Route::get('/checkin', [App\Http\Controllers\CheckInController::class, 'index'])->name('checkin.index');
+    Route::get('/checkin/confirmed-bookings', [App\Http\Controllers\CheckInController::class, 'confirmedBookings'])->name('checkin.confirmed-bookings');
+    Route::post('/checkin/{reservationUuid}/update-customer', [App\Http\Controllers\CheckInController::class, 'updateCustomerDetails'])->name('checkin.update-customer');
+    Route::get('/checkin/{reservationUuid}', [App\Http\Controllers\CheckInController::class, 'show'])->name('checkin.show');
+    Route::post('/checkin/{reservationUuid}', [App\Http\Controllers\CheckInController::class, 'store'])->name('checkin.store');
+    Route::get('/checkin/{checkInUuid}/success', [App\Http\Controllers\CheckInController::class, 'success'])->name('checkin.success');
+    Route::get('/checkin/{checkInUuid}/details', [App\Http\Controllers\CheckInController::class, 'details'])->name('checkin.details');
+    Route::get('/api/checkin/{reservationUuid}/booking-details', [App\Http\Controllers\CheckInController::class, 'getBookingDetails'])->name('api.checkin.booking-details');
+    
+    Route::get('/checkout', [App\Http\Controllers\CheckOutController::class, 'index'])->name('checkout.index');
+    Route::get('/checkout/{reservationUuid}', [App\Http\Controllers\CheckOutController::class, 'show'])->name('checkout.show');
+    Route::post('/checkout/{reservationUuid}', [App\Http\Controllers\CheckOutController::class, 'store'])->name('checkout.store');
+    Route::get('/checkout/{checkOutUuid}/success', [App\Http\Controllers\CheckOutController::class, 'success'])->name('checkout.success');
+    Route::get('/checkout/{checkOutUuid}/details', [App\Http\Controllers\CheckOutController::class, 'details'])->name('checkout.details');
+    Route::post('/checkout/{checkOutUuid}/mark-clean', [App\Http\Controllers\CheckOutController::class, 'markRoomClean'])->name('checkout.mark-clean');
+    Route::get('/api/checkout/{reservationUuid}/booking-details', [App\Http\Controllers\CheckOutController::class, 'getBookingDetails'])->name('api.checkout.booking-details');
+    
     // API Routes for Alpine.js
     Route::prefix('api')->group(function () {
         Route::get('/properties', [App\Http\Controllers\BookingController::class, 'getProperties']);

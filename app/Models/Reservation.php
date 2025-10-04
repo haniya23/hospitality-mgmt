@@ -165,4 +165,14 @@ class Reservation extends Model
     {
         return $this->hasOne(CancelledBooking::class);
     }
+
+    public function checkInRecord()
+    {
+        return $this->hasOne(CheckIn::class);
+    }
+
+    public function checkOutRecord()
+    {
+        return $this->hasOne(CheckOut::class);
+    }
 }
