@@ -97,6 +97,8 @@ class MobileAuthController extends Controller
             'mobile_number' => $request->mobile_number,
             'pin_hash' => Hash::make($request->pin),
             'email' => $request->email,
+            'user_type' => 'owner',
+            'is_staff' => false,
         ], $subscriptionData));
 
 

@@ -136,6 +136,8 @@ class B2bPartner extends Model
                 'mobile_number' => $partnerMobile,
                 'pin_hash' => bcrypt('0000'), // Default PIN
                 'is_active' => false, // Inactive until they accept
+                'user_type' => 'owner',
+                'is_staff' => false,
             ]);
         }
 

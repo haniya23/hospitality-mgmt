@@ -36,6 +36,11 @@ class Property extends Model
                 $model->uuid = Str::uuid();
             }
         });
+        
+        static::created(function ($model) {
+            // Create default roles for the property
+            Role::createDefaultRoles($model->id);
+        });
     }
 
     public function getRouteKeyName()
@@ -66,6 +71,62 @@ class Property extends Model
     public function staffAssignments()
     {
         return $this->hasMany(StaffAssignment::class);
+    }
+
+    public function staffTasks()
+    {
+        return $this->hasMany(StaffTask::class);
+    }
+
+    public function cleaningChecklists()
+    {
+        return $this->hasMany(CleaningChecklist::class);
+    }
+
+    public function activeStaff()
+    {
+        return $this->staffAssignments()
+                    ->where('status', 'active')
+                    ->with('user');
+    }
+
+    public function getActiveStaffCount()
+    {
+        return $this->staffAssignments()
+                    ->where('status', 'active')
+                    ->count();
+    }
+
+    public function getTodaysTasksCount()
+    {
+        return $this->staffTasks()
+                    ->whereDate('scheduled_at', today())
+                    ->whereIn('status', ['pending', 'in_progress'])
+                    ->count();
+    }
+
+    public function getOverdueTasksCount()
+    {
+        return $this->staffTasks()
+                    ->where('scheduled_at', '<', now())
+                    ->whereIn('status', ['pending', 'in_progress'])
+                    ->count();
+    }
+
+    public function getTaskCompletionRate($days = 7)
+    {
+        $startDate = now()->subDays($days);
+        
+        $totalTasks = $this->staffTasks()
+                           ->where('created_at', '>=', $startDate)
+                           ->count();
+        
+        $completedTasks = $this->staffTasks()
+                               ->where('created_at', '>=', $startDate)
+                               ->where('status', 'completed')
+                               ->count();
+        
+        return $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100, 2) : 0;
     }
 
     public function approver()

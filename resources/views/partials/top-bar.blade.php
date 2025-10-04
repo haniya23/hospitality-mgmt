@@ -12,6 +12,34 @@
     $userName = $user->name ?? 'Manager';
     $userInitial = substr($userName, 0, 1);
     
+    // User role logic
+    $roleInfo = match($user->user_type) {
+        'admin' => [
+            'label' => 'Administrator',
+            'icon' => 'fas fa-shield-alt',
+            'color' => 'text-red-600',
+            'bgColor' => 'bg-red-50'
+        ],
+        'owner' => [
+            'label' => 'Property Owner',
+            'icon' => 'fas fa-crown',
+            'color' => 'text-purple-600',
+            'bgColor' => 'bg-purple-50'
+        ],
+        'staff' => [
+            'label' => 'Staff Member',
+            'icon' => 'fas fa-user-tie',
+            'color' => 'text-blue-600',
+            'bgColor' => 'bg-blue-50'
+        ],
+        default => [
+            'label' => 'User',
+            'icon' => 'fas fa-user',
+            'color' => 'text-gray-600',
+            'bgColor' => 'bg-gray-50'
+        ]
+    };
+    
     // Subscription status logic (cached for performance)
     $subscriptionInfo = match($user->subscription_status) {
         'trial' => [
@@ -65,8 +93,14 @@
                 {{-- User Info (Hidden on small screens) --}}
                 <div class="top-bar__user-info">
                     <div class="top-bar__user-name">{{ $userName }}</div>
-                    <div class="top-bar__user-plan {{ $subscriptionInfo['color'] }}">
-                        {{ $subscriptionInfo['label'] }}
+                    <div class="flex items-center gap-2">
+                        <div class="top-bar__user-plan {{ $subscriptionInfo['color'] }}">
+                            {{ $subscriptionInfo['label'] }}
+                        </div>
+                        <div class="flex items-center gap-1 px-2 py-1 rounded-full {{ $roleInfo['bgColor'] }}">
+                            <i class="{{ $roleInfo['icon'] }} {{ $roleInfo['color'] }} text-xs"></i>
+                            <span class="text-xs font-medium {{ $roleInfo['color'] }}">{{ $roleInfo['label'] }}</span>
+                        </div>
                     </div>
                 </div>
                 
@@ -99,8 +133,14 @@
                         {{-- Mobile User Info --}}
                         <div class="top-bar__menu-header">
                             <div class="top-bar__menu-user">{{ $userName }}</div>
-                            <div class="top-bar__menu-plan {{ $subscriptionInfo['color'] }}">
-                                {{ $subscriptionInfo['label'] }} • {{ $subscriptionInfo['detail'] }}
+                            <div class="flex items-center gap-2 mb-2">
+                                <div class="top-bar__menu-plan {{ $subscriptionInfo['color'] }}">
+                                    {{ $subscriptionInfo['label'] }} • {{ $subscriptionInfo['detail'] }}
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1 px-2 py-1 rounded-full {{ $roleInfo['bgColor'] }} w-fit">
+                                <i class="{{ $roleInfo['icon'] }} {{ $roleInfo['color'] }} text-xs"></i>
+                                <span class="text-xs font-medium {{ $roleInfo['color'] }}">{{ $roleInfo['label'] }}</span>
                             </div>
                         </div>
                         
@@ -147,8 +187,14 @@
                 <div class="top-bar__user-section">
                     <div class="top-bar__user-details">
                         <div class="top-bar__user-name">{{ $userName }}</div>
-                        <div class="top-bar__user-status {{ $subscriptionInfo['color'] }}">
-                            {{ $subscriptionInfo['label'] }}
+                        <div class="flex items-center gap-2">
+                            <div class="top-bar__user-status {{ $subscriptionInfo['color'] }}">
+                                {{ $subscriptionInfo['label'] }}
+                            </div>
+                            <div class="flex items-center gap-1 px-2 py-1 rounded-full {{ $roleInfo['bgColor'] }}">
+                                <i class="{{ $roleInfo['icon'] }} {{ $roleInfo['color'] }} text-xs"></i>
+                                <span class="text-xs font-medium {{ $roleInfo['color'] }}">{{ $roleInfo['label'] }}</span>
+                            </div>
                         </div>
                     </div>
                     

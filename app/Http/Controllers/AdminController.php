@@ -160,6 +160,8 @@ class AdminController extends Controller
             'properties_limit' => $request->properties_limit,
             'is_trial_active' => $request->subscription_status === 'trial',
             'subscription_ends_at' => $request->subscription_status !== 'trial' ? now()->addYear() : null,
+            'user_type' => 'owner',
+            'is_staff' => false,
         ]);
 
         return redirect()->route('admin.user-management')->with('success', 'User created successfully!');

@@ -45,6 +45,8 @@ class B2bController extends Controller
                 'email' => $validated['email'],
                 'pin_hash' => Hash::make('0000'), // Default PIN
                 'is_active' => false, // Inactive until they accept
+                'user_type' => 'owner',
+                'is_staff' => false,
             ]);
 
             // Create B2B partner

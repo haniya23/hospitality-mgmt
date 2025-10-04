@@ -29,6 +29,8 @@ class CreateTestUser extends Command
             'mobile_number' => '987654321' . rand(1, 9),
             'is_admin' => false,
             'is_active' => true,
+            'user_type' => 'owner',
+            'is_staff' => false,
         ]);
 
         $this->info("Test user created successfully!");

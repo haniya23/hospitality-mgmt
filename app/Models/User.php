@@ -23,6 +23,8 @@ class User extends Authenticatable implements FilamentUser
         'email',
         'is_active',
         'is_admin',
+        'user_type',
+        'is_staff',
         'subscription_status',
         'trial_plan',
         'trial_ends_at',
@@ -47,6 +49,7 @@ class User extends Authenticatable implements FilamentUser
             'mobile_verified_at' => 'datetime',
             'is_active' => 'boolean',
             'is_admin' => 'boolean',
+            'is_staff' => 'boolean',
             'trial_ends_at' => 'datetime',
             'subscription_ends_at' => 'datetime',
             'is_trial_active' => 'boolean',
@@ -70,6 +73,26 @@ class User extends Authenticatable implements FilamentUser
     public function staffAssignments()
     {
         return $this->hasMany(StaffAssignment::class);
+    }
+
+    public function staffTasks()
+    {
+        return $this->hasManyThrough(StaffTask::class, StaffAssignment::class, 'user_id', 'staff_assignment_id');
+    }
+
+    public function staffNotifications()
+    {
+        return $this->hasManyThrough(StaffNotification::class, StaffAssignment::class, 'user_id', 'staff_assignment_id');
+    }
+
+    public function staffActivityLogs()
+    {
+        return $this->hasManyThrough(StaffActivityLog::class, StaffAssignment::class, 'user_id', 'staff_assignment_id');
+    }
+
+    public function checklistExecutions()
+    {
+        return $this->hasManyThrough(ChecklistExecution::class, StaffAssignment::class, 'user_id', 'staff_assignment_id');
     }
 
     public function b2bPartnerContacts()
@@ -317,6 +340,13 @@ class User extends Authenticatable implements FilamentUser
                 $model->is_trial_active = true;
                 $model->properties_limit = 1;
             }
+            // Set new users as owners by default
+            if (empty($model->user_type)) {
+                $model->user_type = 'owner';
+            }
+            if (is_null($model->is_staff)) {
+                $model->is_staff = false;
+            }
         });
     }
 
@@ -326,6 +356,143 @@ class User extends Authenticatable implements FilamentUser
     public function canAccessPanel(Panel $panel): bool
     {
         return $this->is_admin;
+    }
+
+    // Staff-related methods
+    public function isStaff()
+    {
+        return $this->is_staff || $this->user_type === 'staff';
+    }
+
+    public function isOwner()
+    {
+        return $this->user_type === 'owner' || (!$this->is_staff && !$this->is_admin);
+    }
+
+    public function getAssignedProperties()
+    {
+        return $this->staffAssignments()
+                    ->with('property')
+                    ->where('status', 'active')
+                    ->get()
+                    ->pluck('property');
+    }
+
+    public function getActiveStaffAssignments()
+    {
+        return $this->staffAssignments()
+                    ->where('status', 'active')
+                    ->with(['property', 'role'])
+                    ->get();
+    }
+
+    public function getTodaysTasks()
+    {
+        return $this->staffTasks()
+                    ->whereDate('scheduled_at', today())
+                    ->whereIn('staff_tasks.status', ['pending', 'in_progress'])
+                    ->orderBy('priority', 'desc')
+                    ->orderBy('scheduled_at')
+                    ->get();
+    }
+
+    public function getOverdueTasks()
+    {
+        return $this->staffTasks()
+                    ->where('scheduled_at', '<', now())
+                    ->whereIn('staff_tasks.status', ['pending', 'in_progress'])
+                    ->orderBy('scheduled_at')
+                    ->get();
+    }
+
+    public function getUnreadNotifications()
+    {
+        return $this->staffNotifications()
+                    ->where('is_read', false)
+                    ->orderBy('priority', 'desc')
+                    ->orderBy('staff_notifications.created_at', 'desc')
+                    ->get();
+    }
+
+    public function getUnreadNotificationsCount()
+    {
+        return $this->staffNotifications()
+                    ->where('is_read', false)
+                    ->count();
+    }
+
+    public function getUrgentNotificationsCount()
+    {
+        return $this->staffNotifications()
+                    ->where('is_read', false)
+                    ->where('priority', 'urgent')
+                    ->count();
+    }
+
+    public function hasPermission($permissionKey, $propertyId = null)
+    {
+        $query = StaffPermission::whereHas('staffAssignment', function($q) {
+            $q->where('user_id', $this->id)
+              ->where('status', 'active');
+        })->where('permission_key', $permissionKey);
+
+        if ($propertyId) {
+            $query->whereHas('staffAssignment', function($q) use ($propertyId) {
+                $q->where('property_id', $propertyId);
+            });
+        }
+
+        return $query->where('is_granted', true)->exists();
+    }
+
+    public function getPermissions($propertyId = null)
+    {
+        $query = StaffPermission::whereHas('staffAssignment', function($q) {
+            $q->where('user_id', $this->id)
+              ->where('status', 'active');
+        })->where('is_granted', true);
+
+        if ($propertyId) {
+            $query->whereHas('staffAssignment', function($q) use ($propertyId) {
+                $q->where('property_id', $propertyId);
+            });
+        }
+
+        return $query->pluck('permission_key')->toArray();
+    }
+
+    public function getTodaysActivity()
+    {
+        return $this->staffActivityLogs()
+                    ->whereDate('staff_activity_logs.created_at', today())
+                    ->orderBy('staff_activity_logs.created_at', 'desc')
+                    ->get();
+    }
+
+    public function getTaskCompletionRate($days = 7)
+    {
+        $startDate = now()->subDays($days);
+        
+        $totalTasks = $this->staffTasks()
+                           ->where('staff_tasks.created_at', '>=', $startDate)
+                           ->count();
+        
+        $completedTasks = $this->staffTasks()
+                               ->where('staff_tasks.created_at', '>=', $startDate)
+                               ->where('staff_tasks.status', 'completed')
+                               ->count();
+        
+        return $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100, 2) : 0;
+    }
+
+    // Static method to create staff user
+    public static function createStaff($data)
+    {
+        $data['user_type'] = 'staff';
+        $data['is_staff'] = true;
+        $data['is_active'] = true;
+        
+        return self::create($data);
     }
 
 }

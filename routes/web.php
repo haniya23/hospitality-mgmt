@@ -6,6 +6,11 @@ use Illuminate\Support\Facades\Route;
 // Public Routes
 Route::get('/', [App\Http\Controllers\PublicController::class, 'simple'])->name('public.index');
 
+// Staff Login Redirect
+Route::get('/staff', function () {
+    return redirect()->route('staff.login');
+});
+
 // Authentication Routes
 Route::get('/login', [MobileAuthController::class, 'showLoginForm'])->name('login')->middleware('guest');
 Route::post('/login', [MobileAuthController::class, 'login'])->middleware('guest');
@@ -13,6 +18,63 @@ Route::get('/register', [MobileAuthController::class, 'showRegistrationForm'])->
 Route::post('/register', [MobileAuthController::class, 'register'])->middleware('guest');
 Route::post('/logout', [MobileAuthController::class, 'logout'])->name('logout');
 Route::get('/cashfree/success', [App\Http\Controllers\CashfreeController::class, 'success'])->name('cashfree.success');
+
+// Staff Login Routes
+Route::prefix('staff')->name('staff.')->group(function () {
+    Route::get('/login', [App\Http\Controllers\Auth\StaffAuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [App\Http\Controllers\Auth\StaffAuthController::class, 'login'])->name('login.post');
+    Route::post('/logout', [App\Http\Controllers\Auth\StaffAuthController::class, 'logout'])->name('logout');
+});
+
+// Staff Routes
+Route::middleware(['staff'])->prefix('staff')->name('staff.')->group(function () {
+    Route::get('/dashboard', [App\Http\Controllers\StaffController::class, 'dashboard'])->name('dashboard');
+    Route::get('/tasks', [App\Http\Controllers\StaffController::class, 'tasks'])->name('tasks');
+    Route::post('/tasks/{taskId}/start', [App\Http\Controllers\StaffController::class, 'startTask'])->name('tasks.start');
+    Route::post('/tasks/{taskId}/complete', [App\Http\Controllers\StaffController::class, 'completeTask'])->name('tasks.complete');
+    Route::post('/tasks/{taskId}/cancel', [App\Http\Controllers\StaffController::class, 'cancelTask'])->name('tasks.cancel');
+    Route::get('/notifications', [App\Http\Controllers\StaffController::class, 'notifications'])->name('notifications');
+    Route::post('/notifications/{notificationId}/read', [App\Http\Controllers\StaffController::class, 'markNotificationAsRead'])->name('notifications.read');
+    Route::post('/notifications/mark-all-read', [App\Http\Controllers\StaffController::class, 'markAllNotificationsAsRead'])->name('notifications.mark-all-read');
+    Route::get('/checklists', [App\Http\Controllers\StaffController::class, 'checklists'])->name('checklists');
+    Route::post('/checklists/{checklistId}/start', [App\Http\Controllers\StaffController::class, 'startChecklist'])->name('checklists.start');
+    Route::get('/checklists/{executionUuid}/execute', [App\Http\Controllers\StaffController::class, 'executeChecklist'])->name('checklist.execute');
+    Route::post('/checklists/{executionId}/update-item', [App\Http\Controllers\StaffController::class, 'updateChecklistItem'])->name('checklists.update-item');
+    Route::post('/checklists/{executionId}/complete', [App\Http\Controllers\StaffController::class, 'completeChecklist'])->name('checklists.complete');
+    Route::get('/activity', [App\Http\Controllers\StaffController::class, 'activity'])->name('activity');
+    Route::get('/notifications/count', [App\Http\Controllers\StaffController::class, 'getUnreadNotificationsCount'])->name('notifications.count');
+    Route::get('/dashboard-data', [App\Http\Controllers\StaffController::class, 'dashboard'])->name('dashboard-data');
+});
+
+// Owner Staff Management Routes
+Route::middleware(['auth'])->prefix('owner')->name('owner.')->group(function () {
+    Route::get('/staff', [App\Http\Controllers\OwnerStaffController::class, 'index'])->name('staff.index');
+    Route::get('/staff/create', [App\Http\Controllers\OwnerStaffController::class, 'create'])->name('staff.create');
+    Route::post('/staff', [App\Http\Controllers\OwnerStaffController::class, 'store'])->name('staff.store');
+    Route::get('/staff/{staffAssignmentId}', [App\Http\Controllers\OwnerStaffController::class, 'show'])->name('staff.show');
+    Route::get('/staff/{staffAssignmentId}/edit', [App\Http\Controllers\OwnerStaffController::class, 'edit'])->name('staff.edit');
+    Route::put('/staff/{staffAssignmentId}', [App\Http\Controllers\OwnerStaffController::class, 'update'])->name('staff.update');
+    Route::delete('/staff/{staffAssignmentId}', [App\Http\Controllers\OwnerStaffController::class, 'destroy'])->name('staff.destroy');
+    Route::post('/staff/{staffAssignmentId}/assign-task', [App\Http\Controllers\OwnerStaffController::class, 'assignTask'])->name('staff.assign-task');
+    Route::post('/staff/{staffAssignmentId}/send-notification', [App\Http\Controllers\OwnerStaffController::class, 'sendNotification'])->name('staff.send-notification');
+    Route::post('/staff/{staffAssignmentId}/update-permissions', [App\Http\Controllers\OwnerStaffController::class, 'updatePermissions'])->name('staff.update-permissions');
+    Route::get('/staff/stats', [App\Http\Controllers\OwnerStaffController::class, 'getStaffStats'])->name('staff.stats');
+    Route::get('/staff/analytics', [App\Http\Controllers\OwnerStaffController::class, 'analytics'])->name('staff.analytics');
+});
+
+// API Routes for Staff Management
+Route::middleware(['auth'])->prefix('api')->group(function () {
+    Route::get('/properties/{propertyId}/roles', function ($propertyId) {
+        $user = Auth::user();
+        $property = \App\Models\Property::where('id', $propertyId)
+                                      ->where('owner_id', $user->id)
+                                      ->firstOrFail();
+        
+        $roles = \App\Models\Role::where('property_id', $propertyId)->get();
+        
+        return response()->json(['roles' => $roles]);
+    });
+});
 
 // Protected Routes
 Route::middleware(['auth', 'subscription.limits'])->group(function () {
@@ -23,6 +85,12 @@ Route::middleware(['auth', 'subscription.limits'])->group(function () {
     
     Route::get('/dashboard', function () {
         $user = auth()->user();
+        
+        // If user is staff, redirect to staff dashboard
+        if ($user->isStaff()) {
+            return redirect()->route('staff.dashboard');
+        }
+        
         $properties = $user->properties()->with(['category', 'location'])->latest()->get();
         
         // If user has no properties, redirect to onboarding wizard

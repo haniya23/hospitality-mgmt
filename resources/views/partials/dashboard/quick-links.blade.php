@@ -22,6 +22,17 @@
             <span class="text-sm font-medium text-gray-800 text-center">Properties</span>
         </a>
 
+        @if(auth()->user()->isOwner())
+        <a href="{{ route('owner.staff.index') }}" class="group flex flex-col items-center p-4 rounded-xl bg-gradient-to-br from-indigo-50 to-blue-50 hover:from-indigo-100 hover:to-blue-100 transition-all duration-300 transform hover:scale-105 border border-indigo-200">
+            <div class="w-12 h-12 rounded-xl bg-indigo-500 flex items-center justify-center mb-3 shadow-lg group-hover:shadow-xl transition-shadow">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+            </div>
+            <span class="text-sm font-medium text-gray-800 text-center">Staff Management</span>
+        </a>
+        @endif
+
         <a href="/b2b" class="group flex flex-col items-center p-4 rounded-xl bg-gradient-to-br from-purple-50 to-violet-50 hover:from-purple-100 hover:to-violet-100 transition-all duration-300 transform hover:scale-105 border border-purple-200">
             <div class="w-12 h-12 rounded-xl bg-purple-500 flex items-center justify-center mb-3 shadow-lg group-hover:shadow-xl transition-shadow">
                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

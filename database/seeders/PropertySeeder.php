@@ -34,6 +34,8 @@ class PropertySeeder extends Seeder
                 'mobile_number' => '9876543210',
                 'pin_hash' => bcrypt('1234'),
                 'password' => bcrypt('password'),
+                'user_type' => 'owner',
+                'is_staff' => false,
             ]);
             $users = collect([$user]);
         }
