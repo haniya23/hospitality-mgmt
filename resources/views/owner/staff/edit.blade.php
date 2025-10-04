@@ -33,7 +33,7 @@
             </div>
         </div>
 
-        <form method="POST" action="{{ route('owner.staff.update', $staffAssignment->id) }}" class="space-y-6">
+        <form method="POST" action="{{ route('owner.staff.update', $staffAssignment->uuid) }}" class="space-y-6">
             @csrf
             @method('PUT')
 
@@ -311,14 +311,14 @@
                                     $permission = $staffPermissions->get($key);
                                     $isGranted = $permission ? $permission->is_granted : false;
                                 @endphp
-                                <div class="flex items-center justify-between p-2 border border-gray-200 rounded-lg">
+                                <div class="flex items-center justify-between p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                                     <div class="flex items-center space-x-3">
                                         <input type="checkbox" 
                                                id="permission_{{ $key }}" 
                                                name="permissions[{{ $key }}][granted]"
                                                {{ $isGranted ? 'checked' : '' }}
-                                               class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                        <label for="permission_{{ $key }}" class="text-sm text-gray-700 cursor-pointer">
+                                               class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 permission-checkbox">
+                                        <label for="permission_{{ $key }}" class="text-sm text-gray-700 cursor-pointer flex-1">
                                             {{ $description }}
                                         </label>
                                     </div>
@@ -565,17 +565,25 @@ $(document).ready(function() {
         width: '100%'
     });
 
-    // Handle permission updates
-    $('input[name^="permissions"]').on('change', function() {
+    // Handle permission updates - only for permission checkboxes
+    $('.permission-checkbox').on('change', function() {
         const permissionKey = $(this).attr('name').match(/permissions\[([^\]]+)\]/)[1];
         const isGranted = $(this).is(':checked');
         
-        updatePermission(permissionKey, isGranted);
+        // Only update if this is a real change, not just clicking on the panel
+        if (permissionKey && typeof isGranted === 'boolean') {
+            updatePermission(permissionKey, isGranted);
+        }
     });
 });
 
 // Function to update individual permission
 async function updatePermission(permissionKey, isGranted) {
+    // Prevent unnecessary updates
+    if (!permissionKey || typeof isGranted !== 'boolean') {
+        return;
+    }
+    
     try {
         const permissions = {};
         permissions[permissionKey] = {
@@ -604,8 +612,22 @@ async function updatePermission(permissionKey, isGranted) {
                 icon.removeClass('fa-check text-green-500').addClass('fa-times text-red-500');
             }
             
-            // Show success message
-            showNotification('Permission updated successfully!', 'success');
+            // Show success message only for actual changes
+            console.log('Permission updated successfully:', permissionKey, isGranted);
+            
+            // Show subtle visual feedback
+            const checkbox = $(`input[name="permissions[${permissionKey}][granted]"]`);
+            const container = checkbox.closest('.flex');
+            const feedback = $('<div class="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center text-white text-xs"><i class="fas fa-check"></i></div>');
+            
+            container.css('position', 'relative');
+            container.append(feedback);
+            
+            setTimeout(() => {
+                feedback.fadeOut(300, function() {
+                    $(this).remove();
+                });
+            }, 1000);
         } else {
             showNotification('Failed to update permission: ' + result.message, 'error');
             // Revert the checkbox
@@ -620,11 +642,14 @@ async function updatePermission(permissionKey, isGranted) {
 
 // Function to show notifications
 function showNotification(message, type = 'info') {
+    // Remove any existing notifications first
+    $('.permission-notification').remove();
+    
     const notification = $(`
-        <div class="fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm ${type === 'success' ? 'bg-green-500 text-white' : type === 'error' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'}">
+        <div class="permission-notification fixed bottom-4 right-4 z-30 p-3 rounded-lg shadow-md max-w-sm ${type === 'success' ? 'bg-white border border-green-200 text-green-800' : type === 'error' ? 'bg-white border border-red-200 text-red-800' : 'bg-white border border-blue-200 text-blue-800'}">
             <div class="flex items-center space-x-2">
-                <i class="fas ${type === 'success' ? 'fa-check' : type === 'error' ? 'fa-times' : 'fa-info'}"></i>
-                <span>${message}</span>
+                <i class="fas ${type === 'success' ? 'fa-check text-green-600' : type === 'error' ? 'fa-times text-red-600' : 'fa-info text-blue-600'}"></i>
+                <span class="text-sm font-medium">${message}</span>
             </div>
         </div>
     `);
@@ -635,7 +660,7 @@ function showNotification(message, type = 'info') {
         notification.fadeOut(300, function() {
             $(this).remove();
         });
-    }, 3000);
+    }, 2500);
 }
 </script>
 @endsection

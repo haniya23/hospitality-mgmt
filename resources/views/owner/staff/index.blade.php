@@ -239,7 +239,7 @@
                                 <span class="hidden sm:inline">Attendance</span>
                                 <span class="sm:hidden">Att.</span>
                             </a>
-                            <a :href="`/owner/leave-requests?staff_id=${staff.user.id}&uuid=${staff.user.uuid}`" 
+                            <a :href="`/owner/leave-requests?staff_id=${staff.user.uuid}&uuid=${staff.user.uuid}`" 
                                class="flex items-center justify-center px-3 py-2 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors text-sm font-medium">
                                 <i class="fas fa-calendar-times mr-2"></i>
                                 <span class="hidden sm:inline">Leave</span>

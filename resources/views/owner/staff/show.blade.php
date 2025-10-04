@@ -76,7 +76,7 @@
                    class="px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium flex items-center justify-center">
                     <i class="fas fa-calendar-check mr-2"></i>Attendance
                 </a>
-                <a href="{{ route('owner.leave-requests.index', ['staff_id' => $staffAssignment->user->id]) }}" 
+                <a href="{{ route('owner.leave-requests.index', ['staff_id' => $staffAssignment->user->uuid]) }}" 
                    class="px-4 py-2 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors text-sm font-medium flex items-center justify-center">
                     <i class="fas fa-calendar-times mr-2"></i>Leave Requests
                 </a>
