@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Database\Seeders\RoleSeeder;
 
 class Role extends Model
 {
@@ -47,27 +48,18 @@ class Role extends Model
         return $this->hasMany(StaffAssignment::class);
     }
 
+    public function permissions()
+    {
+        return $this->belongsToMany(Permission::class, 'role_permissions');
+    }
+
     // Default roles for properties
     public static function createDefaultRoles($propertyId)
     {
-        $defaultRoles = [
-            [
-                'name' => 'Manager',
-                'description' => 'Full access to property management and staff oversight',
-            ],
-            [
-                'name' => 'Supervisor',
-                'description' => 'Oversees daily operations and staff coordination',
-            ],
-        ];
-
-        foreach ($defaultRoles as $roleData) {
-            static::create([
-                'property_id' => $propertyId,
-                'name' => $roleData['name'],
-                'description' => $roleData['description'],
-                'is_active' => true,
-            ]);
+        // Use the RoleSeeder to create roles for the property
+        $property = Property::find($propertyId);
+        if ($property) {
+            RoleSeeder::createRolesForProperty($property);
         }
     }
 
