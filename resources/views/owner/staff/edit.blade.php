@@ -254,22 +254,96 @@
                 </div>
             </div>
 
-            <!-- Notes -->
+            <!-- Access Control -->
             <div class="border-t border-gray-200 pt-6">
-                <h4 class="text-lg font-medium text-gray-900 mb-4">Additional Notes</h4>
+                <h4 class="text-lg font-medium text-gray-900 mb-4">Access Control & Permissions</h4>
                 
-                <div>
-                    <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">
-                        Notes
-                    </label>
-                    <textarea id="notes" 
-                              name="notes" 
-                              rows="4"
-                              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent @error('notes') border-red-500 @enderror"
-                              placeholder="Add any additional notes about this staff member...">{{ old('notes', $staffAssignment->notes) }}</textarea>
-                    @error('notes')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
+                <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-shield-alt text-blue-600"></i>
+                        </div>
+                        <div>
+                            <h5 class="font-medium text-gray-900">Role-Based Permissions</h5>
+                            <p class="text-sm text-gray-600">This staff member has permissions based on their assigned role: <strong>{{ $staffAssignment->role->name ?? 'No Role Assigned' }}</strong></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Role Permissions -->
+                    <div>
+                        <h5 class="font-medium text-gray-900 mb-3">Role Permissions</h5>
+                        <div class="space-y-2 max-h-64 overflow-y-auto">
+                            @if($staffAssignment->role && $staffAssignment->role->permissions->count() > 0)
+                                @foreach($staffAssignment->role->permissions->groupBy('module') as $module => $permissions)
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <h6 class="font-medium text-gray-800 text-sm mb-2">{{ ucwords(str_replace('_', ' ', $module)) }}</h6>
+                                        <div class="space-y-1">
+                                            @foreach($permissions as $permission)
+                                                <div class="flex items-center space-x-2 text-sm">
+                                                    <i class="fas fa-check text-green-500"></i>
+                                                    <span class="text-gray-700">{{ $permission->description }}</span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endforeach
+                            @else
+                                <div class="text-center py-4 text-gray-500">
+                                    <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
+                                    <p>No permissions assigned to this role</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Custom Permissions -->
+                    <div>
+                        <h5 class="font-medium text-gray-900 mb-3">Custom Permissions</h5>
+                        <div class="space-y-2 max-h-64 overflow-y-auto">
+                            @php
+                                $staffPermissions = \App\Models\StaffPermission::where('staff_assignment_id', $staffAssignment->id)->get()->keyBy('permission_key');
+                            @endphp
+                            
+                            @foreach(\App\Models\StaffPermission::PERMISSIONS as $key => $description)
+                                @php
+                                    $permission = $staffPermissions->get($key);
+                                    $isGranted = $permission ? $permission->is_granted : false;
+                                @endphp
+                                <div class="flex items-center justify-between p-2 border border-gray-200 rounded-lg">
+                                    <div class="flex items-center space-x-3">
+                                        <input type="checkbox" 
+                                               id="permission_{{ $key }}" 
+                                               name="permissions[{{ $key }}][granted]"
+                                               {{ $isGranted ? 'checked' : '' }}
+                                               class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                        <label for="permission_{{ $key }}" class="text-sm text-gray-700 cursor-pointer">
+                                            {{ $description }}
+                                        </label>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <span class="text-xs text-gray-500">{{ $key }}</span>
+                                        @if($isGranted)
+                                            <i class="fas fa-check text-green-500 text-xs"></i>
+                                        @else
+                                            <i class="fas fa-times text-red-500 text-xs"></i>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                        
+                        <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+                            <div class="flex items-start space-x-2">
+                                <i class="fas fa-info-circle text-blue-600 mt-0.5"></i>
+                                <div class="text-sm text-blue-800">
+                                    <p class="font-medium">Permission Override</p>
+                                    <p>Custom permissions override role-based permissions. Uncheck to deny access even if the role allows it.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -490,6 +564,78 @@ $(document).ready(function() {
         allowClear: true,
         width: '100%'
     });
+
+    // Handle permission updates
+    $('input[name^="permissions"]').on('change', function() {
+        const permissionKey = $(this).attr('name').match(/permissions\[([^\]]+)\]/)[1];
+        const isGranted = $(this).is(':checked');
+        
+        updatePermission(permissionKey, isGranted);
+    });
 });
+
+// Function to update individual permission
+async function updatePermission(permissionKey, isGranted) {
+    try {
+        const permissions = {};
+        permissions[permissionKey] = {
+            granted: isGranted,
+            restrictions: {}
+        };
+
+        const response = await fetch(`/owner/staff/{{ $staffAssignment->uuid }}/update-permissions`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ permissions: permissions })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // Update the visual indicator
+            const icon = $(`input[name="permissions[${permissionKey}][granted]"]`).closest('.flex').find('i');
+            if (isGranted) {
+                icon.removeClass('fa-times text-red-500').addClass('fa-check text-green-500');
+            } else {
+                icon.removeClass('fa-check text-green-500').addClass('fa-times text-red-500');
+            }
+            
+            // Show success message
+            showNotification('Permission updated successfully!', 'success');
+        } else {
+            showNotification('Failed to update permission: ' + result.message, 'error');
+            // Revert the checkbox
+            $(`input[name="permissions[${permissionKey}][granted]"]`).prop('checked', !isGranted);
+        }
+    } catch (error) {
+        showNotification('An error occurred while updating permission.', 'error');
+        // Revert the checkbox
+        $(`input[name="permissions[${permissionKey}][granted]"]`).prop('checked', !isGranted);
+    }
+}
+
+// Function to show notifications
+function showNotification(message, type = 'info') {
+    const notification = $(`
+        <div class="fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm ${type === 'success' ? 'bg-green-500 text-white' : type === 'error' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'}">
+            <div class="flex items-center space-x-2">
+                <i class="fas ${type === 'success' ? 'fa-check' : type === 'error' ? 'fa-times' : 'fa-info'}"></i>
+                <span>${message}</span>
+            </div>
+        </div>
+    `);
+    
+    $('body').append(notification);
+    
+    setTimeout(() => {
+        notification.fadeOut(300, function() {
+            $(this).remove();
+        });
+    }, 3000);
+}
 </script>
 @endsection

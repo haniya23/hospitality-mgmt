@@ -416,20 +416,21 @@ class OwnerStaffController extends Controller
         ]);
     }
 
-    public function updatePermissions(Request $request, $staffAssignmentId)
+    public function updatePermissions(Request $request, $staffAssignmentUuid)
     {
         $staffAssignment = StaffAssignment::whereHas('property', function($q) {
             $q->where('owner_id', Auth::id());
         })
-        ->findOrFail($staffAssignmentId);
+        ->where('uuid', $staffAssignmentUuid)
+        ->firstOrFail();
 
         $permissions = $request->permissions ?? [];
 
-        foreach (StaffPermission::PERMISSIONS as $key => $description) {
-            if (isset($permissions[$key])) {
-                $staffAssignment->grantPermission($key, $permissions[$key]['restrictions'] ?? []);
+        foreach ($permissions as $key => $permissionData) {
+            if (isset($permissionData['granted']) && $permissionData['granted']) {
+                StaffPermission::grantPermission($staffAssignment->id, $key, $permissionData['restrictions'] ?? []);
             } else {
-                $staffAssignment->denyPermission($key);
+                StaffPermission::denyPermission($staffAssignment->id, $key);
             }
         }
 
