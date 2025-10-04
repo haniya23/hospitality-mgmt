@@ -180,6 +180,30 @@
             
             {{-- Desktop Actions --}}
             <div class="top-bar__desktop-actions">
+                {{-- Quick Navigation Buttons --}}
+                @if($user->user_type === 'owner')
+                <div class="flex items-center space-x-2 mr-4">
+                    <a href="{{ route('owner.staff.index') }}" 
+                       class="top-bar__nav-btn {{ request()->routeIs('owner.staff*') ? 'top-bar__nav-btn--active' : '' }}"
+                       title="Staff Management">
+                        <i class="fas fa-users"></i>
+                        <span class="hidden lg:inline">Staff</span>
+                    </a>
+                    <a href="{{ route('owner.attendance.index') }}" 
+                       class="top-bar__nav-btn {{ request()->routeIs('owner.attendance*') ? 'top-bar__nav-btn--active' : '' }}"
+                       title="Attendance">
+                        <i class="fas fa-calendar-check"></i>
+                        <span class="hidden lg:inline">Attendance</span>
+                    </a>
+                    <a href="{{ route('owner.leave-requests.index') }}" 
+                       class="top-bar__nav-btn {{ request()->routeIs('owner.leave-requests*') ? 'top-bar__nav-btn--active' : '' }}"
+                       title="Leave Requests">
+                        <i class="fas fa-calendar-times"></i>
+                        <span class="hidden lg:inline">Leave</span>
+                    </a>
+                </div>
+                @endif
+                
                 {{-- Notifications --}}
                 <x-notification-center />
                 

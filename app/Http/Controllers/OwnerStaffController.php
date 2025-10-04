@@ -208,13 +208,14 @@ class OwnerStaffController extends Controller
         }
     }
 
-    public function show($staffAssignmentId)
+    public function show($staffAssignmentUuid)
     {
         $staffAssignment = StaffAssignment::whereHas('property', function($q) {
             $q->where('owner_id', Auth::id());
         })
         ->with(['user', 'property', 'role', 'staffTasks', 'staffNotifications'])
-        ->findOrFail($staffAssignmentId);
+        ->where('uuid', $staffAssignmentUuid)
+        ->firstOrFail();
 
         $recentTasks = $staffAssignment->staffTasks()
             ->orderBy('created_at', 'desc')
@@ -249,13 +250,14 @@ class OwnerStaffController extends Controller
         ));
     }
 
-    public function edit($staffAssignmentId)
+    public function edit($staffAssignmentUuid)
     {
         $staffAssignment = StaffAssignment::whereHas('property', function($q) {
             $q->where('owner_id', Auth::id());
         })
         ->with(['user', 'property', 'role'])
-        ->findOrFail($staffAssignmentId);
+        ->where('uuid', $staffAssignmentUuid)
+        ->firstOrFail();
 
         $user = Auth::user();
         $properties = $user->properties()->where('status', 'active')->get();
@@ -264,7 +266,7 @@ class OwnerStaffController extends Controller
         return view('owner.staff.edit', compact('staffAssignment', 'properties', 'roles'));
     }
 
-    public function update(Request $request, $staffAssignmentId)
+    public function update(Request $request, $staffAssignmentUuid)
     {
         $request->validate([
             'name' => 'required|string|max:255',
@@ -281,7 +283,8 @@ class OwnerStaffController extends Controller
             $q->where('owner_id', Auth::id());
         })
         ->with('user')
-        ->findOrFail($staffAssignmentId);
+        ->where('uuid', $staffAssignmentUuid)
+        ->firstOrFail();
 
         // Verify property ownership
         $property = Property::where('id', $request->property_id)
@@ -340,7 +343,7 @@ class OwnerStaffController extends Controller
                         ->with('success', 'Staff member deactivated successfully.');
     }
 
-    public function assignTask(Request $request, $staffAssignmentId)
+    public function assignTask(Request $request, $staffAssignmentUuid)
     {
         $request->validate([
             'task_name' => 'required|string|max:255',
@@ -353,7 +356,8 @@ class OwnerStaffController extends Controller
         $staffAssignment = StaffAssignment::whereHas('property', function($q) {
             $q->where('owner_id', Auth::id());
         })
-        ->findOrFail($staffAssignmentId);
+        ->where('uuid', $staffAssignmentUuid)
+        ->firstOrFail();
 
         $task = StaffTask::create([
             'staff_assignment_id' => $staffAssignment->id,
@@ -381,7 +385,7 @@ class OwnerStaffController extends Controller
         ]);
     }
 
-    public function sendNotification(Request $request, $staffAssignmentId)
+    public function sendNotification(Request $request, $staffAssignmentUuid)
     {
         $request->validate([
             'title' => 'required|string|max:255',
@@ -393,7 +397,8 @@ class OwnerStaffController extends Controller
         $staffAssignment = StaffAssignment::whereHas('property', function($q) {
             $q->where('owner_id', Auth::id());
         })
-        ->findOrFail($staffAssignmentId);
+        ->where('uuid', $staffAssignmentUuid)
+        ->firstOrFail();
 
         $notification = StaffNotification::create([
             'staff_assignment_id' => $staffAssignment->id,

@@ -95,6 +95,16 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasManyThrough(ChecklistExecution::class, StaffAssignment::class, 'user_id', 'staff_assignment_id');
     }
 
+    public function attendance()
+    {
+        return $this->hasManyThrough(Attendance::class, StaffAssignment::class, 'user_id', 'staff_assignment_id');
+    }
+
+    public function leaveRequests()
+    {
+        return $this->hasManyThrough(LeaveRequest::class, StaffAssignment::class, 'user_id', 'staff_assignment_id');
+    }
+
     public function b2bPartnerContacts()
     {
         return $this->hasMany(B2bPartner::class, 'contact_user_id');
@@ -493,6 +503,119 @@ class User extends Authenticatable implements FilamentUser
         $data['is_active'] = true;
         
         return self::create($data);
+    }
+
+    // Attendance helper methods
+    public function getTodaysAttendance()
+    {
+        return $this->attendance()->whereDate('date', today())->first();
+    }
+
+    public function markCheckIn($locationData = null)
+    {
+        $staffAssignment = $this->getActiveStaffAssignments()->first();
+        
+        if (!$staffAssignment) {
+            throw new \Exception('No active staff assignment found.');
+        }
+
+        $attendance = Attendance::updateOrCreate(
+            [
+                'staff_assignment_id' => $staffAssignment->id,
+                'date' => today(),
+            ],
+            [
+                'check_in_time' => now()->format('H:i:s'),
+                'status' => 'present',
+                'location_data' => $locationData,
+            ]
+        );
+
+        // Check if late
+        if ($attendance->isLate()) {
+            $attendance->update(['status' => 'late']);
+        }
+
+        return $attendance;
+    }
+
+    public function markCheckOut($notes = null)
+    {
+        $attendance = $this->getTodaysAttendance();
+        
+        if (!$attendance || !$attendance->check_in_time) {
+            throw new \Exception('No check-in found for today.');
+        }
+
+        $attendance->update([
+            'check_out_time' => now()->format('H:i:s'),
+            'notes' => $notes,
+        ]);
+
+        $attendance->calculateHoursWorked();
+
+        return $attendance;
+    }
+
+    public function getAttendanceStats($startDate = null, $endDate = null)
+    {
+        $startDate = $startDate ?? now()->startOfMonth();
+        $endDate = $endDate ?? now()->endOfMonth();
+
+        return Attendance::getStaffAttendanceStats(
+            $this->getActiveStaffAssignments()->first()->id ?? 0,
+            $startDate,
+            $endDate
+        );
+    }
+
+    public function getLeaveStats($year = null)
+    {
+        $staffAssignment = $this->getActiveStaffAssignments()->first();
+        
+        if (!$staffAssignment) {
+            return [
+                'total_requests' => 0,
+                'pending_requests' => 0,
+                'approved_requests' => 0,
+                'rejected_requests' => 0,
+                'total_days_requested' => 0,
+                'total_days_approved' => 0,
+            ];
+        }
+
+        return LeaveRequest::getStaffLeaveStats($staffAssignment->id, $year);
+    }
+
+    public function createLeaveRequest($leaveType, $startDate, $endDate, $reason, $attachments = [])
+    {
+        $staffAssignment = $this->getActiveStaffAssignments()->first();
+        
+        if (!$staffAssignment) {
+            throw new \Exception('No active staff assignment found.');
+        }
+
+        return LeaveRequest::createRequest(
+            $staffAssignment->id,
+            $leaveType,
+            $startDate,
+            $endDate,
+            $reason,
+            $attachments
+        );
+    }
+
+    public function getPendingLeaveRequests()
+    {
+        return $this->leaveRequests()->where('leave_requests.status', 'pending')->get();
+    }
+
+    public function getUpcomingLeaveRequests()
+    {
+        return $this->leaveRequests()
+                    ->where('leave_requests.start_date', '>=', today())
+                    ->where('leave_requests.status', 'approved')
+                    ->get();
     }
 
 }

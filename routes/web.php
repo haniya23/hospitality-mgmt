@@ -44,6 +44,15 @@ Route::middleware(['staff'])->prefix('staff')->name('staff.')->group(function ()
     Route::get('/activity', [App\Http\Controllers\StaffController::class, 'activity'])->name('activity');
     Route::get('/notifications/count', [App\Http\Controllers\StaffController::class, 'getUnreadNotificationsCount'])->name('notifications.count');
     Route::get('/dashboard-data', [App\Http\Controllers\StaffController::class, 'dashboard'])->name('dashboard-data');
+    
+    // Staff Attendance Routes
+    Route::get('/attendance', [App\Http\Controllers\StaffAttendanceController::class, 'index'])->name('attendance');
+    Route::post('/attendance/check-in', [App\Http\Controllers\StaffAttendanceController::class, 'checkIn'])->name('attendance.check-in');
+    Route::post('/attendance/check-out', [App\Http\Controllers\StaffAttendanceController::class, 'checkOut'])->name('attendance.check-out');
+    Route::post('/leave-requests', [App\Http\Controllers\StaffAttendanceController::class, 'createLeaveRequest'])->name('leave-requests.create');
+    Route::post('/leave-requests/{leaveRequestId}/cancel', [App\Http\Controllers\StaffAttendanceController::class, 'cancelLeaveRequest'])->name('leave-requests.cancel');
+    Route::get('/attendance/history', [App\Http\Controllers\StaffAttendanceController::class, 'getAttendanceHistory'])->name('attendance.history');
+    Route::get('/leave-requests/history', [App\Http\Controllers\StaffAttendanceController::class, 'getLeaveHistory'])->name('leave-requests.history');
 });
 
 // Owner Staff Management Routes
@@ -51,15 +60,23 @@ Route::middleware(['auth'])->prefix('owner')->name('owner.')->group(function () 
     Route::get('/staff', [App\Http\Controllers\OwnerStaffController::class, 'index'])->name('staff.index');
     Route::get('/staff/create', [App\Http\Controllers\OwnerStaffController::class, 'create'])->name('staff.create');
     Route::post('/staff', [App\Http\Controllers\OwnerStaffController::class, 'store'])->name('staff.store');
-    Route::get('/staff/{staffAssignmentId}', [App\Http\Controllers\OwnerStaffController::class, 'show'])->name('staff.show');
-    Route::get('/staff/{staffAssignmentId}/edit', [App\Http\Controllers\OwnerStaffController::class, 'edit'])->name('staff.edit');
-    Route::put('/staff/{staffAssignmentId}', [App\Http\Controllers\OwnerStaffController::class, 'update'])->name('staff.update');
-    Route::delete('/staff/{staffAssignmentId}', [App\Http\Controllers\OwnerStaffController::class, 'destroy'])->name('staff.destroy');
-    Route::post('/staff/{staffAssignmentId}/assign-task', [App\Http\Controllers\OwnerStaffController::class, 'assignTask'])->name('staff.assign-task');
-    Route::post('/staff/{staffAssignmentId}/send-notification', [App\Http\Controllers\OwnerStaffController::class, 'sendNotification'])->name('staff.send-notification');
-    Route::post('/staff/{staffAssignmentId}/update-permissions', [App\Http\Controllers\OwnerStaffController::class, 'updatePermissions'])->name('staff.update-permissions');
+    Route::get('/staff/{staffAssignmentUuid}', [App\Http\Controllers\OwnerStaffController::class, 'show'])->name('staff.show');
+    Route::get('/staff/{staffAssignmentUuid}/edit', [App\Http\Controllers\OwnerStaffController::class, 'edit'])->name('staff.edit');
+    Route::put('/staff/{staffAssignmentUuid}', [App\Http\Controllers\OwnerStaffController::class, 'update'])->name('staff.update');
+    Route::delete('/staff/{staffAssignmentUuid}', [App\Http\Controllers\OwnerStaffController::class, 'destroy'])->name('staff.destroy');
+    Route::post('/staff/{staffAssignmentUuid}/assign-task', [App\Http\Controllers\OwnerStaffController::class, 'assignTask'])->name('staff.assign-task');
+    Route::post('/staff/{staffAssignmentUuid}/send-notification', [App\Http\Controllers\OwnerStaffController::class, 'sendNotification'])->name('staff.send-notification');
+    Route::post('/staff/{staffAssignmentUuid}/update-permissions', [App\Http\Controllers\OwnerStaffController::class, 'updatePermissions'])->name('staff.update-permissions');
     Route::get('/staff/stats', [App\Http\Controllers\OwnerStaffController::class, 'getStaffStats'])->name('staff.stats');
     Route::get('/staff/analytics', [App\Http\Controllers\OwnerStaffController::class, 'analytics'])->name('staff.analytics');
+    
+    // Admin Attendance Management Routes
+    Route::get('/attendance', [App\Http\Controllers\AdminAttendanceController::class, 'index'])->name('attendance.index');
+    Route::get('/attendance/staff/{staffUuid}', [App\Http\Controllers\AdminAttendanceController::class, 'staffAttendance'])->name('attendance.staff');
+    Route::put('/attendance/{attendanceId}', [App\Http\Controllers\AdminAttendanceController::class, 'updateAttendance'])->name('attendance.update');
+    Route::get('/leave-requests', [App\Http\Controllers\AdminAttendanceController::class, 'leaveRequests'])->name('leave-requests.index');
+    Route::post('/leave-requests/{leaveRequestId}/approve', [App\Http\Controllers\AdminAttendanceController::class, 'approveLeaveRequest'])->name('leave-requests.approve');
+    Route::post('/leave-requests/{leaveRequestId}/reject', [App\Http\Controllers\AdminAttendanceController::class, 'rejectLeaveRequest'])->name('leave-requests.reject');
 });
 
 // API Routes for Staff Management

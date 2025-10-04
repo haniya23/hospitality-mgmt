@@ -387,6 +387,59 @@
         color: #b91c1c;
     }
     
+    /* Navigation Buttons */
+    .top-bar__nav-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.5rem;
+        background: #f8fafc;
+        color: #64748b;
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+        white-space: nowrap;
+    }
+    
+    .top-bar__nav-btn:hover {
+        background: #e2e8f0;
+        color: #475569;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .top-bar__nav-btn--active {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        border-color: #059669;
+        box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+    }
+    
+    .top-bar__nav-btn--active:hover {
+        background: linear-gradient(135deg, #059669, #047857);
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(16, 185, 129, 0.4);
+    }
+    
+    .top-bar__nav-btn i {
+        font-size: 0.875rem;
+    }
+    
+    /* Ensure navigation buttons stay on top */
+    .top-bar__desktop-actions {
+        z-index: 60;
+        position: relative;
+    }
+    
+    .top-bar__nav-btn {
+        z-index: 61;
+        position: relative;
+    }
+    
     /* Responsive Breakpoints */
     @media (min-width: 640px) {
         .top-bar__greeting {

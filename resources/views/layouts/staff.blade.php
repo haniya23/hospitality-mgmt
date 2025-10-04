@@ -5,9 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Staff Dashboard') - Hospitality Management</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    
+    <!-- Styles -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @stack('styles')
+    
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         .soft-header-gradient {
             background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
@@ -106,6 +115,12 @@
                    class="flex items-center px-4 py-3 rounded-xl transition-colors {{ request()->routeIs('staff.activity') ? 'bg-blue-100 text-blue-700' : 'text-gray-700 hover:bg-gray-100' }}">
                     <i class="fas fa-history w-5 mr-3"></i>
                     <span class="font-medium">Activity Log</span>
+                </a>
+                
+                <a href="{{ route('staff.attendance') }}" 
+                   class="flex items-center px-4 py-3 rounded-xl transition-colors {{ request()->routeIs('staff.attendance') ? 'bg-blue-100 text-blue-700' : 'text-gray-700 hover:bg-gray-100' }}">
+                    <i class="fas fa-calendar-check w-5 mr-3"></i>
+                    <span class="font-medium">Attendance</span>
                 </a>
             </nav>
 
@@ -311,6 +326,10 @@
                                         <i class="fas fa-history w-4 mr-3"></i>
                                         <span class="text-sm">Activity Log</span>
                                     </a>
+                                    <a href="{{ route('staff.attendance') }}" @click="showMoreMenu = false" class="flex items-center px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors rounded-lg {{ request()->routeIs('staff.attendance') ? 'bg-blue-50 text-blue-600' : '' }}">
+                                        <i class="fas fa-calendar-check w-4 mr-3"></i>
+                                        <span class="text-sm">Attendance</span>
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -394,5 +413,7 @@
             }
         }
     </script>
+
+    @stack('scripts')
 </body>
 </html>
