@@ -15,7 +15,7 @@ Route::post('/logout', [MobileAuthController::class, 'logout'])->name('logout');
 Route::get('/cashfree/success', [App\Http\Controllers\CashfreeController::class, 'success'])->name('cashfree.success');
 
 // Protected Routes
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'subscription.limits'])->group(function () {
     // Test route for modal scroll lock
     Route::get('/test-modal-scroll', function () {
         return view('test-modal-scroll');
@@ -227,6 +227,32 @@ Route::middleware('auth')->group(function () {
         return view('bookings.enhanced-create', compact('properties', 'b2bPartners'));
     })->name('bookings.enhanced-create');
     Route::get('/subscription/plans', [App\Http\Controllers\SubscriptionController::class, 'plans'])->name('subscription.plans');
+    Route::get('/subscription/limit-exceeded', function () {
+        $user = auth()->user();
+        $usage = $user->getUsagePercentage();
+        $subscriptionStatus = $user->subscription_status ?? 'trial';
+        $subscriptionEndsAt = $user->subscription_ends_at;
+        $activeSubscription = $user->activeSubscription;
+        
+        // Get real plan details based on subscription status
+        $planDetails = [
+            'name' => ucfirst($subscriptionStatus),
+            'accommodations_allowed' => $usage['accommodations']['max'] ?? 0,
+            'accommodations_used' => $usage['accommodations']['used'] ?? 0,
+            'accommodations_exceeded' => ($usage['accommodations']['used'] ?? 0) - ($usage['accommodations']['max'] ?? 0),
+            'subscription_ends_at' => $subscriptionEndsAt,
+            'is_trial' => $subscriptionStatus === 'trial',
+            'billing_cycle' => $user->billing_cycle,
+            'properties_limit' => $usage['properties']['max'] ?? 0,
+            'properties_used' => $usage['properties']['used'] ?? 0,
+            'active_subscription' => $activeSubscription,
+            'addon_count' => $activeSubscription ? $activeSubscription->addons()->where('cycle_end', '>', now())->sum('qty') : 0,
+            'base_accommodation_limit' => $activeSubscription ? $activeSubscription->base_accommodation_limit : $usage['accommodations']['max'],
+            'addon_price_per_month' => 99 // Real pricing from the app
+        ];
+        
+        return view('subscription.limit-exceeded', compact('planDetails'));
+    })->name('subscription.limit-exceeded');
     Route::get('/welcome-trial', function () {
         return view('welcome-trial');
     })->name('welcome.trial');

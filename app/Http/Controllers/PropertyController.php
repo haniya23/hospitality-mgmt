@@ -90,6 +90,21 @@ class PropertyController extends Controller
             abort(403);
         }
         
+        // Check subscription limits for accommodations - trigger only when used EXCEEDS max
+        $user = auth()->user();
+        $usage = $user->getUsagePercentage();
+        
+        if (isset($usage['accommodations']) && 
+            $usage['accommodations']['used'] > $usage['accommodations']['max']) {
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'You have reached the maximum number of accommodations allowed on your current plan. Please contact WhatsApp support at +91 9400960223 to upgrade your subscription.',
+                'error_code' => 'SUBSCRIPTION_LIMIT_EXCEEDED',
+                'whatsapp_url' => 'https://wa.me/919400960223?text=Hi%2C%20I%20would%20like%20to%20upgrade%20my%20Stay%20Loops%20subscription%20to%20add%20more%20accommodations.'
+            ], 403);
+        }
+        
         $request->validate([
             'custom_name' => 'required|string|max:255',
             'predefined_type_id' => 'nullable|exists:predefined_accommodation_types,id',

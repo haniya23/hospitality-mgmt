@@ -10,6 +10,29 @@
 
 @section('content')
 <div x-data="b2bData()" x-init="init()" class="space-y-6">
+    <!-- Flash Messages -->
+    @if (session()->has('success'))
+        <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl" role="alert">
+            <div class="flex items-center">
+                <svg class="w-5 h-5 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="block sm:inline">{{ session('success') }}</span>
+            </div>
+        </div>
+    @endif
+
+    @if (session()->has('error'))
+        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl" role="alert">
+            <div class="flex items-center">
+                <svg class="w-5 h-5 text-red-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+                <span class="block sm:inline">{{ session('error') }}</span>
+            </div>
+        </div>
+    @endif
+
     @include('partials.b2b.search')
     
     <!-- Partners List with Property-style Cards -->
@@ -213,6 +236,15 @@ function b2bData() {
 
         async init() {
             // Partners are already loaded from server
+            
+            // Show success toast if there's a success message
+            @if (session()->has('success'))
+                window.showSuccess('B2B Partner Created', '{{ session('success') }}', 6000);
+            @endif
+            
+            @if (session()->has('error'))
+                window.showError('Error', '{{ session('error') }}', 6000);
+            @endif
         },
 
         // B2B booking modal state

@@ -1,5 +1,18 @@
 @section('page-title', 'B2B Partners')
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Show success toast if there's a success message
+    @if (session()->has('success'))
+        window.showSuccess('B2B Partner Created', '{{ session('success') }}', 6000);
+    @endif
+    
+    @if (session()->has('error'))
+        window.showError('Error', '{{ session('error') }}', 6000);
+    @endif
+});
+</script>
+
 <div class="space-y-6">
     <!-- Flash Messages -->
     @if (session()->has('success'))

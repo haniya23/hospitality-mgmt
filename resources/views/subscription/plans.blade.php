@@ -452,7 +452,7 @@ function subscriptionPage() {
     </div>
     @endif
 
-    @if(auth()->user()->subscription_status === 'professional')
+    @if(auth()->user()->activeSubscription && auth()->user()->activeSubscription->plan_slug === 'professional')
     <!-- Add Accommodations Section for Professional Users -->
     <div class="mb-8">
         <div class="bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl shadow-lg p-8 text-white">
@@ -671,7 +671,7 @@ function subscriptionPage() {
     </div>
     @endif
     
-    @if(auth()->user()->subscription_status === 'trial')
+    @if(auth()->user()->activeSubscription && (auth()->user()->activeSubscription->plan_slug === 'starter' || auth()->user()->activeSubscription->plan_slug === 'professional'))
     <!-- Extra Accommodations Section -->
     <div class="mb-12">
         <div class="text-center mb-6">

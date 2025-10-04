@@ -51,6 +51,18 @@ class AccommodationController extends Controller
 
     public function store(Request $request)
     {
+        // Check subscription limits for accommodations - trigger only when used EXCEEDS max
+        $user = auth()->user();
+        $usage = $user->getUsagePercentage();
+        
+        if (isset($usage['accommodations']) && 
+            $usage['accommodations']['used'] > $usage['accommodations']['max']) {
+            
+            return back()->withErrors([
+                'subscription_limit' => 'You have reached the maximum number of accommodations allowed on your current plan. Please contact WhatsApp support at +91 9400960223 to upgrade your subscription.'
+            ])->withInput();
+        }
+        
         $request->validate([
             'property_id' => 'required|exists:properties,id',
             'custom_name' => 'required|string|max:255',

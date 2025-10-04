@@ -1156,7 +1156,14 @@ function updateCheckoutToNextDay(checkInDateText) {
 }
 
 // Initialize datepickers when document is ready
-$(document).ready(function() {
+function initializeBookingDatepickersWhenReady() {
+    if (typeof $ === 'undefined') {
+        // jQuery not loaded yet, try again in 100ms
+        setTimeout(initializeBookingDatepickersWhenReady, 100);
+        return;
+    }
+    
+    $(document).ready(function() {
     // Wait for Alpine.js to be fully loaded
     function initializeDatepickers() {
         if (typeof Alpine === 'undefined' || !document.querySelector('[x-data*="bookingCreateForm"]')) {
@@ -1352,5 +1359,9 @@ $(document).ready(function() {
         });
     }
 });
+}
+
+// Start the initialization
+initializeBookingDatepickersWhenReady();
 </script>
 @endpush

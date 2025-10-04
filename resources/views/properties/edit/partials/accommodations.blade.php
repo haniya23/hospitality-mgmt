@@ -337,7 +337,40 @@ async function saveAccommodation(propertyUuid) {
             closeAccommodationModal();
             setTimeout(() => location.reload(), 1000);
         } else {
-            showToast(data.message || 'Error saving accommodation', 'error');
+            // Handle subscription limit error specially
+            if (data.error_code === 'SUBSCRIPTION_LIMIT_EXCEEDED') {
+                // Show WhatsApp contact modal or redirect
+                const whatsappUrl = data.whatsapp_url || 'https://wa.me/919400960223?text=Hi%2C%20I%20would%20like%20to%20add%20accommodation%20addons%20to%20my%20Stay%20Loops%20subscription%20at%20₹99%20per%20accommodation%20per%20month.';
+                
+                // Create a modal to show the subscription limit message
+                const modal = document.createElement('div');
+                modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                modal.innerHTML = `
+                    <div class="bg-white rounded-lg p-6 max-w-md mx-4">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
+                                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 19.5c-.77.833.192 2.5 1.732 2.5z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-900">Accommodation Limit Exceeded</h3>
+                        </div>
+                        <p class="text-gray-600 mb-2">${data.message}</p>
+                        <p class="text-sm text-gray-500 mb-4">Add accommodations at ₹99/month each or upgrade your plan.</p>
+                        <div class="flex space-x-3">
+                            <a href="${whatsappUrl}" target="_blank" class="flex-1 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors text-center">
+                                📱 Contact WhatsApp
+                            </a>
+                            <button onclick="this.closest('.fixed').remove()" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            } else {
+                showToast(data.message || 'Error saving accommodation', 'error');
+            }
         }
     } catch (error) {
         showToast('Error saving accommodation. Please try again.', 'error');
