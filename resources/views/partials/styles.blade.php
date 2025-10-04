@@ -843,4 +843,48 @@
         font-size: 1rem;
         font-weight: 500;
     }
+    
+    /* Global Form Bottom Spacing for Mobile */
+    @media (max-width: 768px) {
+        /* Ensure all forms have proper bottom spacing */
+        form {
+            padding-bottom: 5rem !important; /* 80px for bottom nav clearance */
+        }
+        
+        /* Specific form containers */
+        .max-w-4xl,
+        .max-w-7xl,
+        .max-w-6xl {
+            padding-bottom: 5rem !important;
+        }
+        
+        /* Action button containers */
+        .flex.justify-end,
+        .flex.flex-col.sm\\:flex-row.justify-end {
+            padding-bottom: 5rem !important;
+        }
+        
+        /* Submit button containers */
+        button[type="submit"] {
+            margin-bottom: 2rem !important;
+        }
+    }
+    
+    /* Desktop - Normal spacing */
+    @media (min-width: 769px) {
+        form {
+            padding-bottom: 2rem !important;
+        }
+        
+        .max-w-4xl,
+        .max-w-7xl,
+        .max-w-6xl {
+            padding-bottom: 2rem !important;
+        }
+        
+        .flex.justify-end,
+        .flex.flex-col.sm\\:flex-row.justify-end {
+            padding-bottom: 2rem !important;
+        }
+    }
 </style>

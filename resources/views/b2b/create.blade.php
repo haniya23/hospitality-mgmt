@@ -279,7 +279,7 @@
           
 
             <!-- Action Buttons -->
-            <div class="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 pt-6 border-t-2 border-gray-200 pb-8 lg:pb-0">
+            <div class="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 pt-6 border-t-2 border-gray-200 pb-20 lg:pb-8">
                 <a href="{{ route('b2b.index') }}" 
                    class="w-full sm:w-auto px-6 py-3 border-2 border-gray-300 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 text-center flex items-center justify-center gap-2 group">
                     <svg class="w-5 h-5 text-gray-500 group-hover:text-gray-700 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">

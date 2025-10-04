@@ -296,7 +296,7 @@
             </div>
 
             <!-- Submit Button -->
-            <div class="flex justify-end space-x-4">
+            <div class="flex justify-end space-x-4 pb-20 lg:pb-8">
                 <a href="{{ route('bookings.show', $reservation->uuid) }}" 
                    class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500">
                     Cancel

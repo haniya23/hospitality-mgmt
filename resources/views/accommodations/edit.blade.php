@@ -160,7 +160,7 @@
         </div>
 
         <!-- Submit Button -->
-        <div class="flex justify-end space-x-4 pb-8 lg:pb-0">
+        <div class="flex justify-end space-x-4 pb-20 lg:pb-8">
             <a href="{{ route('accommodations.index') }}" 
                class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
                 Cancel

@@ -147,7 +147,7 @@
             </div>
 
             <!-- Action Buttons -->
-            <div class="flex flex-col-reverse sm:flex-row gap-4 pt-6">
+            <div class="flex flex-col-reverse sm:flex-row gap-4 pt-6 pb-20 lg:pb-8">
                 <a href="{{ route('dashboard') }}" 
                    class="flex-1 sm:flex-none sm:px-8 py-4 bg-white border border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all duration-200 shadow-sm text-center">
                     <span class="flex items-center justify-center space-x-2">

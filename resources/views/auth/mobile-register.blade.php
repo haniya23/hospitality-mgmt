@@ -139,7 +139,7 @@
                 <input type="hidden" name="subscription_choice" value="trial">
 
                 <!-- Submit Button -->
-                <div>
+                <div class="pb-20 lg:pb-8">
                     <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-xl text-white bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
                         <i class="fas fa-user-plus mr-2"></i>
                         Create Account
