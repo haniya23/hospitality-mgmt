@@ -30,9 +30,11 @@
     @include('partials.sidebar')
     
     <div class="lg:ml-72 transition-all duration-300" :class="{ 'lg:ml-16': sidebarCollapsed }">
-        @yield('header')
+        <div class="pt-20 lg:pt-6">
+            @yield('header')
+        </div>
         
-        <main class="px-4 pt-16 pb-0 lg:pt-4 lg:pb-0 sm:pb-0">
+        <main class="px-4 pb-20 lg:pb-4">
             @yield('content')
         </main>
     </div>

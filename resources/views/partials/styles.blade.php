@@ -422,11 +422,24 @@
     
     /* Layout Spacing Fixes */
     
+    /* Top Navigation Spacing - Mobile */
+    @media (max-width: 1023px) {
+        /* Header section - starts below top bar */
+        .lg\:ml-72 > div:first-child {
+            padding-top: 5rem !important; /* Top bar height (4rem) + extra space (1rem) */
+        }
+        
+        /* Main content container - no additional top padding needed */
+        main {
+            padding-top: 0 !important;
+        }
+    }
+    
     /* Bottom Navigation Spacing */
     @media (max-width: 1023px) {
-        /* No bottom padding for main content */
+        /* Main content needs bottom spacing for floating nav */
         main {
-            padding-bottom: 0 !important; /* Removed all bottom padding */
+            padding-bottom: 6rem !important; /* Space for floating bottom nav */
         }
         
         /* Ensure fixed elements don't overlap with bottom nav */
@@ -447,7 +460,11 @@
         /* Main content container - starts below top bar */
         .lg\:ml-72 {
             margin-left: 18rem;
-            padding-top: 4rem; /* Top bar height */
+        }
+        
+        /* Header section - starts below top bar */
+        .lg\:ml-72 > div:first-child {
+            padding-top: 5rem; /* Top bar height (4rem) + extra space (1rem) */
         }
         
         /* When sidebar is collapsed */
@@ -846,27 +863,27 @@
     
     /* Global Form Bottom Spacing for Mobile */
     @media (max-width: 768px) {
-        /* Ensure all forms have proper bottom spacing */
+        /* Forms don't need extra bottom padding since main has it */
         form {
-            padding-bottom: 5rem !important; /* 80px for bottom nav clearance */
+            padding-bottom: 0 !important;
         }
         
         /* Specific form containers */
         .max-w-4xl,
         .max-w-7xl,
         .max-w-6xl {
-            padding-bottom: 5rem !important;
+            padding-bottom: 0 !important;
         }
         
         /* Action button containers */
         .flex.justify-end,
         .flex.flex-col.sm\\:flex-row.justify-end {
-            padding-bottom: 5rem !important;
+            padding-bottom: 0 !important;
         }
         
         /* Submit button containers */
         button[type="submit"] {
-            margin-bottom: 2rem !important;
+            margin-bottom: 1rem !important;
         }
     }
     
