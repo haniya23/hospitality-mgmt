@@ -227,24 +227,7 @@
 
 @push('scripts')
 <script>
-    // Auto-fetch booking details when page loads
     document.addEventListener('DOMContentLoaded', function() {
-        // Refresh customer details from booking system
-        fetch(`/api/checkin/{{ $reservation->uuid }}/booking-details`)
-            .then(response => response.json())
-            .then(data => {
-                // Update form fields with latest data
-                document.getElementById('guest_name').value = data.guest.name || '';
-                document.getElementById('guest_contact').value = data.guest.mobile_number || '';
-                document.getElementById('guest_email').value = data.guest.email || '';
-                document.getElementById('guest_address').value = data.guest.address || '';
-                document.getElementById('id_proof_type').value = data.guest.id_type || '';
-                document.getElementById('id_proof_number').value = data.guest.id_number || '';
-            })
-            .catch(error => {
-                console.error('Error fetching updated customer details:', error);
-            });
-        
         console.log('Check-in form loaded for booking:', '{{ $reservation->confirmation_number }}');
     });
 </script>

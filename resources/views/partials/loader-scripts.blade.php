@@ -1,4 +1,4 @@
-{{-- Global Loader Scripts --}}
+{{-- Global Loader Scripts - Page Loading Only --}}
 
 <script>
     // Global loader functions
@@ -48,37 +48,9 @@
         setTimeout(() => hideGlobalLoader(), 300);
     });
     
-    // Intercept fetch requests to show/hide global loader
-    const originalFetch = window.fetch;
-    window.fetch = function(...args) {
-        // Show loader for non-GET requests
-        if (args[1] && args[1].method && args[1].method !== 'GET') {
-            showGlobalLoader('Processing...');
-        }
-        
-        return originalFetch.apply(this, args)
-            .then(response => {
-                // Hide loader when request completes
-                setTimeout(() => hideGlobalLoader(), 300);
-                return response;
-            })
-            .catch(error => {
-                // Hide loader on error
-                hideGlobalLoader();
-                throw error;
-            });
-    };
-    
     // Intercept page navigation to show loader
     window.addEventListener('beforeunload', function() {
         showGlobalLoader('Loading page...');
-    });
-    
-    // Show loader for form submissions
-    document.addEventListener('submit', function(e) {
-        if (e.target.tagName === 'FORM') {
-            showGlobalLoader('Processing form...');
-        }
     });
     
     // Show loader for link clicks (except hash links)
