@@ -573,6 +573,30 @@ function bookingCreateForm() {
         handleSubmit(event) {
             // Check if form is valid
             const form = event.target;
+            
+            // Custom validation for accommodation selection
+            if (this.showPropertyAccommodationSelection) {
+                // If property/accommodation selection is shown, ensure one is selected
+                if (!this.selectedAccommodation) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    
+                    // Focus on the visible accommodation select
+                    const accommodationSelect = form.querySelector('select[name="accommodation_id"]:not([style*="display: none"])');
+                    if (accommodationSelect) {
+                        accommodationSelect.focus();
+                        accommodationSelect.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        // Add visual feedback
+                        accommodationSelect.style.borderColor = '#ef4444';
+                        setTimeout(() => {
+                            accommodationSelect.style.borderColor = '';
+                        }, 3000);
+                    }
+                    return false;
+                }
+            }
+            
+            // Standard form validation
             if (!form.checkValidity()) {
                 event.preventDefault();
                 event.stopPropagation();

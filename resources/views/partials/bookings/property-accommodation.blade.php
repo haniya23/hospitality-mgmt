@@ -199,7 +199,7 @@
                         </label>
                         <select name="accommodation_id" x-model="selectedAccommodation" @change="updateAccommodationPrice()" 
                                 class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white hover:border-gray-300 font-semibold text-gray-800 select2-dropdown" 
-                                required>
+                                :required="showPropertyAccommodationSelection && showPropertySelection">
                             <option value="">Select Accommodation</option>
                         </select>
                         @error('accommodation_id')
@@ -228,7 +228,7 @@
                         </label>
                         <select name="accommodation_id" x-model="selectedAccommodation" @change="updateAccommodationPrice()" 
                                 class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white hover:border-gray-300 font-semibold text-gray-800 select2-dropdown" 
-                                required>
+                                :required="showPropertyAccommodationSelection && !showPropertySelection">
                             <option value="">Select Accommodation</option>
                             <template x-for="accommodation in singlePropertyAccommodations" :key="accommodation.id">
                                 <option :value="accommodation.id" x-text="accommodation.display_name"></option>

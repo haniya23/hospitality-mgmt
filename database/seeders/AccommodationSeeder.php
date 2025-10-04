@@ -14,7 +14,7 @@ class AccommodationSeeder extends Seeder
     public function run(): void
     {
         // Check if accommodations already exist
-        if (PropertyAccommodation::count() >= 20) {
+        if (PropertyAccommodation::count() >= 10) {
             $this->command->info('Accommodations already seeded. Skipping...');
             return;
         }
