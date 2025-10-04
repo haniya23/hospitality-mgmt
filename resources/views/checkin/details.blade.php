@@ -3,31 +3,31 @@
 @section('title', 'Check-in Details')
 
 @section('content')
-<div class="min-h-screen bg-gray-50 py-8">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-gray-50 py-4 sm:py-8">
+    <div class="max-w-4xl mx-auto px-3 sm:px-4 lg:px-8">
         <!-- Header -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <div class="flex items-center justify-between">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-4 sm:mb-6">
+            <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-900">🏨 Check-in Details</h1>
+                        <h1 class="text-xl sm:text-2xl font-bold text-gray-900">🏨 Check-in Details</h1>
                         <p class="text-sm text-gray-600 mt-1">Complete check-in information</p>
                     </div>
-                    <div class="text-right">
+                    <div class="text-left sm:text-right">
                         <div class="text-sm text-gray-500">Check-in ID</div>
-                        <div class="font-mono text-lg font-semibold text-blue-600">{{ $checkIn->uuid }}</div>
+                        <div class="font-mono text-base sm:text-lg font-semibold text-blue-600">{{ $checkIn->uuid }}</div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Guest Information -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-            <div class="px-6 py-4 border-b border-gray-200">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-4 sm:mb-6">
+            <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
                 <h2 class="text-lg font-semibold text-gray-900">Guest Information</h2>
             </div>
-            <div class="p-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="p-4 sm:p-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     <div>
                         <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide mb-3">Personal Details</h3>
                         <dl class="space-y-2">
@@ -82,12 +82,12 @@
         </div>
 
         <!-- Stay Information -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-            <div class="px-6 py-4 border-b border-gray-200">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-4 sm:mb-6">
+            <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
                 <h2 class="text-lg font-semibold text-gray-900">Stay Information</h2>
             </div>
-            <div class="p-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="p-4 sm:p-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     <div>
                         <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide mb-3">Accommodation</h3>
                         <dl class="space-y-2">
@@ -129,11 +129,11 @@
 
         <!-- Special Requests & Notes -->
         @if($checkIn->special_requests || $checkIn->notes)
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-            <div class="px-6 py-4 border-b border-gray-200">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-4 sm:mb-6">
+            <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
                 <h2 class="text-lg font-semibold text-gray-900">Special Requests & Notes</h2>
             </div>
-            <div class="p-6">
+            <div class="p-4 sm:p-6">
                 @if($checkIn->special_requests)
                 <div class="mb-4">
                     <h3 class="text-sm font-medium text-gray-600 mb-2">Special Requests</h3>
@@ -151,12 +151,12 @@
         @endif
 
         <!-- Staff Information -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-            <div class="px-6 py-4 border-b border-gray-200">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-4 sm:mb-6">
+            <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
                 <h2 class="text-lg font-semibold text-gray-900">Staff Information</h2>
             </div>
-            <div class="p-6">
-                <div class="flex items-center space-x-4">
+            <div class="p-4 sm:p-6">
+                <div class="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
                     <div class="flex-shrink-0">
                         <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
                             <i class="fas fa-user-tie text-green-600"></i>
@@ -171,14 +171,14 @@
         </div>
 
         <!-- Actions -->
-        <div class="flex justify-end space-x-4">
+        <div class="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 pb-16 sm:pb-8">
             <a href="{{ route('checkin.index') }}" 
-               class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500">
+               class="w-full sm:w-auto px-6 py-3 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 text-center">
                 Back to Check-ins
             </a>
             @if($checkIn->reservation->status === 'checked_in')
             <a href="{{ route('checkout.show', $checkIn->reservation->uuid) }}" 
-               class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+               class="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-center">
                 Proceed to Check-out
             </a>
             @endif

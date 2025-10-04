@@ -3,36 +3,36 @@
 @section('title', 'Guest Check-In')
 
 @section('content')
-<div class="min-h-screen bg-gray-50 py-8">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-gray-50 py-4 sm:py-8">
+    <div class="max-w-4xl mx-auto px-3 sm:px-4 lg:px-8">
         <!-- Header -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <div class="flex items-center justify-between">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-4 sm:mb-6">
+            <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-900">🏨 Guest Check-In</h1>
+                        <h1 class="text-xl sm:text-2xl font-bold text-gray-900">🏨 Guest Check-In</h1>
                         <p class="text-sm text-gray-600 mt-1">Complete guest check-in process</p>
                     </div>
-                    <div class="text-right">
+                    <div class="text-left sm:text-right">
                         <div class="text-sm text-gray-500">Booking Reference</div>
-                        <div class="font-mono text-lg font-semibold text-blue-600">{{ $reservation->confirmation_number }}</div>
+                        <div class="font-mono text-base sm:text-lg font-semibold text-blue-600">{{ $reservation->confirmation_number }}</div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Auto-fetch Booking Details Section -->
-        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <div class="flex items-center">
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
+            <div class="flex items-start sm:items-center">
                 <div class="flex-shrink-0">
                     <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
                     </svg>
                 </div>
-                <div class="ml-3">
+                <div class="ml-3 flex-1">
                     <h3 class="text-sm font-medium text-blue-800">📋 Booking & Payment Details (Auto-fetched)</h3>
                     <div class="mt-2 text-sm text-blue-700">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                             <div>
                                 <span class="font-medium">Property:</span> {{ $reservation->accommodation->property->name }}<br>
                                 <span class="font-medium">Room:</span> {{ $reservation->accommodation->display_name }}
@@ -41,7 +41,7 @@
                                 <span class="font-medium">Guests:</span> {{ $reservation->adults }} adults, {{ $reservation->children }} children<br>
                                 <span class="font-medium">Stay:</span> {{ $reservation->check_in_date->format('M d') }} - {{ $reservation->check_out_date->format('M d, Y') }}
                             </div>
-                            <div>
+                            <div class="sm:col-span-2 lg:col-span-1">
                                 <span class="font-medium">Total:</span> ₹{{ number_format($reservation->total_amount, 2) }}<br>
                                 <span class="font-medium">Paid:</span> ₹{{ number_format($reservation->advance_paid, 2) }} | <span class="font-medium">Balance:</span> ₹{{ number_format($reservation->balance_pending, 2) }}
                             </div>
@@ -52,16 +52,16 @@
         </div>
 
         <!-- Check-in Form -->
-        <form action="{{ route('checkin.store', $reservation->uuid) }}" method="POST" class="space-y-6">
+        <form action="{{ route('checkin.store', $reservation->uuid) }}" method="POST" class="space-y-4 sm:space-y-6">
             @csrf
             
             <!-- Guest Information Section -->
             <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                <div class="px-6 py-4 border-b border-gray-200">
+                <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
                     <h2 class="text-lg font-semibold text-gray-900">1. Guest Information</h2>
                 </div>
-                <div class="p-6 space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-4 sm:p-6 space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                             <label for="guest_name" class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
                             <input type="text" id="guest_name" name="guest_name" value="{{ old('guest_name', $reservation->guest->name) }}" 
@@ -80,7 +80,7 @@
                         </div>
                     </div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                             <label for="guest_email" class="block text-sm font-medium text-gray-700 mb-1">Email ID</label>
                             <input type="email" id="guest_email" name="guest_email" value="{{ old('guest_email', $reservation->guest->email) }}" 
@@ -108,7 +108,7 @@
                         @enderror
                     </div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                             <label for="id_proof_type" class="block text-sm font-medium text-gray-700 mb-1">ID Proof Type</label>
                             <select id="id_proof_type" name="id_proof_type" 
@@ -138,11 +138,11 @@
 
             <!-- Stay Details Section -->
             <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                <div class="px-6 py-4 border-b border-gray-200">
+                <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
                     <h2 class="text-lg font-semibold text-gray-900">2. Stay Details</h2>
                 </div>
-                <div class="p-6 space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-4 sm:p-6 space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                             <label for="check_in_time" class="block text-sm font-medium text-gray-700 mb-1">Check-in Date & Time *</label>
                             <input type="datetime-local" id="check_in_time" name="check_in_time" 
@@ -187,22 +187,22 @@
 
             <!-- Confirmation Section -->
             <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                <div class="px-6 py-4 border-b border-gray-200">
+                <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
                     <h2 class="text-lg font-semibold text-gray-900">3. Confirmation</h2>
                 </div>
-                <div class="p-6 space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-4 sm:p-6 space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                             <label for="guest_signature" class="block text-sm font-medium text-gray-700 mb-1">Guest Signature</label>
-                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 h-24 flex items-center justify-center">
-                                <span class="text-gray-500 text-sm">Digital signature pad would go here</span>
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-3 sm:p-4 h-20 sm:h-24 flex items-center justify-center">
+                                <span class="text-gray-500 text-xs sm:text-sm text-center">Digital signature pad would go here</span>
                             </div>
                             <input type="hidden" id="guest_signature" name="guest_signature" value="{{ old('guest_signature') }}">
                         </div>
                         <div>
                             <label for="staff_signature" class="block text-sm font-medium text-gray-700 mb-1">Staff Signature</label>
-                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 h-24 flex items-center justify-center">
-                                <span class="text-gray-500 text-sm">Staff signature pad would go here</span>
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-3 sm:p-4 h-20 sm:h-24 flex items-center justify-center">
+                                <span class="text-gray-500 text-xs sm:text-sm text-center">Staff signature pad would go here</span>
                             </div>
                             <input type="hidden" id="staff_signature" name="staff_signature" value="{{ old('staff_signature') }}">
                         </div>
@@ -211,13 +211,13 @@
             </div>
 
             <!-- Submit Button -->
-            <div class="flex justify-end space-x-4 pb-20 lg:pb-8">
+            <div class="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 pb-16 sm:pb-20 lg:pb-8">
                 <a href="{{ route('bookings.show', $reservation->uuid) }}" 
-                   class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                   class="w-full sm:w-auto px-6 py-3 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 text-center">
                     Cancel
                 </a>
                 <button type="submit" 
-                        class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                        class="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                     Complete Check-in
                 </button>
             </div>

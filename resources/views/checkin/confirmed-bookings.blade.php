@@ -3,20 +3,20 @@
 @section('title', 'Ready for Check-in')
 
 @section('content')
-<div class="min-h-screen bg-gray-50 py-8">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-gray-50 py-4 sm:py-8">
+    <div class="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
         <!-- Header -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <div class="flex items-center justify-between">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-4 sm:mb-6">
+            <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-900">📅 Ready for Check-in</h1>
+                        <h1 class="text-xl sm:text-2xl font-bold text-gray-900">📅 Ready for Check-in</h1>
                         <p class="text-sm text-gray-600 mt-1">Confirmed bookings ready for guest check-in</p>
                     </div>
                     <div class="flex items-center space-x-3">
-                        <div class="text-right">
+                        <div class="text-left sm:text-right">
                             <div class="text-sm text-gray-500">Total Bookings</div>
-                            <div class="text-2xl font-bold text-green-600">{{ $confirmedBookings->flatten()->count() }}</div>
+                            <div class="text-xl sm:text-2xl font-bold text-green-600">{{ $confirmedBookings->flatten()->count() }}</div>
                         </div>
                     </div>
                 </div>
@@ -25,8 +25,8 @@
 
         @if($confirmedBookings->count() > 0)
             <!-- Debug info -->
-            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-                <div class="flex items-center">
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
+                <div class="flex items-start sm:items-center">
                     <div class="flex-shrink-0">
                         <i class="fas fa-info-circle text-yellow-400"></i>
                     </div>
@@ -39,9 +39,9 @@
             </div>
             @foreach($confirmedBookings as $propertyName => $bookings)
             <!-- Property Section -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <div class="flex items-center justify-between">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-4 sm:mb-6">
+                <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
                         <div>
                             <h2 class="text-lg font-semibold text-gray-900">{{ $propertyName }}</h2>
                             <p class="text-sm text-gray-600">{{ $bookings->count() }} booking{{ $bookings->count() > 1 ? 's' : '' }} ready for check-in</p>
@@ -56,33 +56,35 @@
                 
                 <div class="divide-y divide-gray-200">
                     @foreach($bookings as $booking)
-                    <div class="p-6 hover:bg-gray-50 transition-colors">
-                        <div class="flex items-center justify-between">
+                    <div class="p-4 sm:p-6 hover:bg-gray-50 transition-colors">
+                        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
                             <div class="flex-1">
-                                <div class="flex items-center space-x-4">
+                                <div class="flex flex-col sm:flex-row sm:items-start space-y-3 sm:space-y-0 sm:space-x-4">
                                     <div class="flex-shrink-0">
                                         <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                                             <i class="fas fa-calendar-check text-blue-600"></i>
                                         </div>
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <div class="flex items-center space-x-3">
+                                        <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-3 space-y-2 sm:space-y-0">
                                             <h3 class="text-lg font-semibold text-gray-900">{{ $booking->guest->name }}</h3>
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                                Confirmed
-                                            </span>
-                                            @if($booking->checkInRecord)
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                <i class="fas fa-check mr-1"></i>Already Checked In
-                                            </span>
-                                            @endif
+                                            <div class="flex flex-wrap gap-2">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                    Confirmed
+                                                </span>
+                                                @if($booking->checkInRecord)
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                    <i class="fas fa-check mr-1"></i>Already Checked In
+                                                </span>
+                                                @endif
+                                            </div>
                                         </div>
-                                        <div class="mt-1 flex items-center space-x-4 text-sm text-gray-500">
+                                        <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm text-gray-500">
                                             <span><i class="fas fa-bed mr-1"></i>{{ $booking->accommodation->display_name }}</span>
                                             <span><i class="fas fa-calendar mr-1"></i>{{ $booking->check_in_date->format('M d, Y') }}</span>
                                             <span><i class="fas fa-users mr-1"></i>{{ $booking->adults }} adults, {{ $booking->children }} children</span>
                                         </div>
-                                        <div class="mt-2 flex items-center space-x-4 text-sm text-gray-500">
+                                        <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm text-gray-500">
                                             <span><i class="fas fa-phone mr-1"></i>{{ $booking->guest->mobile_number }}</span>
                                             @if($booking->guest->email)
                                             <span><i class="fas fa-envelope mr-1"></i>{{ $booking->guest->email }}</span>
@@ -97,29 +99,29 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="flex items-center space-x-3">
-                                <div class="text-right">
+                            <div class="flex flex-col sm:flex-row lg:flex-col xl:flex-row items-start sm:items-center lg:items-start xl:items-center space-y-3 sm:space-y-0 sm:space-x-3 lg:space-x-0 lg:space-y-3 xl:space-y-0 xl:space-x-3">
+                                <div class="text-left sm:text-right lg:text-left xl:text-right">
                                     <div class="text-sm text-gray-500">Booking Ref</div>
                                     <div class="font-mono text-sm font-semibold text-blue-600">{{ $booking->confirmation_number }}</div>
                                     <div class="text-xs text-gray-500 mt-1">
                                         Check-in: {{ $booking->check_in_date->format('M d') }}
                                     </div>
                                 </div>
-                                <div class="flex space-x-2">
+                                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                                     <!-- Customer Details Update Modal Trigger -->
                                     <button onclick="openCustomerModal('{{ $booking->uuid }}')" 
-                                            class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors">
+                                            class="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors text-center">
                                         <i class="fas fa-edit mr-1"></i>Update Details
                                     </button>
                                     
                                     @if(!$booking->checkInRecord)
                                     <a href="{{ route('checkin.show', $booking->uuid) }}" 
-                                       class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
+                                       class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-center">
                                         <i class="fas fa-sign-in-alt mr-1"></i>Start Check-in
                                     </a>
                                     @else
                                     <a href="{{ route('checkin.details', $booking->checkInRecord->uuid) }}" 
-                                       class="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors">
+                                       class="px-3 py-2 text-sm bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors text-center">
                                         View Check-in
                                     </a>
                                     @endif
@@ -133,9 +135,9 @@
             @endforeach
         @else
             <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                <div class="p-12 text-center">
-                    <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                        <i class="fas fa-calendar-check text-gray-400 text-2xl"></i>
+                <div class="p-8 sm:p-12 text-center">
+                    <div class="mx-auto w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-calendar-check text-gray-400 text-xl sm:text-2xl"></i>
                     </div>
                     <h3 class="text-lg font-medium text-gray-900 mb-2">No confirmed bookings</h3>
                     <p class="text-gray-500 mb-6">Confirmed bookings ready for check-in will appear here.</p>
@@ -152,9 +154,9 @@
 
 <!-- Customer Details Update Modal -->
 <div id="customerModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50" onclick="closeCustomerModal()">
-    <div class="flex items-center justify-center min-h-screen p-4">
-        <div class="bg-white rounded-lg shadow-xl max-w-md w-full" onclick="event.stopPropagation()">
-            <div class="px-6 py-4 border-b border-gray-200">
+    <div class="flex items-center justify-center min-h-screen p-3 sm:p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full max-h-screen overflow-y-auto" onclick="event.stopPropagation()">
+            <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
                 <div class="flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-gray-900">Update Customer Details</h3>
                     <button onclick="closeCustomerModal()" class="text-gray-400 hover:text-gray-600">
@@ -163,7 +165,7 @@
                 </div>
             </div>
             
-            <form id="customerForm" class="p-6">
+            <form id="customerForm" class="p-4 sm:p-6">
                 @csrf
                 <div class="space-y-4">
                     <div>
@@ -190,7 +192,7 @@
                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
                     </div>
                     
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label for="id_type" class="block text-sm font-medium text-gray-700 mb-1">ID Type</label>
                             <select id="id_type" name="id_type"
@@ -211,13 +213,13 @@
                     </div>
                 </div>
                 
-                <div class="flex justify-end space-x-3 mt-6">
+                <div class="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3 mt-6">
                     <button type="button" onclick="closeCustomerModal()" 
-                            class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                            class="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500">
                         Cancel
                     </button>
                     <button type="submit" 
-                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                            class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                         Update Details
                     </button>
                 </div>
