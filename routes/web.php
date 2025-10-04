@@ -24,6 +24,7 @@ Route::prefix('staff')->name('staff.')->group(function () {
     Route::get('/login', [App\Http\Controllers\Auth\StaffAuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [App\Http\Controllers\Auth\StaffAuthController::class, 'login'])->name('login.post');
     Route::post('/logout', [App\Http\Controllers\Auth\StaffAuthController::class, 'logout'])->name('logout');
+    Route::get('/logout', [App\Http\Controllers\Auth\StaffAuthController::class, 'logout'])->name('logout.get');
 });
 
 // Staff Routes
@@ -53,6 +54,13 @@ Route::middleware(['staff'])->prefix('staff')->name('staff.')->group(function ()
     Route::post('/leave-requests/{leaveRequestId}/cancel', [App\Http\Controllers\StaffAttendanceController::class, 'cancelLeaveRequest'])->name('leave-requests.cancel');
     Route::get('/attendance/history', [App\Http\Controllers\StaffAttendanceController::class, 'getAttendanceHistory'])->name('attendance.history');
     Route::get('/leave-requests/history', [App\Http\Controllers\StaffAttendanceController::class, 'getLeaveHistory'])->name('leave-requests.history');
+    
+    // Staff Guest Service Routes
+    Route::get('/guest-service', [App\Http\Controllers\StaffGuestServiceController::class, 'index'])->name('guest-service.index');
+    Route::get('/guest-service/calendar', [App\Http\Controllers\StaffGuestServiceController::class, 'calendar'])->name('guest-service.calendar');
+    Route::post('/guest-service/check-in/{reservationId}', [App\Http\Controllers\StaffGuestServiceController::class, 'checkIn'])->name('guest-service.check-in');
+    Route::post('/guest-service/check-out/{reservationId}', [App\Http\Controllers\StaffGuestServiceController::class, 'checkOut'])->name('guest-service.check-out');
+    Route::get('/guest-service/booking/{reservationId}', [App\Http\Controllers\StaffGuestServiceController::class, 'getBookingDetails'])->name('guest-service.booking');
 });
 
 // Owner Staff Management Routes

@@ -122,6 +122,14 @@
                     <i class="fas fa-calendar-check w-5 mr-3"></i>
                     <span class="font-medium">Attendance</span>
                 </a>
+                
+                @if(Auth::user()->hasPermission('manage_guest_services') || Auth::user()->hasPermission('manage_checkin_checkout'))
+                <a href="{{ route('staff.guest-service.index') }}" 
+                   class="flex items-center px-4 py-3 rounded-xl transition-colors {{ request()->routeIs('staff.guest-service.*') ? 'bg-blue-100 text-blue-700' : 'text-gray-700 hover:bg-gray-100' }}">
+                    <i class="fas fa-concierge-bell w-5 mr-3"></i>
+                    <span class="font-medium">Guest Service</span>
+                </a>
+                @endif
             </nav>
 
             <!-- Quick Stats -->
@@ -271,6 +279,16 @@
                         </a>
                     </div>
 
+                    @if(Auth::user()->hasPermission('manage_guest_services') || Auth::user()->hasPermission('manage_checkin_checkout'))
+                    <!-- Guest Service -->
+                    <div class="group relative">
+                        <a href="{{ route('staff.guest-service.index') }}" class="flex flex-col items-center justify-center p-2 rounded-2xl transition-all duration-200 {{ request()->routeIs('staff.guest-service.*') ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50' }}">
+                            <i class="fas fa-concierge-bell text-lg mb-1"></i>
+                            <span class="text-xs font-medium">Guest Service</span>
+                        </a>
+                    </div>
+                    @endif
+
                     <!-- More Menu (Centered) -->
                     <div class="group relative">
                         <button @click="showMoreMenu = !showMoreMenu" class="flex flex-col items-center justify-center p-2 rounded-2xl transition-all duration-200 text-gray-600 hover:text-blue-600 hover:bg-blue-50">
@@ -330,6 +348,12 @@
                                         <i class="fas fa-calendar-check w-4 mr-3"></i>
                                         <span class="text-sm">Attendance</span>
                                     </a>
+                                    @if(Auth::user()->hasPermission('manage_guest_services') || Auth::user()->hasPermission('manage_checkin_checkout'))
+                                    <a href="{{ route('staff.guest-service.index') }}" @click="showMoreMenu = false" class="flex items-center px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors rounded-lg {{ request()->routeIs('staff.guest-service.*') ? 'bg-blue-50 text-blue-600' : '' }}">
+                                        <i class="fas fa-concierge-bell w-4 mr-3"></i>
+                                        <span class="text-sm">Guest Service</span>
+                                    </a>
+                                    @endif
                                 </div>
                             </div>
                         </div>

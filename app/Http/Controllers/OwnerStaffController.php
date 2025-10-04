@@ -121,6 +121,11 @@ class OwnerStaffController extends Controller
                 'role_id' => 'required|exists:roles,id',
                 'start_date' => 'required|date',
                 'end_date' => 'nullable|date|after:start_date',
+            ], [
+                'mobile_number.unique' => 'This mobile number is already registered. Please use a different mobile number.',
+                'pin.size' => 'PIN must be exactly 4 digits.',
+                'role_id.exists' => 'Please select a valid role.',
+                'property_id.exists' => 'Please select a valid property.',
             ]);
 
             // Verify property ownership
