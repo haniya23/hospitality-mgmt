@@ -34,14 +34,53 @@ class StaffController extends Controller
             ->orderBy('staff_notifications.created_at', 'desc')
             ->get();
         
-        $upcomingBookings = Reservation::whereHas('accommodation.property', function($q) use ($assignedProperties) {
-            $q->whereIn('id', $assignedProperties->pluck('id'));
+        $upcomingBookings = Reservation::whereHas('propertyAccommodation', function($q) use ($assignedProperties) {
+            $q->whereIn('property_id', $assignedProperties->pluck('id'));
         })
         ->where('check_in_date', '>=', today())
         ->where('check_in_date', '<=', today()->addDays(7))
         ->whereIn('status', ['confirmed', 'checked_in'])
         ->orderBy('check_in_date')
         ->get();
+
+        // Get today's check-ins and check-outs for guest service
+        $todaysCheckins = Reservation::whereHas('propertyAccommodation', function($q) use ($assignedProperties) {
+            $q->whereIn('property_id', $assignedProperties->pluck('id'));
+        })
+        ->whereDate('check_in_date', today())
+        ->where('status', 'confirmed')
+        ->whereDoesntHave('checkInRecord')
+        ->with(['guest', 'propertyAccommodation.property'])
+        ->orderBy('check_in_date')
+        ->get()
+        ->map(function($reservation) {
+            return [
+                'id' => $reservation->id,
+                'guest_name' => $reservation->guest->name ?? 'Guest',
+                'property_name' => $reservation->propertyAccommodation->property->name ?? 'Property',
+                'check_in_time' => \Carbon\Carbon::parse($reservation->check_in_date)->format('H:i'),
+                'status' => $reservation->status
+            ];
+        });
+
+        $todaysCheckouts = Reservation::whereHas('propertyAccommodation', function($q) use ($assignedProperties) {
+            $q->whereIn('property_id', $assignedProperties->pluck('id'));
+        })
+        ->whereDate('check_out_date', today())
+        ->where('status', 'checked_in')
+        ->whereDoesntHave('checkOutRecord')
+        ->with(['guest', 'propertyAccommodation.property'])
+        ->orderBy('check_out_date')
+        ->get()
+        ->map(function($reservation) {
+            return [
+                'id' => $reservation->id,
+                'guest_name' => $reservation->guest->name ?? 'Guest',
+                'property_name' => $reservation->propertyAccommodation->property->name ?? 'Property',
+                'check_out_time' => \Carbon\Carbon::parse($reservation->check_out_date)->format('H:i'),
+                'status' => $reservation->status
+            ];
+        });
 
         $activeChecklists = ChecklistExecution::whereHas('staffAssignment', function($q) use ($user) {
             $q->where('user_id', $user->id)
@@ -66,6 +105,8 @@ class StaffController extends Controller
             'unreadNotifications',
             'urgentNotifications',
             'upcomingBookings',
+            'todaysCheckins',
+            'todaysCheckouts',
             'activeChecklists',
             'availableChecklists',
             'taskCompletionRate',
