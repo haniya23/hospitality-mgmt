@@ -319,17 +319,18 @@ class OwnerStaffController extends Controller
             ]);
         });
 
-        return redirect()->route('owner.staff.show', $staffAssignmentId)
+        return redirect()->route('owner.staff.show', $staffAssignment->uuid)
                         ->with('success', 'Staff member updated successfully.');
     }
 
-    public function destroy($staffAssignmentId)
+    public function destroy($staffAssignmentUuid)
     {
         $staffAssignment = StaffAssignment::whereHas('property', function($q) {
             $q->where('owner_id', Auth::id());
         })
         ->with('user')
-        ->findOrFail($staffAssignmentId);
+        ->where('uuid', $staffAssignmentUuid)
+        ->firstOrFail();
 
         DB::transaction(function () use ($staffAssignment) {
             // Deactivate staff assignment
