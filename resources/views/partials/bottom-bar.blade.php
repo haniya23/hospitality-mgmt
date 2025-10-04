@@ -6,7 +6,7 @@
 
 <div class="fixed bottom-0 left-0 right-0 z-20 lg:hidden" x-data="{ showMoreMenu: false }">
     <!-- Floating Navigation Container -->
-    <div class="mx-4 mb-6 lg:mx-8 lg:mb-8">
+    <div class="mx-4 mb-4 lg:mx-8 lg:mb-8">
         <div class="bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl border border-gray-200/50 px-2 py-3 lg:px-4 lg:py-4">
             <div class="flex items-center justify-around lg:justify-center lg:gap-6">
                 <!-- Dashboard -->

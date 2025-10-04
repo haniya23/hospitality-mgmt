@@ -83,8 +83,8 @@
 
 <!-- Accommodation Modal -->
 <div id="accommodationModal" class="fixed inset-0 overflow-y-auto backdrop-blur-sm bg-black/40 hidden" style="z-index: 99999 !important;" x-data x-init="$el.addEventListener('show', () => lockBodyScroll()); $el.addEventListener('hide', () => unlockBodyScroll());">
-    <div class="flex min-h-full items-center justify-center p-4">
-        <div class="relative w-full max-w-2xl mx-auto bg-white rounded-2xl shadow-2xl ring-1 ring-black/5 max-h-[95vh] flex flex-col">
+    <div class="flex min-h-full items-center justify-center p-2 sm:p-4">
+        <div class="relative w-full max-w-2xl mx-auto bg-white rounded-xl sm:rounded-2xl shadow-2xl ring-1 ring-black/5 max-h-[95vh] flex flex-col">
             <!-- Modal Header -->
             <div class="flex items-center justify-between p-6 border-b border-gray-200">
                 <div>

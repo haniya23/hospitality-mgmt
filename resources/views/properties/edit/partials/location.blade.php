@@ -216,6 +216,9 @@ function openLocationModal(propertyUuid) {
         width: '100%',
         dropdownParent: $('#locationModal')
     });
+    
+    // Initialize cascading functionality
+    initializeLocationCascading();
 }
 
 function closeLocationModal() {
@@ -309,5 +312,138 @@ async function saveLocation(propertyUuid) {
         saveButton.textContent = originalText;
         saveButton.disabled = false;
     }
+}
+
+// Initialize cascading location dropdowns
+function initializeLocationCascading() {
+    // Country change handler
+    $('#country_id').on('change', function() {
+        const countryId = $(this).val();
+        
+        // Clear dependent dropdowns
+        $('#state_id').empty().append('<option value="">Select State</option>');
+        $('#district_id').empty().append('<option value="">Select District</option>');
+        $('#city_id').empty().append('<option value="">Select City</option>');
+        $('#pincode_id').empty().append('<option value="">Select Pincode</option>');
+        
+        // Trigger Select2 update
+        $('#state_id, #district_id, #city_id, #pincode_id').trigger('change');
+        
+        if (countryId) {
+            // Load states for selected country
+            loadStates(countryId);
+        }
+    });
+    
+    // State change handler
+    $('#state_id').on('change', function() {
+        const stateId = $(this).val();
+        
+        // Clear dependent dropdowns
+        $('#district_id').empty().append('<option value="">Select District</option>');
+        $('#city_id').empty().append('<option value="">Select City</option>');
+        $('#pincode_id').empty().append('<option value="">Select Pincode</option>');
+        
+        // Trigger Select2 update
+        $('#district_id, #city_id, #pincode_id').trigger('change');
+        
+        if (stateId) {
+            // Load districts for selected state
+            loadDistricts(stateId);
+        }
+    });
+    
+    // District change handler
+    $('#district_id').on('change', function() {
+        const districtId = $(this).val();
+        
+        // Clear dependent dropdowns
+        $('#city_id').empty().append('<option value="">Select City</option>');
+        $('#pincode_id').empty().append('<option value="">Select Pincode</option>');
+        
+        // Trigger Select2 update
+        $('#city_id, #pincode_id').trigger('change');
+        
+        if (districtId) {
+            // Load cities for selected district
+            loadCities(districtId);
+        }
+    });
+    
+    // City change handler
+    $('#city_id').on('change', function() {
+        const cityId = $(this).val();
+        
+        // Clear dependent dropdown
+        $('#pincode_id').empty().append('<option value="">Select Pincode</option>');
+        
+        // Trigger Select2 update
+        $('#pincode_id').trigger('change');
+        
+        if (cityId) {
+            // Load pincodes for selected city
+            loadPincodes(cityId);
+        }
+    });
+}
+
+// Load states for selected country - Using existing data
+function loadStates(countryId) {
+    // Get all states from the existing options
+    const allStates = @json(\App\Models\State::all(['id', 'name', 'country_id']));
+    
+    const stateSelect = $('#state_id');
+    const filteredStates = allStates.filter(state => state.country_id == countryId);
+    
+    filteredStates.forEach(state => {
+        stateSelect.append(`<option value="${state.id}">${state.name}</option>`);
+    });
+    
+    stateSelect.trigger('change');
+}
+
+// Load districts for selected state - Using existing data
+function loadDistricts(stateId) {
+    // Get all districts from the existing options
+    const allDistricts = @json(\App\Models\District::all(['id', 'name', 'state_id']));
+    
+    const districtSelect = $('#district_id');
+    const filteredDistricts = allDistricts.filter(district => district.state_id == stateId);
+    
+    filteredDistricts.forEach(district => {
+        districtSelect.append(`<option value="${district.id}">${district.name}</option>`);
+    });
+    
+    districtSelect.trigger('change');
+}
+
+// Load cities for selected district - Using existing data
+function loadCities(districtId) {
+    // Get all cities from the existing options
+    const allCities = @json(\App\Models\City::all(['id', 'name', 'district_id']));
+    
+    const citySelect = $('#city_id');
+    const filteredCities = allCities.filter(city => city.district_id == districtId);
+    
+    filteredCities.forEach(city => {
+        citySelect.append(`<option value="${city.id}">${city.name}</option>`);
+    });
+    
+    citySelect.trigger('change');
+}
+
+// Load pincodes for selected city - Using existing data
+function loadPincodes(cityId) {
+    // Get all pincodes from the existing options
+    const allPincodes = @json(\App\Models\Pincode::all(['id', 'code', 'city_id']));
+    
+    const pincodeSelect = $('#pincode_id');
+    const filteredPincodes = allPincodes.filter(pincode => pincode.city_id == cityId);
+    
+    filteredPincodes.forEach(pincode => {
+        pincodeSelect.append(`<option value="${pincode.id}">${pincode.code}</option>`);
+    });
+    
+    pincodeSelect.trigger('change');
 }
 </script>

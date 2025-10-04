@@ -422,14 +422,23 @@
     
     /* Layout Spacing Fixes */
     
-    /* Ensure main content starts below top bar on mobile */
+    /* Bottom Navigation Spacing */
     @media (max-width: 1023px) {
-        body {
-            padding-top: 4rem; /* Match top bar height */
+        /* No bottom padding for main content */
+        main {
+            padding-bottom: 0 !important; /* Removed all bottom padding */
         }
         
-        main {
-            padding-bottom: 6rem !important; /* Space for bottom nav */
+        /* Ensure fixed elements don't overlap with bottom nav */
+        .fixed {
+            bottom: 0 !important; /* No bottom spacing */
+        }
+        
+        /* Exception: Only accommodation popup needs bottom spacing */
+        .fixed[x-data*="accommodation"],
+        .property-accommodation-modal.fixed,
+        .accommodation-modal.fixed {
+            bottom: 6rem !important; /* Add space for bottom nav */
         }
     }
     
@@ -659,6 +668,146 @@
         background-position: right 12px center !important;
         background-size: 20px !important;
         cursor: pointer !important;
+    }
+    
+    /* Modal Positioning Fixes */
+    @media (max-width: 1023px) {
+        /* Specific fix for property accommodation popup only */
+        .property-accommodation-modal,
+        .accommodation-modal,
+        [x-data*="accommodation"] {
+            margin-bottom: 6rem !important;
+            z-index: 50 !important;
+        }
+        
+        /* Ensure accommodation popup submit buttons are visible */
+        .accommodation-submit,
+        .property-accommodation-modal button[type="submit"],
+        .accommodation-modal button[type="submit"] {
+            margin-bottom: 4rem !important; /* Increased from 2rem to 4rem */
+            padding-bottom: 4rem !important; /* Increased from 2rem to 4rem */
+            z-index: 51 !important;
+        }
+    }
+    
+    /* Mobile Responsive Accommodation Popup - Match Location Popup Style */
+    @media (max-width: 768px) {
+        /* Accommodation Modal Mobile Responsive - Same as Location */
+        #accommodationModal {
+            padding: 0.5rem !important;
+        }
+        
+        #accommodationModal .flex.min-h-full {
+            align-items: center !important; /* Match location popup */
+            padding: 0.5rem !important; /* Match location popup */
+        }
+        
+        #accommodationModal .relative.w-full.max-w-2xl {
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            border-radius: 0.75rem !important; /* Match location popup */
+            max-height: 90vh !important;
+        }
+        
+        /* Modal Header Mobile */
+        #accommodationModal .flex.items-center.justify-between.p-6 {
+            padding: 1rem !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 0.5rem !important;
+        }
+        
+        #accommodationModal h3 {
+            font-size: 1.125rem !important;
+            line-height: 1.25rem !important;
+        }
+        
+        #accommodationModal p {
+            font-size: 0.875rem !important;
+        }
+        
+        /* Modal Content Mobile */
+        #accommodationModal .flex-1.overflow-y-auto.p-6 {
+            padding: 1rem !important;
+            max-height: calc(90vh - 8rem) !important;
+        }
+        
+        /* Form Grid Mobile */
+        #accommodationModal .grid.grid-cols-1.md\\:grid-cols-2 {
+            grid-template-columns: 1fr !important;
+            gap: 1rem !important;
+        }
+        
+        /* Amenities Grid Mobile */
+        #accommodationModal .grid.grid-cols-2.md\\:grid-cols-3.lg\\:grid-cols-4 {
+            grid-template-columns: 1fr !important;
+            gap: 0.75rem !important;
+        }
+        
+        #accommodationModal .grid.grid-cols-2.md\\:grid-cols-3.lg\\:grid-cols-4 label {
+            padding: 0.5rem !important;
+            border: 1px solid #e5e7eb !important;
+            border-radius: 0.5rem !important;
+            background: #f9fafb !important;
+        }
+        
+        /* Modal Footer Mobile */
+        #accommodationModal .flex.items-center.justify-end.gap-3.p-6 {
+            padding: 1rem !important;
+            flex-direction: row !important; /* Changed from column to row */
+            gap: 0.75rem !important;
+            margin-bottom: 4rem !important; /* Added extra scroll space */
+        }
+        
+        #accommodationModal .flex.items-center.justify-end.gap-3.p-6 button {
+            width: auto !important; /* Changed from 100% to auto */
+            padding: 0.75rem 1rem !important;
+            font-size: 0.875rem !important;
+            margin-bottom: 2rem !important; /* Added extra space after buttons */
+            flex: 1 !important; /* Equal width buttons */
+        }
+        
+        /* Input Fields Mobile */
+        #accommodationModal input,
+        #accommodationModal textarea,
+        #accommodationModal select {
+            font-size: 16px !important; /* Prevents zoom on iOS */
+            padding: 0.75rem !important;
+        }
+        
+        /* File Input Mobile */
+        #accommodationModal input[type="file"] {
+            padding: 0.5rem !important;
+        }
+        
+        /* Textarea Mobile */
+        #accommodationModal textarea {
+            min-height: 6rem !important;
+        }
+    }
+    
+    /* Small Mobile Screens - Match Location Popup */
+    @media (max-width: 480px) {
+        #accommodationModal .relative.w-full.max-w-2xl {
+            max-height: 95vh !important;
+            border-radius: 0.75rem !important; /* Match location popup */
+        }
+        
+        #accommodationModal .flex-1.overflow-y-auto.p-6 {
+            max-height: calc(95vh - 6rem) !important;
+        }
+        
+        #accommodationModal .flex.items-center.justify-end.gap-3.p-6 {
+            padding: 0.75rem !important;
+            margin-bottom: 4rem !important; /* Added extra scroll space for small screens */
+            flex-direction: row !important; /* Keep buttons in one row */
+        }
+        
+        #accommodationModal .flex.items-center.justify-end.gap-3.p-6 button {
+            margin-bottom: 2rem !important; /* Added extra space after buttons */
+            flex: 1 !important; /* Equal width buttons */
+        }
     }
     
     /* Global Loader Styles */
