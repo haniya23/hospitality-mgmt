@@ -187,6 +187,9 @@
     </div>
 </div>
 
+<!-- Notification Container -->
+<div id="notification-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
 <!-- Check-in Modal -->
 <div id="checkInModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
     <div class="flex items-center justify-center min-h-screen p-4">
@@ -266,6 +269,64 @@
 <script>
 let currentReservationId = null;
 
+// Simple notification system
+function showNotification(message, type = 'info') {
+    const container = document.getElementById('notification-container');
+    const notification = document.createElement('div');
+    
+    // Set colors based on type
+    let bgColor, textColor, icon;
+    switch(type) {
+        case 'success':
+            bgColor = 'bg-green-500';
+            textColor = 'text-white';
+            icon = 'fas fa-check-circle';
+            break;
+        case 'error':
+            bgColor = 'bg-red-500';
+            textColor = 'text-white';
+            icon = 'fas fa-exclamation-circle';
+            break;
+        case 'warning':
+            bgColor = 'bg-yellow-500';
+            textColor = 'text-white';
+            icon = 'fas fa-exclamation-triangle';
+            break;
+        default:
+            bgColor = 'bg-blue-500';
+            textColor = 'text-white';
+            icon = 'fas fa-info-circle';
+    }
+    
+    notification.className = `${bgColor} ${textColor} px-4 py-3 rounded-lg shadow-lg flex items-center space-x-3 max-w-sm transform transition-all duration-300 ease-in-out`;
+    notification.style.transform = 'translateX(100%)';
+    
+    notification.innerHTML = `
+        <i class="${icon}"></i>
+        <span class="flex-1 text-sm font-medium">${message}</span>
+        <button onclick="this.parentElement.remove()" class="text-white hover:text-gray-200 transition-colors">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    
+    container.appendChild(notification);
+    
+    // Animate in
+    setTimeout(() => {
+        notification.style.transform = 'translateX(0)';
+    }, 100);
+    
+    // Auto remove after 4 seconds
+    setTimeout(() => {
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.remove();
+            }
+        }, 300);
+    }, 4000);
+}
+
 function openCheckInModal(reservationId) {
     currentReservationId = reservationId;
     document.getElementById('checkInModal').classList.remove('hidden');
@@ -313,14 +374,14 @@ document.getElementById('checkInForm').addEventListener('submit', async function
         const result = await response.json();
         
         if (result.success) {
-            alert('Check-in completed successfully!');
+            showNotification('Check-in completed successfully!', 'success');
             closeCheckInModal();
             location.reload(); // Refresh to update the lists
         } else {
-            alert('Failed to complete check-in: ' + result.message);
+            showNotification('Failed to complete check-in: ' + result.message, 'error');
         }
     } catch (error) {
-        alert('An error occurred while processing check-in.');
+        showNotification('An error occurred while processing check-in.', 'error');
     }
 });
 
@@ -349,14 +410,14 @@ document.getElementById('checkOutForm').addEventListener('submit', async functio
         const result = await response.json();
         
         if (result.success) {
-            alert('Check-out completed successfully!');
+            showNotification('Check-out completed successfully!', 'success');
             closeCheckOutModal();
             location.reload(); // Refresh to update the lists
         } else {
-            alert('Failed to complete check-out: ' + result.message);
+            showNotification('Failed to complete check-out: ' + result.message, 'error');
         }
     } catch (error) {
-        alert('An error occurred while processing check-out.');
+        showNotification('An error occurred while processing check-out.', 'error');
     }
 });
 </script>

@@ -26,6 +26,9 @@ class StaffPermission extends Model
     const PERMISSIONS = [
         // Booking & Guest Management
         'view_bookings' => 'View upcoming bookings calendar',
+        'create_bookings' => 'Create new bookings and reservations',
+        'edit_bookings' => 'Edit existing bookings and reservations',
+        'cancel_bookings' => 'Cancel bookings and reservations',
         'view_guest_details' => 'View guest profiles and information',
         'update_guest_services' => 'Mark guest service tasks as completed',
         

@@ -61,6 +61,21 @@ Route::middleware(['staff'])->prefix('staff')->name('staff.')->group(function ()
     Route::post('/guest-service/check-in/{reservationId}', [App\Http\Controllers\StaffGuestServiceController::class, 'checkIn'])->name('guest-service.check-in');
     Route::post('/guest-service/check-out/{reservationId}', [App\Http\Controllers\StaffGuestServiceController::class, 'checkOut'])->name('guest-service.check-out');
     Route::get('/guest-service/booking/{reservationId}', [App\Http\Controllers\StaffGuestServiceController::class, 'getBookingDetails'])->name('guest-service.booking');
+    
+    // Staff Bookings Routes
+    Route::get('/bookings', [App\Http\Controllers\StaffBookingController::class, 'index'])->name('bookings');
+    Route::get('/bookings/create', [App\Http\Controllers\StaffBookingController::class, 'create'])->name('bookings.create');
+    Route::post('/bookings', [App\Http\Controllers\StaffBookingController::class, 'store'])->name('bookings.store');
+    Route::get('/bookings/{booking}', [App\Http\Controllers\StaffBookingController::class, 'show'])->name('bookings.show');
+    Route::post('/bookings/{booking}/update-customer', [App\Http\Controllers\StaffBookingController::class, 'updateCustomerDetails'])->name('bookings.update-customer');
+    Route::get('/bookings/{booking}/customer-details', [App\Http\Controllers\StaffBookingController::class, 'getCustomerDetails'])->name('bookings.customer-details');
+    
+    // Staff Properties Routes
+    Route::get('/properties', [App\Http\Controllers\StaffPropertyController::class, 'index'])->name('properties');
+    Route::get('/properties/{property}', [App\Http\Controllers\StaffPropertyController::class, 'show'])->name('properties.show');
+    Route::get('/properties/{property}/accommodations', [App\Http\Controllers\StaffPropertyController::class, 'accommodations'])->name('properties.accommodations');
+    Route::get('/properties/{property}/checklists', [App\Http\Controllers\StaffPropertyController::class, 'checklists'])->name('properties.checklists');
+    Route::get('/properties/{property}/staff-assignments', [App\Http\Controllers\StaffPropertyController::class, 'staffAssignments'])->name('properties.staff-assignments');
 });
 
 // Owner Staff Management Routes

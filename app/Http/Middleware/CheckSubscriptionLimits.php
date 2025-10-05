@@ -21,6 +21,11 @@ class CheckSubscriptionLimits
             return $next($request);
         }
 
+        // Skip subscription limit checks for staff users
+        if ($user->isStaff()) {
+            return $next($request);
+        }
+
         // Get user's current usage
         $usage = $user->getUsagePercentage();
         

@@ -122,6 +122,21 @@
                 </div>
             </div>
 
+            <!-- Owner Login Option -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                <div class="text-center">
+                    <div class="mx-auto h-12 w-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center shadow-lg mb-4">
+                        <i class="fas fa-home text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Property Owner Access</h3>
+                    <p class="text-sm text-gray-600 mb-4">Manage your properties and bookings</p>
+                    <a href="/login" class="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-xl text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 shadow-md hover:shadow-lg">
+                        <i class="fas fa-sign-in-alt mr-2"></i>
+                        Owner Login
+                    </a>
+                </div>
+            </div>
+
             <!-- Footer -->
             <div class="text-center">
                 <p class="text-sm text-gray-500">

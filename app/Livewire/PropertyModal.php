@@ -176,19 +176,29 @@ class PropertyModal extends Component
                 'property_category_id' => $this->property_category_id,
             ]);
         } elseif ($this->section === 'location') {
+            $locationData = [
+                'property_id' => $property->id,
+                'address' => $this->address ?: '', // Ensure address is not null
+                'country_id' => $this->country_id,
+                'state_id' => $this->state_id,
+                'district_id' => $this->district_id,
+                'city_id' => $this->city_id,
+                'pincode_id' => $this->pincode_id,
+                'latitude' => $this->latitude,
+                'longitude' => $this->longitude,
+            ];
+            
+            // Filter out null values for optional fields (but keep address as it's required)
+            $filteredData = [];
+            foreach ($locationData as $key => $value) {
+                if ($key === 'address' || !is_null($value)) {
+                    $filteredData[$key] = $value;
+                }
+            }
+            
             $property->location()->updateOrCreate(
                 [],
-                [
-                    'property_id' => $property->id,
-                    'address' => $this->address,
-                    'country_id' => $this->country_id,
-                    'state_id' => $this->state_id,
-                    'district_id' => $this->district_id,
-                    'city_id' => $this->city_id,
-                    'pincode_id' => $this->pincode_id,
-                    'latitude' => $this->latitude,
-                    'longitude' => $this->longitude,
-                ]
+                $filteredData
             );
         } elseif ($this->section === 'accommodation') {
             $property->accommodations()->updateOrCreate([], [

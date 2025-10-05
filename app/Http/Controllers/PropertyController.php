@@ -221,9 +221,23 @@ class PropertyController extends Controller
         
         if ($section === 'location') {
             $locationData = $request->only(['address', 'country_id', 'state_id', 'district_id', 'city_id', 'pincode_id', 'latitude', 'longitude']);
+            
+            // Ensure address is not null - provide empty string if null
+            if (is_null($locationData['address'])) {
+                $locationData['address'] = '';
+            }
+            
+            // Filter out null values for optional fields (but keep address as it's required)
+            $filteredData = [];
+            foreach ($locationData as $key => $value) {
+                if ($key === 'address' || !is_null($value)) {
+                    $filteredData[$key] = $value;
+                }
+            }
+            
             $result = $property->location()->updateOrCreate(
                 ['property_id' => $property->id],
-                $locationData
+                $filteredData
             );
         }
         
