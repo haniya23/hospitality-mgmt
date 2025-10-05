@@ -49,7 +49,7 @@
                              }
                          }"
                          x-init="setTimeout(() => animateValue(), {{ $index * 200 + 300 }})"
-                         x-text="displayValue.toLocaleString()"
+                         x-text="displayValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })"
                      @elseif(isset($card['value']))
                          x-text="{{ $card['value'] }}"
                      @else

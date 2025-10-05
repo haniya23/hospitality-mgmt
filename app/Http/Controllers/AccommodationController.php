@@ -126,7 +126,7 @@ class AccommodationController extends Controller
             ->with('success', 'Accommodation created successfully.');
     }
 
-    public function show(PropertyAccommodation $accommodation)
+    public function maintenance(PropertyAccommodation $accommodation)
     {
         // Check if user owns the property
         if ($accommodation->property->owner_id !== auth()->id()) {
@@ -135,7 +135,44 @@ class AccommodationController extends Controller
         
         $accommodation->load(['property', 'predefinedType', 'amenities', 'photos']);
         
-        return view('accommodations.show', compact('accommodation'));
+        return view('accommodations.maintenance', compact('accommodation'));
+    }
+
+    public function updateMaintenance(Request $request, PropertyAccommodation $accommodation)
+    {
+        // Check if user owns the property
+        if ($accommodation->property->owner_id !== auth()->id()) {
+            abort(403, 'Unauthorized access to this accommodation.');
+        }
+        
+        $request->validate([
+            'maintenance_status' => 'nullable|in:none,scheduled,active,completed',
+            'maintenance_start_date' => 'nullable|date',
+            'maintenance_end_date' => 'nullable|date|after_or_equal:maintenance_start_date',
+            'maintenance_description' => 'nullable|string',
+            'maintenance_cost' => 'nullable|numeric|min:0',
+            'renovation_status' => 'nullable|in:none,scheduled,active,completed',
+            'renovation_start_date' => 'nullable|date',
+            'renovation_end_date' => 'nullable|date|after_or_equal:renovation_start_date',
+            'renovation_description' => 'nullable|string',
+            'renovation_cost' => 'nullable|numeric|min:0',
+        ]);
+
+        $accommodation->update([
+            'maintenance_status' => $request->maintenance_status ?? 'none',
+            'maintenance_start_date' => $request->maintenance_start_date,
+            'maintenance_end_date' => $request->maintenance_end_date,
+            'maintenance_description' => $request->maintenance_description,
+            'maintenance_cost' => $request->maintenance_cost,
+            'renovation_status' => $request->renovation_status ?? 'none',
+            'renovation_start_date' => $request->renovation_start_date,
+            'renovation_end_date' => $request->renovation_end_date,
+            'renovation_description' => $request->renovation_description,
+            'renovation_cost' => $request->renovation_cost,
+        ]);
+
+        return redirect()->route('accommodations.index')
+            ->with('success', 'Maintenance and renovation details updated successfully.');
     }
 
     public function edit(PropertyAccommodation $accommodation)

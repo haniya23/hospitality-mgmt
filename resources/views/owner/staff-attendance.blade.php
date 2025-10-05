@@ -22,15 +22,20 @@
     .stat-card {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.1);
     }
     .stat-card.success {
         background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        box-shadow: 0 8px 25px rgba(17, 153, 142, 0.3);
     }
     .stat-card.warning {
         background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        box-shadow: 0 8px 25px rgba(240, 147, 251, 0.3);
     }
     .stat-card.info {
         background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        box-shadow: 0 8px 25px rgba(79, 172, 254, 0.3);
     }
 </style>
 @endpush
@@ -92,51 +97,51 @@
         </div>
 
         <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div class="stat-card success rounded-2xl p-6 text-white">
+        <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+            <div class="stat-card success rounded-2xl p-4 md:p-6 text-white">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-white/80 text-sm font-medium">Present Days</p>
-                        <p class="text-3xl font-bold">{{ $stats['present_days'] }}</p>
+                        <p class="text-white/80 text-xs md:text-sm font-medium">Present Days</p>
+                        <p class="text-2xl md:text-3xl font-bold">{{ $stats['present_days'] }}</p>
                     </div>
-                    <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                        <i class="fas fa-check text-xl"></i>
+                    <div class="w-10 h-10 md:w-12 md:h-12 bg-white/20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-check text-lg md:text-xl"></i>
                     </div>
                 </div>
             </div>
             
-            <div class="stat-card warning rounded-2xl p-6 text-white">
+            <div class="stat-card warning rounded-2xl p-4 md:p-6 text-white">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-white/80 text-sm font-medium">Absent Days</p>
-                        <p class="text-3xl font-bold">{{ $stats['absent_days'] }}</p>
+                        <p class="text-white/80 text-xs md:text-sm font-medium">Absent Days</p>
+                        <p class="text-2xl md:text-3xl font-bold">{{ $stats['absent_days'] }}</p>
                     </div>
-                    <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                        <i class="fas fa-times text-xl"></i>
+                    <div class="w-10 h-10 md:w-12 md:h-12 bg-white/20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-times text-lg md:text-xl"></i>
                     </div>
                 </div>
             </div>
             
-            <div class="stat-card info rounded-2xl p-6 text-white">
+            <div class="stat-card info rounded-2xl p-4 md:p-6 text-white">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-white/80 text-sm font-medium">Total Hours</p>
-                        <p class="text-3xl font-bold">{{ $stats['total_hours'] }}</p>
+                        <p class="text-white/80 text-xs md:text-sm font-medium">Total Hours</p>
+                        <p class="text-2xl md:text-3xl font-bold">{{ $stats['total_hours'] }}</p>
                     </div>
-                    <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                        <i class="fas fa-clock text-xl"></i>
+                    <div class="w-10 h-10 md:w-12 md:h-12 bg-white/20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-clock text-lg md:text-xl"></i>
                     </div>
                 </div>
             </div>
             
-            <div class="stat-card rounded-2xl p-6 text-white">
+            <div class="stat-card rounded-2xl p-4 md:p-6 text-white">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-white/80 text-sm font-medium">Attendance %</p>
-                        <p class="text-3xl font-bold">{{ $stats['attendance_percentage'] }}%</p>
+                        <p class="text-white/80 text-xs md:text-sm font-medium">Attendance %</p>
+                        <p class="text-2xl md:text-3xl font-bold">{{ $stats['attendance_percentage'] }}%</p>
                     </div>
-                    <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                        <i class="fas fa-percentage text-xl"></i>
+                    <div class="w-10 h-10 md:w-12 md:h-12 bg-white/20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-percentage text-lg md:text-xl"></i>
                     </div>
                 </div>
             </div>

@@ -19,7 +19,7 @@
 </style>
 @endpush
 
-<div class="space-y-3 sm:space-y-4 overflow-y-auto">
+<div x-data="accommodationListData()" x-init="init()" class="space-y-3 sm:space-y-4 overflow-y-auto">
     <template x-for="accommodation in filteredAccommodations" :key="accommodation.id">
         <div class="accommodation-card rounded-2xl overflow-hidden shadow-sm">
             <!-- Accommodation Image -->
@@ -112,11 +112,17 @@
                                       'bg-yellow-100 text-yellow-800': accommodation.maintenance_status === 'scheduled',
                                       'bg-green-100 text-green-800': accommodation.maintenance_status === 'completed'
                                   }"
-                                  x-text="accommodation.maintenance_status.charAt(0).toUpperCase() + accommodation.maintenance_status.slice(1)"></span>
+                                  x-text="accommodation.maintenance_status === 'scheduled' ? 'Pending' : accommodation.maintenance_status.charAt(0).toUpperCase() + accommodation.maintenance_status.slice(1)"></span>
                         </div>
                         <div x-show="accommodation.maintenance_start_date && accommodation.maintenance_end_date" class="text-xs text-gray-600 mt-1">
                             <span x-text="new Date(accommodation.maintenance_start_date).toLocaleDateString()"></span> - 
                             <span x-text="new Date(accommodation.maintenance_end_date).toLocaleDateString()"></span>
+                        </div>
+                        <div x-show="accommodation.maintenance_status === 'scheduled' && accommodation.maintenance_start_date" class="text-xs text-blue-600 mt-1 font-medium">
+                            Available in <span x-text="getDaysUntilAvailable(accommodation.maintenance_start_date)"></span> days
+                        </div>
+                        <div x-show="accommodation.maintenance_status === 'active' && accommodation.maintenance_end_date" class="text-xs text-red-600 mt-1 font-medium">
+                            Available in <span x-text="getDaysUntilAvailable(accommodation.maintenance_end_date)"></span> days
                         </div>
                         <div x-show="accommodation.maintenance_description" class="text-xs text-gray-600 mt-1" x-text="accommodation.maintenance_description"></div>
                         <div x-show="accommodation.maintenance_cost" class="text-xs text-gray-600 mt-1">
@@ -134,11 +140,17 @@
                                       'bg-yellow-100 text-yellow-800': accommodation.renovation_status === 'scheduled',
                                       'bg-green-100 text-green-800': accommodation.renovation_status === 'completed'
                                   }"
-                                  x-text="accommodation.renovation_status.charAt(0).toUpperCase() + accommodation.renovation_status.slice(1)"></span>
+                                  x-text="accommodation.renovation_status === 'scheduled' ? 'Pending' : accommodation.renovation_status.charAt(0).toUpperCase() + accommodation.renovation_status.slice(1)"></span>
                         </div>
                         <div x-show="accommodation.renovation_start_date && accommodation.renovation_end_date" class="text-xs text-gray-600 mt-1">
                             <span x-text="new Date(accommodation.renovation_start_date).toLocaleDateString()"></span> - 
                             <span x-text="new Date(accommodation.renovation_end_date).toLocaleDateString()"></span>
+                        </div>
+                        <div x-show="accommodation.renovation_status === 'scheduled' && accommodation.renovation_start_date" class="text-xs text-blue-600 mt-1 font-medium">
+                            Available in <span x-text="getDaysUntilAvailable(accommodation.renovation_start_date)"></span> days
+                        </div>
+                        <div x-show="accommodation.renovation_status === 'active' && accommodation.renovation_end_date" class="text-xs text-red-600 mt-1 font-medium">
+                            Available in <span x-text="getDaysUntilAvailable(accommodation.renovation_end_date)"></span> days
                         </div>
                         <div x-show="accommodation.renovation_description" class="text-xs text-gray-600 mt-1" x-text="accommodation.renovation_description"></div>
                         <div x-show="accommodation.renovation_cost" class="text-xs text-gray-600 mt-1">
@@ -180,12 +192,12 @@
                         <span class="hidden sm:inline">Edit</span>
                         <span class="sm:hidden">Edit</span>
                     </a>
-                    <button @click="deleteAccommodation(accommodation.uuid)" 
-                            class="bg-red-500 text-white py-2 px-3 sm:px-4 rounded-xl font-medium text-xs sm:text-sm hover:bg-red-600 transition flex items-center justify-center">
-                        <i class="fas fa-trash mr-1"></i>
-                        <span class="hidden sm:inline">Delete</span>
-                        <span class="sm:hidden">Delete</span>
-                    </button>
+                    <a :href="'/accommodations/' + accommodation.uuid + '/maintenance'" 
+                       class="bg-orange-500 text-white py-2 px-3 sm:px-4 rounded-xl font-medium text-xs sm:text-sm hover:bg-orange-600 transition flex items-center justify-center">
+                        <i class="fas fa-tools mr-1"></i>
+                        <span class="hidden sm:inline">Maintenance</span>
+                        <span class="sm:hidden">Maint.</span>
+                    </a>
                 </div>
             </div>
         </div>
@@ -221,3 +233,24 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+function accommodationListData() {
+    return {
+        init() {
+            // Initialize accommodation list data
+        },
+
+        getDaysUntilAvailable(dateString) {
+            if (!dateString) return 0;
+            const targetDate = new Date(dateString);
+            const today = new Date();
+            const diffTime = targetDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays > 0 ? diffDays : 0;
+        }
+    }
+}
+</script>
+@endpush

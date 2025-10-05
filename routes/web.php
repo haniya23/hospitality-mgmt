@@ -211,7 +211,8 @@ Route::middleware(['auth', 'subscription.limits'])->group(function () {
     Route::get('/accommodations', [App\Http\Controllers\AccommodationController::class, 'index'])->name('accommodations.index');
     Route::get('/accommodations/create', [App\Http\Controllers\AccommodationController::class, 'create'])->name('accommodations.create');
     Route::post('/accommodations', [App\Http\Controllers\AccommodationController::class, 'store'])->name('accommodations.store');
-    Route::get('/accommodations/{accommodation}', [App\Http\Controllers\AccommodationController::class, 'show'])->name('accommodations.show');
+    Route::get('/accommodations/{accommodation}/maintenance', [App\Http\Controllers\AccommodationController::class, 'maintenance'])->name('accommodations.maintenance');
+    Route::post('/accommodations/{accommodation}/maintenance', [App\Http\Controllers\AccommodationController::class, 'updateMaintenance'])->name('accommodations.maintenance.update');
     Route::get('/accommodations/{accommodation}/edit', [App\Http\Controllers\AccommodationController::class, 'edit'])->name('accommodations.edit');
     Route::put('/accommodations/{accommodation}', [App\Http\Controllers\AccommodationController::class, 'update'])->name('accommodations.update');
     Route::delete('/accommodations/{accommodation}', [App\Http\Controllers\AccommodationController::class, 'destroy'])->name('accommodations.destroy');

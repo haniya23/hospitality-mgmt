@@ -111,8 +111,8 @@ function accommodationData() {
             return {
                 total: this.accommodations.length,
                 active: this.accommodations.filter(a => a.property.status === 'active').length,
-                totalPrice: this.accommodations.reduce((sum, a) => sum + parseFloat(a.base_price), 0),
-                avgPrice: this.accommodations.length > 0 ? this.accommodations.reduce((sum, a) => sum + parseFloat(a.base_price), 0) / this.accommodations.length : 0
+                totalPrice: Math.round(this.accommodations.reduce((sum, a) => sum + parseFloat(a.base_price), 0) * 100) / 100,
+                avgPrice: this.accommodations.length > 0 ? Math.round((this.accommodations.reduce((sum, a) => sum + parseFloat(a.base_price), 0) / this.accommodations.length) * 100) / 100 : 0
             };
         },
 
@@ -180,6 +180,15 @@ function accommodationData() {
                     alert('Error deleting accommodation');
                 });
             }
+        },
+
+        getDaysUntilAvailable(dateString) {
+            if (!dateString) return 0;
+            const targetDate = new Date(dateString);
+            const today = new Date();
+            const diffTime = targetDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays > 0 ? diffDays : 0;
         }
     }
 }

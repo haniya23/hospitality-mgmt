@@ -173,6 +173,136 @@
             </div>
         </div>
 
+        <!-- Maintenance and Renovation Details -->
+        <div class="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-md hover:shadow-lg border border-gray-200 p-4 sm:p-6 transition-shadow duration-300">
+            <div class="flex items-center gap-2 mb-6">
+                <div class="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center shadow-sm">
+                    <i class="fas fa-tools text-white text-lg"></i>
+                </div>
+                <h2 class="text-lg sm:text-xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">Maintenance & Renovation Details</h2>
+            </div>
+            
+            <div class="space-y-6">
+                <!-- Maintenance Section -->
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="text-md font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-wrench text-orange-600"></i>
+                        Maintenance Details
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="maintenance_status" class="block text-sm font-semibold text-gray-700 mb-2">
+                                Maintenance Status
+                            </label>
+                            <select name="maintenance_status" id="maintenance_status"
+                                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 bg-white hover:border-gray-300 font-semibold text-gray-800">
+                                <option value="none" {{ old('maintenance_status') == 'none' ? 'selected' : '' }}>None</option>
+                                <option value="scheduled" {{ old('maintenance_status') == 'scheduled' ? 'selected' : '' }}>Scheduled</option>
+                                <option value="active" {{ old('maintenance_status') == 'active' ? 'selected' : '' }}>Active</option>
+                                <option value="completed" {{ old('maintenance_status') == 'completed' ? 'selected' : '' }}>Completed</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label for="maintenance_cost" class="block text-sm font-semibold text-gray-700 mb-2">
+                                Maintenance Cost (₹)
+                            </label>
+                            <input type="number" name="maintenance_cost" id="maintenance_cost" min="0" step="0.01"
+                                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 bg-white hover:border-gray-300 font-semibold text-gray-800"
+                                   value="{{ old('maintenance_cost') }}" placeholder="Enter maintenance cost">
+                        </div>
+                        
+                        <div>
+                            <label for="maintenance_start_date" class="block text-sm font-semibold text-gray-700 mb-2">
+                                Start Date
+                            </label>
+                            <input type="date" name="maintenance_start_date" id="maintenance_start_date"
+                                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 bg-white hover:border-gray-300 font-semibold text-gray-800"
+                                   value="{{ old('maintenance_start_date') }}">
+                        </div>
+                        
+                        <div>
+                            <label for="maintenance_end_date" class="block text-sm font-semibold text-gray-700 mb-2">
+                                End Date
+                            </label>
+                            <input type="date" name="maintenance_end_date" id="maintenance_end_date"
+                                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 bg-white hover:border-gray-300 font-semibold text-gray-800"
+                                   value="{{ old('maintenance_end_date') }}">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <label for="maintenance_description" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Maintenance Description
+                        </label>
+                        <textarea name="maintenance_description" id="maintenance_description" rows="3"
+                                  class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 bg-white hover:border-gray-300 font-medium text-gray-800 resize-none"
+                                  placeholder="Describe the maintenance work being done...">{{ old('maintenance_description') }}</textarea>
+                    </div>
+                </div>
+                
+                <!-- Renovation Section -->
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="text-md font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-hammer text-red-600"></i>
+                        Renovation Details
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="renovation_status" class="block text-sm font-semibold text-gray-700 mb-2">
+                                Renovation Status
+                            </label>
+                            <select name="renovation_status" id="renovation_status"
+                                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white hover:border-gray-300 font-semibold text-gray-800">
+                                <option value="none" {{ old('renovation_status') == 'none' ? 'selected' : '' }}>None</option>
+                                <option value="scheduled" {{ old('renovation_status') == 'scheduled' ? 'selected' : '' }}>Scheduled</option>
+                                <option value="active" {{ old('renovation_status') == 'active' ? 'selected' : '' }}>Active</option>
+                                <option value="completed" {{ old('renovation_status') == 'completed' ? 'selected' : '' }}>Completed</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label for="renovation_cost" class="block text-sm font-semibold text-gray-700 mb-2">
+                                Renovation Cost (₹)
+                            </label>
+                            <input type="number" name="renovation_cost" id="renovation_cost" min="0" step="0.01"
+                                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white hover:border-gray-300 font-semibold text-gray-800"
+                                   value="{{ old('renovation_cost') }}" placeholder="Enter renovation cost">
+                        </div>
+                        
+                        <div>
+                            <label for="renovation_start_date" class="block text-sm font-semibold text-gray-700 mb-2">
+                                Start Date
+                            </label>
+                            <input type="date" name="renovation_start_date" id="renovation_start_date"
+                                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white hover:border-gray-300 font-semibold text-gray-800"
+                                   value="{{ old('renovation_start_date') }}">
+                        </div>
+                        
+                        <div>
+                            <label for="renovation_end_date" class="block text-sm font-semibold text-gray-700 mb-2">
+                                End Date
+                            </label>
+                            <input type="date" name="renovation_end_date" id="renovation_end_date"
+                                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white hover:border-gray-300 font-semibold text-gray-800"
+                                   value="{{ old('renovation_end_date') }}">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <label for="renovation_description" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Renovation Description
+                        </label>
+                        <textarea name="renovation_description" id="renovation_description" rows="3"
+                                  class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white hover:border-gray-300 font-medium text-gray-800 resize-none"
+                                  placeholder="Describe the renovation work being done...">{{ old('renovation_description') }}</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Photos -->
         <div class="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-md hover:shadow-lg border border-gray-200 p-4 sm:p-6 transition-shadow duration-300">
             <div class="flex items-center gap-2 mb-6">
