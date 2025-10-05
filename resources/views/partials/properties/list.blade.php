@@ -5,10 +5,17 @@
         transition: all 0.3s ease;
         border-radius: 16px;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        position: relative;
     }
     .property-card:hover { 
         transform: translateY(-4px); 
         box-shadow: 0 12px 40px rgba(0,0,0,0.15); 
+    }
+    .property-card .clickable-area {
+        transition: all 0.2s ease;
+    }
+    .property-card .clickable-area:hover {
+        background-color: rgba(249, 250, 251, 0.8);
     }
     .status-active { 
         background: linear-gradient(135deg, #d1fae5, #a7f3d0);
@@ -59,12 +66,20 @@
         <div class="property-card p-4 sm:p-6">
             <!-- Action buttons moved to top for better mobile experience -->
             <div class="flex justify-between items-start mb-4">
-                <div class="flex items-center space-x-3 flex-1 min-w-0">
+                <!-- Clickable property info section -->
+                <a :href="!showArchive ? '/properties/' + property.uuid : '#'" 
+                   :class="!showArchive ? 'cursor-pointer clickable-area -m-2 p-2 rounded-lg' : 'cursor-default'"
+                   class="flex items-center space-x-3 flex-1 min-w-0">
                     <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl property-icon flex items-center justify-center text-white font-bold flex-shrink-0">
                         <i class="fas fa-building text-lg sm:text-xl"></i>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <h3 class="font-semibold text-gray-800 text-lg truncate" x-text="property.name"></h3>
+                        <div class="flex items-center">
+                            <h3 class="font-semibold text-gray-800 text-lg truncate" x-text="property.name"></h3>
+                            <template x-if="!showArchive">
+                                <i class="fas fa-external-link-alt text-xs text-gray-400 ml-2 opacity-60"></i>
+                            </template>
+                        </div>
                         <div class="flex flex-wrap items-center gap-2 mt-1">
                             <span class="text-xs px-3 py-1 rounded-full font-medium"
                                   :class="'status-' + property.status"
@@ -79,9 +94,9 @@
                             </template>
                         </div>
                     </div>
-                </div>
+                </a>
                 <!-- Edit and Delete buttons moved to top right -->
-                <div class="flex gap-2 flex-shrink-0 ml-3">
+                <div class="flex gap-2 flex-shrink-0 ml-3" @click.stop>
                     <!-- Edit button - disabled for archived properties -->
                     <a :href="!showArchive ? '/properties/' + property.uuid + '/edit' : '#'" 
                        :class="!showArchive ? 'bg-gradient-to-r from-blue-100 to-blue-200 text-blue-700 hover:from-blue-200 hover:to-blue-300' : 'bg-gray-100 text-gray-400 cursor-not-allowed'"
@@ -92,7 +107,7 @@
                     
                     <!-- Delete/Status button -->
                     <template x-if="!showArchive">
-                        <button @click="requestPropertyDeletion(property)" 
+                        <button @click.stop="requestPropertyDeletion(property)" 
                                 class="w-10 h-10 bg-gradient-to-r from-red-100 to-red-200 text-red-700 rounded-xl font-medium text-sm hover:from-red-200 hover:to-red-300 transition action-btn flex items-center justify-center"
                                 title="Request Deletion">
                             <i class="fas fa-trash"></i>
@@ -137,13 +152,13 @@
                     </div>
 
                     <!-- Action buttons for bookings -->
-                    <div class="flex flex-col sm:flex-row gap-2">
-                        <button @click="openBookingModal(property)" class="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white py-3 px-4 rounded-xl font-medium text-sm hover:from-green-600 hover:to-green-700 transition text-center action-btn">
+                    <div class="flex flex-col sm:flex-row gap-2" @click.stop>
+                        <button @click.stop="openBookingModal(property)" class="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white py-3 px-4 rounded-xl font-medium text-sm hover:from-green-600 hover:to-green-700 transition text-center action-btn">
                             <i class="fas fa-calendar-plus mr-2"></i>
                             Add Booking
                         </button>
                         @if($hasB2bPartners)
-                        <button @click="openB2BBookingModal(property)" class="flex-1 bg-gradient-to-r from-purple-500 to-purple-600 text-white py-3 px-4 rounded-xl font-medium text-sm hover:from-purple-600 hover:to-purple-700 transition text-center action-btn">
+                        <button @click.stop="openB2BBookingModal(property)" class="flex-1 bg-gradient-to-r from-purple-500 to-purple-600 text-white py-3 px-4 rounded-xl font-medium text-sm hover:from-purple-600 hover:to-purple-700 transition text-center action-btn">
                             <i class="fas fa-handshake mr-2"></i>
                             B2B Booking
                         </button>

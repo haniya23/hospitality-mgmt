@@ -360,3 +360,4 @@ class StaffAttendanceController extends Controller
         ];
     }
 }
+

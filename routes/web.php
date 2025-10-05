@@ -194,6 +194,7 @@ Route::middleware(['auth', 'subscription.limits'])->group(function () {
     Route::get('/properties/create', [App\Http\Controllers\PropertyController::class, 'create'])->name('properties.create');
     Route::post('/properties', [App\Http\Controllers\PropertyController::class, 'store'])->name('properties.store');
     Route::get('/properties', [App\Http\Controllers\PropertyController::class, 'index'])->name('properties.index');
+    Route::get('/properties/{property}', [App\Http\Controllers\PropertyController::class, 'show'])->name('properties.show');
     Route::get('/properties/{property}/edit', [App\Http\Controllers\PropertyController::class, 'edit'])->name('properties.edit');
     Route::get('/properties/{property}/edit-section', [App\Http\Controllers\PropertyController::class, 'editSection'])->name('properties.edit-section');
     Route::patch('/properties/{property}/update-section', [App\Http\Controllers\PropertyController::class, 'updateSection'])->name('properties.update-section');

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Property;
 use App\Models\PropertyCategory;
+use App\Models\MaintenanceTicket;
 use App\Http\Requests\PropertyUpdateRequest;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -15,6 +16,170 @@ class PropertyController extends Controller
     {
         $categories = PropertyCategory::all();
         return view('properties.create', compact('categories'));
+    }
+
+    public function show(Property $property)
+    {
+        $this->authorize('view', $property);
+        
+        // Load all necessary relationships
+        $property->load([
+            'category',
+            'location.city.district.state',
+            'propertyAccommodations.reservations.guest',
+            'propertyAccommodations.reservations.b2bPartner',
+            'staffAssignments.user',
+            'staffAssignments.role',
+            'staffTasks' => function($query) {
+                $query->whereDate('scheduled_at', today())->orWhere('status', 'pending');
+            },
+            'cleaningChecklists.checklistExecutions' => function($query) {
+                $query->whereDate('created_at', today());
+            }
+        ]);
+
+        // Get today's data
+        $today = today();
+        
+        // Current guests (checked in)
+        $currentGuests = $property->reservations()
+            ->where('status', 'checked_in')
+            ->with(['guest', 'propertyAccommodation'])
+            ->get();
+
+        // Next check-ins (next 24 hours)
+        $nextCheckins = $property->reservations()
+            ->where('status', 'confirmed')
+            ->whereDate('check_in_date', '>=', $today)
+            ->whereDate('check_in_date', '<=', $today->addDay())
+            ->with(['guest', 'propertyAccommodation'])
+            ->orderBy('check_in_date')
+            ->limit(5)
+            ->get();
+
+        // Next check-outs (next 24 hours)
+        $nextCheckouts = $property->reservations()
+            ->where('status', 'checked_in')
+            ->whereDate('check_out_date', '>=', $today)
+            ->whereDate('check_out_date', '<=', $today->addDay())
+            ->with(['guest', 'propertyAccommodation'])
+            ->orderBy('check_out_date')
+            ->limit(5)
+            ->get();
+
+        // Today's revenue
+        $todaysRevenue = $property->reservations()
+            ->whereDate('reservations.created_at', $today)
+            ->sum('total_amount');
+
+        // Occupancy stats
+        $totalAccommodations = $property->propertyAccommodations()->count();
+        $occupiedAccommodations = $property->propertyAccommodations()
+            ->whereHas('reservations', function($query) use ($today) {
+                $query->where('status', 'checked_in')
+                      ->where('check_in_date', '<=', $today)
+                      ->where('check_out_date', '>', $today);
+            })
+            ->count();
+
+        // Staff on duty today
+        $staffOnDuty = $property->staffAssignments()
+            ->where('status', 'active')
+            ->with(['user', 'role'])
+            ->get();
+
+        // Pending tasks
+        $pendingTasks = $property->staffTasks()
+            ->whereIn('status', ['pending', 'in_progress'])
+            ->with(['staffAssignment.user'])
+            ->orderBy('scheduled_at')
+            ->get();
+
+        // Overdue tasks
+        $overdueTasks = $property->staffTasks()
+            ->where('scheduled_at', '<', now())
+            ->whereIn('status', ['pending', 'in_progress'])
+            ->with(['staffAssignment.user'])
+            ->get();
+
+        // Maintenance tickets
+        $maintenanceTickets = MaintenanceTicket::whereHas('propertyAccommodation', function($query) use ($property) {
+            $query->where('property_id', $property->id);
+        })->whereIn('status', ['open', 'in_progress'])
+        ->with(['propertyAccommodation', 'reportedBy', 'assignedTo'])
+        ->get();
+
+        // B2B partners with today's bookings
+        $b2bPartners = $property->reservations()
+            ->whereDate('reservations.created_at', $today)
+            ->whereNotNull('b2b_partner_id')
+            ->with('b2bPartner')
+            ->get()
+            ->groupBy('b2b_partner_id')
+            ->map(function($bookings) {
+                $partner = $bookings->first()->b2bPartner;
+                return [
+                    'partner' => $partner,
+                    'bookings_count' => $bookings->count(),
+                    'revenue' => $bookings->sum('total_amount')
+                ];
+            });
+
+        // Monthly stats
+        $monthlyStats = [
+            'occupancy_rate' => $this->calculateOccupancyRate($property, now()->startOfMonth(), now()->endOfMonth()),
+            'revenue' => $property->reservations()
+                ->whereBetween('reservations.created_at', [now()->startOfMonth(), now()->endOfMonth()])
+                ->sum('total_amount'),
+            'total_bookings' => $property->reservations()
+                ->whereBetween('reservations.created_at', [now()->startOfMonth(), now()->endOfMonth()])
+                ->count(),
+            'average_stay' => $this->calculateAverageStay($property, now()->startOfMonth(), now()->endOfMonth())
+        ];
+
+        return view('properties.show', compact(
+            'property',
+            'currentGuests',
+            'nextCheckins',
+            'nextCheckouts',
+            'todaysRevenue',
+            'totalAccommodations',
+            'occupiedAccommodations',
+            'staffOnDuty',
+            'pendingTasks',
+            'overdueTasks',
+            'maintenanceTickets',
+            'b2bPartners',
+            'monthlyStats'
+        ));
+    }
+
+    private function calculateOccupancyRate($property, $startDate, $endDate)
+    {
+        $totalRoomNights = $property->propertyAccommodations()->count() * $startDate->diffInDays($endDate);
+        $occupiedRoomNights = $property->reservations()
+            ->whereBetween('check_in_date', [$startDate, $endDate])
+            ->orWhereBetween('check_out_date', [$startDate, $endDate])
+            ->sum(\DB::raw('DATEDIFF(check_out_date, check_in_date)'));
+        
+        return $totalRoomNights > 0 ? round(($occupiedRoomNights / $totalRoomNights) * 100, 2) : 0;
+    }
+
+    private function calculateAverageStay($property, $startDate, $endDate)
+    {
+        $bookings = $property->reservations()
+            ->whereBetween('reservations.created_at', [$startDate, $endDate])
+            ->get();
+        
+        if ($bookings->isEmpty()) {
+            return 0;
+        }
+        
+        $totalNights = $bookings->sum(function($booking) {
+            return $booking->check_in_date->diffInDays($booking->check_out_date);
+        });
+        
+        return round($totalNights / $bookings->count(), 1);
     }
 
     public function store(Request $request)
