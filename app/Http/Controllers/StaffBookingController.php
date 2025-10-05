@@ -83,8 +83,15 @@ class StaffBookingController extends Controller
     {
         $user = auth()->user();
         
-        // Get staff assignments to determine which properties they can see
+        // Check if staff has booking access
         $staffAssignments = $user->getActiveStaffAssignments();
+        $hasBookingAccess = $staffAssignments->where('booking_access', true)->count() > 0;
+        
+        if (!$hasBookingAccess) {
+            abort(403, 'You do not have permission to create bookings.');
+        }
+        
+        // Get staff assignments to determine which properties they can see
         $propertyIds = $staffAssignments->pluck('property_id')->toArray();
 
         // Get properties assigned to this staff member
@@ -103,8 +110,15 @@ class StaffBookingController extends Controller
     {
         $user = auth()->user();
         
-        // Get staff assignments to determine which properties they can see
+        // Check if staff has booking access
         $staffAssignments = $user->getActiveStaffAssignments();
+        $hasBookingAccess = $staffAssignments->where('booking_access', true)->count() > 0;
+        
+        if (!$hasBookingAccess) {
+            abort(403, 'You do not have permission to create bookings.');
+        }
+        
+        // Get staff assignments to determine which properties they can see
         $propertyIds = $staffAssignments->pluck('property_id')->toArray();
 
         $request->validate([
@@ -208,8 +222,15 @@ class StaffBookingController extends Controller
     {
         $user = auth()->user();
         
-        // Check if staff has access to this booking's property
+        // Check if staff has booking access
         $staffAssignments = $user->getActiveStaffAssignments();
+        $hasBookingAccess = $staffAssignments->where('booking_access', true)->count() > 0;
+        
+        if (!$hasBookingAccess) {
+            abort(403, 'You do not have permission to edit bookings.');
+        }
+        
+        // Check if staff has access to this booking's property
         $propertyIds = $staffAssignments->pluck('property_id')->toArray();
         
         if (!in_array($booking->accommodation->property_id, $propertyIds)) {
@@ -268,13 +289,16 @@ class StaffBookingController extends Controller
     {
         $user = auth()->user();
         
-        // Check if staff has access to this booking's property
+        // Check if staff has access to this booking's property (all staff can view)
         $staffAssignments = $user->getActiveStaffAssignments();
         $propertyIds = $staffAssignments->pluck('property_id')->toArray();
         
         if (!in_array($booking->accommodation->property_id, $propertyIds)) {
             abort(403, 'You do not have access to this booking.');
         }
+        
+        // Check if staff has booking access (for editing)
+        $hasBookingAccess = $staffAssignments->where('booking_access', true)->count() > 0;
 
         // Handle B2B bookings
         if ($booking->isB2bBooking()) {
@@ -298,7 +322,8 @@ class StaffBookingController extends Controller
             ],
             'is_b2b_booking' => $isB2bBooking,
             'b2b_partner_name' => $b2bPartnerName,
-            'booking_type' => $isB2bBooking ? 'B2B Booking' : 'Regular Booking'
+            'booking_type' => $isB2bBooking ? 'B2B Booking' : 'Regular Booking',
+            'can_edit' => $hasBookingAccess
         ]);
     }
 }

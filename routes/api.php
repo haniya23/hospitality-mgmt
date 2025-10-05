@@ -77,4 +77,19 @@ Route::middleware('auth:web')->group(function () {
                 ];
             });
     });
+    
+    // Roles API route
+    Route::get('/roles', function () {
+        $roles = \App\Models\Role::select('name')
+            ->distinct()
+            ->orderBy('name')
+            ->get()
+            ->map(function ($role, $index) {
+                return [
+                    'id' => $index + 1,
+                    'name' => $role->name
+                ];
+            });
+        return response()->json(['roles' => $roles]);
+    });
 });

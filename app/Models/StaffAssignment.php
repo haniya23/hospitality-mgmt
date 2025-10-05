@@ -15,6 +15,8 @@ class StaffAssignment extends Model
         'property_id',
         'role_id',
         'status',
+        'booking_access',
+        'guest_service_access',
         'start_date',
         'end_date',
     ];
@@ -22,6 +24,8 @@ class StaffAssignment extends Model
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
+        'booking_access' => 'boolean',
+        'guest_service_access' => 'boolean',
     ];
 
     protected static function boot()
@@ -129,5 +133,38 @@ class StaffAssignment extends Model
                     ->where('is_read', false)
                     ->where('priority', 'urgent')
                     ->count();
+    }
+
+    // Simple Access Control Methods
+    public function hasBookingAccess()
+    {
+        return $this->booking_access;
+    }
+
+    public function hasGuestServiceAccess()
+    {
+        return $this->guest_service_access;
+    }
+
+    public function canEditBookings()
+    {
+        return $this->booking_access;
+    }
+
+    public function canEditGuestServices()
+    {
+        return $this->guest_service_access;
+    }
+
+    public function canViewBookings()
+    {
+        // All staff can view bookings (upcoming bookings)
+        return true;
+    }
+
+    public function canViewGuestServices()
+    {
+        // All staff can view guest services
+        return true;
     }
 }

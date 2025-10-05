@@ -121,6 +121,8 @@ class OwnerStaffController extends Controller
                 'role_id' => 'required|exists:roles,id',
                 'start_date' => 'required|date',
                 'end_date' => 'nullable|date|after:start_date',
+                'booking_access' => 'boolean',
+                'guest_service_access' => 'boolean',
             ], [
                 'mobile_number.unique' => 'This mobile number is already registered. Please use a different mobile number.',
                 'pin.size' => 'PIN must be exactly 4 digits.',
@@ -149,22 +151,17 @@ class OwnerStaffController extends Controller
                     'is_active' => true,
                 ]);
 
-                // Create staff assignment
+                // Create staff assignment with simple access
                 $staffAssignment = StaffAssignment::create([
                     'user_id' => $staffUser->id,
                     'property_id' => $property->id,
                     'role_id' => $role->id,
                     'status' => 'active',
+                    'booking_access' => $request->boolean('booking_access'),
+                    'guest_service_access' => $request->boolean('guest_service_access'),
                     'start_date' => $request->start_date,
                     'end_date' => $request->end_date,
                 ]);
-
-                // Create permissions based on frontend selection or defaults
-                if ($request->has('permissions')) {
-                    StaffPermission::createCustomPermissions($staffAssignment->id, $request->permissions);
-                } else {
-                    StaffPermission::createDefaultPermissions($staffAssignment->id);
-                }
 
                 // Send welcome notification
                 StaffNotification::create([
@@ -282,6 +279,8 @@ class OwnerStaffController extends Controller
             'status' => 'required|in:active,inactive,suspended',
             'start_date' => 'required|date',
             'end_date' => 'nullable|date|after:start_date',
+            'booking_access' => 'boolean',
+            'guest_service_access' => 'boolean',
         ]);
 
         $staffAssignment = StaffAssignment::whereHas('property', function($q) {
@@ -319,6 +318,8 @@ class OwnerStaffController extends Controller
                 'property_id' => $property->id,
                 'role_id' => $role->id,
                 'status' => $request->status,
+                'booking_access' => $request->boolean('booking_access'),
+                'guest_service_access' => $request->boolean('guest_service_access'),
                 'start_date' => $request->start_date,
                 'end_date' => $request->end_date,
             ]);
@@ -352,9 +353,8 @@ class OwnerStaffController extends Controller
     public function assignTask(Request $request, $staffAssignmentUuid)
     {
         $request->validate([
-            'task_name' => 'required|string|max:255',
+            'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
-            'task_type' => 'required|in:cleaning,maintenance,guest_service,check_in,check_out,inspection,other',
             'priority' => 'required|in:low,medium,high,urgent',
             'scheduled_at' => 'nullable|date',
         ]);
@@ -368,9 +368,9 @@ class OwnerStaffController extends Controller
         $task = StaffTask::create([
             'staff_assignment_id' => $staffAssignment->id,
             'property_id' => $staffAssignment->property_id,
-            'task_name' => $request->task_name,
+            'task_name' => $request->title,
             'description' => $request->description,
-            'task_type' => $request->task_type,
+            'task_type' => 'other', // Default task type
             'priority' => $request->priority,
             'scheduled_at' => $request->scheduled_at,
             'assigned_by' => Auth::id(),
@@ -396,8 +396,7 @@ class OwnerStaffController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'message' => 'required|string|max:1000',
-            'type' => 'required|in:task_assignment,urgent_update,reminder,general',
-            'priority' => 'required|in:low,medium,high,urgent',
+            'type' => 'required|in:info,urgent,reminder,general',
         ]);
 
         $staffAssignment = StaffAssignment::whereHas('property', function($q) {
@@ -412,7 +411,7 @@ class OwnerStaffController extends Controller
             'title' => $request->title,
             'message' => $request->message,
             'type' => $request->type,
-            'priority' => $request->priority,
+            'priority' => $request->type === 'urgent' ? 'urgent' : 'medium',
         ]);
 
         return response()->json([
@@ -422,27 +421,27 @@ class OwnerStaffController extends Controller
         ]);
     }
 
-    public function updatePermissions(Request $request, $staffAssignmentUuid)
+    public function updateAccess(Request $request, $staffAssignmentUuid)
     {
+        $request->validate([
+            'booking_access' => 'boolean',
+            'guest_service_access' => 'boolean',
+        ]);
+
         $staffAssignment = StaffAssignment::whereHas('property', function($q) {
             $q->where('owner_id', Auth::id());
         })
         ->where('uuid', $staffAssignmentUuid)
         ->firstOrFail();
 
-        $permissions = $request->permissions ?? [];
-
-        foreach ($permissions as $key => $permissionData) {
-            if (isset($permissionData['granted']) && $permissionData['granted']) {
-                StaffPermission::grantPermission($staffAssignment->id, $key, $permissionData['restrictions'] ?? []);
-            } else {
-                StaffPermission::denyPermission($staffAssignment->id, $key);
-            }
-        }
+        $staffAssignment->update([
+            'booking_access' => $request->boolean('booking_access'),
+            'guest_service_access' => $request->boolean('guest_service_access'),
+        ]);
 
         return response()->json([
             'success' => true,
-            'message' => 'Permissions updated successfully'
+            'message' => 'Access permissions updated successfully'
         ]);
     }
 
@@ -707,5 +706,21 @@ class OwnerStaffController extends Controller
         }
         
         return $activities->sortByDesc('created_at')->take(20)->values()->toArray();
+    }
+    
+    public function getAllRoles()
+    {
+        $roles = Role::select('name')
+            ->distinct()
+            ->orderBy('name')
+            ->get()
+            ->map(function ($role, $index) {
+                return [
+                    'id' => $index + 1,
+                    'name' => $role->name
+                ];
+            });
+            
+        return response()->json(['roles' => $roles]);
     }
 }

@@ -78,7 +78,7 @@
                 </div>
             </div>
             <div class="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
-                <a href="{{ route('owner.attendance.staff', $staffAssignment->user->uuid) }}" 
+                <a href="{{ route('owner.attendance.staff', $staffAssignment->uuid) }}" 
                    class="px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium flex items-center justify-center">
                     <i class="fas fa-calendar-check mr-2"></i>Attendance
                 </a>
@@ -423,7 +423,7 @@ document.getElementById('assignTaskForm').addEventListener('submit', async funct
     };
     
     try {
-        const response = await fetch('/owner/staff/{{ $staffAssignment->uuid }}/tasks', {
+        const response = await fetch('/owner/staff/{{ $staffAssignment->uuid }}/assign-task', {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -457,7 +457,7 @@ document.getElementById('sendNotificationForm').addEventListener('submit', async
     };
     
     try {
-        const response = await fetch('/owner/staff/{{ $staffAssignment->uuid }}/notifications', {
+        const response = await fetch('/owner/staff/{{ $staffAssignment->uuid }}/send-notification', {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),

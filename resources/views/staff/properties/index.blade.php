@@ -2,7 +2,7 @@
 
 @section('title', 'My Properties')
 
-@section('staff-content')
+@section('content')
 <div class="space-y-6">
     <!-- Header -->
     <div class="flex items-center justify-between">

@@ -133,10 +133,83 @@
                                     <option :value="role.id" x-text="role.name"></option>
                                 </template>
                             </select>
+                            <p class="text-xs text-gray-500 mt-2">Access controls will appear below once role is selected</p>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                </div>
+
+                <!-- Simple Access Control -->
+                <div class="border-t border-gray-200/50 pt-6" x-show="form.role_id">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4">Access Control</h4>
+                    <p class="text-sm text-gray-600 mb-6">Simple toggles for staff access. All staff can view upcoming bookings and guest services, but only those with access can edit them. Managers automatically get full access.</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Booking Access -->
+                        <div class="modern-card rounded-xl p-6">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                                        <i class="fas fa-calendar-check text-blue-600 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="text-lg font-semibold text-gray-900">Booking Access</h5>
+                                        <p class="text-sm text-gray-600">Can edit booking details and reservations</p>
+                                    </div>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" x-model="form.booking_access" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Guest Service Access -->
+                        <div class="modern-card rounded-xl p-6">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
+                                        <i class="fas fa-concierge-bell text-green-600 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="text-lg font-semibold text-gray-900">Guest Service Access</h5>
+                                        <p class="text-sm text-gray-600">Can update guest services and handle requests</p>
+                                    </div>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" x-model="form.guest_service_access" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Info Box -->
+                    <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-info-circle text-blue-500 mt-1"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h4 class="text-sm font-semibold text-blue-800">How Access Works</h4>
+                                <div class="mt-2 text-sm text-blue-700">
+                                    <ul class="list-disc list-inside space-y-1">
+                                        <li><strong>All staff</strong> can view upcoming bookings and guest services</li>
+                                        <li><strong>Booking Access:</strong> Allows editing booking details, check-in/check-out times, and guest information</li>
+                                        <li><strong>Guest Service Access:</strong> Allows updating guest service requests, room service, and guest communications</li>
+                                        <li>Perfect for cleaners (no access) vs front desk staff (both access)</li>
+                                        <li><strong>Managers:</strong> Automatically get both access levels</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Assignment Dates -->
+                <div class="border-t border-gray-200/50 pt-6" x-show="form.role_id">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4">Assignment Dates</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Start Date *</label>
                             <input x-model="form.start_date" type="date" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white hover:border-gray-300 font-medium text-gray-800">
@@ -147,129 +220,6 @@
                             <input x-model="form.end_date" type="date" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white hover:border-gray-300 font-medium text-gray-800">
                             <p class="text-xs text-gray-500 mt-2">Leave empty for permanent assignment</p>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Permissions -->
-                <div class="border-t border-gray-200/50 pt-6">
-                    <h4 class="text-lg font-semibold text-gray-900 mb-4">Permissions</h4>
-                    <p class="text-sm text-gray-600 mb-6">Select what this staff member can access and do. You can modify these later.</p>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <!-- Booking & Guest Management -->
-                        <div class="modern-card rounded-xl p-6">
-                            <h5 class="text-sm font-bold text-gray-900 mb-4 flex items-center">
-                                <i class="fas fa-calendar-check text-blue-500 mr-2"></i>
-                                Booking & Guest Management
-                            </h5>
-                            <div class="space-y-3">
-                                <label class="flex items-center">
-                                    <input type="checkbox" x-model="permissions.view_bookings" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                                    <span class="ml-3 text-sm text-gray-700">View Bookings Calendar</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" x-model="permissions.view_guest_details" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                                    <span class="ml-3 text-sm text-gray-700">View Guest Details</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" x-model="permissions.update_guest_services" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                                    <span class="ml-3 text-sm text-gray-700">Update Guest Services</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Task Management -->
-                        <div class="modern-card rounded-xl p-6">
-                            <h5 class="text-sm font-bold text-gray-900 mb-4 flex items-center">
-                                <i class="fas fa-tasks text-green-500 mr-2"></i>
-                                Task Management
-                            </h5>
-                            <div class="space-y-3">
-                                <label class="flex items-center">
-                                    <input type="checkbox" x-model="permissions.view_assigned_tasks" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                                    <span class="ml-3 text-sm text-gray-700">View Assigned Tasks</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" x-model="permissions.update_task_status" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                                    <span class="ml-3 text-sm text-gray-700">Update Task Status</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" x-model="permissions.upload_task_photos" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                                    <span class="ml-3 text-sm text-gray-700">Upload Task Photos</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Cleaning & Maintenance -->
-                        <div class="modern-card rounded-xl p-6">
-                            <h5 class="text-sm font-bold text-gray-900 mb-4 flex items-center">
-                                <i class="fas fa-broom text-purple-500 mr-2"></i>
-                                Cleaning & Maintenance
-                            </h5>
-                            <div class="space-y-3">
-                                <label class="flex items-center">
-                                    <input type="checkbox" x-model="permissions.access_cleaning_checklists" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                                    <span class="ml-3 text-sm text-gray-700">Access Cleaning Checklists</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" x-model="permissions.execute_checklists" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                                    <span class="ml-3 text-sm text-gray-700">Execute Checklists</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" x-model="permissions.update_checklist_progress" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                                    <span class="ml-3 text-sm text-gray-700">Update Checklist Progress</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Communication & Reporting -->
-                        <div class="modern-card rounded-xl p-6">
-                            <h5 class="text-sm font-bold text-gray-900 mb-4 flex items-center">
-                                <i class="fas fa-comments text-orange-500 mr-2"></i>
-                                Communication & Reporting
-                            </h5>
-                            <div class="space-y-3">
-                                <label class="flex items-center">
-                                    <input type="checkbox" x-model="permissions.receive_notifications" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                                    <span class="ml-3 text-sm text-gray-700">Receive Notifications</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" x-model="permissions.add_task_notes" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                                    <span class="ml-3 text-sm text-gray-700">Add Task Notes</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" x-model="permissions.report_issues" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                                    <span class="ml-3 text-sm text-gray-700">Report Issues</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" x-model="permissions.view_activity_logs" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                                    <span class="ml-3 text-sm text-gray-700">View Activity Logs</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Quick Permission Sets -->
-                <div class="border-t border-gray-200/50 pt-6">
-                    <h4 class="text-lg font-semibold text-gray-900 mb-4">Quick Permission Sets</h4>
-                    <div class="flex flex-wrap gap-3">
-                        <button type="button" @click="setAllPermissions(true)" class="inline-flex items-center px-4 py-2 border-2 border-gray-200 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
-                            <i class="fas fa-check-double mr-2 text-green-500"></i>
-                            Select All
-                        </button>
-                        <button type="button" @click="setAllPermissions(false)" class="inline-flex items-center px-4 py-2 border-2 border-gray-200 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
-                            <i class="fas fa-times mr-2 text-red-500"></i>
-                            Clear All
-                        </button>
-                        <button type="button" @click="setBasicPermissions()" class="inline-flex items-center px-4 py-2 border-2 border-gray-200 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
-                            <i class="fas fa-user mr-2 text-blue-500"></i>
-                            Basic Access
-                        </button>
-                        <button type="button" @click="setFullPermissions()" class="inline-flex items-center px-4 py-2 border-2 border-gray-200 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
-                            <i class="fas fa-user-shield mr-2 text-purple-500"></i>
-                            Full Access
-                        </button>
                     </div>
                 </div>
 
@@ -301,32 +251,18 @@ function addStaff() {
             property_id: '',
             role_id: '',
             start_date: new Date().toISOString().split('T')[0],
-            end_date: ''
+            end_date: '',
+            booking_access: false,
+            guest_service_access: false
         },
         properties: @json($properties),
         roles: [],
-        permissions: {
-            view_bookings: true,
-            view_guest_details: true,
-            update_guest_services: true,
-            view_assigned_tasks: true,
-            update_task_status: true,
-            upload_task_photos: true,
-            access_cleaning_checklists: true,
-            execute_checklists: true,
-            update_checklist_progress: true,
-            receive_notifications: true,
-            add_task_notes: true,
-            report_issues: true,
-            view_activity_logs: true
-        },
         isSubmitting: false,
         
         init() {
-            // Set default permissions to basic access
-            this.setBasicPermissions();
             this.$nextTick(() => {
                 this.initializeSelect2();
+                this.loadAllRoles();
             });
         },
         
@@ -352,66 +288,49 @@ function addStaff() {
             // Handle Select2 change events
             $('#property_select').on('change', (e) => {
                 this.form.property_id = e.target.value;
-                this.loadRoles();
             });
             
             $('#role_select').on('change', (e) => {
                 this.form.role_id = e.target.value;
+                this.updateAccessBasedOnRole();
             });
         },
         
-        async loadRoles() {
-            if (!this.form.property_id) {
-                this.roles = [];
-                this.form.role_id = '';
-                $('#role_select').val('').trigger('change');
-                return;
-            }
-            
+        async loadAllRoles() {
             try {
-                const response = await fetch(`/api/properties/${this.form.property_id}/roles`);
+                const response = await fetch('/api/roles');
                 const data = await response.json();
                 this.roles = data.roles || [];
                 
-                // Clear role selection and update Select2
-                this.form.role_id = '';
+                // Update Select2 with all roles
                 this.$nextTick(() => {
-                    $('#role_select').val('').trigger('change');
+                    $('#role_select').trigger('change');
                 });
             } catch (error) {
                 console.error('Error loading roles:', error);
                 this.roles = [];
-                this.form.role_id = '';
-                $('#role_select').val('').trigger('change');
             }
         },
         
-        setAllPermissions(value) {
-            Object.keys(this.permissions).forEach(key => {
-                this.permissions[key] = value;
-            });
-        },
-        
-        setBasicPermissions() {
-            this.permissions = {
-                view_bookings: true,
-                view_guest_details: false,
-                update_guest_services: false,
-                view_assigned_tasks: true,
-                update_task_status: true,
-                upload_task_photos: true,
-                access_cleaning_checklists: true,
-                execute_checklists: true,
-                update_checklist_progress: true,
-                receive_notifications: true,
-                add_task_notes: true,
-                report_issues: true,
-                view_activity_logs: true
-            };
-        },
-        
-        setFullPermissions() {
-            this.setAllPermissions(true);
+        updateAccessBasedOnRole() {
+            if (!this.form.role_id || !this.roles.length) {
+                return;
+            }
+            
+            // Find the selected role
+            const selectedRole = this.roles.find(role => role.id == this.form.role_id);
+            
+            if (selectedRole) {
+                // Auto-set access based on role
+                if (selectedRole.name.toLowerCase() === 'manager') {
+                    this.form.booking_access = true;
+                    this.form.guest_service_access = true;
+                } else {
+                    // For non-managers, default to no access
+                    this.form.booking_access = false;
+                    this.form.guest_service_access = false;
+                }
+            }
         },
         
         async submitForm() {
@@ -419,8 +338,7 @@ function addStaff() {
             
             try {
                 const formData = {
-                    ...this.form,
-                    permissions: this.permissions
+                    ...this.form
                 };
                 
                 console.log('Submitting form data:', formData);

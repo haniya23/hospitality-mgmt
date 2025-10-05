@@ -89,17 +89,20 @@ Route::middleware(['auth'])->prefix('owner')->name('owner.')->group(function () 
     Route::delete('/staff/{staffAssignmentUuid}', [App\Http\Controllers\OwnerStaffController::class, 'destroy'])->name('staff.destroy');
     Route::post('/staff/{staffAssignmentUuid}/assign-task', [App\Http\Controllers\OwnerStaffController::class, 'assignTask'])->name('staff.assign-task');
     Route::post('/staff/{staffAssignmentUuid}/send-notification', [App\Http\Controllers\OwnerStaffController::class, 'sendNotification'])->name('staff.send-notification');
-    Route::post('/staff/{staffAssignmentUuid}/update-permissions', [App\Http\Controllers\OwnerStaffController::class, 'updatePermissions'])->name('staff.update-permissions');
+    Route::post('/staff/{staffAssignmentUuid}/update-access', [App\Http\Controllers\OwnerStaffController::class, 'updateAccess'])->name('staff.update-access');
+    
+
     Route::get('/staff/stats', [App\Http\Controllers\OwnerStaffController::class, 'getStaffStats'])->name('staff.stats');
     Route::get('/staff/analytics', [App\Http\Controllers\OwnerStaffController::class, 'analytics'])->name('staff.analytics');
     
-    // Admin Attendance Management Routes
-    Route::get('/attendance', [App\Http\Controllers\AdminAttendanceController::class, 'index'])->name('attendance.index');
-    Route::get('/attendance/staff/{staffUuid}', [App\Http\Controllers\AdminAttendanceController::class, 'staffAttendance'])->name('attendance.staff');
-    Route::put('/attendance/{attendanceId}', [App\Http\Controllers\AdminAttendanceController::class, 'updateAttendance'])->name('attendance.update');
-    Route::get('/leave-requests', [App\Http\Controllers\AdminAttendanceController::class, 'leaveRequests'])->name('leave-requests.index');
-    Route::post('/leave-requests/{leaveRequestId}/approve', [App\Http\Controllers\AdminAttendanceController::class, 'approveLeaveRequest'])->name('leave-requests.approve');
-    Route::post('/leave-requests/{leaveRequestId}/reject', [App\Http\Controllers\AdminAttendanceController::class, 'rejectLeaveRequest'])->name('leave-requests.reject');
+    // Owner Attendance Management Routes
+    Route::get('/attendance', [App\Http\Controllers\OwnerAttendanceController::class, 'index'])->name('attendance.index');
+    Route::get('/attendance/staff/{staffUuid}', [App\Http\Controllers\OwnerAttendanceController::class, 'staffAttendance'])->name('attendance.staff');
+    Route::get('/attendance/{attendanceId}', [App\Http\Controllers\OwnerAttendanceController::class, 'getAttendance'])->name('attendance.get');
+    Route::put('/attendance/{attendanceId}', [App\Http\Controllers\OwnerAttendanceController::class, 'updateAttendance'])->name('attendance.update');
+    Route::get('/leave-requests', [App\Http\Controllers\OwnerAttendanceController::class, 'leaveRequests'])->name('leave-requests.index');
+    Route::post('/leave-requests/{leaveRequestId}/approve', [App\Http\Controllers\OwnerAttendanceController::class, 'approveLeaveRequest'])->name('leave-requests.approve');
+    Route::post('/leave-requests/{leaveRequestId}/reject', [App\Http\Controllers\OwnerAttendanceController::class, 'rejectLeaveRequest'])->name('leave-requests.reject');
 });
 
 // API Routes for Staff Management
@@ -462,4 +465,20 @@ Route::middleware(['auth', 'subscription.limits'])->group(function () {
             'Content-Disposition' => 'attachment; filename="sample-locations.json"'
         ]);
     })->name('admin.download-sample-locations');
+});
+
+// Public API Routes
+Route::get('/api/roles', function () {
+    $roles = \App\Models\Role::select('name')
+        ->distinct()
+        ->orderBy('name')
+        ->get()
+        ->map(function ($role, $index) {
+            return [
+                'id' => $index + 1,
+                'name' => $role->name
+            ];
+        });
+        
+    return response()->json(['roles' => $roles]);
 });

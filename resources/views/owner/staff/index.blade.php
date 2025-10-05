@@ -208,6 +208,20 @@
                                         <span x-text="staff.role.name"></span>
                                     </span>
                                 </div>
+                                
+                                <!-- Permissions -->
+                                <div class="flex items-center space-x-2 mt-2">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" 
+                                          :class="staff.booking_access ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'">
+                                        <i class="fas fa-calendar-check mr-1"></i>
+                                        Booking
+                                    </span>
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" 
+                                          :class="staff.guest_service_access ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600'">
+                                        <i class="fas fa-concierge-bell mr-1"></i>
+                                        Guest Service
+                                    </span>
+                                </div>
                             </div>
                         </div>
                         
@@ -233,13 +247,13 @@
                         
                         <!-- Quick Actions -->
                         <div class="grid grid-cols-2 gap-2 mb-4">
-                            <a :href="`/owner/attendance/staff/${staff.user.uuid}?uuid=${staff.user.uuid}`" 
+                            <a :href="`/owner/attendance/staff/${staff.uuid}`" 
                                class="flex items-center justify-center px-3 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium">
                                 <i class="fas fa-calendar-check mr-2"></i>
                                 <span class="hidden sm:inline">Attendance</span>
                                 <span class="sm:hidden">Att.</span>
                             </a>
-                            <a :href="`/owner/leave-requests?staff_id=${staff.user.uuid}&uuid=${staff.user.uuid}`" 
+                            <a :href="`/owner/leave-requests?staff_id=${staff.user.uuid}`" 
                                class="flex items-center justify-center px-3 py-2 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors text-sm font-medium">
                                 <i class="fas fa-calendar-times mr-2"></i>
                                 <span class="hidden sm:inline">Leave</span>

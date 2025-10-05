@@ -1,6 +1,6 @@
 @extends('layouts.staff')
 
-@section('staff-content')
+@section('content')
 <div class="space-y-6">
     <div class="flex items-center justify-between">
         <div>
