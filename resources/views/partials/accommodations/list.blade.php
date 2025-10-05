@@ -97,6 +97,57 @@
                 </div>
             </div>
 
+            <!-- Maintenance and Renovation Details -->
+            <div x-show="accommodation.maintenance_status !== 'none' || accommodation.renovation_status !== 'none'" class="mb-3 sm:mb-4">
+                <div class="bg-gray-50 rounded-lg p-2 sm:p-3">
+                    <div class="text-xs sm:text-sm text-gray-500 mb-2">Maintenance & Renovation</div>
+                    
+                    <!-- Maintenance Status -->
+                    <div x-show="accommodation.maintenance_status !== 'none'" class="mb-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs sm:text-sm font-medium text-gray-700">Maintenance:</span>
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full"
+                                  :class="{
+                                      'bg-red-100 text-red-800': accommodation.maintenance_status === 'active',
+                                      'bg-yellow-100 text-yellow-800': accommodation.maintenance_status === 'scheduled',
+                                      'bg-green-100 text-green-800': accommodation.maintenance_status === 'completed'
+                                  }"
+                                  x-text="accommodation.maintenance_status.charAt(0).toUpperCase() + accommodation.maintenance_status.slice(1)"></span>
+                        </div>
+                        <div x-show="accommodation.maintenance_start_date && accommodation.maintenance_end_date" class="text-xs text-gray-600 mt-1">
+                            <span x-text="new Date(accommodation.maintenance_start_date).toLocaleDateString()"></span> - 
+                            <span x-text="new Date(accommodation.maintenance_end_date).toLocaleDateString()"></span>
+                        </div>
+                        <div x-show="accommodation.maintenance_description" class="text-xs text-gray-600 mt-1" x-text="accommodation.maintenance_description"></div>
+                        <div x-show="accommodation.maintenance_cost" class="text-xs text-gray-600 mt-1">
+                            Cost: ₹<span x-text="accommodation.maintenance_cost"></span>
+                        </div>
+                    </div>
+                    
+                    <!-- Renovation Status -->
+                    <div x-show="accommodation.renovation_status !== 'none'">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs sm:text-sm font-medium text-gray-700">Renovation:</span>
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full"
+                                  :class="{
+                                      'bg-red-100 text-red-800': accommodation.renovation_status === 'active',
+                                      'bg-yellow-100 text-yellow-800': accommodation.renovation_status === 'scheduled',
+                                      'bg-green-100 text-green-800': accommodation.renovation_status === 'completed'
+                                  }"
+                                  x-text="accommodation.renovation_status.charAt(0).toUpperCase() + accommodation.renovation_status.slice(1)"></span>
+                        </div>
+                        <div x-show="accommodation.renovation_start_date && accommodation.renovation_end_date" class="text-xs text-gray-600 mt-1">
+                            <span x-text="new Date(accommodation.renovation_start_date).toLocaleDateString()"></span> - 
+                            <span x-text="new Date(accommodation.renovation_end_date).toLocaleDateString()"></span>
+                        </div>
+                        <div x-show="accommodation.renovation_description" class="text-xs text-gray-600 mt-1" x-text="accommodation.renovation_description"></div>
+                        <div x-show="accommodation.renovation_cost" class="text-xs text-gray-600 mt-1">
+                            Cost: ₹<span x-text="accommodation.renovation_cost"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Action Buttons -->
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div class="text-xs sm:text-sm text-gray-500">
@@ -106,10 +157,15 @@
                 <div class="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
                     <!-- First Row: Book Now & Details -->
                     <button @click="bookAccommodation(accommodation)" 
-                            class="bg-gradient-to-r from-green-500 to-emerald-500 text-white py-2 px-3 sm:px-4 rounded-xl font-medium text-xs sm:text-sm hover:from-green-600 hover:to-emerald-600 transition flex items-center justify-center">
+                            :disabled="accommodation.maintenance_status === 'active' || accommodation.renovation_status === 'active'"
+                            :class="{
+                                'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600': !(accommodation.maintenance_status === 'active' || accommodation.renovation_status === 'active'),
+                                'bg-gray-400 cursor-not-allowed': accommodation.maintenance_status === 'active' || accommodation.renovation_status === 'active'
+                            }"
+                            class="text-white py-2 px-3 sm:px-4 rounded-xl font-medium text-xs sm:text-sm transition flex items-center justify-center">
                         <i class="fas fa-calendar-plus mr-1"></i>
-                        <span class="hidden sm:inline">Book Now</span>
-                        <span class="sm:hidden">Book Now</span>
+                        <span class="hidden sm:inline" x-text="(accommodation.maintenance_status === 'active' || accommodation.renovation_status === 'active') ? 'Unavailable' : 'Book Now'"></span>
+                        <span class="sm:hidden" x-text="(accommodation.maintenance_status === 'active' || accommodation.renovation_status === 'active') ? 'Unavailable' : 'Book Now'"></span>
                     </button>
                     <a :href="'/accommodations/' + accommodation.uuid" 
                        class="bg-blue-500 text-white py-2 px-3 sm:px-4 rounded-xl font-medium text-xs sm:text-sm hover:bg-blue-600 transition flex items-center justify-center">

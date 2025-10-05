@@ -73,7 +73,17 @@ class AccommodationController extends Controller
             'size' => 'nullable|numeric|min:0',
             'amenities' => 'nullable|array',
             'amenities.*' => 'exists:amenities,id',
-            'photos.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'photos.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'maintenance_status' => 'nullable|in:none,scheduled,active,completed',
+            'maintenance_start_date' => 'nullable|date',
+            'maintenance_end_date' => 'nullable|date|after_or_equal:maintenance_start_date',
+            'maintenance_description' => 'nullable|string',
+            'maintenance_cost' => 'nullable|numeric|min:0',
+            'renovation_status' => 'nullable|in:none,scheduled,active,completed',
+            'renovation_start_date' => 'nullable|date',
+            'renovation_end_date' => 'nullable|date|after_or_equal:renovation_start_date',
+            'renovation_description' => 'nullable|string',
+            'renovation_cost' => 'nullable|numeric|min:0',
         ]);
 
         $accommodation = PropertyAccommodation::create([
@@ -84,6 +94,16 @@ class AccommodationController extends Controller
             'base_price' => $request->base_price,
             'max_occupancy' => $request->max_occupancy,
             'size' => $request->size,
+            'maintenance_status' => $request->maintenance_status ?? 'none',
+            'maintenance_start_date' => $request->maintenance_start_date,
+            'maintenance_end_date' => $request->maintenance_end_date,
+            'maintenance_description' => $request->maintenance_description,
+            'maintenance_cost' => $request->maintenance_cost,
+            'renovation_status' => $request->renovation_status ?? 'none',
+            'renovation_start_date' => $request->renovation_start_date,
+            'renovation_end_date' => $request->renovation_end_date,
+            'renovation_description' => $request->renovation_description,
+            'renovation_cost' => $request->renovation_cost,
         ]);
 
         // Attach amenities
@@ -151,7 +171,17 @@ class AccommodationController extends Controller
             'size' => 'nullable|numeric|min:0',
             'amenities' => 'nullable|array',
             'amenities.*' => 'exists:amenities,id',
-            'photos.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'photos.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'maintenance_status' => 'nullable|in:none,scheduled,active,completed',
+            'maintenance_start_date' => 'nullable|date',
+            'maintenance_end_date' => 'nullable|date|after_or_equal:maintenance_start_date',
+            'maintenance_description' => 'nullable|string',
+            'maintenance_cost' => 'nullable|numeric|min:0',
+            'renovation_status' => 'nullable|in:none,scheduled,active,completed',
+            'renovation_start_date' => 'nullable|date',
+            'renovation_end_date' => 'nullable|date|after_or_equal:renovation_start_date',
+            'renovation_description' => 'nullable|string',
+            'renovation_cost' => 'nullable|numeric|min:0',
         ]);
 
         $accommodation->update([
@@ -162,6 +192,16 @@ class AccommodationController extends Controller
             'base_price' => $request->base_price,
             'max_occupancy' => $request->max_occupancy,
             'size' => $request->size,
+            'maintenance_status' => $request->maintenance_status ?? 'none',
+            'maintenance_start_date' => $request->maintenance_start_date,
+            'maintenance_end_date' => $request->maintenance_end_date,
+            'maintenance_description' => $request->maintenance_description,
+            'maintenance_cost' => $request->maintenance_cost,
+            'renovation_status' => $request->renovation_status ?? 'none',
+            'renovation_start_date' => $request->renovation_start_date,
+            'renovation_end_date' => $request->renovation_end_date,
+            'renovation_description' => $request->renovation_description,
+            'renovation_cost' => $request->renovation_cost,
         ]);
 
         // Sync amenities

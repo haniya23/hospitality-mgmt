@@ -17,6 +17,16 @@ class PropertyAccommodation extends Model
         'features',
         'is_active',
         'uuid',
+        'maintenance_status',
+        'maintenance_start_date',
+        'maintenance_end_date',
+        'maintenance_description',
+        'renovation_status',
+        'renovation_start_date',
+        'renovation_end_date',
+        'renovation_description',
+        'maintenance_cost',
+        'renovation_cost',
     ];
 
     protected $casts = [
@@ -24,6 +34,12 @@ class PropertyAccommodation extends Model
         'is_active' => 'boolean',
         'base_price' => 'decimal:2',
         'size' => 'decimal:2',
+        'maintenance_start_date' => 'date',
+        'maintenance_end_date' => 'date',
+        'renovation_start_date' => 'date',
+        'renovation_end_date' => 'date',
+        'maintenance_cost' => 'decimal:2',
+        'renovation_cost' => 'decimal:2',
     ];
 
     public function property()
@@ -87,6 +103,62 @@ class PropertyAccommodation extends Model
             return $this->custom_name ?: 'Custom Accommodation';
         }
         return $this->custom_name ?: $this->predefinedType->name;
+    }
+
+    /**
+     * Check if accommodation is under maintenance
+     */
+    public function isUnderMaintenance()
+    {
+        return $this->maintenance_status === 'active' && 
+               $this->maintenance_start_date && 
+               $this->maintenance_end_date &&
+               now()->between($this->maintenance_start_date, $this->maintenance_end_date);
+    }
+
+    /**
+     * Check if accommodation is under renovation
+     */
+    public function isUnderRenovation()
+    {
+        return $this->renovation_status === 'active' && 
+               $this->renovation_start_date && 
+               $this->renovation_end_date &&
+               now()->between($this->renovation_start_date, $this->renovation_end_date);
+    }
+
+    /**
+     * Check if accommodation is available for booking
+     */
+    public function isAvailableForBooking()
+    {
+        return $this->is_active && !$this->isUnderMaintenance() && !$this->isUnderRenovation();
+    }
+
+    /**
+     * Get maintenance status badge color
+     */
+    public function getMaintenanceStatusColorAttribute()
+    {
+        return match($this->maintenance_status) {
+            'active' => 'red',
+            'scheduled' => 'yellow',
+            'completed' => 'green',
+            default => 'gray'
+        };
+    }
+
+    /**
+     * Get renovation status badge color
+     */
+    public function getRenovationStatusColorAttribute()
+    {
+        return match($this->renovation_status) {
+            'active' => 'red',
+            'scheduled' => 'yellow',
+            'completed' => 'green',
+            default => 'gray'
+        };
     }
 
     /**

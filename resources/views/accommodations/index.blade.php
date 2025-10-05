@@ -134,6 +134,12 @@ function accommodationData() {
         },
 
         bookAccommodation(accommodation) {
+            // Check if accommodation is under maintenance or renovation
+            if (accommodation.maintenance_status === 'active' || accommodation.renovation_status === 'active') {
+                alert('This accommodation is currently unavailable for booking due to maintenance or renovation.');
+                return;
+            }
+            
             // Store accommodation details in sessionStorage for booking page
             sessionStorage.setItem('selectedAccommodation', JSON.stringify({
                 id: accommodation.id,
