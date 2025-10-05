@@ -11,7 +11,7 @@
             <p class="text-gray-600">Manage upcoming check-ins and check-outs</p>
         </div>
         <div class="flex space-x-3">
-            @if(Auth::user()->hasPermission('create_bookings'))
+            @if(Auth::user()->hasBookingAccess())
             <a href="{{ route('staff.bookings.create') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
                 <i class="fas fa-plus mr-2"></i>
                 Create Booking

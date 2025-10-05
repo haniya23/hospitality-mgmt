@@ -100,8 +100,8 @@ class StaffBookingController extends Controller
         // Get accommodations for these properties
         $accommodations = \App\Models\PropertyAccommodation::whereIn('property_id', $propertyIds)->get();
         
-        // Get B2B partners for these properties
-        $b2bPartners = \App\Models\B2bPartner::whereIn('property_id', $propertyIds)->get();
+        // Get B2B partners (global entities, not tied to specific properties)
+        $b2bPartners = \App\Models\B2bPartner::where('status', 'active')->get();
 
         return view('staff.bookings.create', compact('properties', 'accommodations', 'b2bPartners'));
     }

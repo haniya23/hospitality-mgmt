@@ -32,7 +32,7 @@
                     </a>
                 </div>
 
-                @if(Auth::user()->hasPermission('manage_guest_services') || Auth::user()->hasPermission('manage_checkin_checkout'))
+                @if(Auth::user()->hasGuestServiceAccess())
                 <!-- Guest Service -->
                 <div class="group relative">
                     <a href="{{ route('staff.guest-service.index') }}" class="flex flex-col items-center justify-center p-2 lg:p-4 rounded-2xl transition-all duration-200 {{ request()->routeIs('staff.guest-service.*') ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50' }}">
@@ -73,7 +73,7 @@
                                 <a href="{{ route('staff.bookings.create') }}" 
                                    @click="showMoreMenu = false" 
                                    class="flex items-center px-3 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors rounded-lg {{ request()->routeIs('staff.bookings.create') ? 'bg-blue-50 text-blue-600' : '' }}"
-                                   @if(!Auth::user()->hasPermission('create_bookings'))
+                                   @if(!Auth::user()->hasBookingAccess())
                                        onclick="showPermissionMessage('create_bookings'); return false;"
                                    @endif>
                                     <i class="fas fa-plus w-4 mr-3 text-gray-400"></i>

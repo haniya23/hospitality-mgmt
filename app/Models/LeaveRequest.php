@@ -13,6 +13,7 @@ class LeaveRequest extends Model
     protected $table = 'leave_requests';
 
     protected $fillable = [
+        'uuid',
         'staff_assignment_id',
         'leave_type',
         'start_date',
@@ -201,6 +202,7 @@ class LeaveRequest extends Model
     public static function createRequest($staffAssignmentId, $leaveType, $startDate, $endDate, $reason, $attachments = [])
     {
         $request = self::create([
+            'uuid' => \Illuminate\Support\Str::uuid(),
             'staff_assignment_id' => $staffAssignmentId,
             'leave_type' => $leaveType,
             'start_date' => $startDate,

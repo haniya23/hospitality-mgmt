@@ -62,7 +62,7 @@
             </div>
         </div>
 
-        @if(Auth::user()->hasPermission('manage_guest_services') || Auth::user()->hasPermission('manage_checkin_checkout'))
+        @if(Auth::user()->hasGuestServiceAccess())
         <div class="modern-card rounded-xl sm:rounded-2xl p-3 sm:p-6 hover:scale-105 transition-transform duration-300">
             <div class="flex items-center">
                 <div class="p-2 sm:p-3 rounded-lg bg-indigo-100">
@@ -149,7 +149,7 @@
         </div>
     </div>
 
-    @if(Auth::user()->hasPermission('manage_guest_services') || Auth::user()->hasPermission('manage_checkin_checkout'))
+    @if(Auth::user()->hasGuestServiceAccess())
     <!-- Today's Guest Service -->
     <div class="modern-card rounded-2xl p-4 sm:p-6">
         <div class="flex items-center justify-between mb-4 sm:mb-6">
@@ -283,7 +283,7 @@
                 <i class="fas fa-clipboard-check text-green-600 text-lg sm:text-xl mb-2"></i>
                 <span class="text-xs sm:text-sm font-medium text-green-700">Checklists</span>
             </a>
-            @if(Auth::user()->hasPermission('manage_guest_services') || Auth::user()->hasPermission('manage_checkin_checkout'))
+            @if(Auth::user()->hasGuestServiceAccess())
             <a href="{{ route('staff.guest-service.index') }}" class="flex flex-col items-center p-3 sm:p-4 bg-indigo-50 rounded-xl hover:bg-indigo-100 transition-colors">
                 <i class="fas fa-concierge-bell text-indigo-600 text-lg sm:text-xl mb-2"></i>
                 <span class="text-xs sm:text-sm font-medium text-indigo-700">Guest Service</span>

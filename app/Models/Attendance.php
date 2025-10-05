@@ -13,6 +13,7 @@ class Attendance extends Model
     protected $table = 'attendance';
 
     protected $fillable = [
+        'uuid',
         'staff_assignment_id',
         'date',
         'check_in_time',
@@ -145,6 +146,31 @@ class Attendance extends Model
     }
 
     // Static methods
+    public static function getStaffAttendanceStats($staffAssignmentId, $startDate = null, $endDate = null)
+    {
+        $startDate = $startDate ?? now()->startOfMonth();
+        $endDate = $endDate ?? now()->endOfMonth();
+
+        $attendance = self::where('staff_assignment_id', $staffAssignmentId)
+            ->whereBetween('date', [$startDate, $endDate])
+            ->get();
+
+        $presentDays = $attendance->where('status', 'present')->count();
+        $absentDays = $attendance->where('status', 'absent')->count();
+        $totalHours = $attendance->sum('hours_worked');
+        $totalDays = $attendance->count();
+        
+        $attendancePercentage = $totalDays > 0 ? round(($presentDays / $totalDays) * 100, 1) : 0;
+
+        return [
+            'present_days' => $presentDays,
+            'absent_days' => $absentDays,
+            'total_hours' => round($totalHours, 1),
+            'attendance_percentage' => $attendancePercentage,
+            'total_days' => $totalDays,
+        ];
+    }
+
     public static function markAttendance($staffAssignmentId, $date, $checkInTime = null, $checkOutTime = null, $status = 'present', $notes = null)
     {
         $attendance = self::updateOrCreate(
@@ -167,27 +193,4 @@ class Attendance extends Model
         return $attendance;
     }
 
-    public static function getStaffAttendanceStats($staffAssignmentId, $startDate = null, $endDate = null)
-    {
-        $query = self::where('staff_assignment_id', $staffAssignmentId);
-        
-        if ($startDate && $endDate) {
-            $query->whereBetween('date', [$startDate, $endDate]);
-        }
-
-        $attendance = $query->get();
-
-        return [
-            'total_days' => $attendance->count(),
-            'present_days' => $attendance->where('status', 'present')->count(),
-            'absent_days' => $attendance->where('status', 'absent')->count(),
-            'late_days' => $attendance->where('status', 'late')->count(),
-            'half_days' => $attendance->where('status', 'half_day')->count(),
-            'leave_days' => $attendance->where('status', 'leave')->count(),
-            'total_hours' => $attendance->sum('hours_worked'),
-            'average_hours_per_day' => $attendance->where('status', 'present')->avg('hours_worked') ?? 0,
-            'attendance_percentage' => $attendance->count() > 0 ? 
-                round(($attendance->whereIn('status', ['present', 'late', 'half_day'])->count() / $attendance->count()) * 100, 2) : 0,
-        ];
-    }
 }

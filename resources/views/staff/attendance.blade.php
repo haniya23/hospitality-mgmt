@@ -2,8 +2,289 @@
 
 @section('title', 'Staff Attendance')
 
+@push('styles')
+<style>
+    .notification-enter {
+        transform: translateX(100%);
+        opacity: 0;
+        transition: all 0.3s ease-out;
+    }
+    
+    .notification-enter-active {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    
+    .notification-exit {
+        transform: translateX(0);
+        opacity: 1;
+        transition: all 0.3s ease-in;
+    }
+    
+    .notification-exit-active {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    
+    @media (max-width: 640px) {
+        .notification-enter {
+            transform: translateY(-100%);
+        }
+        
+        .notification-exit-active {
+            transform: translateY(-100%);
+        }
+    }
+</style>
+@endpush
+
 @section('content')
-<div class="space-y-4 sm:space-y-6" x-data="staffAttendance()">
+<div class="space-y-4 sm:space-y-6" 
+     x-data="{
+         // Modal states
+         showLeaveRequestModal: false,
+         showCheckoutModal: false,
+         
+         // Loading states
+         isSubmitting: false,
+         isSubmittingCheckout: false,
+         
+         // Data
+         todaysCheckInTime: @if($todaysAttendance && $todaysAttendance->check_in_time)'{{ \Carbon\Carbon::parse($todaysAttendance->check_in_time)->format('H:i') }}'@else''@endif,
+         
+         // Forms
+         leaveForm: {
+             leave_type: '',
+             start_date: '',
+             end_date: '',
+             reason: '',
+             attachments: []
+         },
+         checkoutForm: {
+             notes: ''
+         },
+         
+         // Methods
+         async checkIn() {
+             try {
+                 let locationData = null;
+                 if (navigator.geolocation) {
+                     navigator.geolocation.getCurrentPosition((position) => {
+                         locationData = {
+                             latitude: position.coords.latitude,
+                             longitude: position.coords.longitude,
+                             accuracy: position.coords.accuracy
+                         };
+                         this.performCheckIn(locationData);
+                     }, () => {
+                         this.performCheckIn(null);
+                     });
+                 } else {
+                     this.performCheckIn(null);
+                 }
+             } catch (error) {
+                 this.showNotification('Failed to get location. Check-in without location.', 'warning');
+                 this.performCheckIn(null);
+             }
+         },
+         
+         async performCheckIn(locationData) {
+             try {
+                 const response = await fetch('/staff/attendance/check-in', {
+                     method: 'POST',
+                     headers: {
+                         'X-CSRF-TOKEN': document.querySelector('meta[name=\"csrf-token\"]').getAttribute('content'),
+                         'Accept': 'application/json',
+                         'Content-Type': 'application/json',
+                     },
+                     body: JSON.stringify(locationData)
+                 });
+                 
+                 const result = await response.json();
+                 
+                 if (result.success) {
+                     this.showNotification('Check-in successful!', 'success');
+                     setTimeout(() => {
+                         window.location.reload();
+                     }, 1000);
+                 } else {
+                     this.showNotification(result.message, 'error');
+                 }
+             } catch (error) {
+                 this.showNotification('Failed to check in. Please try again.', 'error');
+             }
+         },
+         
+         checkOut() {
+             @if($todaysAttendance && $todaysAttendance->check_in_time)
+                 this.todaysCheckInTime = '{{ \Carbon\Carbon::parse($todaysAttendance->check_in_time)->format('H:i') }}';
+             @else
+                 this.todaysCheckInTime = new Date().toLocaleTimeString('en-US', {hour: '2-digit', minute: '2-digit'});
+             @endif
+             this.showCheckoutModal = true;
+         },
+         
+         async submitCheckout() {
+             this.isSubmittingCheckout = true;
+             
+             try {
+                 const response = await fetch('/staff/attendance/check-out', {
+                     method: 'POST',
+                     headers: {
+                         'X-CSRF-TOKEN': document.querySelector('meta[name=\"csrf-token\"]').getAttribute('content'),
+                         'Accept': 'application/json',
+                         'Content-Type': 'application/json',
+                     },
+                     body: JSON.stringify({ notes: this.checkoutForm.notes })
+                 });
+                 
+                 const result = await response.json();
+                 
+                 if (result.success) {
+                     this.showNotification('Check-out successful!', 'success');
+                     this.showCheckoutModal = false;
+                     this.checkoutForm.notes = '';
+                     setTimeout(() => {
+                         window.location.reload();
+                     }, 1000);
+                 } else {
+                     this.showNotification(result.message, 'error');
+                 }
+             } catch (error) {
+                 this.showNotification('Failed to check out. Please try again.', 'error');
+             } finally {
+                 this.isSubmittingCheckout = false;
+             }
+         },
+         
+         async submitLeaveRequest() {
+             this.isSubmitting = true;
+             
+             try {
+                 const formData = new FormData();
+                 formData.append('leave_type', this.leaveForm.leave_type);
+                 formData.append('start_date', this.leaveForm.start_date);
+                 formData.append('end_date', this.leaveForm.end_date);
+                 formData.append('reason', this.leaveForm.reason);
+                 
+                 // Add attachments
+                 this.leaveForm.attachments.forEach((file, index) => {
+                     formData.append(`attachments[${index}]`, file);
+                 });
+                 
+                 const response = await fetch('/staff/leave-requests', {
+                     method: 'POST',
+                     headers: {
+                         'X-CSRF-TOKEN': document.querySelector('meta[name=\"csrf-token\"]').getAttribute('content'),
+                         'Accept': 'application/json',
+                     },
+                     body: formData
+                 });
+                 
+                 const result = await response.json();
+                 
+                 if (result.success) {
+                     this.showNotification('Leave request submitted successfully!', 'success');
+                     this.showLeaveRequestModal = false;
+                     this.resetLeaveForm();
+                     setTimeout(() => {
+                         window.location.reload();
+                     }, 1000);
+                 } else {
+                     this.showNotification(result.message, 'error');
+                 }
+             } catch (error) {
+                 this.showNotification('Failed to submit leave request. Please try again.', 'error');
+             } finally {
+                 this.isSubmitting = false;
+             }
+         },
+         
+         async cancelLeaveRequest(leaveRequestId) {
+             if (!confirm('Are you sure you want to cancel this leave request?')) {
+                 return;
+             }
+             
+             try {
+                 const response = await fetch(`/staff/leave-requests/${leaveRequestId}/cancel`, {
+                     method: 'POST',
+                     headers: {
+                         'X-CSRF-TOKEN': document.querySelector('meta[name=\"csrf-token\"]').getAttribute('content'),
+                         'Accept': 'application/json',
+                     },
+                 });
+                 
+                 const result = await response.json();
+                 
+                 if (result.success) {
+                     this.showNotification('Leave request cancelled successfully!', 'success');
+                     setTimeout(() => {
+                         window.location.reload();
+                     }, 1000);
+                 } else {
+                     this.showNotification(result.message, 'error');
+                 }
+             } catch (error) {
+                 this.showNotification('Failed to cancel leave request. Please try again.', 'error');
+             }
+         },
+         
+         handleFileUpload(event) {
+             this.leaveForm.attachments = Array.from(event.target.files);
+         },
+         
+         resetLeaveForm() {
+             this.leaveForm = {
+                 leave_type: '',
+                 start_date: '',
+                 end_date: '',
+                 reason: '',
+                 attachments: []
+             };
+         },
+         
+         loadAttendanceHistory() {
+             window.location.href = '/staff/attendance/history';
+         },
+         
+         showNotification(message, type = 'info') {
+             const notification = document.createElement('div');
+             notification.className = `fixed top-4 left-4 right-4 sm:left-auto sm:right-4 sm:max-w-sm z-50 p-4 rounded-xl shadow-xl backdrop-blur-sm border notification-enter ${
+                 type === 'success' ? 'bg-green-500/95 text-white border-green-400/50' :
+                 type === 'error' ? 'bg-red-500/95 text-white border-red-400/50' :
+                 type === 'warning' ? 'bg-yellow-500/95 text-white border-yellow-400/50' :
+                 'bg-blue-500/95 text-white border-blue-400/50'
+             }`;
+             
+             const icon = type === 'success' ? 'fa-check-circle' :
+                         type === 'error' ? 'fa-exclamation-circle' :
+                         type === 'warning' ? 'fa-exclamation-triangle' :
+                         'fa-info-circle';
+             
+             notification.innerHTML = `
+                 <div class=\"flex items-center space-x-3\">
+                     <i class=\"fas ${icon} text-lg flex-shrink-0\"></i>
+                     <span class=\"text-sm font-medium\">${message}</span>
+                 </div>
+             `;
+             
+             document.body.appendChild(notification);
+             
+             setTimeout(() => {
+                 notification.classList.remove('notification-enter');
+                 notification.classList.add('notification-enter-active');
+             }, 10);
+             
+             setTimeout(() => {
+                 notification.classList.remove('notification-enter-active');
+                 notification.classList.add('notification-exit-active');
+                 setTimeout(() => {
+                     notification.remove();
+                 }, 300);
+             }, 3000);
+         }
+     }">
+    
     <!-- Back Button -->
     <div class="flex items-center space-x-3">
         <a href="{{ route('staff.dashboard') }}" 
@@ -340,209 +621,77 @@
     </div>
 </div>
 
+<!-- Checkout Modal -->
+<div x-show="showCheckoutModal" 
+     x-transition:enter="transition ease-out duration-200"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100"
+     x-transition:leave="transition ease-in duration-150"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0"
+     class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+     @click.self="showCheckoutModal = false">
+    
+    <div class="bg-white rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 transform scale-95"
+         x-transition:enter-end="opacity-100 transform scale-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100 transform scale-100"
+         x-transition:leave-end="opacity-0 transform scale-95">
+        
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-sign-out-alt text-red-600"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900">Check Out</h3>
+            </div>
+            <button @click="showCheckoutModal = false" class="text-gray-400 hover:text-gray-600 transition-colors">
+                <i class="fas fa-times text-lg"></i>
+            </button>
+        </div>
+
+        <form @submit.prevent="submitCheckout()">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Notes (Optional)</label>
+                    <textarea x-model="checkoutForm.notes" rows="4" 
+                              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                              placeholder="Add any notes for today's work..."></textarea>
+                </div>
+
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="text-sm font-medium text-gray-900 mb-2">Today's Summary</h4>
+                    <div class="text-sm text-gray-600 space-y-1">
+                        <div class="flex justify-between">
+                            <span>Check-in time:</span>
+                            <span x-text="todaysCheckInTime" class="font-medium"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Check-out time:</span>
+                            <span x-text="new Date().toLocaleTimeString('en-US', {hour: '2-digit', minute: '2-digit'})" class="font-medium text-green-600"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex space-x-3 mt-6">
+                <button type="button" @click="showCheckoutModal = false" 
+                        class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+                    Cancel
+                </button>
+                <button type="submit" :disabled="isSubmittingCheckout"
+                        class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 font-medium">
+                    <span x-show="!isSubmittingCheckout">Check Out</span>
+                    <span x-show="isSubmittingCheckout" class="flex items-center justify-center">
+                        <i class="fas fa-spinner fa-spin mr-2"></i>
+                        Processing...
+                    </span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 @endsection
-
-@push('scripts')
-<script>
-function staffAttendance() {
-    return {
-        showLeaveRequestModal: false,
-        isSubmitting: false,
-        leaveForm: {
-            leave_type: '',
-            start_date: '',
-            end_date: '',
-            reason: '',
-            attachments: []
-        },
-
-        async checkIn() {
-            try {
-                // Get location if available
-                let locationData = null;
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition((position) => {
-                        locationData = {
-                            latitude: position.coords.latitude,
-                            longitude: position.coords.longitude,
-                            accuracy: position.coords.accuracy
-                        };
-                        this.performCheckIn(locationData);
-                    }, () => {
-                        this.performCheckIn(null);
-                    });
-                } else {
-                    this.performCheckIn(null);
-                }
-            } catch (error) {
-                this.showNotification('Failed to get location. Check-in without location.', 'warning');
-                this.performCheckIn(null);
-            }
-        },
-
-        async performCheckIn(locationData) {
-            try {
-                const response = await fetch('/staff/attendance/check-in', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(locationData)
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    this.showNotification('Check-in successful!', 'success');
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1000);
-                } else {
-                    this.showNotification(result.message, 'error');
-                }
-            } catch (error) {
-                this.showNotification('Failed to check in. Please try again.', 'error');
-            }
-        },
-
-        async checkOut() {
-            const notes = prompt('Add any notes for today (optional):');
-            
-            try {
-                const response = await fetch('/staff/attendance/check-out', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ notes })
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    this.showNotification('Check-out successful!', 'success');
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1000);
-                } else {
-                    this.showNotification(result.message, 'error');
-                }
-            } catch (error) {
-                this.showNotification('Failed to check out. Please try again.', 'error');
-            }
-        },
-
-        async submitLeaveRequest() {
-            this.isSubmitting = true;
-
-            try {
-                const formData = new FormData();
-                formData.append('leave_type', this.leaveForm.leave_type);
-                formData.append('start_date', this.leaveForm.start_date);
-                formData.append('end_date', this.leaveForm.end_date);
-                formData.append('reason', this.leaveForm.reason);
-
-                // Add attachments
-                this.leaveForm.attachments.forEach((file, index) => {
-                    formData.append(`attachments[${index}]`, file);
-                });
-
-                const response = await fetch('/staff/leave-requests', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json',
-                    },
-                    body: formData
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    this.showNotification('Leave request submitted successfully!', 'success');
-                    this.showLeaveRequestModal = false;
-                    this.resetForm();
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1000);
-                } else {
-                    this.showNotification(result.message, 'error');
-                }
-            } catch (error) {
-                this.showNotification('Failed to submit leave request. Please try again.', 'error');
-            } finally {
-                this.isSubmitting = false;
-            }
-        },
-
-        async cancelLeaveRequest(leaveRequestId) {
-            if (!confirm('Are you sure you want to cancel this leave request?')) {
-                return;
-            }
-
-            try {
-                const response = await fetch(`/staff/leave-requests/${leaveRequestId}/cancel`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json',
-                    },
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    this.showNotification('Leave request cancelled successfully!', 'success');
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1000);
-                } else {
-                    this.showNotification(result.message, 'error');
-                }
-            } catch (error) {
-                this.showNotification('Failed to cancel leave request. Please try again.', 'error');
-            }
-        },
-
-        handleFileUpload(event) {
-            this.leaveForm.attachments = Array.from(event.target.files);
-        },
-
-        resetForm() {
-            this.leaveForm = {
-                leave_type: '',
-                start_date: '',
-                end_date: '',
-                reason: '',
-                attachments: []
-            };
-        },
-
-        loadAttendanceHistory() {
-            window.location.href = '/staff/attendance/history';
-        },
-
-        showNotification(message, type = 'info') {
-            const notification = document.createElement('div');
-            notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm ${
-                type === 'success' ? 'bg-green-500 text-white' :
-                type === 'error' ? 'bg-red-500 text-white' :
-                type === 'warning' ? 'bg-yellow-500 text-white' :
-                'bg-blue-500 text-white'
-            }`;
-            notification.textContent = message;
-            
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.remove();
-            }, 3000);
-        }
-    }
-}
-</script>
-@endpush

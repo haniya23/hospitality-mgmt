@@ -10,7 +10,8 @@ use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
-
+use App\Models\Attendance;
+use App\Models\LeaveRequest;
 class User extends Authenticatable implements FilamentUser
 {
     use HasFactory, Notifiable, HasApiTokens;
@@ -85,10 +86,6 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasManyThrough(StaffNotification::class, StaffAssignment::class, 'user_id', 'staff_assignment_id');
     }
 
-    public function staffActivityLogs()
-    {
-        return $this->hasManyThrough(StaffActivityLog::class, StaffAssignment::class, 'user_id', 'staff_assignment_id');
-    }
 
     public function checklistExecutions()
     {
@@ -439,44 +436,33 @@ class User extends Authenticatable implements FilamentUser
                     ->count();
     }
 
-    public function hasPermission($permissionKey, $propertyId = null)
+    // Simple access control methods using the new system
+    public function hasBookingAccess($propertyId = null)
     {
-        $query = StaffPermission::whereHas('staffAssignment', function($q) {
-            $q->where('user_id', $this->id)
-              ->where('status', 'active');
-        })->where('permission_key', $permissionKey);
-
+        $query = $this->staffAssignments()->where('status', 'active')->where('booking_access', true);
+        
         if ($propertyId) {
-            $query->whereHas('staffAssignment', function($q) use ($propertyId) {
-                $q->where('property_id', $propertyId);
-            });
+            $query->where('property_id', $propertyId);
         }
-
-        return $query->where('is_granted', true)->exists();
+        
+        return $query->exists();
     }
 
-    public function getPermissions($propertyId = null)
+    public function hasGuestServiceAccess($propertyId = null)
     {
-        $query = StaffPermission::whereHas('staffAssignment', function($q) {
-            $q->where('user_id', $this->id)
-              ->where('status', 'active');
-        })->where('is_granted', true);
-
+        $query = $this->staffAssignments()->where('status', 'active')->where('guest_service_access', true);
+        
         if ($propertyId) {
-            $query->whereHas('staffAssignment', function($q) use ($propertyId) {
-                $q->where('property_id', $propertyId);
-            });
+            $query->where('property_id', $propertyId);
         }
-
-        return $query->pluck('permission_key')->toArray();
+        
+        return $query->exists();
     }
 
     public function getTodaysActivity()
     {
-        return $this->staffActivityLogs()
-                    ->whereDate('staff_activity_logs.created_at', today())
-                    ->orderBy('staff_activity_logs.created_at', 'desc')
-                    ->get();
+        // Activity logging removed - using simple access control system
+        return collect([]);
     }
 
     public function getTaskCompletionRate($days = 7)
@@ -519,17 +505,27 @@ class User extends Authenticatable implements FilamentUser
             throw new \Exception('No active staff assignment found.');
         }
 
-        $attendance = Attendance::updateOrCreate(
-            [
+        $attendance = Attendance::where([
+            'staff_assignment_id' => $staffAssignment->id,
+            'date' => today(),
+        ])->first();
+
+        if (!$attendance) {
+            $attendance = Attendance::create([
+                'uuid' => \Illuminate\Support\Str::uuid(),
                 'staff_assignment_id' => $staffAssignment->id,
                 'date' => today(),
-            ],
-            [
                 'check_in_time' => now()->format('H:i:s'),
                 'status' => 'present',
                 'location_data' => $locationData,
-            ]
-        );
+            ]);
+        } else {
+            $attendance->update([
+                'check_in_time' => now()->format('H:i:s'),
+                'status' => 'present',
+                'location_data' => $locationData,
+            ]);
+        }
 
         // Check if late
         if ($attendance->isLate()) {

@@ -16,10 +16,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             BasicDataSeeder::class,
             SouthIndiaLocationSeeder::class,
-            PropertySeeder::class,
-            AccommodationSeeder::class,
-            BookingSeeder::class,
-            RoleSeeder::class,
+            SystemSeeder::class, // Our comprehensive system seeder
         ]);
     }
 }

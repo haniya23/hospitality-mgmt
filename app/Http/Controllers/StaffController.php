@@ -285,10 +285,7 @@ class StaffController extends Controller
     {
         $checklist = CleaningChecklist::findOrFail($checklistId);
         
-        // Check if user has permission to execute checklists for this property
-        if (!Auth::user()->hasPermission('execute_checklists', $checklist->property_id)) {
-            return response()->json(['error' => 'You are not authorized to execute this checklist.'], 403);
-        }
+        // Simple access control - all staff can execute checklists
 
         $staffAssignment = Auth::user()->staffAssignments()
             ->where('property_id', $checklist->property_id)
@@ -383,9 +380,9 @@ class StaffController extends Controller
     {
         $user = Auth::user();
         
-        $activities = $user->staffActivityLogs()
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
+        // Activity logging removed - using simple access control system
+        // Return empty collection since we don't track detailed activities anymore
+        $activities = collect([]);
 
         return view('staff.activity', compact('activities'));
     }

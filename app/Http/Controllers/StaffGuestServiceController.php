@@ -26,7 +26,7 @@ class StaffGuestServiceController extends Controller
         $staff = Auth::user();
         
         // Check if staff has guest service permissions
-        if (!$staff->hasPermission('manage_guest_services') && !$staff->hasPermission('manage_checkin_checkout')) {
+        if (!$staff->hasGuestServiceAccess()) {
             abort(403, 'You do not have permission to access guest services.');
         }
 
@@ -110,10 +110,7 @@ class StaffGuestServiceController extends Controller
     {
         $staff = Auth::user();
         
-        // Check permissions
-        if (!$staff->hasPermission('view_bookings')) {
-            abort(403, 'You do not have permission to view bookings.');
-        }
+        // All staff can view bookings (upcoming bookings)
 
         $staffAssignments = $staff->getActiveStaffAssignments();
         $propertyIds = $staffAssignments->pluck('property_id')->toArray();
@@ -141,7 +138,7 @@ class StaffGuestServiceController extends Controller
         $staff = Auth::user();
         
         // Check permissions
-        if (!$staff->hasPermission('manage_checkin_checkout')) {
+        if (!$staff->hasGuestServiceAccess()) {
             abort(403, 'You do not have permission to process check-ins.');
         }
 
@@ -200,7 +197,7 @@ class StaffGuestServiceController extends Controller
         $staff = Auth::user();
         
         // Check permissions
-        if (!$staff->hasPermission('manage_checkin_checkout')) {
+        if (!$staff->hasGuestServiceAccess()) {
             abort(403, 'You do not have permission to process check-outs.');
         }
 

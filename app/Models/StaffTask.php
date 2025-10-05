@@ -157,14 +157,5 @@ class StaffTask extends Model
         }
     }
 
-    private function logActivity($action, $data = [])
-    {
-        StaffActivityLog::create([
-            'staff_assignment_id' => $this->staff_assignment_id,
-            'action' => $action,
-            'model_type' => self::class,
-            'model_id' => $this->id,
-            'data' => $data,
-        ]);
-    }
+    // Activity logging removed - using simple access control system
 }

@@ -175,9 +175,6 @@ class StaffPropertyController extends Controller
                           ->where('check_in_date', '<=', today()->addDays(30))
                           ->with('guest');
                 },
-                'cleaningChecklists' => function($query) {
-                    $query->where('is_active', true);
-                }
             ])
             ->get()
             ->map(function ($accommodation) {
@@ -199,7 +196,7 @@ class StaffPropertyController extends Controller
                 $checklistExecutions = ChecklistExecution::whereHas('staffAssignment', function($q) use ($accommodation) {
                     $q->where('property_id', $accommodation->property_id);
                 })
-                ->where('accommodation_id', $accommodation->id)
+                ->where('property_accommodation_id', $accommodation->id)
                 ->where('status', 'in_progress')
                 ->with('cleaningChecklist')
                 ->get();

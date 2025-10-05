@@ -8,7 +8,6 @@ use App\Models\StaffAssignment;
 use App\Models\StaffTask;
 use App\Models\StaffNotification;
 use App\Models\CleaningChecklist;
-use App\Models\StaffPermission;
 use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -64,17 +63,8 @@ class OwnerStaffController extends Controller
                 ? round(($assignment->task_stats['completed'] / $assignment->task_stats['total']) * 100, 2)
                 : 0;
             
-            $assignment->recent_activities = $assignment->staffActivityLogs()
-                ->orderBy('created_at', 'desc')
-                ->limit(3)
-                ->get()
-                ->map(function ($log) {
-                    return [
-                        'id' => $log->id,
-                        'description' => $log->getActionDescription(),
-                        'time_ago' => $log->getTimeAgo(),
-                    ];
-                });
+            // Recent activities removed - using simple access control system
+            $assignment->recent_activities = collect([]);
         });
 
         $properties = $user->properties()->where('status', 'active')->get();
@@ -113,6 +103,18 @@ class OwnerStaffController extends Controller
     public function store(Request $request)
     {
         try {
+            // Handle JSON requests
+            if ($request->isJson()) {
+                $data = $request->json()->all();
+                $request->merge($data);
+            }
+            
+            \Log::info('Staff creation request data', [
+                'is_json' => $request->isJson(),
+                'content_type' => $request->header('Content-Type'),
+                'data' => $request->all()
+            ]);
+            
             $request->validate([
                 'name' => 'required|string|max:255',
                 'mobile_number' => 'required|string|unique:users,mobile_number',
@@ -120,7 +122,7 @@ class OwnerStaffController extends Controller
                 'property_id' => 'required|exists:properties,id',
                 'role_id' => 'required|exists:roles,id',
                 'start_date' => 'required|date',
-                'end_date' => 'nullable|date|after:start_date',
+                'end_date' => 'nullable|date|after_or_equal:start_date',
                 'booking_access' => 'boolean',
                 'guest_service_access' => 'boolean',
             ], [
@@ -141,7 +143,10 @@ class OwnerStaffController extends Controller
                        ->firstOrFail();
 
             $result = DB::transaction(function () use ($request, $property, $role) {
+                \Log::info('Starting database transaction');
+                
                 // Create staff user
+                \Log::info('Creating staff user', ['name' => $request->name]);
                 $staffUser = User::createStaff([
                     'name' => $request->name,
                     'mobile_number' => $request->mobile_number,
@@ -150,8 +155,10 @@ class OwnerStaffController extends Controller
                     'is_staff' => true,
                     'is_active' => true,
                 ]);
+                \Log::info('Staff user created successfully', ['user_id' => $staffUser->id]);
 
                 // Create staff assignment with simple access
+                \Log::info('Creating staff assignment', ['user_id' => $staffUser->id, 'property_id' => $property->id]);
                 $staffAssignment = StaffAssignment::create([
                     'user_id' => $staffUser->id,
                     'property_id' => $property->id,
@@ -162,16 +169,25 @@ class OwnerStaffController extends Controller
                     'start_date' => $request->start_date,
                     'end_date' => $request->end_date,
                 ]);
+                \Log::info('Staff assignment created successfully', ['assignment_id' => $staffAssignment->id]);
 
                 // Send welcome notification
-                StaffNotification::create([
-                    'staff_assignment_id' => $staffAssignment->id,
-                    'from_user_id' => Auth::id(),
-                    'title' => 'Welcome to the Team!',
-                    'message' => "Welcome {$staffUser->name}! You have been assigned to {$property->name}. Please check your dashboard for assigned tasks.",
-                    'type' => 'general',
-                    'priority' => 'medium',
-                ]);
+                try {
+                    StaffNotification::create([
+                        'staff_assignment_id' => $staffAssignment->id,
+                        'from_user_id' => Auth::id(),
+                        'title' => 'Welcome to the Team!',
+                        'message' => "Welcome {$staffUser->name}! You have been assigned to {$property->name}. Please check your dashboard for assigned tasks.",
+                        'type' => 'general',
+                        'priority' => 'medium',
+                    ]);
+                } catch (\Exception $notificationError) {
+                    \Log::error('Failed to create welcome notification', [
+                        'error' => $notificationError->getMessage(),
+                        'staff_assignment_id' => $staffAssignment->id
+                    ]);
+                    // Continue without notification - don't fail the whole process
+                }
 
                 return [
                     'staff_user' => $staffUser,
@@ -200,6 +216,12 @@ class OwnerStaffController extends Controller
             }
             throw $e;
         } catch (\Exception $e) {
+            \Log::error('Staff creation failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->all()
+            ]);
+            
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
@@ -498,7 +520,7 @@ class OwnerStaffController extends Controller
             $query->where('property_id', $propertyId);
         }
         
-        $staffAssignments = $query->with(['user', 'property', 'staffTasks', 'staffActivityLogs'])->get();
+        $staffAssignments = $query->with(['user', 'property', 'staffTasks'])->get();
         
         // Calculate analytics
         $analytics = [
@@ -687,23 +709,8 @@ class OwnerStaffController extends Controller
     {
         $activities = collect();
         
-        foreach ($staffAssignments as $assignment) {
-            $logs = $assignment->staffActivityLogs()
-                ->where('created_at', '>=', $startDate)
-                ->orderBy('created_at', 'desc')
-                ->limit(10)
-                ->get();
-            
-            foreach ($logs as $log) {
-                $activities->push([
-                    'id' => $log->id,
-                    'description' => $log->getActionDescription(),
-                    'staff_name' => $assignment->user->name,
-                    'time_ago' => $log->getTimeAgo(),
-                    'created_at' => $log->created_at,
-                ]);
-            }
-        }
+        // Activity logs removed - using simple access control system
+        // No activity logging in the simplified system
         
         return $activities->sortByDesc('created_at')->take(20)->values()->toArray();
     }
