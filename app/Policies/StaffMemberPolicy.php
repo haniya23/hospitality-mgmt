@@ -24,7 +24,12 @@ class StaffMemberPolicy
     {
         // Owner can view all staff in their properties
         if ($user->isOwner()) {
-            return $staffMember->property->owner_id === $user->id;
+            // Load property if not loaded
+            if (!$staffMember->relationLoaded('property')) {
+                $staffMember->load('property');
+            }
+            
+            return $staffMember->property && $staffMember->property->owner_id === $user->id;
         }
 
         // Manager can view staff in their property
@@ -56,7 +61,12 @@ class StaffMemberPolicy
     {
         // Owner can update all staff in their properties
         if ($user->isOwner()) {
-            return $staffMember->property->owner_id === $user->id;
+            // Load property if not loaded
+            if (!$staffMember->relationLoaded('property')) {
+                $staffMember->load('property');
+            }
+            
+            return $staffMember->property && $staffMember->property->owner_id === $user->id;
         }
 
         // Manager can update staff in their property (but not themselves)
@@ -75,7 +85,12 @@ class StaffMemberPolicy
     {
         // Only owners can delete staff members
         if ($user->isOwner()) {
-            return $staffMember->property->owner_id === $user->id;
+            // Load property if not loaded
+            if (!$staffMember->relationLoaded('property')) {
+                $staffMember->load('property');
+            }
+            
+            return $staffMember->property && $staffMember->property->owner_id === $user->id;
         }
 
         return false;
@@ -88,7 +103,12 @@ class StaffMemberPolicy
     {
         // Owner can assign to anyone in their properties
         if ($user->isOwner()) {
-            return $staffMember->property->owner_id === $user->id;
+            // Load property if not loaded
+            if (!$staffMember->relationLoaded('property')) {
+                $staffMember->load('property');
+            }
+            
+            return $staffMember->property && $staffMember->property->owner_id === $user->id;
         }
 
         // Manager can assign to supervisors and staff in their property
@@ -112,7 +132,12 @@ class StaffMemberPolicy
     {
         // Owner can manage all staff attendance
         if ($user->isOwner()) {
-            return $staffMember->property->owner_id === $user->id;
+            // Load property if not loaded
+            if (!$staffMember->relationLoaded('property')) {
+                $staffMember->load('property');
+            }
+            
+            return $staffMember->property && $staffMember->property->owner_id === $user->id;
         }
 
         // Manager can manage all staff attendance in their property
@@ -135,7 +160,12 @@ class StaffMemberPolicy
     {
         // Owner can review all leave requests
         if ($user->isOwner()) {
-            return $staffMember->property->owner_id === $user->id;
+            // Load property if not loaded
+            if (!$staffMember->relationLoaded('property')) {
+                $staffMember->load('property');
+            }
+            
+            return $staffMember->property && $staffMember->property->owner_id === $user->id;
         }
 
         // Manager can review all leave requests in their property

@@ -42,14 +42,29 @@ class OwnerStaffController extends Controller
         $properties = auth()->user()->properties()->get();
         $departments = StaffDepartment::active()->get();
         
-        // Get potential supervisors (managers and supervisors)
-        $supervisors = StaffMember::whereIn('property_id', $properties->pluck('id'))
-            ->whereIn('staff_role', ['manager', 'supervisor'])
+        // Get all potential supervisors grouped by property
+        // Managers can supervise supervisors and staff
+        // Supervisors can supervise staff only
+        $allStaff = StaffMember::whereIn('property_id', $properties->pluck('id'))
             ->where('status', 'active')
-            ->with('user', 'property')
+            ->with('user', 'property', 'department')
+            ->orderBy('property_id')
+            ->orderByRaw("FIELD(staff_role, 'manager', 'supervisor', 'staff')")
             ->get();
         
-        return view('staff.owner.create', compact('properties', 'departments', 'supervisors'));
+        // Prepare staff data for JavaScript
+        $staffData = $allStaff->map(function($staff) {
+            return [
+                'id' => $staff->id,
+                'name' => $staff->user->name,
+                'role' => $staff->staff_role,
+                'property_id' => $staff->property_id,
+                'department' => $staff->department ? $staff->department->name : 'No Dept',
+                'job_title' => $staff->job_title ?? ucfirst($staff->staff_role),
+            ];
+        });
+        
+        return view('staff.owner.create', compact('properties', 'departments', 'staffData'));
     }
 
     /**
@@ -115,11 +130,23 @@ class OwnerStaffController extends Controller
      */
     public function show(StaffMember $staffMember)
     {
-        $this->authorize('view', $staffMember);
+        // Eager load property for authorization check
+        $staffMember->loadMissing('property');
+        
+        // Owner authorization: check if staff belongs to owner's properties
+        if (auth()->user()->isOwner()) {
+            $ownerPropertyIds = auth()->user()->properties()->pluck('id')->toArray();
+            
+            if (!in_array($staffMember->property_id, $ownerPropertyIds)) {
+                abort(403, 'This staff member does not belong to any of your properties.');
+            }
+        } else {
+            // For non-owners (managers, supervisors), use the policy
+            $this->authorize('view', $staffMember);
+        }
         
         $staffMember->load([
             'user',
-            'property',
             'department',
             'supervisor.user',
             'subordinates.user',
@@ -145,21 +172,48 @@ class OwnerStaffController extends Controller
      */
     public function edit(StaffMember $staffMember)
     {
-        $this->authorize('update', $staffMember);
+        // Eager load property for authorization
+        $staffMember->loadMissing('property');
+        
+        // Owner authorization: check if staff belongs to owner's properties
+        if (auth()->user()->isOwner()) {
+            $ownerPropertyIds = auth()->user()->properties()->pluck('id')->toArray();
+            
+            if (!in_array($staffMember->property_id, $ownerPropertyIds)) {
+                abort(403, 'This staff member does not belong to any of your properties.');
+            }
+        } else {
+            // For non-owners, use the policy
+            $this->authorize('update', $staffMember);
+        }
         
         $properties = auth()->user()->properties()->get();
         $departments = StaffDepartment::active()->get();
         
-        $supervisors = StaffMember::where('property_id', $staffMember->property_id)
-            ->whereIn('staff_role', ['manager', 'supervisor'])
+        // Get all staff members who can be supervisors (based on hierarchy rules)
+        $allStaff = StaffMember::whereIn('property_id', $properties->pluck('id'))
             ->where('id', '!=', $staffMember->id)
             ->where('status', 'active')
-            ->with('user')
+            ->with('user', 'property', 'department')
+            ->orderBy('property_id')
+            ->orderByRaw("FIELD(staff_role, 'manager', 'supervisor', 'staff')")
             ->get();
         
-        $staffMember->load('user');
+        // Prepare staff data for JavaScript
+        $staffData = $allStaff->map(function($staff) {
+            return [
+                'id' => $staff->id,
+                'name' => $staff->user->name,
+                'role' => $staff->staff_role,
+                'property_id' => $staff->property_id,
+                'department' => $staff->department ? $staff->department->name : 'No Dept',
+                'job_title' => $staff->job_title ?? ucfirst($staff->staff_role),
+            ];
+        });
         
-        return view('staff.owner.edit', compact('staffMember', 'properties', 'departments', 'supervisors'));
+        $staffMember->load('user', 'department', 'supervisor');
+        
+        return view('staff.owner.edit', compact('staffMember', 'properties', 'departments', 'staffData'));
     }
 
     /**

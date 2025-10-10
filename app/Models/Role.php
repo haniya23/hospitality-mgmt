@@ -43,9 +43,9 @@ class Role extends Model
         return $this->belongsTo(Property::class);
     }
 
-    public function staffAssignments()
+    public function staffMembers()
     {
-        return $this->hasMany(StaffAssignment::class);
+        return $this->hasMany(StaffMember::class, 'department_id');
     }
 
     public function permissions()

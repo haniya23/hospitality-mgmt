@@ -68,48 +68,45 @@ class Property extends Model
         return $this->hasMany(Role::class);
     }
 
-    public function staffAssignments()
+    // New Staff Hierarchy Relationships
+    public function staffMembers()
     {
-        return $this->hasMany(StaffAssignment::class);
+        return $this->hasMany(StaffMember::class);
     }
 
-    public function staffTasks()
+    public function tasks()
     {
-        return $this->hasMany(StaffTask::class);
+        return $this->hasMany(Task::class);
     }
 
-    public function cleaningChecklists()
-    {
-        return $this->hasMany(CleaningChecklist::class);
-    }
-
+    // Staff relationship helpers
     public function activeStaff()
     {
-        return $this->staffAssignments()
+        return $this->staffMembers()
                     ->where('status', 'active')
                     ->with('user');
     }
 
     public function getActiveStaffCount()
     {
-        return $this->staffAssignments()
+        return $this->staffMembers()
                     ->where('status', 'active')
                     ->count();
     }
 
     public function getTodaysTasksCount()
     {
-        return $this->staffTasks()
+        return $this->tasks()
                     ->whereDate('scheduled_at', today())
-                    ->whereIn('status', ['pending', 'in_progress'])
+                    ->whereNotIn('status', ['completed', 'verified', 'cancelled'])
                     ->count();
     }
 
     public function getOverdueTasksCount()
     {
-        return $this->staffTasks()
-                    ->where('scheduled_at', '<', now())
-                    ->whereIn('status', ['pending', 'in_progress'])
+        return $this->tasks()
+                    ->where('due_at', '<', now())
+                    ->whereNotIn('status', ['completed', 'verified', 'cancelled'])
                     ->count();
     }
 
@@ -117,13 +114,13 @@ class Property extends Model
     {
         $startDate = now()->subDays($days);
         
-        $totalTasks = $this->staffTasks()
+        $totalTasks = $this->tasks()
                            ->where('created_at', '>=', $startDate)
                            ->count();
         
-        $completedTasks = $this->staffTasks()
+        $completedTasks = $this->tasks()
                                ->where('created_at', '>=', $startDate)
-                               ->where('status', 'completed')
+                               ->whereIn('status', ['completed', 'verified'])
                                ->count();
         
         return $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100, 2) : 0;

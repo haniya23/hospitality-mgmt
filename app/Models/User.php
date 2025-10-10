@@ -80,6 +80,19 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(Task::class, 'created_by');
     }
 
+    /**
+     * Get all staff members across all properties owned by this user
+     */
+    public function allStaff()
+    {
+        if (!$this->isOwner()) {
+            return collect();
+        }
+
+        return StaffMember::whereIn('property_id', $this->properties()->pluck('id'))
+            ->with('user', 'property', 'department');
+    }
+
     public function b2bPartnerContacts()
     {
         return $this->hasMany(B2bPartner::class, 'contact_user_id');

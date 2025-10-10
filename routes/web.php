@@ -14,6 +14,70 @@ Route::post('/register', [MobileAuthController::class, 'register'])->middleware(
 Route::post('/logout', [MobileAuthController::class, 'logout'])->name('logout');
 Route::get('/cashfree/success', [App\Http\Controllers\CashfreeController::class, 'success'])->name('cashfree.success');
 
+// ============================================
+// STAFF HIERARCHY ROUTES
+// ============================================
+
+// Owner - Staff Management
+Route::middleware(['auth'])->prefix('owner')->name('owner.')->group(function () {
+    Route::resource('staff', App\Http\Controllers\Staff\OwnerStaffController::class);
+    Route::get('staff/{property}/hierarchy', [App\Http\Controllers\Staff\OwnerStaffController::class, 'hierarchy'])->name('staff.hierarchy');
+});
+
+// Manager Dashboard (requires manager role)
+Route::middleware(['auth', 'staff.role:manager'])->prefix('manager')->name('manager.')->group(function () {
+    Route::get('/dashboard', [App\Http\Controllers\Staff\ManagerDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/supervisors', [App\Http\Controllers\Staff\ManagerDashboardController::class, 'supervisors'])->name('supervisors');
+    Route::get('/tasks', [App\Http\Controllers\Staff\ManagerDashboardController::class, 'tasks'])->name('tasks');
+    Route::get('/analytics', [App\Http\Controllers\Staff\ManagerDashboardController::class, 'analytics'])->name('analytics');
+});
+
+// Supervisor Dashboard (requires supervisor or manager role)
+Route::middleware(['auth', 'staff.role:supervisor'])->prefix('supervisor')->name('supervisor.')->group(function () {
+    Route::get('/dashboard', [App\Http\Controllers\Staff\SupervisorDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/my-team', [App\Http\Controllers\Staff\SupervisorDashboardController::class, 'myTeam'])->name('my-team');
+    Route::get('/tasks', [App\Http\Controllers\Staff\SupervisorDashboardController::class, 'tasks'])->name('tasks');
+    Route::post('/tasks/{task}/assign', [App\Http\Controllers\Staff\SupervisorDashboardController::class, 'assignTask'])->name('tasks.assign');
+    Route::post('/tasks/{task}/verify', [App\Http\Controllers\Staff\SupervisorDashboardController::class, 'verifyTask'])->name('tasks.verify');
+    Route::post('/tasks/{task}/reject', [App\Http\Controllers\Staff\SupervisorDashboardController::class, 'rejectTask'])->name('tasks.reject');
+});
+
+// Staff Dashboard (any staff member)
+Route::middleware(['auth', 'staff.role'])->prefix('staff')->name('staff.')->group(function () {
+    Route::get('/dashboard', [App\Http\Controllers\Staff\StaffDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/my-tasks', [App\Http\Controllers\Staff\StaffDashboardController::class, 'myTasks'])->name('my-tasks');
+    Route::get('/tasks/{task}', [App\Http\Controllers\Staff\StaffDashboardController::class, 'showTask'])->name('tasks.show');
+    Route::post('/tasks/{task}/start', [App\Http\Controllers\Staff\StaffDashboardController::class, 'startTask'])->name('tasks.start');
+    Route::post('/tasks/{task}/complete', [App\Http\Controllers\Staff\StaffDashboardController::class, 'completeTask'])->name('tasks.complete');
+    Route::post('/tasks/{task}/upload-proof', [App\Http\Controllers\Staff\StaffDashboardController::class, 'uploadProof'])->name('tasks.upload-proof');
+    
+    // Attendance
+    Route::get('/attendance', [App\Http\Controllers\Staff\AttendanceController::class, 'index'])->name('attendance');
+    Route::post('/attendance/check-in', [App\Http\Controllers\Staff\AttendanceController::class, 'checkIn'])->name('attendance.check-in');
+    Route::post('/attendance/check-out', [App\Http\Controllers\Staff\AttendanceController::class, 'checkOut'])->name('attendance.check-out');
+    
+    // Leave Requests
+    Route::get('/leave-requests', [App\Http\Controllers\Staff\AttendanceController::class, 'leaveRequests'])->name('leave-requests');
+    Route::post('/leave-requests', [App\Http\Controllers\Staff\AttendanceController::class, 'storeLeaveRequest'])->name('leave-requests.store');
+});
+
+// Tasks (accessible by managers and supervisors)
+Route::middleware(['auth', 'staff.role:supervisor'])->prefix('tasks')->name('tasks.')->group(function () {
+    Route::get('/', [App\Http\Controllers\Staff\TaskController::class, 'index'])->name('index');
+    Route::get('/create', [App\Http\Controllers\Staff\TaskController::class, 'create'])->name('create');
+    Route::post('/', [App\Http\Controllers\Staff\TaskController::class, 'store'])->name('store');
+    Route::put('/{task}', [App\Http\Controllers\Staff\TaskController::class, 'update'])->name('update');
+    Route::delete('/{task}', [App\Http\Controllers\Staff\TaskController::class, 'destroy'])->name('destroy');
+});
+
+// Attendance Management (for supervisors and managers)
+Route::middleware(['auth', 'staff.role:supervisor'])->prefix('attendance-management')->name('attendance.management.')->group(function () {
+    Route::get('/', [App\Http\Controllers\Staff\AttendanceController::class, 'management'])->name('index');
+    Route::get('/staff/{staffMember}', [App\Http\Controllers\Staff\AttendanceController::class, 'staffAttendance'])->name('staff');
+    Route::post('/leave-requests/{leaveRequest}/approve', [App\Http\Controllers\Staff\AttendanceController::class, 'approveLeave'])->name('leave.approve');
+    Route::post('/leave-requests/{leaveRequest}/reject', [App\Http\Controllers\Staff\AttendanceController::class, 'rejectLeave'])->name('leave.reject');
+});
+
 // Protected Routes
 Route::middleware(['auth', 'subscription.limits'])->group(function () {
     // Test route for modal scroll lock
@@ -23,6 +87,17 @@ Route::middleware(['auth', 'subscription.limits'])->group(function () {
     
     Route::get('/dashboard', function () {
         $user = auth()->user();
+        
+        // Redirect staff members to their role-specific dashboards
+        if ($user->staffMember) {
+            if ($user->staffMember->isManager()) {
+                return redirect()->route('manager.dashboard');
+            } elseif ($user->staffMember->isSupervisor()) {
+                return redirect()->route('supervisor.dashboard');
+            } elseif ($user->staffMember->isStaff()) {
+                return redirect()->route('staff.dashboard');
+            }
+        }
         
         $properties = $user->properties()->with(['category', 'location'])->latest()->get();
         

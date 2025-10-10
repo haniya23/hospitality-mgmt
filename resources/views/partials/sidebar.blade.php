@@ -202,7 +202,7 @@
                         <li><a href="{{ route('owner.staff.create') }}" class="flex gap-4 p-3 font-semibold rounded-lg hover:bg-green-100 {{ request()->routeIs('owner.staff.create') ? 'bg-gradient-to-r from-green-400 to-green-600 text-white' : 'text-gray-700' }} transition-all">
                             <i class="fas fa-user-plus w-5"></i>Add Staff
                         </a></li>
-                        <li><a href="{{ route('owner.staff.analytics') }}" class="flex gap-4 p-3 font-semibold rounded-lg hover:bg-green-100 {{ request()->routeIs('owner.staff.analytics') ? 'bg-gradient-to-r from-green-400 to-green-600 text-white' : 'text-gray-700' }} transition-all">
+                        <li><a href="{{ route('manager.analytics') }}" class="flex gap-4 p-3 font-semibold rounded-lg hover:bg-green-100 {{ request()->routeIs('manager.analytics') ? 'bg-gradient-to-r from-green-400 to-green-600 text-white' : 'text-gray-700' }} transition-all">
                             <i class="fas fa-chart-line w-5"></i>Staff Analytics
                         </a></li>
                     </ul>
@@ -499,7 +499,7 @@
                     <a href="{{ route('owner.staff.create') }}" @click="sidebarOpen = false" class="block p-2 text-sm text-gray-600 hover:text-green-600 hover:bg-green-50 rounded transition-colors {{ request()->routeIs('owner.staff.create') ? 'text-green-600 bg-green-50' : '' }}">
                         Add Staff
                     </a>
-                    <a href="{{ route('owner.staff.analytics') }}" @click="sidebarOpen = false" class="block p-2 text-sm text-gray-600 hover:text-green-600 hover:bg-green-50 rounded transition-colors {{ request()->routeIs('owner.staff.analytics') ? 'text-green-600 bg-green-50' : '' }}">
+                    <a href="{{ route('manager.analytics') }}" @click="sidebarOpen = false" class="block p-2 text-sm text-gray-600 hover:text-green-600 hover:bg-green-50 rounded transition-colors {{ request()->routeIs('manager.analytics') ? 'text-green-600 bg-green-50' : '' }}">
                         Staff Analytics
                     </a>
                 </div>

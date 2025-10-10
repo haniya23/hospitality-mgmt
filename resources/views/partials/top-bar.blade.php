@@ -189,17 +189,17 @@
                         <i class="fas fa-users"></i>
                         <span class="hidden lg:inline">Staff</span>
                     </a>
-                    <a href="{{ route('owner.attendance.index') }}" 
-                       class="top-bar__nav-btn {{ request()->routeIs('owner.attendance*') ? 'top-bar__nav-btn--active' : '' }}"
-                       title="Attendance">
+                    <a href="{{ route('attendance.management.index') }}" 
+                       class="top-bar__nav-btn {{ request()->routeIs('attendance.management*') ? 'top-bar__nav-btn--active' : '' }}"
+                       title="Attendance Management">
                         <i class="fas fa-calendar-check"></i>
                         <span class="hidden lg:inline">Attendance</span>
                     </a>
-                    <a href="{{ route('owner.leave-requests.index') }}" 
-                       class="top-bar__nav-btn {{ request()->routeIs('owner.leave-requests*') ? 'top-bar__nav-btn--active' : '' }}"
-                       title="Leave Requests">
-                        <i class="fas fa-calendar-times"></i>
-                        <span class="hidden lg:inline">Leave</span>
+                    <a href="{{ route('tasks.index') }}" 
+                       class="top-bar__nav-btn {{ request()->routeIs('tasks*') ? 'top-bar__nav-btn--active' : '' }}"
+                       title="Task Management">
+                        <i class="fas fa-tasks"></i>
+                        <span class="hidden lg:inline">Tasks</span>
                     </a>
                 </div>
                 @endif

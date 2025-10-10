@@ -605,7 +605,7 @@
                             <i class="fas fa-users mr-2"></i>
                             Manage Staff
                         </a>
-                        <a href="{{ route('owner.attendance.index') }}" class="w-full bg-orange-600 text-white rounded-lg p-3 hover:bg-orange-700 transition-colors flex items-center justify-center" style="box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2), -4px -4px 8px rgba(255, 255, 255, 0.1), inset 2px 2px 4px rgba(255, 255, 255, 0.2), inset -2px -2px 4px rgba(0, 0, 0, 0.1);">
+                        <a href="{{ route('attendance.management.index') }}" class="w-full bg-orange-600 text-white rounded-lg p-3 hover:bg-orange-700 transition-colors flex items-center justify-center" style="box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2), -4px -4px 8px rgba(255, 255, 255, 0.1), inset 2px 2px 4px rgba(255, 255, 255, 0.2), inset -2px -2px 4px rgba(0, 0, 0, 0.1);">
                             <i class="fas fa-calendar-check mr-2"></i>
                             Staff Attendance
                         </a>

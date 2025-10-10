@@ -1,13 +1,10 @@
 @if(auth()->user()->isOwner())
 @php
     $user = auth()->user();
-    $totalStaff = $user->properties()->withCount('staffAssignments')->get()->sum('staff_assignments_count');
-    $activeStaff = $user->properties()->withCount(['staffAssignments' => function($query) {
-        $query->where('status', 'active');
-    }])->get()->sum('staff_assignments_count');
-    $todaysTasks = $user->properties()->withCount(['staffTasks' => function($query) {
-        $query->whereDate('due_date', today());
-    }])->get()->sum('staff_tasks_count');
+    $propertyIds = $user->properties()->pluck('id');
+    $totalStaff = \App\Models\StaffMember::whereIn('property_id', $propertyIds)->count();
+    $activeStaff = \App\Models\StaffMember::whereIn('property_id', $propertyIds)->where('status', 'active')->count();
+    $todaysTasks = \App\Models\Task::whereIn('property_id', $propertyIds)->whereDate('scheduled_at', today())->count();
 @endphp
 
 <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
@@ -48,7 +45,7 @@
                 </div>
             </a>
             
-            <a href="{{ route('owner.staff.analytics') }}" class="flex items-center justify-center p-3 rounded-xl bg-gradient-to-r from-purple-50 to-violet-50 hover:from-purple-100 hover:to-violet-100 transition-all duration-300 border border-purple-200 group">
+            <a href="{{ route('manager.analytics') }}" class="flex items-center justify-center p-3 rounded-xl bg-gradient-to-r from-purple-50 to-violet-50 hover:from-purple-100 hover:to-violet-100 transition-all duration-300 border border-purple-200 group">
                 <div class="flex items-center space-x-2">
                     <div class="w-8 h-8 rounded-lg bg-purple-500 flex items-center justify-center group-hover:bg-purple-600 transition-colors">
                         <i class="fas fa-chart-line text-white text-sm"></i>
@@ -67,16 +64,13 @@
             </div>
             <div class="space-y-2">
                 @php
-                    $recentActivity = $user->properties()
-                        ->with(['staffAssignments.user', 'staffTasks' => function($query) {
-                            $query->where('created_at', '>=', now()->subDays(7))
-                                  ->orderBy('created_at', 'desc')
-                                  ->limit(3);
-                        }])
-                        ->get()
-                        ->pluck('staffTasks')
-                        ->flatten()
-                        ->take(3);
+                    $propertyIds = $user->properties()->pluck('id');
+                    $recentActivity = \App\Models\Task::whereIn('property_id', $propertyIds)
+                        ->with('assignedStaff.user')
+                        ->where('created_at', '>=', now()->subDays(7))
+                        ->orderBy('created_at', 'desc')
+                        ->limit(3)
+                        ->get();
                 @endphp
                 
                 @forelse($recentActivity as $task)
@@ -90,10 +84,10 @@
                     </div>
                     <div class="flex-shrink-0">
                         <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
-                            @if($task->status === 'completed') bg-green-100 text-green-800
+                            @if(in_array($task->status, ['completed', 'verified'])) bg-green-100 text-green-800
                             @elseif($task->status === 'in_progress') bg-blue-100 text-blue-800
                             @else bg-gray-100 text-gray-800 @endif">
-                            {{ ucfirst($task->status) }}
+                            {{ ucfirst(str_replace('_', ' ', $task->status)) }}
                         </span>
                     </div>
                 </div>
