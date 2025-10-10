@@ -21,8 +21,8 @@ class CheckSubscriptionLimits
             return $next($request);
         }
 
-        // Skip subscription limit checks for staff users
-        if ($user->isStaff()) {
+        // Skip subscription limit checks for admin users
+        if ($user->is_admin) {
             return $next($request);
         }
 

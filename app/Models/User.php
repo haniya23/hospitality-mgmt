@@ -10,8 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
-use App\Models\Attendance;
-use App\Models\LeaveRequest;
+
 class User extends Authenticatable implements FilamentUser
 {
     use HasFactory, Notifiable, HasApiTokens;
@@ -70,36 +69,15 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(Property::class, 'owner_id');
     }
 
-
-    public function staffAssignments()
+    // New Staff Hierarchy Relationships
+    public function staffMember()
     {
-        return $this->hasMany(StaffAssignment::class);
+        return $this->hasOne(StaffMember::class);
     }
 
-    public function staffTasks()
+    public function createdTasks()
     {
-        return $this->hasManyThrough(StaffTask::class, StaffAssignment::class, 'user_id', 'staff_assignment_id');
-    }
-
-    public function staffNotifications()
-    {
-        return $this->hasManyThrough(StaffNotification::class, StaffAssignment::class, 'user_id', 'staff_assignment_id');
-    }
-
-
-    public function checklistExecutions()
-    {
-        return $this->hasManyThrough(ChecklistExecution::class, StaffAssignment::class, 'user_id', 'staff_assignment_id');
-    }
-
-    public function attendance()
-    {
-        return $this->hasManyThrough(Attendance::class, StaffAssignment::class, 'user_id', 'staff_assignment_id');
-    }
-
-    public function leaveRequests()
-    {
-        return $this->hasManyThrough(LeaveRequest::class, StaffAssignment::class, 'user_id', 'staff_assignment_id');
+        return $this->hasMany(Task::class, 'created_by');
     }
 
     public function b2bPartnerContacts()
@@ -365,253 +343,9 @@ class User extends Authenticatable implements FilamentUser
         return $this->is_admin;
     }
 
-    // Staff-related methods
-    public function isStaff()
-    {
-        return $this->is_staff || $this->user_type === 'staff';
-    }
-
+    // User role helpers
     public function isOwner()
     {
         return $this->user_type === 'owner' || (!$this->is_staff && !$this->is_admin);
     }
-
-    public function getAssignedProperties()
-    {
-        return $this->staffAssignments()
-                    ->with('property')
-                    ->where('status', 'active')
-                    ->get()
-                    ->pluck('property');
-    }
-
-    public function getActiveStaffAssignments()
-    {
-        return $this->staffAssignments()
-                    ->where('status', 'active')
-                    ->with(['property', 'role'])
-                    ->get();
-    }
-
-    public function getTodaysTasks()
-    {
-        return $this->staffTasks()
-                    ->whereDate('scheduled_at', today())
-                    ->whereIn('staff_tasks.status', ['pending', 'in_progress'])
-                    ->orderBy('priority', 'desc')
-                    ->orderBy('scheduled_at')
-                    ->get();
-    }
-
-    public function getOverdueTasks()
-    {
-        return $this->staffTasks()
-                    ->where('scheduled_at', '<', now())
-                    ->whereIn('staff_tasks.status', ['pending', 'in_progress'])
-                    ->orderBy('scheduled_at')
-                    ->get();
-    }
-
-    public function getUnreadNotifications()
-    {
-        return $this->staffNotifications()
-                    ->where('is_read', false)
-                    ->orderBy('priority', 'desc')
-                    ->orderBy('staff_notifications.created_at', 'desc')
-                    ->get();
-    }
-
-    public function getUnreadNotificationsCount()
-    {
-        return $this->staffNotifications()
-                    ->where('is_read', false)
-                    ->count();
-    }
-
-    public function getUrgentNotificationsCount()
-    {
-        return $this->staffNotifications()
-                    ->where('is_read', false)
-                    ->where('priority', 'urgent')
-                    ->count();
-    }
-
-    // Simple access control methods using the new system
-    public function hasBookingAccess($propertyId = null)
-    {
-        $query = $this->staffAssignments()->where('status', 'active')->where('booking_access', true);
-        
-        if ($propertyId) {
-            $query->where('property_id', $propertyId);
-        }
-        
-        return $query->exists();
-    }
-
-    public function hasGuestServiceAccess($propertyId = null)
-    {
-        $query = $this->staffAssignments()->where('status', 'active')->where('guest_service_access', true);
-        
-        if ($propertyId) {
-            $query->where('property_id', $propertyId);
-        }
-        
-        return $query->exists();
-    }
-
-    public function getTodaysActivity()
-    {
-        // Activity logging removed - using simple access control system
-        return collect([]);
-    }
-
-    public function getTaskCompletionRate($days = 7)
-    {
-        $startDate = now()->subDays($days);
-        
-        $totalTasks = $this->staffTasks()
-                           ->where('staff_tasks.created_at', '>=', $startDate)
-                           ->count();
-        
-        $completedTasks = $this->staffTasks()
-                               ->where('staff_tasks.created_at', '>=', $startDate)
-                               ->where('staff_tasks.status', 'completed')
-                               ->count();
-        
-        return $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100, 2) : 0;
-    }
-
-    // Static method to create staff user
-    public static function createStaff($data)
-    {
-        $data['user_type'] = 'staff';
-        $data['is_staff'] = true;
-        $data['is_active'] = true;
-        
-        return self::create($data);
-    }
-
-    // Attendance helper methods
-    public function getTodaysAttendance()
-    {
-        return $this->attendance()->whereDate('date', today())->first();
-    }
-
-    public function markCheckIn($locationData = null)
-    {
-        $staffAssignment = $this->getActiveStaffAssignments()->first();
-        
-        if (!$staffAssignment) {
-            throw new \Exception('No active staff assignment found.');
-        }
-
-        $attendance = Attendance::where([
-            'staff_assignment_id' => $staffAssignment->id,
-            'date' => today(),
-        ])->first();
-
-        if (!$attendance) {
-            $attendance = Attendance::create([
-                'uuid' => \Illuminate\Support\Str::uuid(),
-                'staff_assignment_id' => $staffAssignment->id,
-                'date' => today(),
-                'check_in_time' => now()->format('H:i:s'),
-                'status' => 'present',
-                'location_data' => $locationData,
-            ]);
-        } else {
-            $attendance->update([
-                'check_in_time' => now()->format('H:i:s'),
-                'status' => 'present',
-                'location_data' => $locationData,
-            ]);
-        }
-
-        // Check if late
-        if ($attendance->isLate()) {
-            $attendance->update(['status' => 'late']);
-        }
-
-        return $attendance;
-    }
-
-    public function markCheckOut($notes = null)
-    {
-        $attendance = $this->getTodaysAttendance();
-        
-        if (!$attendance || !$attendance->check_in_time) {
-            throw new \Exception('No check-in found for today.');
-        }
-
-        $attendance->update([
-            'check_out_time' => now()->format('H:i:s'),
-            'notes' => $notes,
-        ]);
-
-        $attendance->calculateHoursWorked();
-
-        return $attendance;
-    }
-
-    public function getAttendanceStats($startDate = null, $endDate = null)
-    {
-        $startDate = $startDate ?? now()->startOfMonth();
-        $endDate = $endDate ?? now()->endOfMonth();
-
-        return Attendance::getStaffAttendanceStats(
-            $this->getActiveStaffAssignments()->first()->id ?? 0,
-            $startDate,
-            $endDate
-        );
-    }
-
-    public function getLeaveStats($year = null)
-    {
-        $staffAssignment = $this->getActiveStaffAssignments()->first();
-        
-        if (!$staffAssignment) {
-            return [
-                'total_requests' => 0,
-                'pending_requests' => 0,
-                'approved_requests' => 0,
-                'rejected_requests' => 0,
-                'total_days_requested' => 0,
-                'total_days_approved' => 0,
-            ];
-        }
-
-        return LeaveRequest::getStaffLeaveStats($staffAssignment->id, $year);
-    }
-
-    public function createLeaveRequest($leaveType, $startDate, $endDate, $reason, $attachments = [])
-    {
-        $staffAssignment = $this->getActiveStaffAssignments()->first();
-        
-        if (!$staffAssignment) {
-            throw new \Exception('No active staff assignment found.');
-        }
-
-        return LeaveRequest::createRequest(
-            $staffAssignment->id,
-            $leaveType,
-            $startDate,
-            $endDate,
-            $reason,
-            $attachments
-        );
-    }
-
-    public function getPendingLeaveRequests()
-    {
-        return $this->leaveRequests()->where('leave_requests.status', 'pending')->get();
-    }
-
-    public function getUpcomingLeaveRequests()
-    {
-        return $this->leaveRequests()
-                    ->where('leave_requests.start_date', '>=', today())
-                    ->where('leave_requests.status', 'approved')
-                    ->get();
-    }
-
 }

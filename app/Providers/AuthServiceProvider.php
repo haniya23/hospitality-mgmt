@@ -3,7 +3,11 @@
 namespace App\Providers;
 
 use App\Models\PropertyAccommodation;
+use App\Models\StaffMember;
+use App\Models\Task;
 use App\Policies\PropertyAccommodationPolicy;
+use App\Policies\StaffMemberPolicy;
+use App\Policies\TaskPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -15,6 +19,8 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         PropertyAccommodation::class => PropertyAccommodationPolicy::class,
+        StaffMember::class => StaffMemberPolicy::class,
+        Task::class => TaskPolicy::class,
     ];
 
     /**
