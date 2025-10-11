@@ -16,7 +16,9 @@ class DatabaseSeeder extends Seeder
         $this->call([
             BasicDataSeeder::class,
             SouthIndiaLocationSeeder::class,
+            StaffDepartmentSeeder::class, // Seed departments first
             SystemSeeder::class, // Our comprehensive system seeder
+            StaffMemberSeeder::class, // Comprehensive staff with all departments
         ]);
     }
 }

@@ -76,17 +76,40 @@ class OwnerStaffController extends Controller
             'property_id' => 'required|exists:properties,id',
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'mobile_number' => 'required|string|max:15',
+            'mobile_number' => [
+                'required',
+                'string',
+                'regex:/^[0-9]{10}$/',
+                'unique:users,mobile_number'
+            ],
             'password' => 'required|string|min:6',
             'department_id' => 'nullable|exists:staff_departments,id',
             'staff_role' => 'required|in:manager,supervisor,staff',
             'job_title' => 'nullable|string|max:255',
-            'reports_to' => 'nullable|exists:staff_members,id',
+            'reports_to' => [
+                'nullable',
+                'exists:staff_members,id',
+                'required_if:staff_role,supervisor'
+            ],
             'employment_type' => 'required|in:full_time,part_time,contract,temporary',
             'join_date' => 'required|date',
-            'phone' => 'nullable|string|max:15',
-            'emergency_contact' => 'nullable|string|max:255',
+            'phone' => [
+                'nullable',
+                'string',
+                'regex:/^[0-9]{10,15}$/'
+            ],
+            'emergency_contact' => [
+                'nullable',
+                'string',
+                'regex:/^[0-9]{10,15}$/'
+            ],
             'notes' => 'nullable|string',
+        ], [
+            'mobile_number.regex' => 'Mobile number must be exactly 10 digits.',
+            'mobile_number.unique' => 'This mobile number is already registered.',
+            'phone.regex' => 'Phone number must be 10-15 digits.',
+            'emergency_contact.regex' => 'Emergency contact must be 10-15 digits.',
+            'reports_to.required_if' => 'Supervisors must report to a Manager.',
         ]);
 
         // Verify property ownership
@@ -99,8 +122,6 @@ class OwnerStaffController extends Controller
             'email' => $validated['email'],
             'mobile_number' => $validated['mobile_number'],
             'password' => Hash::make($validated['password']),
-            'user_type' => 'staff',
-            'is_staff' => true,
             'is_active' => true,
         ]);
 
@@ -128,24 +149,29 @@ class OwnerStaffController extends Controller
     /**
      * Display the specified staff member.
      */
-    public function show(StaffMember $staffMember)
+    public function show(StaffMember $staff)
     {
-        // Eager load property for authorization check
-        $staffMember->loadMissing('property');
+        // Check if staff member exists
+        if (!$staff->exists) {
+            abort(404, 'Staff member not found');
+        }
+        
+        // Eager load relationships for authorization check
+        $staff->loadMissing(['property', 'user']);
         
         // Owner authorization: check if staff belongs to owner's properties
         if (auth()->user()->isOwner()) {
             $ownerPropertyIds = auth()->user()->properties()->pluck('id')->toArray();
             
-            if (!in_array($staffMember->property_id, $ownerPropertyIds)) {
+            if (!in_array($staff->property_id, $ownerPropertyIds)) {
                 abort(403, 'This staff member does not belong to any of your properties.');
             }
         } else {
             // For non-owners (managers, supervisors), use the policy
-            $this->authorize('view', $staffMember);
+            $this->authorize('view', $staff);
         }
         
-        $staffMember->load([
+        $staff->load([
             'user',
             'department',
             'supervisor.user',
@@ -157,34 +183,39 @@ class OwnerStaffController extends Controller
 
         // Calculate stats
         $stats = [
-            'total_tasks' => $staffMember->assignedTasks()->count(),
-            'completed_tasks' => $staffMember->assignedTasks()->whereIn('status', ['completed', 'verified'])->count(),
-            'pending_tasks' => $staffMember->assignedTasks()->whereIn('status', ['assigned', 'in_progress'])->count(),
-            'completion_rate' => $staffMember->getTaskCompletionRate(30),
-            'subordinates_count' => $staffMember->subordinates()->count(),
+            'total_tasks' => $staff->assignedTasks()->count(),
+            'completed_tasks' => $staff->assignedTasks()->whereIn('status', ['completed', 'verified'])->count(),
+            'pending_tasks' => $staff->assignedTasks()->whereIn('status', ['assigned', 'in_progress'])->count(),
+            'completion_rate' => $staff->getTaskCompletionRate(30),
+            'subordinates_count' => $staff->subordinates()->count(),
         ];
 
-        return view('staff.owner.show', compact('staffMember', 'stats'));
+        return view('staff.owner.show', compact('staff', 'stats'));
     }
 
     /**
      * Show the form for editing the staff member.
      */
-    public function edit(StaffMember $staffMember)
+    public function edit(StaffMember $staff)
     {
+        // Check if staff member exists
+        if (!$staff->exists) {
+            abort(404, 'Staff member not found');
+        }
+        
         // Eager load property for authorization
-        $staffMember->loadMissing('property');
+        $staff->loadMissing(['property', 'user']);
         
         // Owner authorization: check if staff belongs to owner's properties
         if (auth()->user()->isOwner()) {
             $ownerPropertyIds = auth()->user()->properties()->pluck('id')->toArray();
             
-            if (!in_array($staffMember->property_id, $ownerPropertyIds)) {
+            if (!in_array($staff->property_id, $ownerPropertyIds)) {
                 abort(403, 'This staff member does not belong to any of your properties.');
             }
         } else {
             // For non-owners, use the policy
-            $this->authorize('update', $staffMember);
+            $this->authorize('update', $staff);
         }
         
         $properties = auth()->user()->properties()->get();
@@ -192,7 +223,7 @@ class OwnerStaffController extends Controller
         
         // Get all staff members who can be supervisors (based on hierarchy rules)
         $allStaff = StaffMember::whereIn('property_id', $properties->pluck('id'))
-            ->where('id', '!=', $staffMember->id)
+            ->where('id', '!=', $staff->id)
             ->where('status', 'active')
             ->with('user', 'property', 'department')
             ->orderBy('property_id')
@@ -200,58 +231,86 @@ class OwnerStaffController extends Controller
             ->get();
         
         // Prepare staff data for JavaScript
-        $staffData = $allStaff->map(function($staff) {
+        $staffData = $allStaff->map(function($staffMember) {
             return [
-                'id' => $staff->id,
-                'name' => $staff->user->name,
-                'role' => $staff->staff_role,
-                'property_id' => $staff->property_id,
-                'department' => $staff->department ? $staff->department->name : 'No Dept',
-                'job_title' => $staff->job_title ?? ucfirst($staff->staff_role),
+                'id' => $staffMember->id,
+                'name' => $staffMember->user->name,
+                'role' => $staffMember->staff_role,
+                'property_id' => $staffMember->property_id,
+                'department' => $staffMember->department ? $staffMember->department->name : 'No Dept',
+                'job_title' => $staffMember->job_title ?? ucfirst($staffMember->staff_role),
             ];
         });
         
-        $staffMember->load('user', 'department', 'supervisor');
+        $staff->load('user', 'department', 'supervisor');
         
-        return view('staff.owner.edit', compact('staffMember', 'properties', 'departments', 'staffData'));
+        return view('staff.owner.edit', compact('staff', 'properties', 'departments', 'staffData'));
     }
 
     /**
      * Update the specified staff member.
      */
-    public function update(Request $request, StaffMember $staffMember)
+    public function update(Request $request, StaffMember $staff)
     {
-        $this->authorize('update', $staffMember);
+        // Eager load property for authorization
+        $staff->loadMissing('property');
+        
+        // Owner authorization
+        if (auth()->user()->isOwner()) {
+            $ownerPropertyIds = auth()->user()->properties()->pluck('id')->toArray();
+            
+            if (!in_array($staff->property_id, $ownerPropertyIds)) {
+                abort(403, 'This staff member does not belong to any of your properties.');
+            }
+        } else {
+            $this->authorize('update', $staff);
+        }
         
         $validated = $request->validate([
             'property_id' => 'required|exists:properties,id',
             'department_id' => 'nullable|exists:staff_departments,id',
             'staff_role' => 'required|in:manager,supervisor,staff',
             'job_title' => 'nullable|string|max:255',
-            'reports_to' => 'nullable|exists:staff_members,id',
+            'reports_to' => [
+                'nullable',
+                'exists:staff_members,id',
+                'required_if:staff_role,supervisor'
+            ],
             'employment_type' => 'required|in:full_time,part_time,contract,temporary',
             'status' => 'required|in:active,inactive,on_leave,suspended',
             'join_date' => 'required|date',
             'end_date' => 'nullable|date|after:join_date',
-            'phone' => 'nullable|string|max:15',
-            'emergency_contact' => 'nullable|string|max:255',
+            'phone' => [
+                'nullable',
+                'string',
+                'regex:/^[0-9]{10,15}$/'
+            ],
+            'emergency_contact' => [
+                'nullable',
+                'string',
+                'regex:/^[0-9]{10,15}$/'
+            ],
             'notes' => 'nullable|string',
+        ], [
+            'phone.regex' => 'Phone number must be 10-15 digits.',
+            'emergency_contact.regex' => 'Emergency contact must be 10-15 digits.',
+            'reports_to.required_if' => 'Supervisors must report to a Manager.',
         ]);
 
-        $staffMember->update($validated);
+        $staff->update($validated);
 
-        return redirect()->route('owner.staff.show', $staffMember)
+        return redirect()->route('owner.staff.show', $staff)
             ->with('success', 'Staff member updated successfully!');
     }
 
     /**
      * Remove the specified staff member.
      */
-    public function destroy(StaffMember $staffMember)
+    public function destroy(StaffMember $staff)
     {
-        $this->authorize('delete', $staffMember);
+        $this->authorize('delete', $staff);
         
-        $staffMember->delete();
+        $staff->delete();
 
         return redirect()->route('owner.staff.index')
             ->with('success', 'Staff member removed successfully!');

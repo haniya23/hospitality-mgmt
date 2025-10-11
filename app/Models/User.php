@@ -23,8 +23,6 @@ class User extends Authenticatable implements FilamentUser
         'email',
         'is_active',
         'is_admin',
-        'user_type',
-        'is_staff',
         'subscription_status',
         'trial_plan',
         'trial_ends_at',
@@ -49,7 +47,6 @@ class User extends Authenticatable implements FilamentUser
             'mobile_verified_at' => 'datetime',
             'is_active' => 'boolean',
             'is_admin' => 'boolean',
-            'is_staff' => 'boolean',
             'trial_ends_at' => 'datetime',
             'subscription_ends_at' => 'datetime',
             'is_trial_active' => 'boolean',
@@ -339,12 +336,6 @@ class User extends Authenticatable implements FilamentUser
                 $model->properties_limit = 1;
             }
             // Set new users as owners by default
-            if (empty($model->user_type)) {
-                $model->user_type = 'owner';
-            }
-            if (is_null($model->is_staff)) {
-                $model->is_staff = false;
-            }
         });
     }
 
@@ -359,6 +350,6 @@ class User extends Authenticatable implements FilamentUser
     // User role helpers
     public function isOwner()
     {
-        return $this->user_type === 'owner' || (!$this->is_staff && !$this->is_admin);
+        return !$this->is_admin && !$this->staffMember;
     }
 }

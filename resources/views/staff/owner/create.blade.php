@@ -263,11 +263,7 @@ function staffForm() {
                         <select name="reports_to" x-model="selectedSupervisor"
                             :required="selectedRole === 'supervisor'"
                             class="w-full border border-gray-200 rounded-xl shadow-sm py-3 sm:py-4 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
-                            <option value="">
-                                <template x-if="!selectedProperty">Select property first</template>
-                                <template x-if="selectedProperty && availableSupervisors.length === 0">No supervisors available - will report to owner</template>
-                                <template x-if="selectedProperty && availableSupervisors.length > 0">Select supervisor</template>
-                            </option>
+                            <option value="" x-text="!selectedProperty ? 'Select property first' : (availableSupervisors.length > 0 ? 'Select supervisor' : 'No supervisors available')"></option>
                             <template x-for="supervisor in availableSupervisors" :key="supervisor.id">
                                 <option :value="supervisor.id" x-text="supervisor.label"></option>
                             </template>

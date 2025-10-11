@@ -28,13 +28,10 @@ class PropertyController extends Controller
             'location.city.district.state',
             'propertyAccommodations.reservations.guest',
             'propertyAccommodations.reservations.b2bPartner',
-            'staffAssignments.user',
-            'staffAssignments.role',
-            'staffTasks' => function($query) {
+            'staffMembers.user',
+            'staffMembers.department',
+            'tasks' => function($query) {
                 $query->whereDate('scheduled_at', today())->orWhere('status', 'pending');
-            },
-            'cleaningChecklists.checklistExecutions' => function($query) {
-                $query->whereDate('created_at', today());
             }
         ]);
 
@@ -83,23 +80,23 @@ class PropertyController extends Controller
             ->count();
 
         // Staff on duty today
-        $staffOnDuty = $property->staffAssignments()
+        $staffOnDuty = $property->staffMembers()
             ->where('status', 'active')
-            ->with(['user', 'role'])
+            ->with(['user', 'department'])
             ->get();
 
         // Pending tasks
-        $pendingTasks = $property->staffTasks()
+        $pendingTasks = $property->tasks()
             ->whereIn('status', ['pending', 'in_progress'])
-            ->with(['staffAssignment.user'])
+            ->with(['assignedStaff.user'])
             ->orderBy('scheduled_at')
             ->get();
 
         // Overdue tasks
-        $overdueTasks = $property->staffTasks()
+        $overdueTasks = $property->tasks()
             ->where('scheduled_at', '<', now())
             ->whereIn('status', ['pending', 'in_progress'])
-            ->with(['staffAssignment.user'])
+            ->with(['assignedStaff.user'])
             ->get();
 
         // Maintenance tickets

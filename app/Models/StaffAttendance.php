@@ -11,6 +11,8 @@ class StaffAttendance extends Model
 {
     use HasFactory;
 
+    protected $table = 'staff_attendance';
+
     protected $fillable = [
         'staff_member_id',
         'date',

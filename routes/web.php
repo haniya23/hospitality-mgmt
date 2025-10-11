@@ -20,8 +20,11 @@ Route::get('/cashfree/success', [App\Http\Controllers\CashfreeController::class,
 
 // Owner - Staff Management
 Route::middleware(['auth'])->prefix('owner')->name('owner.')->group(function () {
+    // Specific routes first (to avoid conflicts with resource routes)
+    Route::get('staff/hierarchy/{property}', [App\Http\Controllers\Staff\OwnerStaffController::class, 'hierarchy'])->name('staff.hierarchy');
+    
+    // Resource routes
     Route::resource('staff', App\Http\Controllers\Staff\OwnerStaffController::class);
-    Route::get('staff/{property}/hierarchy', [App\Http\Controllers\Staff\OwnerStaffController::class, 'hierarchy'])->name('staff.hierarchy');
 });
 
 // Manager Dashboard (requires manager role)

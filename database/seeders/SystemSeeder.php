@@ -12,7 +12,8 @@ use App\Models\PredefinedAccommodationType;
 use App\Models\B2bPartner;
 use App\Models\Guest;
 use App\Models\Role;
-use App\Models\StaffAssignment;
+use App\Models\StaffMember;
+use App\Models\StaffDepartment;
 use App\Models\Country;
 use App\Models\State;
 use App\Models\District;
@@ -149,8 +150,6 @@ class SystemSeeder extends Seeder
                 'pin_hash' => Hash::make('1234'),
                 'is_active' => true,
                 'is_admin' => false,
-                'user_type' => 'owner',
-                'is_staff' => false,
                 'subscription_status' => 'professional',
                 'billing_cycle' => 'monthly',
             ]
@@ -333,8 +332,6 @@ class SystemSeeder extends Seeder
                 'pin_hash' => Hash::make('1234'),
                 'is_active' => true,
                 'is_admin' => false,
-                'user_type' => 'b2b',
-                'is_staff' => false,
             ]);
             
             // Create B2B partner
@@ -417,29 +414,28 @@ class SystemSeeder extends Seeder
                 'pin_hash' => Hash::make('1234'),
                 'is_active' => true,
                 'is_admin' => false,
-                'user_type' => 'staff',
-                'is_staff' => true,
             ]);
             
-            // Get or create role
-            $role = Role::firstOrCreate([
-                'name' => $staff['role'],
-                'property_id' => $properties->get($staff['property_index'])->id,
-            ], [
-                'description' => ucfirst($staff['role']) . ' role',
-                'is_active' => true,
-            ]);
+            // Get or create department (map role to department)
+            $departmentName = match($staff['role']) {
+                'housekeeper' => 'Housekeeping',
+                'receptionist' => 'Front Office',
+                'maintenance' => 'Maintenance',
+                default => 'Guest Services'
+            };
             
-            // Create staff assignment
-            StaffAssignment::create([
+            $department = StaffDepartment::where('name', $departmentName)->first();
+            
+            // Create staff member
+            StaffMember::create([
                 'user_id' => $staffUser->id,
                 'property_id' => $properties->get($staff['property_index'])->id,
-                'role_id' => $role->id,
+                'department_id' => $department?->id,
+                'staff_role' => 'staff', // All demo staff are regular staff
+                'job_title' => ucfirst($staff['role']),
+                'employment_type' => 'full_time',
+                'join_date' => now()->subDays(30),
                 'status' => 'active',
-                'booking_access' => $staff['booking_access'],
-                'guest_service_access' => $staff['guest_service_access'],
-                'start_date' => now()->subDays(30),
-                'end_date' => now()->addYear(),
             ]);
         }
     }

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $staffMember->user->name . ' - Staff Details')
+@section('title', $staff->user->name . ' - Staff Details')
 @section('page-title', 'Staff Details')
 
 @section('content')
@@ -19,7 +19,7 @@
             <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
             </svg>
-            <span class="text-gray-700 font-medium">{{ $staffMember->user->name }}</span>
+            <span class="text-gray-700 font-medium">{{ $staff->user->name }}</span>
         </nav>
     </div>
 
@@ -27,30 +27,30 @@
     <div class="bg-gradient-to-br from-white/95 to-blue-50/90 backdrop-blur-xl rounded-2xl shadow-2xl p-4 sm:p-6 border border-white/20 mb-6">
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div class="flex items-center space-x-4">
-                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl {{ $staffMember->getRoleBadgeColor() }} flex items-center justify-center shadow-lg text-2xl sm:text-3xl font-bold">
-                    {{ substr($staffMember->user->name, 0, 1) }}
+                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl {{ $staff->getRoleBadgeColor() }} flex items-center justify-center shadow-lg text-2xl sm:text-3xl font-bold">
+                    {{ substr($staff->user->name, 0, 1) }}
                 </div>
                 <div>
-                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ $staffMember->user->name }}</h1>
-                    <p class="text-sm sm:text-base text-gray-600 mt-1">{{ $staffMember->job_title ?? ucfirst($staffMember->staff_role) }}</p>
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ $staff->user->name }}</h1>
+                    <p class="text-sm sm:text-base text-gray-600 mt-1">{{ $staff->job_title ?? ucfirst($staff->staff_role) }}</p>
                     <div class="flex flex-wrap items-center gap-2 mt-2">
-                        <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $staffMember->getRoleBadgeColor() }}">
-                            {{ ucfirst($staffMember->staff_role) }}
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $staff->getRoleBadgeColor() }}">
+                            {{ ucfirst($staff->staff_role) }}
                         </span>
-                        <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $staffMember->getStatusBadgeColor() }}">
-                            {{ ucfirst(str_replace('_', ' ', $staffMember->status)) }}
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $staff->getStatusBadgeColor() }}">
+                            {{ ucfirst(str_replace('_', ' ', $staff->status)) }}
                         </span>
-                        @if($staffMember->department)
+                        @if($staff->department)
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold" 
-                                style="background-color: {{ $staffMember->department->color }}20; color: {{ $staffMember->department->color }};">
-                                <i class="{{ $staffMember->department->icon }} mr-1"></i> {{ $staffMember->department->name }}
+                                style="background-color: {{ $staff->department->color }}20; color: {{ $staff->department->color }};">
+                                <i class="{{ $staff->department->icon }} mr-1"></i> {{ $staff->department->name }}
                             </span>
                         @endif
                     </div>
                 </div>
             </div>
             <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                <a href="{{ route('owner.staff.edit', $staffMember) }}" 
+                <a href="{{ route('owner.staff.edit', $staff) }}" 
                     class="inline-flex justify-center items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 font-semibold transition-all shadow-lg text-center">
                     <i class="fas fa-edit mr-2"></i> Edit
                 </a>
@@ -126,77 +126,77 @@
 
                 <div class="space-y-4">
                     <div class="flex items-center justify-center mb-6">
-                        <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl {{ $staffMember->getRoleBadgeColor() }} flex items-center justify-center text-4xl sm:text-5xl font-bold shadow-lg">
-                            {{ substr($staffMember->user->name, 0, 1) }}
+                        <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl {{ $staff->getRoleBadgeColor() }} flex items-center justify-center text-4xl sm:text-5xl font-bold shadow-lg">
+                            {{ substr($staff->user->name, 0, 1) }}
                         </div>
                     </div>
 
                     <div class="space-y-3">
                         <div class="bg-white/50 rounded-xl p-3 border border-gray-100">
                             <p class="text-xs text-gray-500 mb-1">Email</p>
-                            <p class="font-medium text-gray-900 text-sm">{{ $staffMember->user->email }}</p>
+                            <p class="font-medium text-gray-900 text-sm">{{ $staff->user->email }}</p>
                         </div>
 
                         <div class="bg-white/50 rounded-xl p-3 border border-gray-100">
                             <p class="text-xs text-gray-500 mb-1">Mobile</p>
-                            <p class="font-medium text-gray-900 text-sm">{{ $staffMember->user->mobile_number }}</p>
+                            <p class="font-medium text-gray-900 text-sm">{{ $staff->user->mobile_number }}</p>
                         </div>
 
-                        @if($staffMember->phone)
+                        @if($staff->phone)
                             <div class="bg-white/50 rounded-xl p-3 border border-gray-100">
                                 <p class="text-xs text-gray-500 mb-1">Phone</p>
-                                <p class="font-medium text-gray-900 text-sm">{{ $staffMember->phone }}</p>
+                                <p class="font-medium text-gray-900 text-sm">{{ $staff->phone }}</p>
                             </div>
                         @endif
 
-                        @if($staffMember->emergency_contact)
+                        @if($staff->emergency_contact)
                             <div class="bg-white/50 rounded-xl p-3 border border-gray-100">
                                 <p class="text-xs text-gray-500 mb-1">Emergency Contact</p>
-                                <p class="font-medium text-gray-900 text-sm">{{ $staffMember->emergency_contact }}</p>
+                                <p class="font-medium text-gray-900 text-sm">{{ $staff->emergency_contact }}</p>
                             </div>
                         @endif
 
                         <div class="bg-white/50 rounded-xl p-3 border border-gray-100">
                             <p class="text-xs text-gray-500 mb-1">Property</p>
-                            <p class="font-medium text-gray-900 text-sm">{{ $staffMember->property->name }}</p>
+                            <p class="font-medium text-gray-900 text-sm">{{ $staff->property->name }}</p>
                         </div>
 
                         <div class="bg-white/50 rounded-xl p-3 border border-gray-100">
                             <p class="text-xs text-gray-500 mb-1">Employment Type</p>
-                            <p class="font-medium text-gray-900 text-sm">{{ ucfirst(str_replace('_', ' ', $staffMember->employment_type)) }}</p>
+                            <p class="font-medium text-gray-900 text-sm">{{ ucfirst(str_replace('_', ' ', $staff->employment_type)) }}</p>
                         </div>
 
                         <div class="bg-white/50 rounded-xl p-3 border border-gray-100">
                             <p class="text-xs text-gray-500 mb-1">Join Date</p>
-                            <p class="font-medium text-gray-900 text-sm">{{ $staffMember->join_date->format('M d, Y') }}</p>
+                            <p class="font-medium text-gray-900 text-sm">{{ $staff->join_date->format('M d, Y') }}</p>
                         </div>
 
-                        @if($staffMember->supervisor)
+                        @if($staff->supervisor)
                             <div class="bg-white/50 rounded-xl p-3 border border-gray-100">
                                 <p class="text-xs text-gray-500 mb-1">Reports To</p>
-                                <p class="font-medium text-gray-900 text-sm">{{ $staffMember->supervisor->user->name }}</p>
-                                <p class="text-xs text-gray-400">{{ ucfirst($staffMember->supervisor->staff_role) }}</p>
+                                <p class="font-medium text-gray-900 text-sm">{{ $staff->supervisor->user->name }}</p>
+                                <p class="text-xs text-gray-400">{{ ucfirst($staff->supervisor->staff_role) }}</p>
                             </div>
                         @endif
 
-                        @if($staffMember->notes)
+                        @if($staff->notes)
                             <div class="bg-white/50 rounded-xl p-3 border border-gray-100">
                                 <p class="text-xs text-gray-500 mb-1">Notes</p>
-                                <p class="text-sm text-gray-700">{{ $staffMember->notes }}</p>
+                                <p class="text-sm text-gray-700">{{ $staff->notes }}</p>
                             </div>
                         @endif
                     </div>
                 </div>
             </div>
 
-            @if($staffMember->subordinates->count() > 0)
+            @if($staff->subordinates->count() > 0)
                 <div class="bg-gradient-to-br from-white/95 to-indigo-50/90 backdrop-blur-xl rounded-2xl shadow-xl p-4 sm:p-6 border border-white/20">
                     <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                         <i class="fas fa-users text-indigo-600 mr-2"></i>
-                        Team Members ({{ $staffMember->subordinates->count() }})
+                        Team Members ({{ $staff->subordinates->count() }})
                     </h2>
                     <div class="space-y-3">
-                        @foreach($staffMember->subordinates as $subordinate)
+                        @foreach($staff->subordinates as $subordinate)
                             <div class="flex items-center bg-white/50 rounded-xl p-3 border border-white/30">
                                 <div class="w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold shadow-sm">
                                     {{ substr($subordinate->user->name, 0, 1) }}
@@ -221,7 +221,7 @@
                     Recent Tasks
                 </h2>
                 <div class="space-y-4">
-                    @forelse($staffMember->assignedTasks as $task)
+                    @forelse($staff->assignedTasks as $task)
                         <div class="bg-white/70 rounded-xl p-4 border border-white/50 hover:shadow-lg transition-all">
                             <div class="flex items-start justify-between mb-3">
                                 <div class="flex-1">
@@ -265,7 +265,7 @@
                     Recent Attendance
                 </h2>
                 <div class="space-y-3">
-                    @forelse($staffMember->attendance as $attendance)
+                    @forelse($staff->attendance as $attendance)
                         <div class="flex items-center justify-between bg-white/70 rounded-xl p-4 border border-white/50">
                             <div>
                                 <p class="font-semibold text-gray-900 text-sm">{{ $attendance->date->format('M d, Y (D)') }}</p>
@@ -301,7 +301,7 @@
                     Recent Leave Requests
                 </h2>
                 <div class="space-y-3">
-                    @forelse($staffMember->leaveRequests as $leave)
+                    @forelse($staff->leaveRequests as $leave)
                         <div class="bg-white/70 rounded-xl p-4 border border-white/50">
                             <div class="flex items-start justify-between mb-2">
                                 <div class="flex items-start gap-2">

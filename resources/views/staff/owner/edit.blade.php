@@ -7,9 +7,9 @@
 <script>
 function staffEditForm() {
     return {
-        selectedProperty: '{{ $staffMember->property_id }}',
-        selectedRole: '{{ $staffMember->staff_role }}',
-        selectedSupervisor: '{{ $staffMember->reports_to ?? '' }}',
+        selectedProperty: '{{ $staff->property_id }}',
+        selectedRole: '{{ $staff->staff_role }}',
+        selectedSupervisor: '{{ $staff->reports_to ?? '' }}',
         allStaff: @json($staffData ?? []),
         availableSupervisors: [],
         
@@ -83,11 +83,11 @@ function staffEditForm() {
             </div>
             <div class="flex-1">
                 <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">Edit Staff Member</h2>
-                <p class="text-sm text-emerald-600 font-medium mt-1">{{ $staffMember->user->name }}</p>
+                <p class="text-sm text-emerald-600 font-medium mt-1">{{ $staff->user->name }}</p>
             </div>
         </div>
 
-        <form action="{{ route('owner.staff.update', $staffMember) }}" method="POST" class="space-y-6 sm:space-y-8">
+        <form action="{{ route('owner.staff.update', $staff) }}" method="POST" class="space-y-6 sm:space-y-8">
             @csrf
             @method('PUT')
 
@@ -110,7 +110,7 @@ function staffEditForm() {
                         <select name="property_id" required x-model="selectedProperty" @change="filterSupervisors()"
                             class="w-full border border-gray-200 rounded-xl shadow-sm py-3 sm:py-4 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                             @foreach($properties as $property)
-                                <option value="{{ $property->id }}" {{ $staffMember->property_id == $property->id ? 'selected' : '' }}>
+                                <option value="{{ $property->id }}" {{ $staff->property_id == $property->id ? 'selected' : '' }}>
                                     {{ $property->name }}
                                 </option>
                             @endforeach
@@ -123,7 +123,7 @@ function staffEditForm() {
                             class="w-full border border-gray-200 rounded-xl shadow-sm py-3 sm:py-4 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                             <option value="">Select Department</option>
                             @foreach($departments as $dept)
-                                <option value="{{ $dept->id }}" {{ $staffMember->department_id == $dept->id ? 'selected' : '' }}>
+                                <option value="{{ $dept->id }}" {{ $staff->department_id == $dept->id ? 'selected' : '' }}>
                                     {{ $dept->name }}
                                 </option>
                             @endforeach
@@ -144,7 +144,7 @@ function staffEditForm() {
 
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Job Title</label>
-                        <input type="text" name="job_title" value="{{ old('job_title', $staffMember->job_title) }}"
+                        <input type="text" name="job_title" value="{{ old('job_title', $staff->job_title) }}"
                             class="w-full border border-gray-200 rounded-xl shadow-sm py-3 sm:py-4 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                     </div>
 
@@ -156,10 +156,7 @@ function staffEditForm() {
                         <select name="reports_to" x-model="selectedSupervisor"
                             :required="selectedRole === 'supervisor'"
                             class="w-full border border-gray-200 rounded-xl shadow-sm py-3 sm:py-4 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
-                            <option value="">
-                                <template x-if="availableSupervisors.length === 0">No supervisors available</template>
-                                <template x-if="availableSupervisors.length > 0">Select supervisor</template>
-                            </option>
+                            <option value="" x-text="availableSupervisors.length > 0 ? 'Select supervisor' : 'No supervisors available'"></option>
                             <template x-for="supervisor in availableSupervisors" :key="supervisor.id">
                                 <option :value="supervisor.id" x-text="supervisor.label"></option>
                             </template>
@@ -177,10 +174,10 @@ function staffEditForm() {
                         </label>
                         <select name="employment_type" required
                             class="w-full border border-gray-200 rounded-xl shadow-sm py-3 sm:py-4 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
-                            <option value="full_time" {{ $staffMember->employment_type == 'full_time' ? 'selected' : '' }}>Full Time</option>
-                            <option value="part_time" {{ $staffMember->employment_type == 'part_time' ? 'selected' : '' }}>Part Time</option>
-                            <option value="contract" {{ $staffMember->employment_type == 'contract' ? 'selected' : '' }}>Contract</option>
-                            <option value="temporary" {{ $staffMember->employment_type == 'temporary' ? 'selected' : '' }}>Temporary</option>
+                            <option value="full_time" {{ $staff->employment_type == 'full_time' ? 'selected' : '' }}>Full Time</option>
+                            <option value="part_time" {{ $staff->employment_type == 'part_time' ? 'selected' : '' }}>Part Time</option>
+                            <option value="contract" {{ $staff->employment_type == 'contract' ? 'selected' : '' }}>Contract</option>
+                            <option value="temporary" {{ $staff->employment_type == 'temporary' ? 'selected' : '' }}>Temporary</option>
                         </select>
                     </div>
 
@@ -190,10 +187,10 @@ function staffEditForm() {
                         </label>
                         <select name="status" required
                             class="w-full border border-gray-200 rounded-xl shadow-sm py-3 sm:py-4 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
-                            <option value="active" {{ $staffMember->status == 'active' ? 'selected' : '' }}>Active</option>
-                            <option value="inactive" {{ $staffMember->status == 'inactive' ? 'selected' : '' }}>Inactive</option>
-                            <option value="on_leave" {{ $staffMember->status == 'on_leave' ? 'selected' : '' }}>On Leave</option>
-                            <option value="suspended" {{ $staffMember->status == 'suspended' ? 'selected' : '' }}>Suspended</option>
+                            <option value="active" {{ $staff->status == 'active' ? 'selected' : '' }}>Active</option>
+                            <option value="inactive" {{ $staff->status == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                            <option value="on_leave" {{ $staff->status == 'on_leave' ? 'selected' : '' }}>On Leave</option>
+                            <option value="suspended" {{ $staff->status == 'suspended' ? 'selected' : '' }}>Suspended</option>
                         </select>
                     </div>
 
@@ -201,25 +198,25 @@ function staffEditForm() {
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             Join Date <span class="text-red-500">*</span>
                         </label>
-                        <input type="date" name="join_date" value="{{ old('join_date', $staffMember->join_date->format('Y-m-d')) }}" required
+                        <input type="date" name="join_date" value="{{ old('join_date', $staff->join_date->format('Y-m-d')) }}" required
                             class="w-full border border-gray-200 rounded-xl shadow-sm py-3 sm:py-4 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                     </div>
 
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">End Date</label>
-                        <input type="date" name="end_date" value="{{ old('end_date', $staffMember->end_date?->format('Y-m-d')) }}"
+                        <input type="date" name="end_date" value="{{ old('end_date', $staff->end_date?->format('Y-m-d')) }}"
                             class="w-full border border-gray-200 rounded-xl shadow-sm py-3 sm:py-4 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                     </div>
 
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Phone</label>
-                        <input type="text" name="phone" value="{{ old('phone', $staffMember->phone) }}"
+                        <input type="text" name="phone" value="{{ old('phone', $staff->phone) }}"
                             class="w-full border border-gray-200 rounded-xl shadow-sm py-3 sm:py-4 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                     </div>
 
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Emergency Contact</label>
-                        <input type="text" name="emergency_contact" value="{{ old('emergency_contact', $staffMember->emergency_contact) }}"
+                        <input type="text" name="emergency_contact" value="{{ old('emergency_contact', $staff->emergency_contact) }}"
                             class="w-full border border-gray-200 rounded-xl shadow-sm py-3 sm:py-4 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                     </div>
                 </div>
@@ -236,12 +233,12 @@ function staffEditForm() {
                     </div>
                 </div>
                 <textarea name="notes" rows="4"
-                    class="w-full border border-gray-200 rounded-xl shadow-sm py-3 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">{{ old('notes', $staffMember->notes) }}</textarea>
+                    class="w-full border border-gray-200 rounded-xl shadow-sm py-3 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">{{ old('notes', $staff->notes) }}</textarea>
             </div>
 
             <!-- Submit Buttons -->
             <div class="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 pt-6 border-t border-gray-200">
-                <a href="{{ route('owner.staff.show', $staffMember) }}" 
+                <a href="{{ route('owner.staff.show', $staff) }}" 
                     class="inline-flex justify-center items-center px-6 py-3 sm:py-4 border border-gray-300 rounded-xl text-gray-700 bg-white hover:bg-gray-50 font-semibold transition-all shadow-sm text-center">
                     <i class="fas fa-times mr-2"></i> Cancel
                 </a>
