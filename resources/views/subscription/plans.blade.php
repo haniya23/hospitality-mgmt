@@ -497,8 +497,8 @@ function subscriptionPage() {
     </div>
     @endif
     
-    <!-- Billing Toggle - Show for all users who can see plans -->
-    @if(auth()->user()->subscription_status === 'trial' || auth()->user()->subscription_status === 'starter')
+    <!-- Billing Toggle - Show only for trial users -->
+    @if(auth()->user()->subscription_status === 'trial')
     <div class="text-center mb-8">
         <div class="inline-flex items-center bg-gray-100 rounded-full p-1">
             <button @click="yearly = false" :class="!yearly ? 'bg-white shadow-sm' : ''" class="px-4 py-2 rounded-full text-sm font-medium transition-all">Monthly</button>
@@ -580,9 +580,50 @@ function subscriptionPage() {
             </div>
         </div>
     </div>
+    @else
+    <!-- Coming Soon Section for Non-Trial Users -->
+    <div class="mb-12">
+        <div class="text-center mb-6">
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">Subscription Plans</h2>
+            <p class="text-gray-600">Premium features coming soon</p>
+        </div>
+        
+        <div class="max-w-md mx-auto">
+            <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl shadow-lg p-8 border-2 border-purple-200">
+                <div class="text-center mb-6">
+                    <div class="w-20 h-20 mx-auto bg-purple-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-rocket text-3xl text-purple-600"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Coming Soon</h3>
+                    <p class="text-gray-600 mb-4">We're working on exciting new subscription plans with advanced features!</p>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6 mb-6">
+                    <h4 class="font-semibold text-gray-800 mb-3 text-center">Contact Us for Early Access</h4>
+                    <div class="flex items-center justify-center space-x-3">
+                        <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                            <i class="fab fa-whatsapp text-white text-lg"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">WhatsApp</p>
+                            <a href="https://wa.me/919400960223" target="_blank" class="text-lg font-semibold text-green-600 hover:text-green-700">
+                                +91 94009 60223
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <a href="https://wa.me/919400960223" target="_blank" 
+                   class="w-full bg-green-500 text-white py-3 rounded-xl font-semibold hover:bg-green-600 transition-all flex items-center justify-center">
+                    <i class="fab fa-whatsapp mr-2"></i>
+                    Contact on WhatsApp
+                </a>
+            </div>
+        </div>
+    </div>
     @endif
 
-    @if(auth()->user()->subscription_status === 'trial' || auth()->user()->subscription_status === 'starter')
+    @if(auth()->user()->subscription_status === 'trial')
     <!-- Professional Plan Section -->
     <div class="mb-12">
         <div class="text-center mb-6">
@@ -716,7 +757,7 @@ function subscriptionPage() {
 
     @if(auth()->user()->subscription_status === 'trial')
     <div class="text-center mt-12">
-        <p class="text-gray-600 mb-4">All plans include a 15-day free trial. No credit card required.</p>
+        <p class="text-gray-600 mb-4">All plans include a 30-day free trial. No credit card required.</p>
         <div class="flex justify-center space-x-8 text-sm text-gray-500">
             <span><i class="fas fa-shield-alt mr-2"></i>Secure payments</span>
             <span><i class="fas fa-sync-alt mr-2"></i>Cancel anytime</span>

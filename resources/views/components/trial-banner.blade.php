@@ -64,7 +64,7 @@ function trialBanner(initialDays) {
         progressPercentage: 100,
         visible: false,
         init() {
-            this.progressPercentage = (this.daysLeft / 14) * 100; // Assuming a 14-day trial
+            this.progressPercentage = (this.daysLeft / 30) * 100; // 30-day trial
             setTimeout(() => { this.visible = true; }, 50);
 
             // Animate the number change with GSAP if available, fallback to simple animation

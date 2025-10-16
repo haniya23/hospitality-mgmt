@@ -9,7 +9,7 @@
                 <i class="fas fa-gift text-6xl text-yellow-300"></i>
             </div>
             <h1 class="text-4xl font-bold mb-4">Welcome {{ auth()->user()->name }}!</h1>
-            <p class="text-xl mb-6">Your 15-day free trial has started. Choose your plan to unlock features.</p>
+            <p class="text-xl mb-6">Your 30-day free trial has started. Choose your plan to unlock features.</p>
             <div class="bg-white bg-opacity-20 rounded-full px-6 py-3 inline-block">
                 <span class="text-2xl font-bold">{{ auth()->user()->remaining_trial_days }} Days Remaining</span>
             </div>
@@ -30,7 +30,7 @@
             <div class="text-center mb-6">
                 <h3 class="text-2xl font-bold text-gray-900 mb-2">Start with Starter</h3>
                 <div class="text-4xl font-bold text-blue-600 mb-2">FREE</div>
-                <div class="text-sm text-gray-500 mb-4">15-day trial • Then ₹299/month</div>
+                <div class="text-sm text-gray-500 mb-4">30-day trial • Then ₹299/month</div>
                 <p class="text-gray-600">Perfect for single property</p>
             </div>
             
@@ -73,7 +73,7 @@
             <div class="text-center mb-6">
                 <h3 class="text-2xl font-bold text-gray-900 mb-2">Try Professional</h3>
                 <div class="text-4xl font-bold text-purple-600 mb-2">FREE</div>
-                <div class="text-sm text-gray-500 mb-4">15-day trial • Then ₹999/month</div>
+                <div class="text-sm text-gray-500 mb-4">30-day trial • Then ₹999/month</div>
                 <p class="text-gray-600">Complete hospitality solution</p>
             </div>
             

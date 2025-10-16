@@ -68,7 +68,7 @@ class MobileAuthController extends Controller
             $subscriptionData = [
                 'subscription_status' => 'trial',
                 'trial_plan' => 'professional',
-                'trial_ends_at' => now()->addDays(15),
+                'trial_ends_at' => now()->addDays(30),
                 'is_trial_active' => true,
                 'properties_limit' => 1,
             ];

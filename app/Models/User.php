@@ -331,7 +331,7 @@ class User extends Authenticatable implements FilamentUser
             if (empty($model->subscription_status)) {
                 $model->subscription_status = 'trial';
                 $model->trial_plan = 'professional';
-                $model->trial_ends_at = now()->addDays(15);
+                $model->trial_ends_at = now()->addDays(30);
                 $model->is_trial_active = true;
                 $model->properties_limit = 1;
             }

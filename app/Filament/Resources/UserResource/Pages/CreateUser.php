@@ -34,7 +34,7 @@ class CreateUser extends CreateRecord
         if ($data['subscription_status'] === 'trial') {
             $data['is_trial_active'] = true;
             $data['trial_plan'] = $data['trial_plan'] ?? 'professional';
-            $data['trial_ends_at'] = $data['trial_ends_at'] ?? now()->addDays(15);
+            $data['trial_ends_at'] = $data['trial_ends_at'] ?? now()->addDays(30);
         }
 
         // Set admin defaults
