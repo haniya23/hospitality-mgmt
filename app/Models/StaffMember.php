@@ -104,6 +104,11 @@ class StaffMember extends Model
         return $this->hasMany(StaffPerformanceReview::class);
     }
 
+    public function permissions()
+    {
+        return $this->hasOne(StaffPermission::class);
+    }
+
     // Scopes
     public function scopeActive($query)
     {
@@ -214,5 +219,84 @@ class StaffMember extends Model
             'suspended' => 'bg-red-100 text-red-800',
             default => 'bg-gray-100 text-gray-800'
         };
+    }
+
+    /**
+     * Check if staff member has a specific permission
+     */
+    public function hasPermission($permission)
+    {
+        // Managers have all permissions by default
+        if ($this->isManager()) {
+            return true;
+        }
+
+        // Load permissions if not already loaded
+        if (!$this->relationLoaded('permissions')) {
+            $this->load('permissions');
+        }
+
+        // If no permissions record, return false
+        if (!$this->permissions) {
+            return false;
+        }
+
+        return $this->permissions->$permission ?? false;
+    }
+
+    /**
+     * Get all subordinates (direct and indirect reports)
+     */
+    public function getAllSubordinates()
+    {
+        $subordinates = collect();
+        $direct = $this->subordinates;
+        
+        foreach ($direct as $sub) {
+            $subordinates->push($sub);
+            $subordinates = $subordinates->merge($sub->getAllSubordinates());
+        }
+        
+        return $subordinates;
+    }
+
+    /**
+     * Check if this staff member can manage another staff member
+     */
+    public function canManage(StaffMember $other)
+    {
+        // Managers can manage everyone in their property
+        if ($this->isManager() && $this->property_id === $other->property_id) {
+            return true;
+        }
+
+        // Supervisors can manage their direct reports
+        if ($this->isSupervisor() && $other->reports_to === $this->id) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Get accessible staff members based on hierarchy
+     */
+    public function getAccessibleStaff()
+    {
+        if ($this->isManager()) {
+            // Managers see all staff in their property
+            return StaffMember::where('property_id', $this->property_id)->get();
+        }
+
+        if ($this->isSupervisor()) {
+            // Supervisors see themselves and their direct reports
+            return StaffMember::where(function ($query) {
+                $query->where('id', $this->id)
+                      ->orWhere('reports_to', $this->id);
+            })->get();
+        }
+
+        // Staff only see themselves
+        return collect([$this]);
     }
 }

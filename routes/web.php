@@ -18,13 +18,14 @@ Route::get('/cashfree/success', [App\Http\Controllers\CashfreeController::class,
 // STAFF HIERARCHY ROUTES
 // ============================================
 
-// Owner - Staff Management
+// Owner - Staff Management & Task Management
 Route::middleware(['auth'])->prefix('owner')->name('owner.')->group(function () {
-    // Specific routes first (to avoid conflicts with resource routes)
+    // Staff Management
     Route::get('staff/hierarchy/{property}', [App\Http\Controllers\Staff\OwnerStaffController::class, 'hierarchy'])->name('staff.hierarchy');
-    
-    // Resource routes
     Route::resource('staff', App\Http\Controllers\Staff\OwnerStaffController::class);
+    
+    // Task Management
+    Route::resource('tasks', App\Http\Controllers\Owner\TaskController::class);
 });
 
 // Manager Dashboard (requires manager role)
@@ -62,6 +63,15 @@ Route::middleware(['auth', 'staff.role'])->prefix('staff')->name('staff.')->grou
     // Leave Requests
     Route::get('/leave-requests', [App\Http\Controllers\Staff\AttendanceController::class, 'leaveRequests'])->name('leave-requests');
     Route::post('/leave-requests', [App\Http\Controllers\Staff\AttendanceController::class, 'storeLeaveRequest'])->name('leave-requests.store');
+    
+    // Access Management (Manager Only)
+    Route::middleware(['staff.role:manager'])->group(function () {
+        Route::get('/permissions', [App\Http\Controllers\Staff\PermissionController::class, 'index'])->name('permissions.index');
+        Route::get('/permissions/{staffMember}/edit', [App\Http\Controllers\Staff\PermissionController::class, 'edit'])->name('permissions.edit');
+        Route::put('/permissions/{staffMember}', [App\Http\Controllers\Staff\PermissionController::class, 'update'])->name('permissions.update');
+        Route::put('/permissions/{staffMember}/reset', [App\Http\Controllers\Staff\PermissionController::class, 'resetToDefault'])->name('permissions.reset');
+        Route::put('/permissions/{staffMember}/revoke', [App\Http\Controllers\Staff\PermissionController::class, 'revokeAll'])->name('permissions.revoke');
+    });
 });
 
 // Tasks (accessible by managers and supervisors)

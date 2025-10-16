@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Traits\HasCreatedUpdatedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Payment extends Model
 {
+    use HasCreatedUpdatedBy;
+    
     protected $fillable = [
         'invoice_id',
         'subscription_id',

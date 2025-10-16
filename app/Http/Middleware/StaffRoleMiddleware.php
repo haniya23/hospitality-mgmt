@@ -22,14 +22,9 @@ class StaffRoleMiddleware
             return redirect()->route('login');
         }
 
-        // Owners always have access
-        if ($user->isOwner()) {
-            return $next($request);
-        }
-
         // Check if user has a staff member record
         if (!$user->staffMember) {
-            abort(403, 'You do not have staff access.');
+            abort(403, 'You do not have staff access. This area is for staff members only.');
         }
 
         // Check if staff member is active

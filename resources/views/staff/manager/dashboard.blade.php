@@ -130,7 +130,7 @@
     </div>
 
     {{-- Quick Actions --}}
-    <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="mt-8 grid grid-cols-1 md:grid-cols-4 gap-4">
         <a href="{{ route('tasks.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white rounded-lg p-6 text-center transition">
             <i class="fas fa-plus-circle text-3xl mb-2"></i>
             <p class="font-semibold">Create Task</p>
@@ -142,6 +142,10 @@
         <a href="{{ route('owner.staff.index') }}" class="bg-green-600 hover:bg-green-700 text-white rounded-lg p-6 text-center transition">
             <i class="fas fa-user-plus text-3xl mb-2"></i>
             <p class="font-semibold">Manage Staff</p>
+        </a>
+        <a href="{{ route('staff.permissions.index') }}" class="bg-orange-600 hover:bg-orange-700 text-white rounded-lg p-6 text-center transition">
+            <i class="fas fa-shield-alt text-3xl mb-2"></i>
+            <p class="font-semibold">Access Management</p>
         </a>
     </div>
 </div>

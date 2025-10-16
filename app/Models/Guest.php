@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\HasCreatedUpdatedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 class Guest extends Model
 {
-    use HasFactory;
+    use HasFactory, HasCreatedUpdatedBy;
 
     protected $fillable = [
         'name',
