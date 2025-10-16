@@ -28,6 +28,13 @@ Route::middleware(['auth'])->prefix('owner')->name('owner.')->group(function () 
     Route::resource('tasks', App\Http\Controllers\Owner\TaskController::class);
 });
 
+// Staff Templates
+Route::middleware(['auth'])->prefix('staff-templates')->name('staff.templates.')->group(function () {
+    Route::get('/', [App\Http\Controllers\StaffTemplateController::class, 'index'])->name('index');
+    Route::post('/apply', [App\Http\Controllers\StaffTemplateController::class, 'apply'])->name('apply');
+    Route::get('/{type}/preview', [App\Http\Controllers\StaffTemplateController::class, 'preview'])->name('preview');
+});
+
 // Manager Dashboard (requires manager role)
 Route::middleware(['auth', 'staff.role:manager'])->prefix('manager')->name('manager.')->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\Staff\ManagerDashboardController::class, 'index'])->name('dashboard');
