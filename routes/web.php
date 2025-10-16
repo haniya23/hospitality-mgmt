@@ -203,8 +203,9 @@ Route::middleware(['auth', 'subscription.limits'])->group(function () {
     Route::delete('/accommodations/{accommodation}', [App\Http\Controllers\AccommodationController::class, 'destroy'])->name('accommodations.destroy');
     
     // Photo Routes
-    Route::post('/properties/{property}/photos', [App\Http\Controllers\PropertyController::class, 'storePhotos'])->name('properties.photos.store');
-    Route::delete('/properties/{property}/photos/{photo}', [App\Http\Controllers\PropertyController::class, 'deletePhoto'])->name('properties.photos.delete');
+    Route::post('/properties/{property:uuid}/photos', [App\Http\Controllers\PropertyController::class, 'storePhotos'])->name('properties.photos.store');
+    Route::post('/properties/{property:uuid}/photos/upload', [App\Http\Controllers\PropertyPhotoController::class, 'upload'])->name('properties.photos.upload');
+    Route::delete('/properties/{property:uuid}/photos/{photo}', [App\Http\Controllers\PropertyController::class, 'deletePhoto'])->name('properties.photos.delete');
     
     // Booking Management Routes
     Route::get('/bookings', function () {
