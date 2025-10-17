@@ -77,10 +77,10 @@
                     </div>
                 </div>
                 <div class="flex flex-col sm:flex-row gap-3">
-                    <a href="{{ route('staff.templates.index') }}" 
+                    <!-- <a href="{{ route('staff.templates.index') }}" 
                         class="w-full sm:w-auto inline-flex justify-center items-center px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 font-semibold transition-all shadow-lg">
                         <i class="fas fa-sitemap mr-2"></i> Use Template
-                    </a>
+                    </a> -->
                     <a href="{{ route('owner.staff.create') }}" 
                         class="w-full sm:w-auto inline-flex justify-center items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 font-semibold transition-all shadow-lg">
                         <i class="fas fa-user-plus mr-2"></i> Add Staff Member

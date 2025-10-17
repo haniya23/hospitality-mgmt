@@ -139,7 +139,17 @@
                             <i class="fas fa-calendar-alt w-5"></i>Calendar View
                         </a></li>
                         <li><a href="{{ route('bookings.cancelled') }}" class="flex gap-4 p-3 font-semibold rounded-lg hover:bg-green-100 {{ request()->routeIs('bookings.cancelled') ? 'bg-gradient-to-r from-green-400 to-green-600 text-white' : 'text-gray-700' }} transition-all">
-                            <i class="fas fa-times-circle w-5"></i>Cancelled
+                            <i class="fas fa-times-circle w-5"></i>Cancelled Bookings
+                        </a></li>
+                    </ul>
+                </div>
+
+                <!-- Support Section -->
+                <div class="mb-6">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">Support</h3>
+                    <ul class="space-y-1">
+                        <li><a href="{{ route('contact.index') }}" class="flex gap-4 p-3 font-semibold rounded-lg hover:bg-green-100 {{ request()->routeIs('contact.index') ? 'bg-gradient-to-r from-green-400 to-green-600 text-white' : 'text-gray-700' }} transition-all">
+                            <i class="fab fa-whatsapp w-5"></i>Contact Us
                         </a></li>
                     </ul>
                 </div>
@@ -535,6 +545,11 @@
             <!-- Subscription -->
             <a href="{{ route('subscription.plans') }}" @click="sidebarOpen = false" class="flex gap-4 p-3 font-semibold rounded-lg hover:bg-green-100 {{ request()->routeIs('subscription.*') ? 'bg-gradient-to-r from-green-400 to-green-600 text-white' : 'text-gray-700' }} transition-all">
                 <i class="fas fa-crown w-5"></i>Subscription
+            </a>
+            
+            <!-- Contact Us -->
+            <a href="{{ route('contact.index') }}" @click="sidebarOpen = false" class="flex gap-4 p-3 font-semibold rounded-lg hover:bg-green-100 {{ request()->routeIs('contact.index') ? 'bg-gradient-to-r from-green-400 to-green-600 text-white' : 'text-gray-700' }} transition-all">
+                <i class="fab fa-whatsapp w-5"></i>Contact Us
             </a>
         </div>
         

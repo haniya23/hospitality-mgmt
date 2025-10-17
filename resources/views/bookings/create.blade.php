@@ -1,3 +1,4 @@
+@php($hideBottomBar = true)
 @extends('layouts.app')
 
 @section('title', 'Create Booking')

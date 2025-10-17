@@ -569,14 +569,11 @@ function subscriptionPage() {
                     </li>
                 </ul>
                 
-                <button @click="subscribeToPlan('starter')" 
-                        class="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition-all">
-                    <span x-show="!loading">Choose Starter Plan</span>
-                    <span x-show="loading" class="flex items-center justify-center">
-                        <i class="fas fa-spinner fa-spin mr-2"></i>
-                        Processing...
-                    </span>
-                </button>
+                <a href="{{ route('contact.index') }}" 
+                   class="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition-all flex items-center justify-center">
+                    <i class="fab fa-whatsapp mr-2"></i>
+                    Contact Us
+                </a>
             </div>
         </div>
     </div>
@@ -699,14 +696,11 @@ function subscriptionPage() {
                     </li>
                 </ul>
                 
-                <button @click="subscribeToPlan('professional')" 
-                        class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all">
-                    <span x-show="!loading">Choose Professional Plan</span>
-                    <span x-show="loading" class="flex items-center justify-center">
-                        <i class="fas fa-spinner fa-spin mr-2"></i>
-                        Processing...
-                    </span>
-                </button>
+                <a href="{{ route('contact.index') }}" 
+                   class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all flex items-center justify-center">
+                    <i class="fab fa-whatsapp mr-2"></i>
+                    Contact Us
+                </a>
             </div>
         </div>
     </div>

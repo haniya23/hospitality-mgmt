@@ -39,7 +39,9 @@
         </main>
     </div>
     
-    @include('partials.bottom-bar')
+    @if(!isset($hideBottomBar) || !$hideBottomBar)
+        @include('partials.bottom-bar')
+    @endif
     
     <!-- Global Loader -->
     <div x-show="globalLoading" 

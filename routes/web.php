@@ -344,6 +344,7 @@ Route::middleware(['auth', 'subscription.limits'])->group(function () {
         return view('bookings.enhanced-create', compact('properties', 'b2bPartners'));
     })->name('bookings.enhanced-create');
     Route::get('/subscription/plans', [App\Http\Controllers\SubscriptionController::class, 'plans'])->name('subscription.plans');
+    Route::get('/contact', [App\Http\Controllers\ContactController::class, 'index'])->name('contact.index');
     Route::get('/subscription/limit-exceeded', function () {
         $user = auth()->user();
         $usage = $user->getUsagePercentage();
