@@ -35,7 +35,15 @@ class CustomerController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:guests,email',
-            'mobile_number' => 'nullable|string|unique:guests,mobile_number',
+            'mobile_number' => [
+                'nullable',
+                'string',
+                function ($attribute, $value, $fail) {
+                    if ($value && Guest::where('mobile_number', $value)->where('is_reserved', false)->exists()) {
+                        $fail('The mobile number has already been taken by another customer.');
+                    }
+                },
+            ],
             'phone' => 'nullable|string',
             'gender' => 'nullable|in:male,female,other',
             'address' => 'nullable|string',
@@ -64,7 +72,18 @@ class CustomerController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:guests,email,' . $customer->id,
-            'mobile_number' => 'nullable|string|unique:guests,mobile_number,' . $customer->id,
+            'mobile_number' => [
+                'nullable',
+                'string',
+                function ($attribute, $value, $fail) use ($customer) {
+                    if ($value && Guest::where('mobile_number', $value)
+                        ->where('is_reserved', false)
+                        ->where('id', '!=', $customer->id)
+                        ->exists()) {
+                        $fail('The mobile number has already been taken by another customer.');
+                    }
+                },
+            ],
             'phone' => 'nullable|string',
             'gender' => 'nullable|in:male,female,other',
             'address' => 'nullable|string',

@@ -150,11 +150,13 @@ class Guest extends Model
     // Create reserved customer for accommodation
     public static function createReservedCustomerForAccommodation(PropertyAccommodation $accommodation)
     {
+        $ownerMobile = $accommodation->property->owner->mobile_number ?? '0000000000';
+        
         return static::create([
             'name' => "Reserved – {$accommodation->display_name}",
             'email' => "reserved-acc-{$accommodation->id}@accommodation.local",
-            'phone' => "0000000000", // Default phone for accommodation reserved customers
-            'mobile_number' => "0000000000",
+            'phone' => $ownerMobile,
+            'mobile_number' => $ownerMobile,
             'accommodation_id' => $accommodation->id,
             'is_reserved' => true,
             'id_type' => 'aadhar',
