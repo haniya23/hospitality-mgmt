@@ -147,6 +147,84 @@
         </div>
     </div>
     
+    <!-- Invoice Download Modal -->
+    <div x-show="showInvoiceModal" 
+         x-transition:enter="ease-out duration-300" 
+         x-transition:enter-start="opacity-0" 
+         x-transition:enter-end="opacity-100" 
+         x-transition:leave="ease-in duration-200" 
+         x-transition:leave-start="opacity-100" 
+         x-transition:leave-end="opacity-0" 
+         class="fixed inset-0 overflow-y-auto"
+         style="z-index: 99999 !important;"
+         x-cloak
+         style="background-color: rgba(0,0,0,0.5);">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0" @click="closeInvoiceModal()">
+            <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full" @click.stop>
+                <div class="bg-white px-6 pt-6 pb-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mr-4">
+                                <i class="fas fa-file-pdf text-purple-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">Download Invoice</h3>
+                                <p class="text-sm text-gray-600">Get your booking invoice</p>
+                            </div>
+                        </div>
+                        <button @click="closeInvoiceModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                            <i class="fas fa-times text-lg"></i>
+                        </button>
+                    </div>
+                    
+                    <div x-show="selectedInvoiceBooking" class="bg-gray-50 rounded-xl p-4 mb-6">
+                        <div class="flex items-center space-x-3 mb-3">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-sm">
+                                <span x-text="selectedInvoiceBooking?.guest?.name?.charAt(0)?.toUpperCase()"></span>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-900" x-text="selectedInvoiceBooking?.guest?.name"></h4>
+                                <p class="text-sm text-gray-600" x-text="selectedInvoiceBooking?.confirmation_number"></p>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <span class="text-gray-500">Property:</span>
+                                <p class="font-medium" x-text="selectedInvoiceBooking?.accommodation?.property?.name"></p>
+                            </div>
+                            <div>
+                                <span class="text-gray-500">Amount:</span>
+                                <p class="font-medium text-green-600" x-text="'₹' + formatNumber(selectedInvoiceBooking?.total_amount)"></p>
+                            </div>
+                            <div>
+                                <span class="text-gray-500">Check-in:</span>
+                                <p class="font-medium" x-text="formatDate(selectedInvoiceBooking?.check_in_date)"></p>
+                            </div>
+                            <div>
+                                <span class="text-gray-500">Check-out:</span>
+                                <p class="font-medium" x-text="formatDate(selectedInvoiceBooking?.check_out_date)"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 px-6 py-4 flex space-x-3">
+                    <button @click="downloadInvoice(selectedInvoiceBooking)" 
+                            class="flex-1 bg-purple-600 text-white py-3 px-4 rounded-xl font-medium text-sm hover:bg-purple-700 transition flex items-center justify-center">
+                        <i class="fas fa-download mr-2"></i>
+                        Download PDF
+                    </button>
+                    <button @click="shareToWhatsApp(selectedInvoiceBooking)" 
+                            class="flex-1 bg-green-500 text-white py-3 px-4 rounded-xl font-medium text-sm hover:bg-green-600 transition flex items-center justify-center">
+                        <i class="fab fa-whatsapp mr-2"></i>
+                        Share
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Bulk Download Modal -->
     <div x-show="showBulkDownloadModal" 
          x-transition:enter="ease-out duration-300" 
@@ -254,6 +332,8 @@ function bookingData() {
         confirmRate: 0,
         confirmAmount: 0,
         confirmAdvance: 0,
+        showInvoiceModal: false,
+        selectedInvoiceBooking: null,
         showBulkDownloadModal: false,
         bulkDownloadOptions: {
             all: false,
@@ -441,7 +521,7 @@ function bookingData() {
         },
 
         shareToWhatsApp(booking) {
-            const invoiceUrl = `${window.location.origin}/bookings/${booking.uuid}/invoice/download`;
+            const invoiceUrl = `${window.location.origin}/public/invoice/${booking.uuid}`;
             const message = `🏨 *Booking Invoice*\n\n` +
                 `📋 *Confirmation:* ${booking.confirmation_number}\n` +
                 `👤 *Guest:* ${booking.guest.name}\n` +
@@ -455,6 +535,20 @@ function bookingData() {
             
             const whatsappUrl = `https://wa.me/send?text=${encodeURIComponent(message)}`;
             window.open(whatsappUrl, '_blank');
+            
+            // Close the modal after sharing
+            this.closeInvoiceModal();
+            this.showMessage('WhatsApp share opened!', 'success');
+        },
+
+        openInvoiceModal(booking) {
+            this.selectedInvoiceBooking = booking;
+            this.showInvoiceModal = true;
+        },
+
+        closeInvoiceModal() {
+            this.showInvoiceModal = false;
+            this.selectedInvoiceBooking = null;
         },
 
         downloadInvoice(booking) {
@@ -470,6 +564,10 @@ function bookingData() {
             setTimeout(() => {
                 document.body.removeChild(iframe);
             }, 1000);
+            
+            // Close the modal after starting download
+            this.closeInvoiceModal();
+            this.showMessage('Invoice download started!', 'success');
         },
 
         // Bulk Download Functions

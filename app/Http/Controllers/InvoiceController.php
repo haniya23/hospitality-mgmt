@@ -18,6 +18,17 @@ class InvoiceController extends Controller
         // Ensure the booking belongs to the authenticated user's property
         $this->authorize('view', $booking);
         
+        return $this->generateInvoicePdf($booking);
+    }
+
+    public function publicDownload(Reservation $booking)
+    {
+        // No authorization check for public access
+        return $this->generateInvoicePdf($booking);
+    }
+
+    private function generateInvoicePdf(Reservation $booking)
+    {
         // Load all necessary relationships
         $booking->load([
             'guest',

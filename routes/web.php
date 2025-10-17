@@ -6,6 +6,9 @@ use Illuminate\Support\Facades\Route;
 // Public Routes
 Route::get('/', [App\Http\Controllers\PublicController::class, 'simple'])->name('public.index');
 
+// Public invoice download
+Route::get('/public/invoice/{booking}', [App\Http\Controllers\InvoiceController::class, 'publicDownload'])->name('public.invoice.download');
+
 // Authentication Routes
 Route::get('/login', [MobileAuthController::class, 'showLoginForm'])->name('login')->middleware('guest');
 Route::post('/login', [MobileAuthController::class, 'login'])->middleware('guest');

@@ -84,7 +84,7 @@
                             <i class="fas fa-edit mr-1"></i>
                             Edit
                         </a>
-                        <button @click="downloadInvoice(booking)" 
+                        <button @click="openInvoiceModal(booking)" 
                                 class="bg-purple-500 text-white py-2 px-4 rounded-xl font-medium text-sm hover:bg-purple-600 transition text-center">
                             <i class="fas fa-file-pdf mr-1"></i>
                             Invoice
