@@ -108,6 +108,104 @@ class BookingProvider with ChangeNotifier {
     }
   }
 
+  Future<void> fetchCheckInHistory() async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+      final response = await http.get(
+        Uri.parse('${ApiConfig.baseUrl}/owner/checkins'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true) {
+          _recentCheckIns = List<Map<String, dynamic>>.from(data['data']['data']);
+        }
+      }
+    } catch (_) {
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchCheckOutHistory() async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+      final response = await http.get(
+        Uri.parse('${ApiConfig.baseUrl}/owner/checkouts'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true) {
+          _recentCheckOuts = List<Map<String, dynamic>>.from(data['data']['data']);
+        }
+      }
+    } catch (_) {
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<Map<String, dynamic>?> fetchCheckInDetails(String uuid) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+      final response = await http.get(
+        Uri.parse('${ApiConfig.baseUrl}/owner/checkins/$uuid'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true) {
+          return data['data'];
+        }
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  Future<Map<String, dynamic>?> fetchCheckOutDetails(String uuid) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+      final response = await http.get(
+        Uri.parse('${ApiConfig.baseUrl}/owner/checkouts/$uuid'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true) {
+          return data['data'];
+        }
+      }
+    } catch (_) {}
+    return null;
+  }
+
   Future<void> fetchBookings({String status = 'all'}) async {
     _isLoading = true;
     _currentStatus = status;

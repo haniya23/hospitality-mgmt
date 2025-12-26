@@ -153,9 +153,8 @@ class _GuestServicesScreenState extends ConsumerState<GuestServicesScreen>
     final guestName = booking['guest']?['name'] ?? booking['guest_name'] ?? 'Unknown Guest';
     
     // For history, accommodation info is nested under 'reservation'
-    final accommodation = isHistory 
-        ? booking['reservation']?['accommodation']
-        : booking['accommodation'];
+    final reservation = booking['reservation'] as Map<String, dynamic>?;
+    final accommodation = isHistory ? (reservation?['accommodation']) : (booking['accommodation']);
         
     final propertyName = accommodation?['property']?['name'] ?? 'Property';
     final roomName = accommodation?['custom_name'] ?? accommodation?['name'] ?? 'Room';

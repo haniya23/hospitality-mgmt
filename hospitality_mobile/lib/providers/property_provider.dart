@@ -136,7 +136,9 @@ class PropertyProvider with ChangeNotifier {
         }
       } 
     } catch (_) {}
-    Future<bool> uploadPropertyPhoto(int id, String filePath) async {
+  }
+
+  Future<bool> uploadPropertyPhoto(int id, String filePath) async {
     _isLoading = true;
     notifyListeners();
     try {
@@ -273,5 +275,4 @@ class PropertyProvider with ChangeNotifier {
       notifyListeners();
     }
   }
-}
 }

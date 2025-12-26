@@ -17,6 +17,10 @@ class CheckOutDetailsScreen extends StatelessWidget {
     // Parse dates
     final checkOutTime = DateTime.tryParse(checkOut['check_out_time'] ?? '');
     final processedAt = DateTime.tryParse(checkOut['created_at'] ?? '');
+    
+    // Parse numeric values safely
+    final lateCharges = double.tryParse(checkOut['late_checkout_charges']?.toString() ?? '0') ?? 0.0;
+    final rating = int.tryParse(checkOut['rating']?.toString() ?? '0') ?? 0;
 
     return Scaffold(
       appBar: AppBar(
@@ -50,8 +54,8 @@ class CheckOutDetailsScreen extends StatelessWidget {
             _buildSectionHeader('Billing & Payments'),
             const SizedBox(height: 8),
             _buildInfoRow('Final Bill', '₹${checkOut['final_bill'] ?? 0}'),
-            if ((checkOut['late_checkout_charges'] ?? 0) > 0)
-              _buildInfoRow('Late Charges', '₹${checkOut['late_checkout_charges']}'),
+            if (lateCharges > 0)
+              _buildInfoRow('Late Charges', '₹$lateCharges'),
             _buildInfoRow('Payment Status', (checkOut['payment_status'] ?? 'pending').toString().toUpperCase()),
             
             if (checkOut['services_used'] != null && (checkOut['services_used'] as List).isNotEmpty) ...[
@@ -75,7 +79,7 @@ class CheckOutDetailsScreen extends StatelessWidget {
                 children: [
                   const Text('Rating: '),
                   ...List.generate(5, (index) => Icon(
-                    index < (checkOut['rating'] ?? 0) ? Icons.star : Icons.star_border,
+                    index < rating ? Icons.star : Icons.star_border,
                     color: Colors.amber,
                     size: 20,
                   )),
