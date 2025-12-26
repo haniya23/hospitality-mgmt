@@ -159,6 +159,9 @@ class _BookingsTabState extends State<BookingsTab> with SingleTickerProviderStat
       separatorBuilder: (_, __) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
         final booking = bookings[index];
+        if (isCompleted) {
+          return _buildCompletedCard(context, booking);
+        }
         return isPending
             ? _buildPendingCard(context, booking)
             : _buildConfirmedCard(context, booking);
@@ -253,6 +256,36 @@ class _BookingsTabState extends State<BookingsTab> with SingleTickerProviderStat
               tooltip: 'Cancel Booking',
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  // Completed Card: View Details and Collect Payment (if balance > 0)
+  Widget _buildCompletedCard(BuildContext context, Map<String, dynamic> booking) {
+    final balancePending = double.tryParse(booking['balance_pending']?.toString() ?? '0') ?? 0;
+    
+    return _buildBaseCard(
+      context,
+      booking,
+      actions: Row(
+        children: [
+          Expanded(
+            child: _buildActionButton(Icons.visibility, 'View Details', Colors.blue, () {
+              // Navigate to booking details if needed
+            }),
+          ),
+          if (balancePending > 0)
+            const SizedBox(width: 8),
+          if (balancePending > 0)
+            Expanded(
+              child: _buildActionButton(
+                Icons.payment, 
+                'Collect Payment', 
+                Colors.green, 
+                () => _showPaymentCollectionDialog(context, booking)
+              ),
+            ),
         ],
       ),
     );
@@ -684,5 +717,78 @@ class _BookingsTabState extends State<BookingsTab> with SingleTickerProviderStat
              if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not launch invoice')));
           }
       }
+  }
+
+  void _showPaymentCollectionDialog(BuildContext context, Map<String, dynamic> booking) {
+    final balancePending = double.tryParse(booking['balance_pending']?.toString() ?? '0') ?? 0;
+    final amountController = TextEditingController(text: balancePending.toStringAsFixed(2));
+    final notesController = TextEditingController();
+    final guestName = booking['guest']?['name'] ?? 'Guest';
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Collect Payment', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 4),
+            Text(guestName, style: GoogleFonts.outfit(fontSize: 14, color: Colors.grey.shade600)),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(color: Colors.red.shade50, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.red.shade200)),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Current Balance:', style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 13)),
+                    Text('₹${balancePending.toStringAsFixed(2)}', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: Colors.red.shade700, fontSize: 18)),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text('Amount to Collect *', style: GoogleFonts.outfit(fontWeight: FontWeight.w500, fontSize: 13)),
+              const SizedBox(height: 8),
+              TextField(controller: amountController, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(hintText: 'Enter amount', prefixText: '₹ ', border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)), contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14))),
+              const SizedBox(height: 16),
+              Text('Payment Notes (Optional)', style: GoogleFonts.outfit(fontWeight: FontWeight.w500, fontSize: 13)),
+              const SizedBox(height: 8),
+              TextField(controller: notesController, decoration: InputDecoration(hintText: 'Add any notes...', border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)), contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14)), maxLines: 2),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: Text('Cancel', style: GoogleFonts.outfit(color: Colors.grey))),
+          ElevatedButton.icon(
+            onPressed: () async {
+              final amount = double.tryParse(amountController.text);
+              if (amount == null || amount <= 0) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a valid amount')));
+                return;
+              }
+              Navigator.pop(context);
+              final success = await Provider.of<BookingProvider>(context, listen: false).updateBookingPayment(booking['uuid'], amount, notesController.text);
+              if (success && mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Payment collected successfully!'), backgroundColor: Colors.green));
+                final provider = Provider.of<BookingProvider>(context, listen: false);
+                provider.fetchBookings(status: 'checked_out');
+                provider.fetchCounts();
+              } else if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(Provider.of<BookingProvider>(context, listen: false).error ?? 'Failed'), backgroundColor: Colors.red));
+              }
+            },
+            icon: const Icon(Icons.check),
+            label: Text('Collect Payment', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
+          ),
+        ],
+      ),
+    );
   }
 }
