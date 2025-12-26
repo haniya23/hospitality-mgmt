@@ -81,12 +81,13 @@ Route::prefix('owner')->name('api.owner.')->middleware('auth:sanctum')->group(fu
     Route::get('/dashboard', [App\Http\Controllers\Api\Owner\DashboardController::class, 'index'])->name('dashboard');
     
     // Bookings
-    Route::apiResource('bookings', \App\Http\Controllers\Api\Owner\BookingController::class);
+    // Bookings
+    Route::get('/bookings/counts', [App\Http\Controllers\Api\Owner\BookingController::class, 'counts'])->name('bookings.counts');
     Route::post('bookings/{id}/check-in', [\App\Http\Controllers\Api\Owner\CheckInController::class, 'store']);
     Route::post('bookings/{id}/check-out', [\App\Http\Controllers\Api\Owner\CheckOutController::class, 'store']);
     Route::patch('/bookings/{id}/status', [App\Http\Controllers\Api\Owner\BookingController::class, 'updateStatus'])->name('bookings.status');
     Route::get('/bookings/{id}/invoice', [App\Http\Controllers\Api\Owner\BookingController::class, 'downloadInvoice'])->name('bookings.invoice');
-    Route::get('/bookings/counts', [App\Http\Controllers\Api\Owner\BookingController::class, 'counts'])->name('bookings.counts');
+    Route::apiResource('bookings', \App\Http\Controllers\Api\Owner\BookingController::class);
     
     // Properties
     Route::get('/properties', [App\Http\Controllers\Api\Owner\PropertyController::class, 'index'])->name('properties.index');

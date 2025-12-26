@@ -1,6 +1,6 @@
 class ApiConfig {
   // User specified Valet URL
-  static const String baseUrl = 'http://hospitality-mgmt.test/api'; 
+  static const String baseUrl = 'https://stayloops.space/api'; 
   
   static const String loginEndpoint = '$baseUrl/mobile-login';
   static const String dashboardEndpoint = '$baseUrl/owner/dashboard';

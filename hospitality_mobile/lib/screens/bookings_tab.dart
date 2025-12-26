@@ -498,7 +498,7 @@ class _BookingsTabState extends State<BookingsTab> with SingleTickerProviderStat
 
   void _showConfirmDialog(BuildContext context, Map<String, dynamic> booking) {
     final guestName = booking['guest']?['name'] ?? 'Guest';
-    final dates = '${booking['check_in_date']} - ${booking['check_out_date']}';
+    final dates = '${_formatDate(booking['check_in_date'])} - ${_formatDate(booking['check_out_date'])}';
     
     showDialog(
       context: context,
@@ -640,9 +640,19 @@ class _BookingsTabState extends State<BookingsTab> with SingleTickerProviderStat
   void _shareBooking(Map<String, dynamic> booking) {
     final guest = booking['guest']['name'];
     final prop = booking['accommodation']['property']['name'];
-    final dates = '${booking['check_in_date']} to ${booking['check_out_date']}';
+    final dates = '${_formatDate(booking['check_in_date'])} to ${_formatDate(booking['check_out_date'])}';
     final text = 'Booking Confirmed!\nGuest: $guest\nProperty: $prop\nDates: $dates\nTotal: ₹${booking['total_amount']}';
     Share.share(text);
+  }
+
+  String _formatDate(dynamic dateStr) {
+    if (dateStr == null) return '';
+    try {
+      final date = DateTime.parse(dateStr.toString());
+      return DateFormat('d MMM yyyy, h:mm a').format(date);
+    } catch (_) {
+      return dateStr.toString();
+    }
   }
 
   void _downloadInvoice(BuildContext context, int bookingId) async {
