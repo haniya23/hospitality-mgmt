@@ -7,7 +7,7 @@ import '../config/api_config.dart';
 class BookingProvider with ChangeNotifier {
   bool _isLoading = false;
   List<Map<String, dynamic>> _bookings = [];
-  Map<String, int> _counts = {'all': 0, 'pending': 0, 'confirmed': 0, 'cancelled': 0};
+  Map<String, int> _counts = {'all': 0, 'pending': 0, 'confirmed': 0, 'cancelled': 0, 'completed': 0};
   String? _error;
   String _currentStatus = 'all';
   List<Map<String, dynamic>> _checkIns = [];

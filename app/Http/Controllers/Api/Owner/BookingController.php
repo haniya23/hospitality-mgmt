@@ -57,6 +57,7 @@ class BookingController extends Controller
             'pending' => $user->reservations()->where('status', 'pending')->count(),
             'confirmed' => $user->reservations()->where('status', 'confirmed')->count(),
             'cancelled' => $user->reservations()->where('status', 'cancelled')->count(),
+            'completed' => $user->reservations()->where('status', 'checked_out')->count(),
         ];
 
         return response()->json([

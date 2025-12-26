@@ -23,7 +23,7 @@ class _BookingsTabState extends State<BookingsTab> with SingleTickerProviderStat
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(_handleTabSelection);
     
     Future.microtask(() {
@@ -38,8 +38,10 @@ class _BookingsTabState extends State<BookingsTab> with SingleTickerProviderStat
       final provider = Provider.of<BookingProvider>(context, listen: false);
       if (_tabController.index == 0) {
         provider.fetchBookings(status: 'pending');
-      } else {
+      } else if (_tabController.index == 1) {
         provider.fetchBookings(status: 'confirmed');
+      } else {
+        provider.fetchBookings(status: 'checked_out');
       }
     }
   }
@@ -73,7 +75,8 @@ class _BookingsTabState extends State<BookingsTab> with SingleTickerProviderStat
           IconButton(
             icon: const Icon(Icons.refresh, color: Colors.black87),
             onPressed: () {
-               bookingProvider.fetchBookings(status: _tabController.index == 0 ? 'pending' : 'confirmed');
+               final status = _tabController.index == 0 ? 'pending' : (_tabController.index == 1 ? 'confirmed' : 'checked_out');
+               bookingProvider.fetchBookings(status: status);
                bookingProvider.fetchCounts();
             },
           ),
@@ -86,7 +89,8 @@ class _BookingsTabState extends State<BookingsTab> with SingleTickerProviderStat
                   context,
                   MaterialPageRoute(builder: (context) => const CreateBookingScreen()),
                 ).then((_) {
-                  bookingProvider.fetchBookings(status: _tabController.index == 0 ? 'pending' : 'confirmed');
+                  final status = _tabController.index == 0 ? 'pending' : (_tabController.index == 1 ? 'confirmed' : 'checked_out');
+                  bookingProvider.fetchBookings(status: status);
                   bookingProvider.fetchCounts();
                 });
               },
@@ -102,6 +106,7 @@ class _BookingsTabState extends State<BookingsTab> with SingleTickerProviderStat
           tabs: [
             Tab(text: 'Pending Requests (${counts['pending'] ?? 0})'),
             Tab(text: 'Confirmed (${counts['confirmed'] ?? 0})'),
+            Tab(text: 'Completed (${counts['completed'] ?? 0})'),
           ],
         ),
       ),
@@ -110,8 +115,9 @@ class _BookingsTabState extends State<BookingsTab> with SingleTickerProviderStat
           TabBarView(
             controller: _tabController,
             children: [
-              _buildBookingList(bookingProvider.bookings, isPending: true),
-              _buildBookingList(bookingProvider.bookings, isPending: false),
+              _buildBookingList(bookingProvider.bookings, isPending: true, isCompleted: false),
+              _buildBookingList(bookingProvider.bookings, isPending: false, isCompleted: false),
+              _buildBookingList(bookingProvider.bookings, isPending: false, isCompleted: true),
             ],
           ),
           if (bookingProvider.isLoading)
@@ -126,16 +132,20 @@ class _BookingsTabState extends State<BookingsTab> with SingleTickerProviderStat
     );
   }
 
-  Widget _buildBookingList(List<dynamic> bookings, {required bool isPending}) {
+  Widget _buildBookingList(List<dynamic> bookings, {required bool isPending, required bool isCompleted}) {
     if (bookings.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(isPending ? Icons.pending_actions : Icons.check_circle_outline, size: 64, color: Colors.grey[300]),
+            Icon(
+              isCompleted ? Icons.check_circle : (isPending ? Icons.pending_actions : Icons.check_circle_outline), 
+              size: 64, 
+              color: Colors.grey[300]
+            ),
             const SizedBox(height: 16),
             Text(
-              isPending ? 'No pending requests' : 'No confirmed bookings',
+              isCompleted ? 'No completed bookings' : (isPending ? 'No pending requests' : 'No confirmed bookings'),
               style: GoogleFonts.outfit(color: Colors.grey[500]),
             ),
           ],
