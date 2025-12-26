@@ -25,6 +25,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 // Cashfree Webhook (must be public)
 Route::post('/cashfree/webhook', [App\Http\Controllers\CashfreeController::class, 'webhook'])->name('cashfree.webhook');
 
+// Mobile Login (Public)
+Route::post('/mobile-login', [App\Http\Controllers\Api\Auth\MobileLoginController::class, 'login'])->name('api.mobile.login');
+
 // ============================================
 // STAFF API ROUTES (Sanctum Authentication)
 // ============================================
@@ -74,6 +77,30 @@ Route::prefix('staff')->name('api.staff.')->group(function () {
 // ============================================
 
 Route::prefix('owner')->name('api.owner.')->middleware('auth:sanctum')->group(function () {
+    // Dashboard
+    Route::get('/dashboard', [App\Http\Controllers\Api\Owner\DashboardController::class, 'index'])->name('dashboard');
+    
+    // Bookings
+    Route::apiResource('bookings', \App\Http\Controllers\Api\Owner\BookingController::class);
+    Route::post('bookings/{id}/check-in', [\App\Http\Controllers\Api\Owner\CheckInController::class, 'store']);
+    Route::post('bookings/{id}/check-out', [\App\Http\Controllers\Api\Owner\CheckOutController::class, 'store']);
+    Route::patch('/bookings/{id}/status', [App\Http\Controllers\Api\Owner\BookingController::class, 'updateStatus'])->name('bookings.status');
+    Route::get('/bookings/{id}/invoice', [App\Http\Controllers\Api\Owner\BookingController::class, 'downloadInvoice'])->name('bookings.invoice');
+    Route::get('/bookings/counts', [App\Http\Controllers\Api\Owner\BookingController::class, 'counts'])->name('bookings.counts');
+    
+    // Properties
+    Route::get('/properties', [App\Http\Controllers\Api\Owner\PropertyController::class, 'index'])->name('properties.index');
+
+    // B2B Partners
+    Route::get('/b2b', [App\Http\Controllers\Api\Owner\B2bController::class, 'index'])->name('b2b.index');
+    Route::post('/b2b', [App\Http\Controllers\Api\Owner\B2bController::class, 'store'])->name('b2b.store');
+    Route::put('/b2b/{id}', [App\Http\Controllers\Api\Owner\B2bController::class, 'update'])->name('b2b.update');
+
+    // Guests
+    Route::get('/guests', [App\Http\Controllers\Api\Owner\GuestController::class, 'index'])->name('guests.index');
+    Route::post('/guests', [App\Http\Controllers\Api\Owner\GuestController::class, 'store'])->name('guests.store');
+    Route::put('/guests/{id}', [App\Http\Controllers\Api\Owner\GuestController::class, 'update'])->name('guests.update');
+
     // Staff Management
     Route::prefix('staff')->name('staff.')->group(function () {
         Route::get('/', [App\Http\Controllers\Api\Owner\StaffManagementController::class, 'index'])->name('index');
