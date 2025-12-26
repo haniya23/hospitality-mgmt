@@ -49,6 +49,8 @@ class _CheckOutFormScreenState extends ConsumerState<CheckOutFormScreen> {
   late TextEditingController _feedbackController;
 
   double _originalTotal = 0.0;
+  double _balancePending = 0.0;
+  late TextEditingController _amountCollectedController;
 
   @override
   void initState() {
@@ -62,10 +64,12 @@ class _CheckOutFormScreenState extends ConsumerState<CheckOutFormScreen> {
     _checkOutTimeController = TextEditingController(
         text: DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now()));
 
+    _balancePending = double.tryParse(widget.booking['balance_pending']?.toString() ?? '0') ?? 0.0;
     _lateChargesController = TextEditingController(text: '0');
     _serviceNotesController = TextEditingController();
     _finalBillController = TextEditingController(text: _originalTotal.toStringAsFixed(2));
     _depositRefundController = TextEditingController(text: '0');
+    _amountCollectedController = TextEditingController(text: _balancePending.toStringAsFixed(2));
     
     _paymentStatus = 'completed'; // Default
     _paymentNotesController = TextEditingController();
@@ -89,6 +93,7 @@ class _CheckOutFormScreenState extends ConsumerState<CheckOutFormScreen> {
     _serviceNotesController.dispose();
     _finalBillController.dispose();
     _depositRefundController.dispose();
+    _amountCollectedController.dispose();
     _paymentNotesController.dispose();
     _feedbackController.dispose();
     super.dispose();
@@ -106,6 +111,7 @@ class _CheckOutFormScreenState extends ConsumerState<CheckOutFormScreen> {
       'service_notes': _serviceNotesController.text,
       'final_bill': double.tryParse(_finalBillController.text) ?? 0,
       'deposit_refund': double.tryParse(_depositRefundController.text) ?? 0,
+      'amount_collected': double.tryParse(_amountCollectedController.text) ?? 0,
       'payment_status': _paymentStatus,
       'payment_notes': _paymentNotesController.text,
       'rating': _rating > 0 ? _rating : null,
@@ -206,6 +212,32 @@ class _CheckOutFormScreenState extends ConsumerState<CheckOutFormScreen> {
                   onChanged: (val) => setState(() => _paymentStatus = val),
                   validator: (val) => val == null ? 'Required' : null,
                 ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.blue.shade200),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Balance Pending:', style: GoogleFonts.outfit(fontWeight: FontWeight.w600)),
+                          Text('₹${_balancePending.toStringAsFixed(2)}', 
+                            style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: Colors.red.shade700)),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _buildTextField('Amount Collected', _amountCollectedController, 
+                  keyboardType: TextInputType.number,
+                  required: false),
                 const SizedBox(height: 12),
                 _buildTextField('Payment Notes', _paymentNotesController, maxLines: 2),
               ]),

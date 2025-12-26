@@ -359,8 +359,9 @@ function bookingData() {
             const pending = this.bookings.filter(b => b.status === 'pending').length;
             const confirmed = this.bookings.filter(b => b.status === 'confirmed').length;
             const cancelled = this.bookings.filter(b => b.status === 'cancelled').length;
+            const completed = this.bookings.filter(b => b.status === 'checked_out').length;
             
-            return { all, pending, confirmed, cancelled };
+            return { all, pending, confirmed, cancelled, completed };
         },
 
         async init() {
@@ -372,7 +373,7 @@ function bookingData() {
             try {
                 const response = await fetch('/api/bookings');
                 const data = await response.json();
-                this.bookings = [...data.pending, ...data.active, ...data.cancelled];
+                this.bookings = [...data.pending, ...data.active, ...data.cancelled, ...data.completed];
             } catch (error) {
                 // Error loading bookings
                 this.showMessage('Error loading bookings', 'error');
@@ -654,6 +655,10 @@ function bookingData() {
 
         navigateToCancelledBookings() {
             window.location.href = '/bookings-cancelled';
+        },
+
+        navigateToCompletedBookings() {
+            window.location.href = '/bookings-completed';
         }
     }
 }

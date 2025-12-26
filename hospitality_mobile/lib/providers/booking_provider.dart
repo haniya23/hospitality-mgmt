@@ -229,7 +229,8 @@ class BookingProvider with ChangeNotifier {
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
         if (jsonData['success'] == true) {
-          _bookings = jsonData['data']['data']; 
+          final List<dynamic> data = jsonData['data']['data'];
+          _bookings = data.map((item) => Map<String, dynamic>.from(item as Map)).toList();
           fetchCounts(); // Refresh counts
         } else {
           _error = jsonData['message'] ?? 'Failed to load bookings';
@@ -448,6 +449,52 @@ class BookingProvider with ChangeNotifier {
       } else {
         final errorData = jsonDecode(response.body);
         _error = errorData['message'] ?? 'Failed to check out guest';
+        return false;
+      }
+    } catch (e) {
+      _error = 'Connection error: $e';
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> updateBookingPayment(String uuid, double amountPaid, String notes) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+
+      final url = '${ApiConfig.baseUrl}/api/bookings/$uuid/payment';
+
+      final response = await http.patch(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({
+          'amount_paid': amountPaid,
+          'payment_notes': notes,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body);
+        if (result['success'] == true) {
+          await fetchBookings(status: 'all');
+          await fetchCounts();
+          return true;
+        } else {
+          _error = result['message'] ?? 'Failed to update payment';
+          return false;
+        }
+      } else {
+        final errorData = jsonDecode(response.body);
+        _error = errorData['message'] ?? 'Failed to update payment';
         return false;
       }
     } catch (e) {

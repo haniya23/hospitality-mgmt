@@ -35,6 +35,15 @@
             'action' => 'navigateToConfirmedBookings()'
         ],
         [
+            'value' => 'bookingStats.completed', 
+            'label' => 'Completed',
+            'icon' => 'fas fa-check-double',
+            'bgGradient' => 'from-teal-50 to-cyan-50',
+            'accentColor' => 'bg-teal-500',
+            'clickable' => true,
+            'action' => 'navigateToCompletedBookings()'
+        ],
+        [
             'value' => 'bookingStats.cancelled', 
             'label' => 'Cancelled',
             'icon' => 'fas fa-times-circle',

@@ -39,6 +39,7 @@ class CheckOutController extends Controller
             'deposit_refund' => 'nullable|numeric|min:0',
             'payment_status' => 'required|in:pending,completed,partial,refunded',
             'payment_notes' => 'nullable|string|max:1000',
+            'amount_collected' => 'nullable|numeric|min:0',
             'rating' => 'nullable|integer|min:1|max:5',
             'feedback_comments' => 'nullable|string|max:1000',
             'guest_signature' => 'nullable|string',
@@ -69,8 +70,18 @@ class CheckOutController extends Controller
             'room_marked_clean' => false,
         ]);
 
-        // Update reservation status
-        $reservation->checkOut();
+    // Update reservation payment information
+    $amountCollected = $validated['amount_collected'] ?? 0;
+    if ($amountCollected > 0) {
+        $newBalance = max(0, $reservation->balance_pending - $amountCollected);
+        $reservation->update([
+            'balance_pending' => $newBalance,
+            'advance_paid' => $reservation->advance_paid + $amountCollected
+        ]);
+    }
+
+    // Update reservation status
+    $reservation->checkOut();
 
         return response()->json([
             'success' => true,

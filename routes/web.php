@@ -223,6 +223,8 @@ Route::middleware(['auth', 'subscription.limits'])->group(function () {
     Route::get('/bookings/{booking}/edit', [App\Http\Controllers\BookingController::class, 'edit'])->name('bookings.edit');
     Route::put('/bookings/{booking}', [App\Http\Controllers\BookingController::class, 'update'])->name('bookings.update');
     Route::get('/bookings-cancelled', [App\Http\Controllers\BookingController::class, 'cancelled'])->name('bookings.cancelled');
+    Route::get('/bookings-completed', [App\Http\Controllers\BookingController::class, 'completed'])->name('bookings.completed');
+    Route::patch('/bookings/{booking}/payment', [App\Http\Controllers\BookingController::class, 'updatePayment'])->name('bookings.payment.update');
     
     // Invoice Routes
     Route::get('/bookings/{booking}/invoice/download', [App\Http\Controllers\InvoiceController::class, 'download'])->name('bookings.invoice.download');

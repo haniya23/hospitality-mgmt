@@ -29,7 +29,8 @@ class BookingController extends Controller
         return response()->json([
             'pending' => $bookings->where('status', 'pending')->values(),
             'active' => $bookings->whereIn('status', ['confirmed', 'checked_in'])->values(),
-            'cancelled' => $bookings->where('status', 'cancelled')->values()
+            'cancelled' => $bookings->where('status', 'cancelled')->values(),
+            'completed' => $bookings->where('status', 'checked_out')->values()
         ]);
     }
 
@@ -507,6 +508,28 @@ class BookingController extends Controller
 
         return view('bookings.cancelled', compact('cancelledBookings', 'properties'));
     }
+
+    public function completed(Request $request)
+    {
+        $query = Reservation::with(['guest', 'accommodation.property', 'b2bPartner', 'checkInRecord.staff', 'checkOutRecord.staff'])
+            ->whereHas('accommodation.property', function($q) {
+                $q->where('owner_id', auth()->id());
+            })
+            ->where('status', 'checked_out');
+
+        if ($request->property_id) {
+            $query->whereHas('accommodation', function($q) use ($request) {
+                $q->where('property_id', $request->property_id);
+            });
+        }
+
+        $completedBookings = $query->latest()->paginate(10);
+
+        $properties = Property::where('owner_id', auth()->id())
+            ->get(['id', 'name']);
+
+        return view('bookings.completed', compact('completedBookings', 'properties'));
+    }
     
     public function findAvailableAccommodations(Request $request)
     {
@@ -583,6 +606,46 @@ class BookingController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Booking reactivated successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function updatePayment(Request $request, Reservation $booking)
+    {
+        try {
+            $booking->load('accommodation.property');
+            
+            if ($booking->accommodation->property->owner_id !== auth()->id()) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+            }
+            
+            $request->validate([
+                'amount_paid' => 'required|numeric|min:0',
+                'payment_notes' => 'nullable|string|max:500'
+            ]);
+            
+            $amountPaid = $request->amount_paid;
+            $newBalance = max(0, $booking->balance_pending - $amountPaid);
+            
+            $booking->update([
+                'balance_pending' => $newBalance,
+                'advance_paid' => $booking->advance_paid + $amountPaid
+            ]);
+            
+            // Update checkout record payment status if fully paid
+            if ($newBalance == 0 && $booking->checkOutRecord) {
+                $booking->checkOutRecord->update([
+                    'payment_status' => 'completed',
+                    'payment_notes' => $request->payment_notes
+                ]);
+            }
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Payment updated successfully',
+                'new_balance' => $newBalance
             ]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);

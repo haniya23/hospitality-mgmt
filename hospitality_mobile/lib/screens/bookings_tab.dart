@@ -249,9 +249,18 @@ class _BookingsTabState extends State<BookingsTab> with SingleTickerProviderStat
   }
 
   Widget _buildBaseCard(BuildContext context, Map<String, dynamic> booking, {required Widget actions}) {
-    final guestName = booking['guest']?['name'] ?? 'Guest';
+    // Try multiple sources for guest name
+    String guestName = 'Guest';
+    if (booking['guest'] != null && booking['guest']['name'] != null) {
+      guestName = booking['guest']['name'];
+    } else if (booking['b2b_partner'] != null && booking['b2b_partner']['name'] != null) {
+      guestName = booking['b2b_partner']['name'];
+    } else if (booking['guest_name'] != null) {
+      guestName = booking['guest_name'];
+    }
+    
     final propertyName = booking['accommodation']?['property']?['name'] ?? 'Property';
-    final accName = booking['accommodation']?['display_name'] ?? 'Unit';
+    final accName = booking['accommodation']?['display_name'] ?? booking['accommodation']?['name'] ?? 'Unit';
     final checkIn = DateTime.parse(booking['check_in_date']);
     final checkOut = DateTime.parse(booking['check_out_date']);
     final nights = checkOut.difference(checkIn).inDays;

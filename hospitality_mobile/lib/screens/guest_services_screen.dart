@@ -27,7 +27,10 @@ class _GuestServicesScreenState extends ConsumerState<GuestServicesScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
-    _refreshData();
+    // Delay data fetching until after the widget tree is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _refreshData();
+    });
   }
 
   Future<void> _refreshData() async {
