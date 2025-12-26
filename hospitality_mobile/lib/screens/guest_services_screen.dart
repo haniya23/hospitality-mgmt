@@ -7,6 +7,8 @@ import '../providers/riverpod_providers.dart';
 import '../providers/booking_provider.dart';
 import 'checkin_form_screen.dart';
 import 'checkout_form_screen.dart';
+import 'checkin_details_screen.dart';
+import 'checkout_details_screen.dart';
 
 class GuestServicesScreen extends ConsumerStatefulWidget {
   const GuestServicesScreen({super.key});
@@ -24,16 +26,18 @@ class _GuestServicesScreenState extends ConsumerState<GuestServicesScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
     _refreshData();
   }
 
   Future<void> _refreshData() async {
     final dateStr = DateFormat('yyyy-MM-dd').format(_today);
-    // Fetch parallel
+    // Fetch all required data
     await Future.wait([
       ref.read(bookingProvider).fetchCheckIns(dateStr, showAll: _showAll),
       ref.read(bookingProvider).fetchCheckOuts(dateStr, showAll: _showAll),
+      ref.read(bookingProvider).fetchCheckInHistory(),
+      ref.read(bookingProvider).fetchCheckOutHistory(),
     ]);
   }
 
@@ -60,9 +64,12 @@ class _GuestServicesScreenState extends ConsumerState<GuestServicesScreen>
           unselectedLabelColor: const Color(0xFF64748B),
           labelStyle: GoogleFonts.outfit(fontWeight: FontWeight.w600),
           indicatorColor: const Color(0xFF4F46E5),
+          isScrollable: true,
           tabs: const [
             Tab(text: 'Ready for Check-in'),
             Tab(text: 'Check-out Pending'),
+            Tab(text: 'Recent Check-ins'),
+            Tab(text: 'Recent Check-outs'),
           ],
         ),
         actions: [
@@ -84,62 +91,21 @@ class _GuestServicesScreenState extends ConsumerState<GuestServicesScreen>
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            color: Colors.white,
-            child: Row(
+      body: bookingProv.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : TabBarView(
+              controller: _tabController,
               children: [
-                ActionChip(
-                  label: const Text('Today'),
-                  backgroundColor: !_showAll ? Colors.blue.shade50 : Colors.grey.shade100,
-                  labelStyle: GoogleFonts.outfit(
-                    color: !_showAll ? Colors.blue.shade700 : Colors.grey.shade700,
-                    fontWeight: !_showAll ? FontWeight.bold : FontWeight.normal,
-                  ),
-                  onPressed: () {
-                    if (_showAll) {
-                      setState(() => _showAll = false);
-                      _refreshData();
-                    }
-                  },
-                ),
-                const SizedBox(width: 12),
-                ActionChip(
-                  label: const Text('upcoming'),
-                  backgroundColor: _showAll ? Colors.blue.shade50 : Colors.grey.shade100,
-                  labelStyle: GoogleFonts.outfit(
-                    color: _showAll ? Colors.blue.shade700 : Colors.grey.shade700,
-                    fontWeight: _showAll ? FontWeight.bold : FontWeight.normal,
-                  ),
-                  onPressed: () {
-                    if (!_showAll) {
-                      setState(() => _showAll = true);
-                      _refreshData();
-                    }
-                  },
-                ),
+                _buildList(bookingProv.checkIns, isCheckIn: true, isHistory: false),
+                _buildList(bookingProv.checkOuts, isCheckIn: false, isHistory: false),
+                _buildList(bookingProv.recentCheckIns, isCheckIn: true, isHistory: true),
+                _buildList(bookingProv.recentCheckOuts, isCheckIn: false, isHistory: true),
               ],
             ),
-          ),
-          Expanded(
-            child: bookingProv.isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : TabBarView(
-                    controller: _tabController,
-                    children: [
-                      _buildList(bookingProv.checkIns, isCheckIn: true),
-                      _buildList(bookingProv.checkOuts, isCheckIn: false),
-                    ],
-                  ),
-          ),
-        ],
-      ),
     );
   }
 
-  Widget _buildList(List bookings, {required bool isCheckIn}) {
+  Widget _buildList(List bookings, {required bool isCheckIn, required bool isHistory}) {
     if (bookings.isEmpty) {
       return Center(
         child: Column(
@@ -152,9 +118,9 @@ class _GuestServicesScreenState extends ConsumerState<GuestServicesScreen>
             ),
             const SizedBox(height: 16),
             Text(
-              isCheckIn
-                  ? 'No check-ins found'
-                  : 'No check-outs found',
+              isHistory 
+                  ? (isCheckIn ? 'No recent check-ins' : 'No recent check-outs')
+                  : (isCheckIn ? 'No pending check-ins' : 'No pending check-outs'),
               style: GoogleFonts.outfit(
                 fontSize: 16,
                 color: Colors.grey.shade500,
@@ -173,7 +139,7 @@ class _GuestServicesScreenState extends ConsumerState<GuestServicesScreen>
         separatorBuilder: (_, __) => const SizedBox(height: 16),
         itemBuilder: (context, index) {
           final booking = bookings[index];
-          return _buildBookingCard(booking, isCheckIn)
+          return _buildBookingCard(booking, isCheckIn, isHistory)
               .animate()
               .fadeIn(delay: (50 * index).ms)
               .slideY(begin: 0.1, end: 0);
@@ -182,15 +148,26 @@ class _GuestServicesScreenState extends ConsumerState<GuestServicesScreen>
     );
   }
 
-  Widget _buildBookingCard(Map<String, dynamic> booking, bool isCheckIn) {
-    final guestName = booking['guest']?['name'] ?? 'Unknown Guest';
-    final propertyName = booking['accommodation']?['property']?['name'] ?? 'Property';
-    final roomName = booking['accommodation']?['name'] ?? 'Room';
-    final bookingId = booking['id'];
+  Widget _buildBookingCard(Map<String, dynamic> booking, bool isCheckIn, bool isHistory) {
+    // Determine data paths based on history (CheckIn/CheckOut model) vs pending (Reservation model)
+    final guestName = booking['guest']?['name'] ?? booking['guest_name'] ?? 'Unknown Guest';
     
-    final dateStr = isCheckIn ? booking['check_in_date'] : booking['check_out_date'];
+    // For history, accommodation info is nested under 'reservation'
+    final accommodation = isHistory 
+        ? booking['reservation']?['accommodation']
+        : booking['accommodation'];
+        
+    final propertyName = accommodation?['property']?['name'] ?? 'Property';
+    final roomName = accommodation?['custom_name'] ?? accommodation?['name'] ?? 'Room';
+    
+    final dateStr = isHistory
+        ? (isCheckIn ? booking['check_in_time'] : booking['check_out_time'])
+        : (isCheckIn ? booking['check_in_date'] : booking['check_out_date']);
+        
     final parsedDate = DateTime.tryParse(dateStr ?? '');
-    final dateDisplay = parsedDate != null ? DateFormat('d MMM').format(parsedDate) : 'Unknown';
+    final dateDisplay = parsedDate != null 
+        ? DateFormat(isHistory ? 'MMM d, h:mm a' : 'MMM d').format(parsedDate) 
+        : 'Unknown';
 
     return Container(
       decoration: BoxDecoration(
@@ -250,16 +227,25 @@ class _GuestServicesScreenState extends ConsumerState<GuestServicesScreen>
           Row(
             children: [
               _buildInfoChip(
-                  Icons.calendar_today, isCheckIn ? 'Arriving $dateDisplay' : 'Departing $dateDisplay'),
+                  Icons.calendar_today, 
+                  isHistory 
+                      ? (isCheckIn ? 'Checked in $dateDisplay' : 'Checked out $dateDisplay')
+                      : (isCheckIn ? 'Arriving $dateDisplay' : 'Departing $dateDisplay')
+              ),
               const Spacer(),
               ElevatedButton.icon(
-                onPressed: () => _handleStatusChange(bookingId, isCheckIn),
-                icon: Icon(isCheckIn ? Icons.check : Icons.done_all, size: 16),
-                label: Text(isCheckIn ? 'Check In' : 'Check Out'),
+                onPressed: () => isHistory 
+                    ? _viewDetails(context, booking['uuid'], isCheckIn)
+                    : _handleStatusChange(booking['id'], isCheckIn),
+                icon: Icon(isHistory ? Icons.visibility : (isCheckIn ? Icons.check : Icons.done_all), size: 16),
+                label: Text(isHistory ? 'View Details' : (isCheckIn ? 'Check In' : 'Check Out')),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: isCheckIn ? const Color(0xFF4F46E5) : const Color(0xFFF59E0B),
-                  foregroundColor: Colors.white,
-                  elevation: 0,
+                  backgroundColor: isHistory 
+                      ? Colors.white 
+                      : (isCheckIn ? const Color(0xFF4F46E5) : const Color(0xFFF59E0B)),
+                  foregroundColor: isHistory ? Colors.blue.shade700 : Colors.white,
+                  elevation: isHistory ? 0 : 2,
+                  side: isHistory ? BorderSide(color: Colors.blue.shade200) : null,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -291,7 +277,6 @@ class _GuestServicesScreenState extends ConsumerState<GuestServicesScreen>
   }
 
   Future<void> _handleStatusChange(int bookingId, bool isCheckIn) async {
-    // Find booking data
     final bookingProv = ref.read(bookingProvider);
     final booking = isCheckIn 
         ? bookingProv.checkIns.firstWhere((b) => b['id'] == bookingId)
@@ -313,6 +298,38 @@ class _GuestServicesScreenState extends ConsumerState<GuestServicesScreen>
         ),
       );
       if (result == true) _refreshData();
+    }
+  }
+
+  Future<void> _viewDetails(BuildContext context, String uuid, bool isCheckIn) async {
+    final bookingProv = ref.read(bookingProvider);
+    
+    // Show loading
+    showDialog(context: context, barrierDismissible: false, builder: (_) => const Center(child: CircularProgressIndicator()));
+    
+    try {
+      if (isCheckIn) {
+        final details = await bookingProv.fetchCheckInDetails(uuid);
+        Navigator.pop(context); // hide loading
+        if (details != null) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => CheckInDetailsScreen(checkIn: details)),
+          );
+        }
+      } else {
+        final details = await bookingProv.fetchCheckOutDetails(uuid);
+        Navigator.pop(context);
+        if (details != null) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => CheckOutDetailsScreen(checkOut: details)),
+          );
+        }
+      }
+    } catch (e) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error loading details: $e')));
     }
   }
 }

@@ -68,4 +68,43 @@ class CheckInController extends Controller
             'data' => $checkIn
         ]);
     }
+    /**
+     * List recent check-ins
+     */
+    public function index(Request $request)
+    {
+        $user = $request->user();
+        
+        $checkIns = CheckIn::with(['reservation.accommodation.property', 'guest'])
+            ->whereHas('reservation.accommodation.property', function($query) use ($user) {
+                $query->where('owner_id', $user->id);
+            })
+            ->latest()
+            ->paginate(20);
+
+        return response()->json([
+            'success' => true,
+            'data' => $checkIns
+        ]);
+    }
+
+    /**
+     * Get check-in details
+     */
+    public function show(Request $request, $uuid)
+    {
+        $checkIn = CheckIn::with(['reservation.accommodation.property', 'reservation.guest', 'guest', 'staff'])
+            ->where('uuid', $uuid)
+            ->firstOrFail();
+
+        // Ensure owner owns the property
+        if ($checkIn->reservation->accommodation->property->owner_id !== $request->user()->id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $checkIn
+        ]);
+    }
 }

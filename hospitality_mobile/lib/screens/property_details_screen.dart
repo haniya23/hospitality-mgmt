@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+import '../providers/property_provider.dart';
 import 'accommodation_details_screen.dart'; // Forward reference
 
 class PropertyDetailsScreen extends StatelessWidget {
@@ -21,6 +24,12 @@ class PropertyDetailsScreen extends StatelessWidget {
             expandedHeight: 250.0,
             floating: false,
             pinned: true,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.add_a_photo),
+                onPressed: () => _pickAndUploadPhoto(context),
+              ),
+            ],
             flexibleSpace: FlexibleSpaceBar(
               title: Text(
                 property['name'],
@@ -35,12 +44,30 @@ class PropertyDetailsScreen extends StatelessWidget {
                 fit: StackFit.expand,
                 children: [
                   photos.isNotEmpty
-                      ? Image.network(
-                          photos[0]['url'] ?? 'https://via.placeholder.com/400x250',
-                          fit: BoxFit.cover,
-                          errorBuilder: (ctx, err, _) => Container(color: Colors.grey[200]),
+                      ? PageView.builder(
+                          itemCount: photos.length,
+                          itemBuilder: (context, index) {
+                            return Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                Image.network(
+                                  photos[index]['url'] ?? 'https://via.placeholder.com/400x250',
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (ctx, err, _) => Container(color: Colors.grey[200]),
+                                ),
+                                Positioned(
+                                  top: 10,
+                                  right: 10,
+                                  child: IconButton(
+                                    icon: const Icon(Icons.delete, color: Colors.red),
+                                    onPressed: () => _confirmDeletePhoto(context, photos[index]['id']),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
                         )
-                      : Container(color: Colors.blueGrey.shade100),
+                      : Container(color: Colors.blueGrey.shade100, child: const Icon(Icons.image, size: 50, color: Colors.white54)),
                   const DecoratedBox(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
@@ -126,6 +153,50 @@ class PropertyDetailsScreen extends StatelessWidget {
                 ],
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _pickAndUploadPhoto(BuildContext context) async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    
+    if (image != null) {
+      final success = await Provider.of<PropertyProvider>(context, listen: false)
+          .uploadPropertyPhoto(property['id'], image.path);
+      
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Photo uploaded successfully')));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to upload photo')));
+      }
+    }
+  }
+
+  void _confirmDeletePhoto(BuildContext context, int photoId) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Photo?'),
+        content: const Text('Are you sure you want to delete this photo?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              final success = await Provider.of<PropertyProvider>(context, listen: false)
+                  .deletePropertyPhoto(property['id'], photoId);
+               if (success) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Photo deleted successfully')));
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Delete', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),

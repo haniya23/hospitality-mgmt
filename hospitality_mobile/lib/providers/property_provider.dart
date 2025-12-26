@@ -136,5 +136,142 @@ class PropertyProvider with ChangeNotifier {
         }
       } 
     } catch (_) {}
+    Future<bool> uploadPropertyPhoto(int id, String filePath) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse('${ApiConfig.propertiesEndpoint}/$id/photos'),
+      );
+      request.headers.addAll({
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      });
+      request.files.add(await http.MultipartFile.fromPath('photos[]', filePath));
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        await fetchProperties();
+        return true;
+      } else {
+        final jsonData = jsonDecode(response.body);
+        _error = jsonData['message'] ?? 'Failed to upload photo';
+        return false;
+      }
+    } catch (e) {
+      _error = 'Connection error: $e';
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
+
+  Future<bool> deletePropertyPhoto(int id, int photoId) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+
+      final response = await http.delete(
+        Uri.parse('${ApiConfig.propertiesEndpoint}/$id/photos/$photoId'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        await fetchProperties();
+        return true;
+      } else {
+        final jsonData = jsonDecode(response.body);
+        _error = jsonData['message'] ?? 'Failed to delete photo';
+        return false;
+      }
+    } catch (e) {
+      _error = 'Connection error: $e';
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> uploadAccommodationPhoto(int propertyId, int accommodationId, String filePath) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse('${ApiConfig.propertiesEndpoint}/$propertyId/accommodations/$accommodationId/photos'),
+      );
+      request.headers.addAll({
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      });
+      request.files.add(await http.MultipartFile.fromPath('photos[]', filePath));
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        await fetchProperties();
+        return true;
+      } else {
+        final jsonData = jsonDecode(response.body);
+        _error = jsonData['message'] ?? 'Failed to upload photo';
+        return false;
+      }
+    } catch (e) {
+      _error = 'Connection error: $e';
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> deleteAccommodationPhoto(int propertyId, int accommodationId, int photoId) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+
+      final response = await http.delete(
+        Uri.parse('${ApiConfig.propertiesEndpoint}/$propertyId/accommodations/$accommodationId/photos/$photoId'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        await fetchProperties();
+        return true;
+      } else {
+        final jsonData = jsonDecode(response.body);
+        _error = jsonData['message'] ?? 'Failed to delete photo';
+        return false;
+      }
+    } catch (e) {
+      _error = 'Connection error: $e';
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+}
 }

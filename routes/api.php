@@ -93,6 +93,12 @@ Route::prefix('owner')->name('api.owner.')->middleware('auth:sanctum')->group(fu
     Route::get('/properties', [App\Http\Controllers\Api\Owner\PropertyController::class, 'index'])->name('properties.index');
     Route::put('/properties/{id}', [App\Http\Controllers\Api\Owner\PropertyController::class, 'update'])->name('properties.update');
     Route::patch('/properties/{id}/status', [App\Http\Controllers\Api\Owner\PropertyController::class, 'toggleStatus'])->name('properties.status');
+    Route::post('/properties/{id}/photos', [App\Http\Controllers\Api\Owner\PropertyController::class, 'storePhotos'])->name('properties.photos.store');
+    Route::delete('/properties/{id}/photos/{photoId}', [App\Http\Controllers\Api\Owner\PropertyController::class, 'deletePhoto'])->name('properties.photos.delete');
+
+    // Accommodation Photos
+    Route::post('/properties/{id}/accommodations/{accommodationId}/photos', [App\Http\Controllers\Api\Owner\PropertyController::class, 'storeAccommodationPhotos'])->name('properties.accommodations.photos.store');
+    Route::delete('/properties/{id}/accommodations/{accommodationId}/photos/{photoId}', [App\Http\Controllers\Api\Owner\PropertyController::class, 'deleteAccommodationPhoto'])->name('properties.accommodations.photos.delete');
 
     // B2B Partners
     Route::get('/b2b', [App\Http\Controllers\Api\Owner\B2bController::class, 'index'])->name('b2b.index');
@@ -102,6 +108,12 @@ Route::prefix('owner')->name('api.owner.')->middleware('auth:sanctum')->group(fu
     // Guests
     Route::get('/guests', [App\Http\Controllers\Api\Owner\GuestController::class, 'index'])->name('guests.index');
     Route::post('/guests', [App\Http\Controllers\Api\Owner\GuestController::class, 'store'])->name('guests.store');
+    // Check-in/Check-out History
+    Route::get('/checkins', [App\Http\Controllers\Api\Owner\CheckInController::class, 'index'])->name('checkins.index');
+    Route::get('/checkins/{uuid}', [App\Http\Controllers\Api\Owner\CheckInController::class, 'show'])->name('checkins.show');
+    
+    Route::get('/checkouts', [App\Http\Controllers\Api\Owner\CheckOutController::class, 'index'])->name('checkouts.index');
+    Route::get('/checkouts/{uuid}', [App\Http\Controllers\Api\Owner\CheckOutController::class, 'show'])->name('checkouts.show');
     Route::put('/guests/{id}', [App\Http\Controllers\Api\Owner\GuestController::class, 'update'])->name('guests.update');
 
     // Staff Management

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+import '../providers/property_provider.dart';
 import 'create_booking_screen.dart';
 
 class AccommodationDetailsScreen extends StatelessWidget {
@@ -9,6 +12,11 @@ class AccommodationDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // If photos update, we might need to refresh? But provider updates should handle it if we listen...
+    // Actually this screen is stateless and receives map. It won't auto-update unless parent rebuilds or we fetch.
+    // Ideally we should use Consumer or fetch fresh data. For now, rely on what's passed, 
+    // but upload actions will be simpler.
+    
     final photos = accommodation['photos'] as List? ?? [];
     final amenities = accommodation['amenities'] as List? ?? [];
     final predefinedName = accommodation['predefined_type']?['name'] ?? 'Room';
@@ -20,6 +28,12 @@ class AccommodationDetailsScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black87),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add_a_photo, color: Colors.blue),
+            onPressed: () => _pickAndUploadPhoto(context),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -32,10 +46,23 @@ class AccommodationDetailsScreen extends StatelessWidget {
                   ? PageView.builder(
                       itemCount: photos.length,
                       itemBuilder: (context, index) {
-                        return Image.network(
-                          photos[index]['url'] ?? '',
-                          fit: BoxFit.cover,
-                          errorBuilder: (c,e,s) => Container(color: Colors.grey[300]),
+                        return Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            Image.network(
+                              photos[index]['url'] ?? '',
+                              fit: BoxFit.cover,
+                              errorBuilder: (c,e,s) => Container(color: Colors.grey[300]),
+                            ),
+                            Positioned(
+                              top: 10,
+                              right: 10,
+                              child: IconButton(
+                                icon: const Icon(Icons.delete, color: Colors.red),
+                                onPressed: () => _confirmDeletePhoto(context, photos[index]['id']),
+                              ),
+                            ),
+                          ],
                         );
                       },
                     )
@@ -144,6 +171,60 @@ class AccommodationDetailsScreen extends StatelessWidget {
           ),
           child: Text('Book Now', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold)),
         ),
+      ),
+    );
+  }
+
+  Future<void> _pickAndUploadPhoto(BuildContext context) async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    
+    if (image != null) {
+      final propertyId = accommodation['property_id'];
+      if (propertyId == null) {
+         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error: Property ID missing')));
+         return;
+      }
+      
+      final success = await Provider.of<PropertyProvider>(context, listen: false)
+          .uploadAccommodationPhoto(propertyId, accommodation['id'], image.path);
+      
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Photo uploaded successfully. Go back to see changes.')));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to upload photo')));
+      }
+    }
+  }
+
+  void _confirmDeletePhoto(BuildContext context, int photoId) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Photo?'),
+        content: const Text('Are you sure you want to delete this photo?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              
+              final propertyId = accommodation['property_id'];
+              if (propertyId == null) return;
+
+              final success = await Provider.of<PropertyProvider>(context, listen: false)
+                  .deleteAccommodationPhoto(propertyId, accommodation['id'], photoId);
+               if (success) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Photo deleted successfully. Go back to see changes.')));
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Delete', style: TextStyle(color: Colors.white)),
+          ),
+        ],
       ),
     );
   }

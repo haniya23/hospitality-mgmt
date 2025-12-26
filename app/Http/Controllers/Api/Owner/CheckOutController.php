@@ -78,4 +78,43 @@ class CheckOutController extends Controller
             'data' => $checkOut
         ]);
     }
+    /**
+     * List recent check-outs
+     */
+    public function index(Request $request)
+    {
+        $user = $request->user();
+        
+        $checkOuts = CheckOut::with(['reservation.accommodation.property', 'guest'])
+            ->whereHas('reservation.accommodation.property', function($query) use ($user) {
+                $query->where('owner_id', $user->id);
+            })
+            ->latest()
+            ->paginate(20);
+
+        return response()->json([
+            'success' => true,
+            'data' => $checkOuts
+        ]);
+    }
+
+    /**
+     * Get check-out details
+     */
+    public function show(Request $request, $uuid)
+    {
+        $checkOut = CheckOut::with(['reservation.accommodation.property', 'reservation.guest', 'guest', 'staff', 'checkIn'])
+            ->where('uuid', $uuid)
+            ->firstOrFail();
+
+        // Ensure owner owns the property
+        if ($checkOut->reservation->accommodation->property->owner_id !== $request->user()->id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $checkOut
+        ]);
+    }
 }

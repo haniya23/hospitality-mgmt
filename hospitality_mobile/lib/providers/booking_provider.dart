@@ -6,21 +6,25 @@ import '../config/api_config.dart';
 
 class BookingProvider with ChangeNotifier {
   bool _isLoading = false;
-  List<dynamic> _bookings = [];
+  List<Map<String, dynamic>> _bookings = [];
   Map<String, int> _counts = {'all': 0, 'pending': 0, 'confirmed': 0, 'cancelled': 0};
   String? _error;
   String _currentStatus = 'all';
+  List<Map<String, dynamic>> _checkIns = [];
+  List<Map<String, dynamic>> _checkOuts = [];
+  List<Map<String, dynamic>> _recentCheckIns = [];
+  List<Map<String, dynamic>> _recentCheckOuts = [];
 
   bool get isLoading => _isLoading;
-  List<dynamic> get bookings => _bookings;
+  List<Map<String, dynamic>> get bookings => _bookings;
   Map<String, int> get counts => _counts;
   String? get error => _error;
   String get currentStatus => _currentStatus;
-  List<dynamic> get checkIns => _checkIns;
-  List<dynamic> get checkOuts => _checkOuts;
-
-  List<dynamic> _checkIns = [];
-  List<dynamic> _checkOuts = [];
+  
+  List<Map<String, dynamic>> get checkIns => _checkIns;
+  List<Map<String, dynamic>> get checkOuts => _checkOuts;
+  List<Map<String, dynamic>> get recentCheckIns => _recentCheckIns;
+  List<Map<String, dynamic>> get recentCheckOuts => _recentCheckOuts;
 
   Future<void> fetchCheckIns(String date, {bool showAll = false}) async {
     _isLoading = true;
