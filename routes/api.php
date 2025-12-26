@@ -91,6 +91,8 @@ Route::prefix('owner')->name('api.owner.')->middleware('auth:sanctum')->group(fu
     
     // Properties
     Route::get('/properties', [App\Http\Controllers\Api\Owner\PropertyController::class, 'index'])->name('properties.index');
+    Route::put('/properties/{id}', [App\Http\Controllers\Api\Owner\PropertyController::class, 'update'])->name('properties.update');
+    Route::patch('/properties/{id}/status', [App\Http\Controllers\Api\Owner\PropertyController::class, 'toggleStatus'])->name('properties.status');
 
     // B2B Partners
     Route::get('/b2b', [App\Http\Controllers\Api\Owner\B2bController::class, 'index'])->name('b2b.index');

@@ -73,6 +73,7 @@ class _PropertiesTabState extends State<PropertiesTab> {
   Widget _buildPropertyCard(Map<String, dynamic> property) {
     final photos = property['photos'] as List? ?? [];
     final imageUrl = photos.isNotEmpty ? photos[0]['url'] : null;
+    final isActive = property['status'] == 'active';
 
     return GestureDetector(
       onTap: () {
@@ -136,6 +137,22 @@ class _PropertiesTabState extends State<PropertiesTab> {
                              maxLines: 1, overflow: TextOverflow.ellipsis,
                            ),
                          ),
+                         // Status Switch
+                         Transform.scale(
+                           scale: 0.8,
+                           child: Switch(
+                             value: isActive,
+                             onChanged: (val) {
+                               Provider.of<PropertyProvider>(context, listen: false).toggleStatus(property['id']);
+                             },
+                             activeColor: Colors.blue,
+                           ),
+                         ),
+                       ],
+                     ),
+                     const SizedBox(height: 4),
+                     Row(
+                       children: [
                          if (property['category'] != null)
                            Container(
                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -145,27 +162,14 @@ class _PropertiesTabState extends State<PropertiesTab> {
                              ),
                              child: Text(
                                property['category']['name'] ?? '',
-                               style: GoogleFonts.outfit(
-                                 fontSize: 10,
-                                 fontWeight: FontWeight.bold,
-                                 color: Colors.blue.shade700,
-                               ),
+                               style: GoogleFonts.outfit(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.blue.shade700),
                              ),
                            ),
-                       ],
-                     ),
-                     const SizedBox(height: 4),
-                     Row(
-                       children: [
-                         Icon(Icons.location_on, size: 14, color: Colors.grey[400]),
-                         const SizedBox(width: 4),
+                         const SizedBox(width: 8),
                          Expanded(
                            child: Text(
                              property['location']?['city']?['name'] ?? 'Location',
-                             style: GoogleFonts.outfit(
-                               fontSize: 13,
-                               color: Colors.grey[600],
-                             ),
+                             style: GoogleFonts.outfit(fontSize: 13, color: Colors.grey[600]),
                              maxLines: 1, overflow: TextOverflow.ellipsis,
                            ),
                          ),
@@ -194,14 +198,13 @@ class _PropertiesTabState extends State<PropertiesTab> {
                              ],
                            ),
                          ),
-                         Row(
-                           children: [
-                             Text(
-                               'Manage',
-                               style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.blue),
-                             ),
-                             const Icon(Icons.arrow_forward_ios, size: 10, color: Colors.blue),
-                           ],
+                         
+                         // Edit Button
+                         IconButton(
+                           icon: const Icon(Icons.edit, size: 20, color: Colors.blueGrey),
+                           padding: EdgeInsets.zero,
+                           constraints: const BoxConstraints(),
+                           onPressed: () => _showEditDialog(property),
                          ),
                        ],
                      ),
@@ -211,6 +214,57 @@ class _PropertiesTabState extends State<PropertiesTab> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _showEditDialog(Map<String, dynamic> property) {
+    final nameController = TextEditingController(text: property['name']);
+    final descController = TextEditingController(text: property['description']);
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Edit Property', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(labelText: 'Property Name', border: OutlineInputBorder()),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: descController,
+              decoration: const InputDecoration(labelText: 'Description', border: OutlineInputBorder()),
+              maxLines: 3,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel', style: GoogleFonts.outfit(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              final success = await Provider.of<PropertyProvider>(context, listen: false).updateProperty(
+                property['id'], 
+                {
+                  'name': nameController.text,
+                  'description': descController.text,
+                }
+              );
+              
+              if (success && mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Property updated successfully')));
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+            child: Text('Save', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: Colors.white)),
+          ),
+        ],
       ),
     );
   }
