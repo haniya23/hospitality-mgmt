@@ -46,6 +46,7 @@ class PropertyProvider with ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
   Future<bool> updateProperty(int id, Map<String, dynamic> data) async {
     _isLoading = true;
     notifyListeners();
