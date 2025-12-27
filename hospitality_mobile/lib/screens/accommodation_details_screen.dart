@@ -1,8 +1,11 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:provider/provider.dart';
 import '../providers/property_provider.dart';
+import '../utils/image_helper.dart';
 import 'create_booking_screen.dart';
 
 class AccommodationDetailsScreen extends StatelessWidget {
@@ -176,24 +179,34 @@ class AccommodationDetailsScreen extends StatelessWidget {
   }
 
   Future<void> _pickAndUploadPhoto(BuildContext context) async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    final helper = ImageHelper.instance;
     
-    if (image != null) {
-      final propertyId = accommodation['property_id'];
-      if (propertyId == null) {
-         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error: Property ID missing')));
-         return;
-      }
-      
-      final success = await Provider.of<PropertyProvider>(context, listen: false)
-          .uploadAccommodationPhoto(propertyId, accommodation['id'], image.path);
-      
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Photo uploaded successfully. Go back to see changes.')));
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to upload photo')));
-      }
+    // 1. Pick
+    final XFile? file = await helper.pickImage();
+    if (file == null) return;
+
+    // 2. Crop
+    final CroppedFile? croppedFile = await helper.crop(file: file);
+    if (croppedFile == null) return;
+
+    // 3. Compress
+    final XFile? compressedFile = await helper.compress(file: File(croppedFile.path));
+    if (compressedFile == null) return;
+    
+    final propertyId = accommodation['property_id'];
+    if (propertyId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error: Property ID missing')));
+        return;
+    }
+    
+    final success = await Provider.of<PropertyProvider>(context, listen: false)
+        .uploadAccommodationPhoto(propertyId, accommodation['id'], compressedFile.path);
+    
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Photo uploaded successfully. Go back to see changes.')));
+    } else {
+      final provider = Provider.of<PropertyProvider>(context, listen: false);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(provider.error ?? 'Failed to upload photo')));
     }
   }
 
@@ -219,6 +232,9 @@ class AccommodationDetailsScreen extends StatelessWidget {
                   .deleteAccommodationPhoto(propertyId, accommodation['id'], photoId);
                if (success) {
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Photo deleted successfully. Go back to see changes.')));
+              } else {
+                 final provider = Provider.of<PropertyProvider>(context, listen: false);
+                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(provider.error ?? 'Failed to delete photo')));
               }
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),

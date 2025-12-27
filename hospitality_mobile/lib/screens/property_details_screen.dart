@@ -1,9 +1,12 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:provider/provider.dart';
 import '../providers/property_provider.dart';
+import '../utils/image_helper.dart';
 import 'accommodation_details_screen.dart'; // Forward reference
 
 class PropertyDetailsScreen extends StatelessWidget {
@@ -160,18 +163,29 @@ class PropertyDetailsScreen extends StatelessWidget {
   }
 
   Future<void> _pickAndUploadPhoto(BuildContext context) async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    final helper = ImageHelper.instance;
     
-    if (image != null) {
-      final success = await Provider.of<PropertyProvider>(context, listen: false)
-          .uploadPropertyPhoto(property['id'], image.path);
-      
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Photo uploaded successfully')));
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to upload photo')));
-      }
+    // 1. Pick
+    final XFile? file = await helper.pickImage();
+    if (file == null) return;
+
+    // 2. Crop
+    final CroppedFile? croppedFile = await helper.crop(file: file);
+    if (croppedFile == null) return;
+
+    // 3. Compress
+    final XFile? compressedFile = await helper.compress(file: File(croppedFile.path));
+    if (compressedFile == null) return;
+
+    // 4. Upload
+    final success = await Provider.of<PropertyProvider>(context, listen: false)
+        .uploadPropertyPhoto(property['id'], compressedFile.path);
+    
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Photo uploaded successfully')));
+    } else {
+      final provider = Provider.of<PropertyProvider>(context, listen: false);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(provider.error ?? 'Failed to upload photo')));
     }
   }
 
@@ -191,8 +205,11 @@ class PropertyDetailsScreen extends StatelessWidget {
               Navigator.pop(context);
               final success = await Provider.of<PropertyProvider>(context, listen: false)
                   .deletePropertyPhoto(property['id'], photoId);
-               if (success) {
+                if (success) {
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Photo deleted successfully')));
+              } else {
+                 final provider = Provider.of<PropertyProvider>(context, listen: false);
+                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(provider.error ?? 'Failed to delete photo')));
               }
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),

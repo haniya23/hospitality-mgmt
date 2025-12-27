@@ -162,8 +162,16 @@ class PropertyProvider with ChangeNotifier {
         await fetchProperties();
         return true;
       } else {
-        final jsonData = jsonDecode(response.body);
-        _error = jsonData['message'] ?? 'Failed to upload photo';
+         try {
+          final jsonData = jsonDecode(response.body);
+          _error = jsonData['message'] ?? 'Failed to upload photo';
+        } catch (e) {
+          if (response.statusCode == 413) {
+            _error = 'File too large (Server limit)';
+          } else {
+             _error = 'Server Error: ${response.statusCode}';
+          }
+        }
         return false;
       }
     } catch (e) {
@@ -231,8 +239,16 @@ class PropertyProvider with ChangeNotifier {
         await fetchProperties();
         return true;
       } else {
-        final jsonData = jsonDecode(response.body);
-        _error = jsonData['message'] ?? 'Failed to upload photo';
+         try {
+          final jsonData = jsonDecode(response.body);
+          _error = jsonData['message'] ?? 'Failed to upload photo';
+        } catch (e) {
+          if (response.statusCode == 413) {
+            _error = 'File too large (Server limit)';
+          } else {
+             _error = 'Server Error: ${response.statusCode}';
+          }
+        }
         return false;
       }
     } catch (e) {

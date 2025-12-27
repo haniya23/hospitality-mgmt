@@ -89,6 +89,7 @@ class PropertyController extends Controller
                 $property->photos()->create([
                     'file_path' => $path,
                     'is_main' => $property->photos()->doesntExist(), // First photo is main
+                    'file_size' => $photo->getSize(),
                 ]);
             }
         }
@@ -140,6 +141,7 @@ class PropertyController extends Controller
                 $accommodation->photos()->create([
                     'file_path' => $path,
                     'is_main' => $accommodation->photos()->doesntExist(),
+                    'file_size' => $photo->getSize(),
                 ]);
             }
         }
