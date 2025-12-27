@@ -142,6 +142,7 @@ class PropertyController extends Controller
                     'file_path' => $path,
                     'is_main' => $accommodation->photos()->doesntExist(),
                     'file_size' => $photo->getSize(),
+                    'property_id' => $property->id,
                 ]);
             }
         }
@@ -182,8 +183,10 @@ class PropertyController extends Controller
         
         // Load all necessary relationships
         $property->load([
+            'photos',
             'category',
             'location.city.district.state',
+            'propertyAccommodations.photos',
             'propertyAccommodations.reservations.guest',
             'propertyAccommodations.reservations.b2bPartner',
             'staffMembers.user',
