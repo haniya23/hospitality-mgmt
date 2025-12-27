@@ -16,6 +16,13 @@ class PropertyPhoto extends Model
         'file_size',
     ];
 
+    protected $appends = ['url'];
+
+    public function getUrlAttribute()
+    {
+        return $this->file_path ? \Illuminate\Support\Facades\Storage::url($this->file_path) : null;
+    }
+
     public function property()
     {
         return $this->belongsTo(Property::class);
