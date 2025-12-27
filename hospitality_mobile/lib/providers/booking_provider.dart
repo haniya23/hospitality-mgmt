@@ -15,7 +15,10 @@ class BookingProvider with ChangeNotifier {
   List<Map<String, dynamic>> _recentCheckIns = [];
   List<Map<String, dynamic>> _recentCheckOuts = [];
 
+  bool _isCountsLoading = false;
+
   bool get isLoading => _isLoading;
+  bool get isCountsLoading => _isCountsLoading;
   List<Map<String, dynamic>> get bookings => _bookings;
   Map<String, int> get counts => _counts;
   String? get error => _error;
@@ -246,7 +249,43 @@ class BookingProvider with ChangeNotifier {
     }
   }
 
+  Future<Map<String, dynamic>?> fetchBookingDetails(int id) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+
+      final response = await http.get(
+        Uri.parse('${ApiConfig.bookingsEndpoint}/$id'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final jsonData = jsonDecode(response.body);
+        if (jsonData['success'] == true) {
+          return jsonData['data'];
+        } else {
+             _error = jsonData['message'];
+        }
+      } else {
+        _error = 'Failed to load booking details';
+      }
+    } catch (e) {
+      _error = 'Connection error: $e';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+    return null;
+  }
+
   Future<void> fetchCounts() async {
+    _isCountsLoading = true;
+    notifyListeners();
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('auth_token');
@@ -263,11 +302,13 @@ class BookingProvider with ChangeNotifier {
         final jsonData = jsonDecode(response.body);
         if (jsonData['success'] == true) {
           _counts = Map<String, int>.from(jsonData['data']);
-          notifyListeners();
         }
       }
     } catch (e) {
       print('Error fetching counts: $e');
+    } finally {
+      _isCountsLoading = false;
+      notifyListeners();
     }
   }
 

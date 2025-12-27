@@ -17,251 +17,119 @@ class BookingsTab extends StatefulWidget {
   State<BookingsTab> createState() => _BookingsTabState();
 }
 
-class _BookingsTabState extends State<BookingsTab> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _BookingsTabState extends State<BookingsTab> {
+  int _selectedIndex = 0; // 0: Pending, 1: Confirmed, 2: Completed
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-    _tabController.addListener(_handleTabSelection);
-    
     Future.microtask(() {
-      final provider = Provider.of<BookingProvider>(context, listen: false);
-      provider.fetchCounts();
-      provider.fetchBookings(status: 'pending'); // Default to Pending tab
+      _loadData();
     });
   }
 
-  void _handleTabSelection() {
-    if (_tabController.indexIsChanging) {
-      final provider = Provider.of<BookingProvider>(context, listen: false);
-      if (_tabController.index == 0) {
-        provider.fetchBookings(status: 'pending');
-      } else if (_tabController.index == 1) {
-        provider.fetchBookings(status: 'confirmed');
-      } else {
-        provider.fetchBookings(status: 'checked_out');
-      }
+  void _loadData() {
+    final provider = Provider.of<BookingProvider>(context, listen: false);
+    provider.fetchCounts();
+    _fetchBookingsForCurrentTab();
+  }
+
+  // ... imports
+  import 'booking_details_screen.dart';
+
+  // ... inside _BookingsTabState
+  
+  // NOTE: index 3 is now Cancelled
+  void _fetchBookingsForCurrentTab() {
+    final provider = Provider.of<BookingProvider>(context, listen: false);
+    String status;
+    switch (_selectedIndex) {
+      case 0: status = 'pending'; break;
+      case 1: status = 'confirmed'; break;
+      case 2: status = 'checked_out'; break;
+      case 3: status = 'cancelled'; break;
+      default: status = 'pending';
     }
+    provider.fetchBookings(status: status);
   }
 
-  @override
-  void dispose() {
-    _tabController.removeListener(_handleTabSelection);
-    _tabController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final bookingProvider = Provider.of<BookingProvider>(context);
-    final counts = bookingProvider.counts;
-
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.menu, color: Colors.black87),
-          onPressed: () => MainLayout.scaffoldKey.currentState?.openDrawer(),
-        ),
-        title: Text(
-          'Bookings',
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: const Color(0xFF1E293B)),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.black87),
-            onPressed: () {
-               final status = _tabController.index == 0 ? 'pending' : (_tabController.index == 1 ? 'confirmed' : 'checked_out');
-               bookingProvider.fetchBookings(status: status);
-               bookingProvider.fetchCounts();
-            },
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: IconButton(
-              icon: const Icon(Icons.add_circle, color: Colors.blue, size: 32),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const CreateBookingScreen()),
-                ).then((_) {
-                  final status = _tabController.index == 0 ? 'pending' : (_tabController.index == 1 ? 'confirmed' : 'checked_out');
-                  bookingProvider.fetchBookings(status: status);
-                  bookingProvider.fetchCounts();
-                });
-              },
-            ),
-          ),
-        ],
-        bottom: TabBar(
-          controller: _tabController,
-          labelColor: Colors.blue,
-          unselectedLabelColor: Colors.grey,
-          labelStyle: GoogleFonts.outfit(fontWeight: FontWeight.bold),
-          indicatorColor: Colors.blue,
-          tabs: [
-            Tab(text: 'Pending Requests (${counts['pending'] ?? 0})'),
-            Tab(text: 'Confirmed (${counts['confirmed'] ?? 0})'),
-            Tab(text: 'Completed (${counts['completed'] ?? 0})'),
+  Widget _buildStatusCards(Map<String, int> counts) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      color: Colors.white,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            _buildStatusCardWrapper(0, 'Pending', counts['pending'] ?? 0, const Color(0xFFF59E0B), Icons.pending_actions_rounded),
+            const SizedBox(width: 8),
+            _buildStatusCardWrapper(1, 'Confirmed', counts['confirmed'] ?? 0, const Color(0xFF3B82F6), Icons.check_circle_rounded),
+            const SizedBox(width: 8),
+            _buildStatusCardWrapper(2, 'Completed', counts['completed'] ?? 0, const Color(0xFF10B981), Icons.task_alt_rounded),
+            const SizedBox(width: 8),
+            _buildStatusCardWrapper(3, 'Cancelled', counts['cancelled'] ?? 0, const Color(0xFFEF4444), Icons.cancel_outlined),
           ],
         ),
-      ),
-      body: Stack(
-        children: [
-          TabBarView(
-            controller: _tabController,
-            children: [
-              _buildBookingList(bookingProvider.bookings, isPending: true, isCompleted: false),
-              _buildBookingList(bookingProvider.bookings, isPending: false, isCompleted: false),
-              _buildBookingList(bookingProvider.bookings, isPending: false, isCompleted: true),
-            ],
-          ),
-          if (bookingProvider.isLoading)
-            Container(
-              color: Colors.white.withOpacity(0.5),
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
-            ),
-        ],
       ),
     );
   }
 
-  Widget _buildBookingList(List<dynamic> bookings, {required bool isPending, required bool isCompleted}) {
+  Widget _buildStatusCardWrapper(int index, String title, int count, Color color, IconData icon) {
+    return SizedBox(
+      width: 110, // Fixed width for horizontal scrolling consistency
+      child: _buildSingleStatusCard(
+        index: index,
+        title: title,
+        count: count,
+        primaryColor: color,
+        icon: icon,
+      ),
+    );
+  }
+
+  Widget _buildBookingList(List<dynamic> bookings) {
     if (bookings.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              isCompleted ? Icons.check_circle : (isPending ? Icons.pending_actions : Icons.check_circle_outline), 
-              size: 64, 
-              color: Colors.grey[300]
-            ),
+            Icon(Icons.inbox, size: 64, color: Colors.grey[300]),
             const SizedBox(height: 16),
-            Text(
-              isCompleted ? 'No completed bookings' : (isPending ? 'No pending requests' : 'No confirmed bookings'),
-              style: GoogleFonts.outfit(color: Colors.grey[500]),
-            ),
+            Text('No bookings found', style: GoogleFonts.outfit(color: Colors.grey[500], fontSize: 16)),
           ],
         ),
       );
     }
-
     return ListView.separated(
       padding: const EdgeInsets.all(16),
       itemCount: bookings.length,
       separatorBuilder: (_, __) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
         final booking = bookings[index];
-        if (isCompleted) {
-          return _buildCompletedCard(context, booking);
-        }
-        return isPending
-            ? _buildPendingCard(context, booking)
-            : _buildConfirmedCard(context, booking);
+        if (_selectedIndex == 3) return _buildCancelledCard(context, booking);
+        if (_selectedIndex == 2) return _buildCompletedCard(context, booking);
+        return _selectedIndex == 0 ? _buildPendingCard(context, booking) : _buildConfirmedCard(context, booking);
       },
     );
   }
 
-  // Pending Card: Confirm / Cancel
-  Widget _buildPendingCard(BuildContext context, Map<String, dynamic> booking) {
+  Widget _buildCancelledCard(BuildContext context, Map<String, dynamic> booking) {
     return _buildBaseCard(
-      context,
+      context, 
       booking,
-      actions: Column(
-        children: [
-          const Divider(),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () => _updateStatus(context, booking['id'], 'cancelled'),
-                  icon: const Icon(Icons.close, size: 18),
-                  label: const Text('Decline'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFFEF4444), // Red text
-                    side: const BorderSide(color: Color(0xFFEF4444)), // Red border
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    textStyle: GoogleFonts.outfit(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: () => _showConfirmDialog(context, booking),
-                  icon: const Icon(Icons.check, size: 18),
-                  label: const Text('Approve Request'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF10B981),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    textStyle: GoogleFonts.outfit(fontWeight: FontWeight.bold),
-                    elevation: 0,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
+      actions: SizedBox(
+        width: double.infinity,
+        child: _buildActionButton(Icons.visibility, 'View Details', Colors.grey, () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => BookingDetailsScreen(bookingId: booking['id'], initialData: booking)),
+          );
+        }),
       ),
     );
   }
 
-  // Confirmed Card: Edit, Invoice, Share, Cancel (Icon)
-  Widget _buildConfirmedCard(BuildContext context, Map<String, dynamic> booking) {
-    return _buildBaseCard(
-      context,
-      booking,
-      actions: Row(
-        children: [
-          Expanded(
-            child: _buildActionButton(Icons.edit, 'Edit', Colors.blue, () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => CreateBookingScreen(editingBooking: booking)),
-              ).then((_) {
-                 // Refresh after valid return
-                 if (context.mounted) {
-                   final provider = Provider.of<BookingProvider>(context, listen: false);
-                   provider.fetchBookings(status: provider.currentStatus);
-                   provider.fetchCounts();
-                 }
-              });
-            }),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: _buildActionButton(Icons.description, 'Invoice', Colors.purple, () => _downloadInvoice(context, booking['id'])),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: _buildActionButton(Icons.share, 'Share', Colors.green, () => _shareBooking(booking)),
-          ),
-          const SizedBox(width: 8),
-          Container(
-            decoration: BoxDecoration(color: Colors.red.shade50, borderRadius: BorderRadius.circular(8)),
-            child: IconButton(
-              icon: const Icon(Icons.close, color: Colors.red),
-              onPressed: () => _showCancelDialog(context, booking['id']),
-              tooltip: 'Cancel Booking',
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Completed Card: View Details and Collect Payment (if balance > 0)
+  // Update Completed Card to link to Details
   Widget _buildCompletedCard(BuildContext context, Map<String, dynamic> booking) {
     final balancePending = double.tryParse(booking['balance_pending']?.toString() ?? '0') ?? 0;
     
@@ -271,21 +139,25 @@ class _BookingsTabState extends State<BookingsTab> with SingleTickerProviderStat
       actions: Row(
         children: [
           Expanded(
-            child: _buildActionButton(Icons.visibility, 'View Details', Colors.blue, () {
-              // Navigate to booking details if needed
+            child: _buildActionButton(Icons.visibility, 'Details', Colors.blue, () {
+               Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => BookingDetailsScreen(bookingId: booking['id'], initialData: booking)),
+              );
             }),
           ),
-          if (balancePending > 0)
+          if (balancePending > 0) ...[
             const SizedBox(width: 8),
-          if (balancePending > 0)
             Expanded(
+              flex: 2,
               child: _buildActionButton(
                 Icons.payment, 
                 'Collect Payment', 
-                Colors.green, 
+                Colors.orange, 
                 () => _showPaymentCollectionDialog(context, booking)
               ),
             ),
+          ]
         ],
       ),
     );
@@ -512,6 +384,10 @@ class _BookingsTabState extends State<BookingsTab> with SingleTickerProviderStat
         bg = const Color(0xFFFEE2E2); // Red 100
         text = const Color(0xFF991B1B); // Red 800
         break;
+      case 'checked_out':
+        bg = Colors.grey.shade200;
+        text = Colors.grey.shade800;
+        break;
       default:
         bg = Colors.grey.shade100;
         text = Colors.grey.shade700;
@@ -583,6 +459,8 @@ class _BookingsTabState extends State<BookingsTab> with SingleTickerProviderStat
                   _buildDialogRow('Dates:', dates),
                   const SizedBox(height: 8),
                   _buildDialogRow('Total:', '₹${booking['total_amount']}'),
+                  const SizedBox(height: 16),
+                  const Text('Note: This will mark the booking as confirmed.', style: TextStyle(fontSize: 12, color: Colors.grey)),
                 ],
               ),
             ),
@@ -627,7 +505,6 @@ class _BookingsTabState extends State<BookingsTab> with SingleTickerProviderStat
   }
 
   void _updateStatus(BuildContext context, int id, String status) async {
-      // Direct update for simple status changes (like Confirm)
       final success = await Provider.of<BookingProvider>(context, listen: false)
           .updateBookingStatus(id, status);
       
@@ -639,6 +516,7 @@ class _BookingsTabState extends State<BookingsTab> with SingleTickerProviderStat
             behavior: SnackBarBehavior.floating,
           ),
         );
+        _loadData(); // Refresh list/counts
       }
   }
 
@@ -679,6 +557,7 @@ class _BookingsTabState extends State<BookingsTab> with SingleTickerProviderStat
                   .updateBookingStatus(bookingId, 'cancelled', reason: reasonController.text);
               if (success && mounted) {
                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Booking cancelled successfully')));
+                 _loadData();
               }
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
@@ -776,9 +655,7 @@ class _BookingsTabState extends State<BookingsTab> with SingleTickerProviderStat
               final success = await Provider.of<BookingProvider>(context, listen: false).updateBookingPayment(booking['uuid'], amount, notesController.text);
               if (success && mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Payment collected successfully!'), backgroundColor: Colors.green));
-                final provider = Provider.of<BookingProvider>(context, listen: false);
-                provider.fetchBookings(status: 'checked_out');
-                provider.fetchCounts();
+                _loadData();
               } else if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(Provider.of<BookingProvider>(context, listen: false).error ?? 'Failed'), backgroundColor: Colors.red));
               }
