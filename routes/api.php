@@ -90,6 +90,7 @@ Route::prefix('owner')->name('api.owner.')->middleware('auth:sanctum')->group(fu
     Route::apiResource('bookings', \App\Http\Controllers\Api\Owner\BookingController::class);
     
     // Properties
+    Route::get('/properties/{id}', [App\Http\Controllers\Api\Owner\PropertyController::class, 'show'])->name('properties.show');
     Route::get('/properties', [App\Http\Controllers\Api\Owner\PropertyController::class, 'index'])->name('properties.index');
     Route::put('/properties/{id}', [App\Http\Controllers\Api\Owner\PropertyController::class, 'update'])->name('properties.update');
     Route::patch('/properties/{id}/status', [App\Http\Controllers\Api\Owner\PropertyController::class, 'toggleStatus'])->name('properties.status');

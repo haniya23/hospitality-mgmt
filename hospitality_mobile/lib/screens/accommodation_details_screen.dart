@@ -114,9 +114,13 @@ class AccommodationDetailsScreen extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            name,
-                            style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold),
+                          Expanded(
+                            child: Text(
+                              name,
+                              style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                           Text(
                             '₹${double.parse(freshAccommodation['base_price'].toString()).toStringAsFixed(2)}',
@@ -124,37 +128,81 @@ class AccommodationDetailsScreen extends StatelessWidget {
                           ),
                         ],
                       ),
+                      const SizedBox(height: 16),
+                      
+                      Text(
+                         'Description',
+                         style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
                       const SizedBox(height: 8),
                       Text(
-          onPressed: () {
-             // Navigate to Booking wizard with pre-filled data
-             final propertyId = accommodation['property_id']?.toString();
-             final accId = accommodation['id']?.toString();
-             
-             if (propertyId != null && accId != null) {
-               Navigator.push(
-                 context,
-                 MaterialPageRoute(
-                   builder: (context) => CreateBookingScreen(
-                     initialPropertyId: propertyId,
-                     initialAccommodationId: accId,
-                   ),
-                 ),
-               );
-             } else {
-               ScaffoldMessenger.of(context).showSnackBar(
-                 const SnackBar(content: Text('Error: Property information missing used for booking.')),
-               );
-             }
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue[700],
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        freshAccommodation['description'] ?? 'No description available',
+                        style: GoogleFonts.poppins(color: Colors.grey[700], height: 1.5),
+                      ),
+                      const SizedBox(height: 24),
+                      
+                      if (amenities.isNotEmpty) ...[
+                         Text(
+                           'Amenities',
+                           style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16),
+                         ),
+                         const SizedBox(height: 12),
+                         Wrap(
+                           spacing: 8,
+                           runSpacing: 8,
+                           children: amenities.map<Widget>((amenity) {
+                             return Chip(
+                               label: Text(amenity['name']),
+                               backgroundColor: Colors.blue.shade50,
+                               labelStyle: GoogleFonts.poppins(color: Colors.blue.shade900, fontSize: 12),
+                               avatar: const Icon(Icons.check_circle, size: 16, color: Colors.blue),
+                             );
+                           }).toList(),
+                         ),
+                         const SizedBox(height: 24),
+                      ],
+
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                             // Navigate to Booking wizard with pre-filled data
+                             final propertyId = accommodation['property_id']?.toString();
+                             final accId = accommodation['id']?.toString();
+                             
+                             if (propertyId != null && accId != null) {
+                               Navigator.push(
+                                 context,
+                                 MaterialPageRoute(
+                                   builder: (context) => CreateBookingScreen(
+                                     initialPropertyId: propertyId,
+                                     initialAccommodationId: accId,
+                                   ),
+                                 ),
+                               );
+                             } else {
+                               ScaffoldMessenger.of(context).showSnackBar(
+                                 const SnackBar(content: Text('Error: Property information missing used for booking.')),
+                               );
+                             }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue[700],
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: Text('Book Now', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                        ),
+                      ),
+                      const SizedBox(height: 40),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
-          child: Text('Book Now', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold)),
-        ),
-      ),
+        );
+      },
     );
   }
 
