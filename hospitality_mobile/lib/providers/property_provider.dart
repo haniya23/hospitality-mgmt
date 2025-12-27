@@ -9,9 +9,45 @@ class PropertyProvider with ChangeNotifier {
   List<dynamic> _properties = [];
   String? _error;
 
+  Map<String, dynamic>? _dashboardData;
+  Map<String, dynamic>? get dashboardData => _dashboardData;
+
   bool get isLoading => _isLoading;
   List<dynamic> get properties => _properties;
   String? get error => _error;
+
+  Future<void> fetchPropertyDashboard(int propertyId) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+      final response = await http.get(
+        Uri.parse('${ApiConfig.baseUrl}/owner/properties/$propertyId'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          _dashboardData = data['data'];
+        } else {
+            _error = data['message'] ?? 'Failed to load dashboard data';
+        }
+      } else {
+        _error = 'Failed to load dashboard data: ${response.statusCode}';
+      }
+    } catch (e) {
+      _error = 'Connection error: $e';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 
   Future<void> fetchProperties() async {
     _isLoading = true;
