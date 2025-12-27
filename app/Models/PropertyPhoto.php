@@ -20,7 +20,7 @@ class PropertyPhoto extends Model
 
     public function getUrlAttribute()
     {
-        return $this->file_path ? \Illuminate\Support\Facades\Storage::url($this->file_path) : null;
+        return $this->file_path ? asset(\Illuminate\Support\Facades\Storage::url($this->file_path)) : null;
     }
 
     public function property()
