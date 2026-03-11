@@ -740,7 +740,7 @@ function bookingEditForm() {
             if (!this.selectedProperty) return;
             
             try {
-                const response = await fetch(`/api/properties/${this.selectedProperty}/accommodations`);
+                const response = await fetch(`/api/bookings/properties/${this.selectedProperty}/accommodations`);
                 const accommodations = await response.json();
                 
                 const select = document.querySelector('select[name="accommodation_id"]');

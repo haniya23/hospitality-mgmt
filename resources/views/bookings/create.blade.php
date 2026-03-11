@@ -739,7 +739,7 @@ function bookingCreateForm() {
             if (!this.selectedProperty) return;
             
             try {
-                const response = await fetch(`/api/properties/${this.selectedProperty}/accommodations`);
+                const response = await fetch(`/api/bookings/properties/${this.selectedProperty}/accommodations`);
                 this.accommodations = await response.json();
                 
                 // Update the select element for multiple properties case
@@ -1036,7 +1036,7 @@ function bookingCreateForm() {
             };
             
             try {
-                const response = await fetch(`/api/properties/${propertyId}/accommodations`);
+                const response = await fetch(`/api/bookings/properties/${propertyId}/accommodations`);
                 const accommodations = await response.json();
                 this.modalAccommodations = accommodations;
                 } catch (error) {

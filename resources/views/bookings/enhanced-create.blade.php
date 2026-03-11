@@ -435,7 +435,7 @@ function enhancedBookingForm() {
             if (!this.selectedProperty) return;
             
             try {
-                const response = await fetch(`/api/properties/${this.selectedProperty.uuid}/accommodations`);
+                const response = await fetch(`/api/bookings/properties/${this.selectedProperty.uuid}/accommodations`);
                 if (response.ok) {
                     const accommodations = await response.json();
                     this.selectedPropertyAccommodations = accommodations;
