@@ -47,7 +47,7 @@ class Reservation extends Model
     protected static function boot()
     {
         parent::boot();
-        
+
         static::creating(function ($model) {
             if (empty($model->uuid)) {
                 $model->uuid = Str::uuid();
@@ -175,5 +175,10 @@ class Reservation extends Model
     public function checkOutRecord()
     {
         return $this->hasOne(CheckOut::class);
+    }
+
+    public function bookingFinance()
+    {
+        return $this->hasOne(BookingFinance::class);
     }
 }

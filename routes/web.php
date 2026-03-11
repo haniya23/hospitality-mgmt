@@ -26,9 +26,52 @@ Route::middleware(['auth'])->prefix('owner')->name('owner.')->group(function () 
     // Staff Management
     Route::get('staff/hierarchy/{property}', [App\Http\Controllers\Staff\OwnerStaffController::class, 'hierarchy'])->name('staff.hierarchy');
     Route::resource('staff', App\Http\Controllers\Staff\OwnerStaffController::class);
-    
+
     // Task Management
     Route::resource('tasks', App\Http\Controllers\Owner\TaskController::class);
+
+    // ================================================
+    // FINANCIAL REPORTING & ANALYTICS ROUTES
+    // ================================================
+
+    // Financial Dashboards
+    Route::get('/financial', [App\Http\Controllers\Owner\FinancialDashboardController::class, 'index'])->name('financial.dashboard');
+    Route::get('/financial/property/{property}', [App\Http\Controllers\Owner\FinancialDashboardController::class, 'propertyDashboard'])->name('financial.property');
+    Route::get('/financial/accommodation/{accommodation}', [App\Http\Controllers\Owner\FinancialDashboardController::class, 'accommodationDashboard'])->name('financial.accommodation');
+    Route::get('/financial/b2b', [App\Http\Controllers\Owner\FinancialDashboardController::class, 'b2bDashboard'])->name('financial.b2b');
+    Route::get('/financial/chart-data', [App\Http\Controllers\Owner\FinancialDashboardController::class, 'chartData'])->name('financial.chart-data');
+
+    // Income Management
+    Route::resource('income', App\Http\Controllers\Owner\IncomeController::class);
+
+    // Expense Management
+    Route::resource('expense', App\Http\Controllers\Owner\ExpenseController::class);
+
+    // Financial Reports
+    Route::prefix('reports')->name('reports.')->group(function () {
+        Route::get('/weekly', [App\Http\Controllers\Owner\FinancialReportController::class, 'weeklyReports'])->name('weekly');
+        Route::get('/monthly', [App\Http\Controllers\Owner\FinancialReportController::class, 'monthlyReports'])->name('monthly');
+        Route::get('/{report}', [App\Http\Controllers\Owner\FinancialReportController::class, 'viewReport'])->name('view');
+        Route::post('/{report}/regenerate', [App\Http\Controllers\Owner\FinancialReportController::class, 'regenerateReport'])->name('regenerate');
+        Route::post('/{report}/approve', [App\Http\Controllers\Owner\FinancialReportController::class, 'approveReport'])->name('approve');
+        Route::post('/{report}/lock', [App\Http\Controllers\Owner\FinancialReportController::class, 'lockReport'])->name('lock');
+        Route::get('/{report}/pdf', [App\Http\Controllers\Owner\FinancialReportController::class, 'exportPdf'])->name('pdf');
+        Route::get('/{report}/excel', [App\Http\Controllers\Owner\FinancialReportController::class, 'exportExcel'])->name('excel');
+        Route::post('/generate', [App\Http\Controllers\Owner\FinancialReportController::class, 'generateReport'])->name('generate');
+    });
+
+    // ================================================
+    // BOOKING FINANCES - Centralized Finance Dashboard
+    // ================================================
+    Route::prefix('booking-finance')->name('booking-finance.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Owner\BookingFinanceController::class, 'index'])->name('index');
+        Route::get('/summary', [App\Http\Controllers\Owner\BookingFinanceController::class, 'summary'])->name('summary');
+        Route::get('/export', [App\Http\Controllers\Owner\BookingFinanceController::class, 'export'])->name('export');
+        Route::get('/{bookingFinance}', [App\Http\Controllers\Owner\BookingFinanceController::class, 'show'])->name('show');
+        Route::post('/{bookingFinance}/payment', [App\Http\Controllers\Owner\BookingFinanceController::class, 'recordPayment'])->name('payment');
+        Route::post('/{bookingFinance}/charge', [App\Http\Controllers\Owner\BookingFinanceController::class, 'recordCharge'])->name('charge');
+        Route::post('/{bookingFinance}/refund', [App\Http\Controllers\Owner\BookingFinanceController::class, 'recordRefund'])->name('refund');
+    });
 });
 
 // Staff Templates
@@ -64,16 +107,16 @@ Route::middleware(['auth', 'staff.role'])->prefix('staff')->name('staff.')->grou
     Route::post('/tasks/{task}/start', [App\Http\Controllers\Staff\StaffDashboardController::class, 'startTask'])->name('tasks.start');
     Route::post('/tasks/{task}/complete', [App\Http\Controllers\Staff\StaffDashboardController::class, 'completeTask'])->name('tasks.complete');
     Route::post('/tasks/{task}/upload-proof', [App\Http\Controllers\Staff\StaffDashboardController::class, 'uploadProof'])->name('tasks.upload-proof');
-    
+
     // Attendance
     Route::get('/attendance', [App\Http\Controllers\Staff\AttendanceController::class, 'index'])->name('attendance');
     Route::post('/attendance/check-in', [App\Http\Controllers\Staff\AttendanceController::class, 'checkIn'])->name('attendance.check-in');
     Route::post('/attendance/check-out', [App\Http\Controllers\Staff\AttendanceController::class, 'checkOut'])->name('attendance.check-out');
-    
+
     // Leave Requests
     Route::get('/leave-requests', [App\Http\Controllers\Staff\AttendanceController::class, 'leaveRequests'])->name('leave-requests');
     Route::post('/leave-requests', [App\Http\Controllers\Staff\AttendanceController::class, 'storeLeaveRequest'])->name('leave-requests.store');
-    
+
     // Access Management (Manager Only)
     Route::middleware(['staff.role:manager'])->group(function () {
         Route::get('/permissions', [App\Http\Controllers\Staff\PermissionController::class, 'index'])->name('permissions.index');
@@ -107,10 +150,10 @@ Route::middleware(['auth', 'subscription.limits'])->group(function () {
     Route::get('/test-modal-scroll', function () {
         return view('test-modal-scroll');
     })->name('test.modal.scroll');
-    
+
     Route::get('/dashboard', function () {
         $user = auth()->user();
-        
+
         // Redirect staff members to their role-specific dashboards
         if ($user->staffMember) {
             if ($user->staffMember->isManager()) {
@@ -121,64 +164,64 @@ Route::middleware(['auth', 'subscription.limits'])->group(function () {
                 return redirect()->route('staff.dashboard');
             }
         }
-        
+
         $properties = $user->properties()->with(['category', 'location'])->latest()->get();
-        
+
         // If user has no properties, redirect to onboarding wizard
         if ($properties->isEmpty()) {
             return redirect()->route('onboarding.wizard');
         }
-        
-          // Get dynamic dashboard data
+
+        // Get dynamic dashboard data
         $dashboardData = [
             'properties' => $properties->load(['propertyAccommodations.reservations', 'category', 'location.city.district.state']),
-            'nextBooking' => \App\Models\Reservation::whereHas('accommodation.property', function($q) use ($user) {
+            'nextBooking' => \App\Models\Reservation::whereHas('accommodation.property', function ($q) use ($user) {
                 $q->where('owner_id', $user->id);
             })->where('status', 'confirmed')
-            ->where('check_in_date', '>=', now())
-            ->orderBy('check_in_date')
-            ->first(),
-            'upcomingBookingsThisWeek' => \App\Models\Reservation::whereHas('accommodation.property', function($q) use ($user) {
+                ->where('check_in_date', '>=', now())
+                ->orderBy('check_in_date')
+                ->first(),
+            'upcomingBookingsThisWeek' => \App\Models\Reservation::whereHas('accommodation.property', function ($q) use ($user) {
                 $q->where('owner_id', $user->id);
             })->where('status', 'confirmed')
-            ->whereBetween('check_in_date', [now(), now()->addWeek()])
-            ->count(),
-            'upcomingBookingsThisMonth' => \App\Models\Reservation::whereHas('accommodation.property', function($q) use ($user) {
+                ->whereBetween('check_in_date', [now(), now()->addWeek()])
+                ->count(),
+            'upcomingBookingsThisMonth' => \App\Models\Reservation::whereHas('accommodation.property', function ($q) use ($user) {
                 $q->where('owner_id', $user->id);
             })->where('status', 'confirmed')
-            ->whereBetween('check_in_date', [now(), now()->addMonth()])
-            ->count(),
-            'topB2bPartner' => \App\Models\B2bPartner::whereHas('reservations.accommodation.property', function($q) use ($user) {
+                ->whereBetween('check_in_date', [now(), now()->addMonth()])
+                ->count(),
+            'topB2bPartner' => \App\Models\B2bPartner::whereHas('reservations.accommodation.property', function ($q) use ($user) {
                 $q->where('owner_id', $user->id);
             })->withCount('reservations')
-            ->orderBy('reservations_count', 'desc')
-            ->first(),
-            'recentBookings' => \App\Models\Reservation::whereHas('accommodation.property', function($q) use ($user) {
+                ->orderBy('reservations_count', 'desc')
+                ->first(),
+            'recentBookings' => \App\Models\Reservation::whereHas('accommodation.property', function ($q) use ($user) {
                 $q->where('owner_id', $user->id);
             })->with(['guest', 'accommodation.property'])
-            ->latest()
-            ->limit(5)
-            ->get(),
-            'pendingBookings' => \App\Models\Reservation::whereHas('accommodation.property', function($q) use ($user) {
+                ->latest()
+                ->limit(5)
+                ->get(),
+            'pendingBookings' => \App\Models\Reservation::whereHas('accommodation.property', function ($q) use ($user) {
                 $q->where('owner_id', $user->id);
             })->where('status', 'pending')
-            ->with(['guest', 'accommodation.property'])
-            ->latest()
-            ->get(),
-            'activeBookings' => \App\Models\Reservation::whereHas('accommodation.property', function($q) use ($user) {
+                ->with(['guest', 'accommodation.property'])
+                ->latest()
+                ->get(),
+            'activeBookings' => \App\Models\Reservation::whereHas('accommodation.property', function ($q) use ($user) {
                 $q->where('owner_id', $user->id);
             })->whereIn('status', ['confirmed', 'checked_in'])
-            ->with(['guest', 'accommodation.property'])
-            ->latest()
-            ->get(),
+                ->with(['guest', 'accommodation.property'])
+                ->latest()
+                ->get(),
         ];
-        
+
         // Include motivational quotes from partial
         $dashboardData['motivationalQuotes'] = include resource_path('views/partials/dashboard/motivational-quotes.blade.php');
-        
+
         return view('dashboard', $dashboardData);
     })->name('dashboard');
-    
+
     Route::get('/properties/create', [App\Http\Controllers\PropertyController::class, 'create'])->name('properties.create');
     Route::post('/properties', [App\Http\Controllers\PropertyController::class, 'store'])->name('properties.store');
     Route::get('/properties', [App\Http\Controllers\PropertyController::class, 'index'])->name('properties.index');
@@ -187,14 +230,14 @@ Route::middleware(['auth', 'subscription.limits'])->group(function () {
     Route::get('/properties/{property}/edit-section', [App\Http\Controllers\PropertyController::class, 'editSection'])->name('properties.edit-section');
     Route::patch('/properties/{property}/update-section', [App\Http\Controllers\PropertyController::class, 'updateSection'])->name('properties.update-section');
     Route::post('/properties/{property}/test-ajax', [App\Http\Controllers\PropertyController::class, 'testAjax'])->name('properties.test-ajax');
-    
+
     // Accommodation Routes
     Route::get('/properties/{property}/accommodations/create', [App\Http\Controllers\PropertyController::class, 'createAccommodation'])->name('properties.accommodations.create');
     Route::get('/properties/{property}/accommodations/{accommodation}/edit', [App\Http\Controllers\PropertyController::class, 'editAccommodation'])->name('properties.accommodations.edit');
     Route::post('/properties/{property}/accommodations/store', [App\Http\Controllers\PropertyController::class, 'storeAccommodation'])->name('properties.accommodations.store');
     Route::post('/properties/{property}/accommodations/{accommodation}/update', [App\Http\Controllers\PropertyController::class, 'updateAccommodation'])->name('properties.accommodations.update');
     Route::delete('/properties/{property}/accommodations/{accommodation}/delete', [App\Http\Controllers\PropertyController::class, 'deleteAccommodation'])->name('properties.accommodations.delete');
-    
+
     // Dedicated Accommodation Routes
     Route::get('/accommodations', [App\Http\Controllers\AccommodationController::class, 'index'])->name('accommodations.index');
     Route::get('/accommodations/create', [App\Http\Controllers\AccommodationController::class, 'create'])->name('accommodations.create');
@@ -204,12 +247,12 @@ Route::middleware(['auth', 'subscription.limits'])->group(function () {
     Route::get('/accommodations/{accommodation}/edit', [App\Http\Controllers\AccommodationController::class, 'edit'])->name('accommodations.edit');
     Route::put('/accommodations/{accommodation}', [App\Http\Controllers\AccommodationController::class, 'update'])->name('accommodations.update');
     Route::delete('/accommodations/{accommodation}', [App\Http\Controllers\AccommodationController::class, 'destroy'])->name('accommodations.destroy');
-    
+
     // Photo Routes
     Route::post('/properties/{property:uuid}/photos', [App\Http\Controllers\PropertyController::class, 'storePhotos'])->name('properties.photos.store');
     Route::post('/properties/{property:uuid}/photos/upload', [App\Http\Controllers\PropertyPhotoController::class, 'upload'])->name('properties.photos.upload');
     Route::delete('/properties/{property:uuid}/photos/{photo}', [App\Http\Controllers\PropertyController::class, 'deletePhoto'])->name('properties.photos.delete');
-    
+
     // Booking Management Routes
     Route::get('/bookings', function () {
         return view('bookings.index');
@@ -225,11 +268,11 @@ Route::middleware(['auth', 'subscription.limits'])->group(function () {
     Route::get('/bookings-cancelled', [App\Http\Controllers\BookingController::class, 'cancelled'])->name('bookings.cancelled');
     Route::get('/bookings-completed', [App\Http\Controllers\BookingController::class, 'completed'])->name('bookings.completed');
     Route::patch('/bookings/{booking}/payment', [App\Http\Controllers\BookingController::class, 'updatePayment'])->name('bookings.payment.update');
-    
+
     // Invoice Routes
     Route::get('/bookings/{booking}/invoice/download', [App\Http\Controllers\InvoiceController::class, 'download'])->name('bookings.invoice.download');
     Route::get('/bookings/bulk-invoice/download', [App\Http\Controllers\InvoiceController::class, 'bulkDownload'])->name('bookings.bulk-invoice.download');
-    
+
     // Check-in/Check-out Routes
     Route::get('/checkin', [App\Http\Controllers\CheckInController::class, 'index'])->name('checkin.index');
     Route::get('/checkin/confirmed-bookings', [App\Http\Controllers\CheckInController::class, 'confirmedBookings'])->name('checkin.confirmed-bookings');
@@ -239,7 +282,7 @@ Route::middleware(['auth', 'subscription.limits'])->group(function () {
     Route::get('/checkin/{checkInUuid}/success', [App\Http\Controllers\CheckInController::class, 'success'])->name('checkin.success');
     Route::get('/checkin/{checkInUuid}/details', [App\Http\Controllers\CheckInController::class, 'details'])->name('checkin.details');
     Route::get('/api/checkin/{reservationUuid}/booking-details', [App\Http\Controllers\CheckInController::class, 'getBookingDetails'])->name('api.checkin.booking-details');
-    
+
     Route::get('/checkout', [App\Http\Controllers\CheckOutController::class, 'index'])->name('checkout.index');
     Route::get('/checkout/{reservationUuid}', [App\Http\Controllers\CheckOutController::class, 'show'])->name('checkout.show');
     Route::post('/checkout/{reservationUuid}', [App\Http\Controllers\CheckOutController::class, 'store'])->name('checkout.store');
@@ -247,7 +290,7 @@ Route::middleware(['auth', 'subscription.limits'])->group(function () {
     Route::get('/checkout/{checkOutUuid}/details', [App\Http\Controllers\CheckOutController::class, 'details'])->name('checkout.details');
     Route::post('/checkout/{checkOutUuid}/mark-clean', [App\Http\Controllers\CheckOutController::class, 'markRoomClean'])->name('checkout.mark-clean');
     Route::get('/api/checkout/{reservationUuid}/booking-details', [App\Http\Controllers\CheckOutController::class, 'getBookingDetails'])->name('api.checkout.booking-details');
-    
+
     // API Routes for Alpine.js
     Route::prefix('api')->group(function () {
         Route::get('/properties', [App\Http\Controllers\BookingController::class, 'getProperties']);
@@ -268,21 +311,21 @@ Route::middleware(['auth', 'subscription.limits'])->group(function () {
         Route::patch('/bookings/{booking}/confirm', [App\Http\Controllers\BookingController::class, 'confirm']);
         Route::patch('/bookings/{booking}/cancel', [App\Http\Controllers\BookingController::class, 'cancel']);
         Route::patch('/bookings/{booking}/reactivate', [App\Http\Controllers\BookingController::class, 'reactivate']);
-        
+
         // Property Delete Request Routes
         Route::post('/property-delete-requests', [App\Http\Controllers\PropertyDeleteRequestController::class, 'store']);
         Route::get('/property-delete-requests', [App\Http\Controllers\PropertyDeleteRequestController::class, 'index']);
         Route::get('/property-delete-requests/{deleteRequest}', [App\Http\Controllers\PropertyDeleteRequestController::class, 'show']);
         Route::delete('/property-delete-requests/{deleteRequest}', [App\Http\Controllers\PropertyDeleteRequestController::class, 'cancel']);
     });
-    
+
     // Customer Management Routes
     Route::get('/customers', [App\Http\Controllers\CustomerController::class, 'index'])->name('customers.index');
     Route::get('/customers/create', [App\Http\Controllers\CustomerController::class, 'create'])->name('customers.create');
     Route::post('/customers', [App\Http\Controllers\CustomerController::class, 'store'])->name('customers.store');
     Route::get('/customers/{customer}/edit', [App\Http\Controllers\CustomerController::class, 'edit'])->name('customers.edit');
     Route::put('/customers/{customer}', [App\Http\Controllers\CustomerController::class, 'update'])->name('customers.update');
-    
+
     // B2B Management Routes
     Route::get('/b2b', [App\Http\Controllers\B2bController::class, 'index'])->name('b2b.index')->middleware('subscription:b2b');
     Route::get('/b2b/create', [App\Http\Controllers\B2bController::class, 'create'])->name('b2b.create')->middleware('subscription:b2b');
@@ -292,9 +335,9 @@ Route::middleware(['auth', 'subscription.limits'])->group(function () {
     Route::put('/b2b/{b2b}', [App\Http\Controllers\B2bController::class, 'update'])->name('b2b.update')->middleware('subscription:b2b');
     Route::delete('/b2b/{b2b}', [App\Http\Controllers\B2bController::class, 'destroy'])->name('b2b.destroy')->middleware('subscription:b2b');
     Route::patch('/b2b/{b2b}/toggle-status', [App\Http\Controllers\B2bController::class, 'toggleStatus'])->name('b2b.toggle-status')->middleware('subscription:b2b');
-    
 
-    
+
+
     // Pricing Management Routes
     Route::get('/pricing', function () {
         return view('pricing.index');
@@ -302,14 +345,14 @@ Route::middleware(['auth', 'subscription.limits'])->group(function () {
     Route::get('/pricing/calendar', function () {
         return view('pricing.calendar');
     })->name('pricing.calendar');
-    
-    
+
+
     // Onboarding Routes
     Route::get('/onboarding', function () {
         $propertyCategories = \App\Models\PropertyCategory::all();
         return view('onboarding.wizard', compact('propertyCategories'));
     })->name('onboarding.wizard');
-    
+
     // Booking Dashboard Routes
     Route::get('/booking-dashboard', function () {
         $user = auth()->user();
@@ -329,23 +372,23 @@ Route::middleware(['auth', 'subscription.limits'])->group(function () {
                     'total_amount' => $booking->total_amount
                 ];
             });
-        
+
         $stats = [
             'total_bookings' => $user->reservations()->count(),
             'confirmed_bookings' => $user->reservations()->where('status', 'confirmed')->count(),
             'pending_bookings' => $user->reservations()->where('status', 'pending')->count(),
             'total_revenue' => $user->reservations()->sum('total_amount')
         ];
-        
+
         return view('booking-dashboard', compact('recentBookings', 'stats'));
     })->name('booking.dashboard');
-    
+
     // Enhanced Booking Routes
     Route::get('/bookings/enhanced-create', function () {
         $user = auth()->user();
         $properties = $user->properties()->with(['category', 'propertyAccommodations'])->get();
         $b2bPartners = $user->b2bPartners()->where('status', 'active')->get();
-        
+
         return view('bookings.enhanced-create', compact('properties', 'b2bPartners'));
     })->name('bookings.enhanced-create');
     Route::get('/subscription/plans', [App\Http\Controllers\SubscriptionController::class, 'plans'])->name('subscription.plans');
@@ -356,7 +399,7 @@ Route::middleware(['auth', 'subscription.limits'])->group(function () {
         $subscriptionStatus = $user->subscription_status ?? 'trial';
         $subscriptionEndsAt = $user->subscription_ends_at;
         $activeSubscription = $user->activeSubscription;
-        
+
         // Get real plan details based on subscription status
         $planDetails = [
             'name' => ucfirst($subscriptionStatus),
@@ -373,25 +416,25 @@ Route::middleware(['auth', 'subscription.limits'])->group(function () {
             'base_accommodation_limit' => $activeSubscription ? $activeSubscription->base_accommodation_limit : $usage['accommodations']['max'],
             'addon_price_per_month' => 99 // Real pricing from the app
         ];
-        
+
         return view('subscription.limit-exceeded', compact('planDetails'));
     })->name('subscription.limit-exceeded');
     Route::get('/welcome-trial', function () {
         return view('welcome-trial');
     })->name('welcome.trial');
-    
+
     // Cashfree Payment Routes
     Route::post('/cashfree/create-order', [App\Http\Controllers\CashfreeController::class, 'createOrder'])->name('cashfree.create-order');
-    
-    
-    
+
+
+
     // Test payment success endpoint
     Route::get('/test-payment-success', function () {
         $user = auth()->user();
         if (!$user) {
             return redirect()->route('login');
         }
-        
+
         // Simulate successful payment
         $user->update([
             'subscription_status' => 'professional',
@@ -400,11 +443,11 @@ Route::middleware(['auth', 'subscription.limits'])->group(function () {
             'properties_limit' => 5,
             'billing_cycle' => 'monthly',
         ]);
-        
+
         return redirect()->route('subscription.plans', ['payment' => 'success'])
             ->with('success', 'Test payment successful! Your subscription has been activated.');
     })->name('test.payment.success');
-    
+
     // Admin sample download route
     Route::get('/admin/download-sample-locations', function () {
         $sampleData = [
@@ -473,6 +516,6 @@ Route::get('/api/roles', function () {
                 'name' => $role->name
             ];
         });
-        
+
     return response()->json(['roles' => $roles]);
 });

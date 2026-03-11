@@ -3,10 +3,14 @@
 namespace App\Providers;
 
 use App\Models\B2bPartner;
+use App\Models\Payment;
 use App\Models\PropertyAccommodation;
+use App\Models\Reservation;
 use App\Models\StaffMember;
 use App\Observers\B2bPartnerObserver;
+use App\Observers\PaymentObserver;
 use App\Observers\PropertyAccommodationObserver;
+use App\Observers\ReservationObserver;
 use App\Observers\StaffMemberObserver;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
@@ -28,7 +32,9 @@ class AppServiceProvider extends ServiceProvider
     {
         // Register model observers
         B2bPartner::observe(B2bPartnerObserver::class);
+        Payment::observe(PaymentObserver::class);
         PropertyAccommodation::observe(PropertyAccommodationObserver::class);
+        Reservation::observe(ReservationObserver::class);
         StaffMember::observe(StaffMemberObserver::class);
 
         // Register custom Blade directives for permissions

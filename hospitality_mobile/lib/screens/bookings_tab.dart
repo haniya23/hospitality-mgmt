@@ -7,7 +7,7 @@ import 'main_layout.dart';
 import 'create_booking_screen.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
-
+import 'booking_details_screen.dart';
 class BookingsTab extends StatefulWidget {
   final VoidCallback? onAddBooking;
   
@@ -35,11 +35,35 @@ class _BookingsTabState extends State<BookingsTab> {
   }
 
   // ... imports
-  import 'booking_details_screen.dart';
 
   // ... inside _BookingsTabState
   
   // NOTE: index 3 is now Cancelled
+  @override
+  Widget build(BuildContext context) {
+    final provider = Provider.of<BookingProvider>(context);
+    final bookings = provider.bookings;
+    final counts = provider.counts;
+
+    return Column(
+      children: [
+        _buildStatusCards(counts),
+        const SizedBox(height: 8),
+        Expanded(
+          child: provider.isLoading 
+              ? const Center(child: CircularProgressIndicator())
+              : RefreshIndicator(
+                  onRefresh: () async {
+                    provider.fetchCounts();
+                    _fetchBookingsForCurrentTab();
+                  },
+                  child: _buildBookingList(bookings),
+                ),
+        ),
+      ],
+    );
+  }
+
   void _fetchBookingsForCurrentTab() {
     final provider = Provider.of<BookingProvider>(context, listen: false);
     String status;
@@ -83,6 +107,99 @@ class _BookingsTabState extends State<BookingsTab> {
         count: count,
         primaryColor: color,
         icon: icon,
+      ),
+    );
+  }
+
+  Widget _buildSingleStatusCard({
+    required int index,
+    required String title,
+    required int count,
+    required Color primaryColor,
+    required IconData icon,
+  }) {
+    final isSelected = _selectedIndex == index;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedIndex = index;
+        });
+        _fetchBookingsForCurrentTab();
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? primaryColor.withOpacity(0.1) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? primaryColor : Colors.grey.shade200,
+            width: isSelected ? 1.5 : 1,
+          ),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: isSelected ? primaryColor : Colors.grey, size: 24),
+            const SizedBox(height: 8),
+            Text(
+              count.toString(),
+              style: GoogleFonts.outfit(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: isSelected ? primaryColor : Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              title,
+              style: GoogleFonts.outfit(
+                fontSize: 12,
+                color: isSelected ? primaryColor : Colors.grey,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPendingCard(BuildContext context, Map<String, dynamic> booking) {
+    return _buildBaseCard(
+      context,
+      booking,
+      actions: Row(
+        children: [
+          Expanded(
+            child: _buildActionButton(Icons.visibility, 'View Details', Colors.grey, () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => BookingDetailsScreen(bookingId: booking['id'], initialData: booking)),
+              );
+            }),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: _buildActionButton(Icons.check_circle, 'Approve', const Color(0xFF10B981), () {
+              _showConfirmDialog(context, booking);
+            }),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildConfirmedCard(BuildContext context, Map<String, dynamic> booking) {
+    return _buildBaseCard(
+      context,
+      booking,
+      actions: SizedBox(
+        width: double.infinity,
+        child: _buildActionButton(Icons.visibility, 'View Details', Colors.blue, () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => BookingDetailsScreen(bookingId: booking['id'], initialData: booking)),
+          );
+        }),
       ),
     );
   }

@@ -6,6 +6,7 @@ import 'providers/auth_provider.dart';
 import 'providers/riverpod_providers.dart';
 import 'screens/login_screen.dart';
 import 'screens/main_layout.dart';
+import 'screens/splash_screen.dart';
 
 void main() {
   runApp(
@@ -38,7 +39,7 @@ class MyApp extends ConsumerWidget {
         provider.ChangeNotifierProvider.value(value: guest),
       ],
       child: MaterialApp(
-        title: 'Hospitality Management',
+        title: 'Stay Loops', // Updated title
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           useMaterial3: true,
@@ -49,7 +50,7 @@ class MyApp extends ConsumerWidget {
           ),
           textTheme: GoogleFonts.poppinsTextTheme(),
         ),
-        home: const AuthWrapper(),
+        home: const SplashScreen(),
       ),
     );
   }
