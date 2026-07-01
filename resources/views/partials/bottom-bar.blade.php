@@ -1,7 +1,6 @@
 <!-- Bottom Navigation Bar -->
 @php
     $user = auth()->user();
-    $canAccessAdvanced = ($user->subscription_status === 'trial' && $user->trial_plan === 'professional') || in_array($user->subscription_status, ['starter', 'professional']);
 @endphp
 
 <div class="fixed bottom-0 left-0 right-0 z-20 lg:hidden" x-data="{ showMoreMenu: false }">
@@ -89,16 +88,7 @@
                         </div>
 
 
-                        <!-- Account Section -->
-                        <div class="px-3 py-2">
-                            <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Account</h4>
-                            <div class="space-y-1">
-                                <a href="{{ route('subscription.plans') }}" @click="showMoreMenu = false" class="flex items-center px-3 py-2 text-gray-700 hover:bg-green-50 hover:text-green-600 transition-colors rounded-lg {{ request()->routeIs('subscription.*') ? 'bg-green-50 text-green-600' : '' }}">
-                                    <i class="fas fa-crown w-4 mr-3"></i>
-                                    <span class="text-sm">Subscription</span>
-                                </a>
-                            </div>
-                        </div>
+
                     </div>
                 </div>
 

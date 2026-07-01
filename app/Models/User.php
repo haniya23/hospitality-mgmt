@@ -148,70 +148,27 @@ class User extends Authenticatable implements FilamentUser
 
     public function isTrialExpired()
     {
-        return $this->trial_ends_at && $this->trial_ends_at->isPast();
+        return false;
     }
 
     public function canCreateProperty()
     {
-        $maxProperties = $this->getMaxProperties();
-        return $this->properties()->count() < $maxProperties;
+        return true;
     }
 
     public function canCreateAccommodation($propertyId = null)
     {
-        $maxAccommodations = $this->getMaxAccommodations();
-        $currentAccommodations = $this->properties()->withCount('accommodations')->get()->sum('accommodations_count');
-        
-        if ($propertyId) {
-            $propertyAccommodations = $this->properties()->where('id', $propertyId)->withCount('accommodations')->first();
-            if ($propertyAccommodations && $propertyAccommodations->accommodations_count >= 3) {
-                return false; // Max 3 accommodations per property
-            }
-        }
-        
-        return $currentAccommodations < $maxAccommodations;
+        return true;
     }
 
     public function getMaxProperties()
     {
-        switch ($this->subscription_status) {
-            case 'starter':
-                return 1;
-            case 'professional':
-                return 5;
-            case 'trial':
-                return 5; // Trial users get professional limits
-            default:
-                return 1;
-        }
+        return 999999;
     }
 
     public function getMaxAccommodations()
     {
-        $baseLimit = 3; // Default for starter
-        
-        switch ($this->subscription_status) {
-            case 'starter':
-                $baseLimit = 3;
-                break;
-            case 'professional':
-                $baseLimit = 15;
-                break;
-            case 'trial':
-                $baseLimit = 15; // Trial users get professional limits
-                break;
-            default:
-                $baseLimit = 3;
-        }
-        
-        // Add active accommodation addons
-        $activeSubscription = $this->activeSubscription;
-        if ($activeSubscription) {
-            $activeAddons = $activeSubscription->addons()->where('cycle_end', '>', now())->sum('qty');
-            $baseLimit += $activeAddons;
-        }
-        
-        return $baseLimit;
+        return 999999;
     }
 
     public function getUsagePercentage()
@@ -241,70 +198,47 @@ class User extends Authenticatable implements FilamentUser
 
     public function getRemainingPropertiesAttribute()
     {
-        $maxProperties = $this->getMaxProperties();
-        return max(0, $maxProperties - $this->properties()->count());
+        return 999999;
     }
 
     public function getPropertyLimit()
     {
-        return $this->getMaxProperties();
+        return 999999;
     }
 
     public function getAccommodationLimit()
     {
-        return $this->getMaxAccommodations();
+        return 999999;
     }
 
     public function hasFeature($feature)
     {
-        // Professional trial: allow all features
-        if ($this->subscription_status === 'trial' && $this->trial_plan === 'professional') {
-            return true;
-        }
-        // Any paid plan: allow all features; property count is limited elsewhere
-        if (in_array($this->subscription_status, ['starter', 'professional'])) {
-            return true;
-        }
-        // Fallback (non-auth or unknown): restrict
-        return false;
+        return true;
     }
 
     public function getPlanNameAttribute()
     {
-        if ($this->subscription_status === 'trial') {
-            // Always show Professional during trial in UI
-            return 'Trial - Professional';
-        }
-        
-        if (in_array($this->subscription_status, ['starter', 'professional'])) {
-            return ucfirst($this->subscription_status);
-        }
-        
-        return 'Trial - Starter';
+        return 'Free';
     }
 
     public function getPlanName()
     {
-        return $this->plan_name;
+        return 'Free';
     }
 
     public function isOnTrial()
     {
-        return $this->subscription_status === 'trial' && $this->is_trial_active && !$this->isTrialExpired();
+        return false;
     }
 
     public function getImageUploadLimitAttribute()
     {
-        if ($this->subscription_status === 'trial') {
-            return 0; // No image uploads during trial
-        }
-        
-        return $this->subscription_status === 'professional' ? 999 : 1;
+        return 999999;
     }
 
     public function canUploadImages()
     {
-        return $this->subscription_status !== 'trial';
+        return true;
     }
 
     protected static function boot()
@@ -329,11 +263,11 @@ class User extends Authenticatable implements FilamentUser
             }
             // Set default values for new users (only if not already set)
             if (empty($model->subscription_status)) {
-                $model->subscription_status = 'trial';
-                $model->trial_plan = 'professional';
-                $model->trial_ends_at = now()->addDays(30);
-                $model->is_trial_active = true;
-                $model->properties_limit = 1;
+                $model->subscription_status = 'free';
+                $model->trial_plan = null;
+                $model->trial_ends_at = null;
+                $model->is_trial_active = false;
+                $model->properties_limit = 999999;
             }
             // Set new users as owners by default
         });

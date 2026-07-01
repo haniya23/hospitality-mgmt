@@ -1,4 +1,4 @@
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-4" style="z-index: 1 !important;">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-4" style="z-index: 1 !important;">
     <div class="bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl p-4 shadow-lg cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:scale-105 border border-purple-200" 
          style="z-index: 1 !important;"
          @click="nextQuote()">
@@ -22,10 +22,5 @@
         </div>
         <div class="text-lg font-bold text-gray-800" x-text="topB2bPartner ? topB2bPartner.partner_name : 'No partners'"></div>
         <div class="text-sm text-gray-600" x-text="topB2bPartner ? topB2bPartner.reservations_count + ' bookings' : 'Top B2B Partner'"></div>
-    </div>
-
-    <!-- Subscription Status Widget -->
-    <div class="lg:col-span-1">
-        <x-subscription-status-widget />
     </div>
 </div>

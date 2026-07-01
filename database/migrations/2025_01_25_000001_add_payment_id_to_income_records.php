@@ -18,7 +18,9 @@ return new class extends Migration {
 
         // Update income_type enum to include b2b_booking
         // Note: In MySQL, we need to alter the column type
-        DB::statement("ALTER TABLE income_records MODIFY COLUMN income_type ENUM('booking', 'rental', 'service', 'deposit', 'penalty', 'commission', 'b2b_booking', 'other') DEFAULT 'booking'");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE income_records MODIFY COLUMN income_type ENUM('booking', 'rental', 'service', 'deposit', 'penalty', 'commission', 'b2b_booking', 'other') DEFAULT 'booking'");
+        }
     }
 
     public function down(): void
@@ -29,6 +31,8 @@ return new class extends Migration {
         });
 
         // Revert enum
-        DB::statement("ALTER TABLE income_records MODIFY COLUMN income_type ENUM('booking', 'rental', 'service', 'deposit', 'penalty', 'commission', 'other') DEFAULT 'booking'");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE income_records MODIFY COLUMN income_type ENUM('booking', 'rental', 'service', 'deposit', 'penalty', 'commission', 'other') DEFAULT 'booking'");
+        }
     }
 };

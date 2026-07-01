@@ -40,24 +40,7 @@
         ]
     };
     
-    // Subscription status logic (cached for performance)
-    $subscriptionInfo = match($user->subscription_status) {
-        'trial' => [
-            'label' => 'Trial',
-            'detail' => $user->remaining_trial_days . ' days left',
-            'color' => 'text-blue-600'
-        ],
-        'starter', 'professional' => [
-            'label' => ucfirst($user->subscription_status) . ' Plan',
-            'detail' => 'Active',
-            'color' => 'text-green-600'
-        ],
-        default => [
-            'label' => 'Free Plan',
-            'detail' => 'Limited access',
-            'color' => 'text-gray-600'
-        ]
-    };
+
 @endphp
 
 {{-- Top Bar Container - Professional Structure --}}
@@ -94,9 +77,6 @@
                 <div class="top-bar__user-info">
                     <div class="top-bar__user-name">{{ $userName }}</div>
                     <div class="flex items-center gap-2">
-                        <div class="top-bar__user-plan {{ $subscriptionInfo['color'] }}">
-                            {{ $subscriptionInfo['label'] }}
-                        </div>
                         <div class="flex items-center gap-1 px-2 py-1 rounded-full {{ $roleInfo['bgColor'] }}">
                             <i class="{{ $roleInfo['icon'] }} {{ $roleInfo['color'] }} text-xs"></i>
                             <span class="text-xs font-medium {{ $roleInfo['color'] }}">{{ $roleInfo['label'] }}</span>
@@ -133,22 +113,14 @@
                         {{-- Mobile User Info --}}
                         <div class="top-bar__menu-header">
                             <div class="top-bar__menu-user">{{ $userName }}</div>
-                            <div class="flex items-center gap-2 mb-2">
-                                <div class="top-bar__menu-plan {{ $subscriptionInfo['color'] }}">
-                                    {{ $subscriptionInfo['label'] }} • {{ $subscriptionInfo['detail'] }}
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-1 px-2 py-1 rounded-full {{ $roleInfo['bgColor'] }} w-fit">
+                            <div class="flex items-center gap-1 px-2 py-1 rounded-full {{ $roleInfo['bgColor'] }} w-fit mt-2">
                                 <i class="{{ $roleInfo['icon'] }} {{ $roleInfo['color'] }} text-xs"></i>
                                 <span class="text-xs font-medium {{ $roleInfo['color'] }}">{{ $roleInfo['label'] }}</span>
                             </div>
                         </div>
                         
                         {{-- Menu Items --}}
-                        <a href="{{ route('subscription.plans') }}" class="top-bar__menu-item" role="menuitem">
-                            <i class="fas fa-crown" aria-hidden="true"></i>
-                            <span>Subscription</span>
-                        </a>
+
                         
                         <form method="POST" action="{{ route('logout') }}" class="top-bar__menu-form">
                             @csrf
@@ -212,9 +184,6 @@
                     <div class="top-bar__user-details">
                         <div class="top-bar__user-name">{{ $userName }}</div>
                         <div class="flex items-center gap-2">
-                            <div class="top-bar__user-status {{ $subscriptionInfo['color'] }}">
-                                {{ $subscriptionInfo['label'] }}
-                            </div>
                             <div class="flex items-center gap-1 px-2 py-1 rounded-full {{ $roleInfo['bgColor'] }}">
                                 <i class="{{ $roleInfo['icon'] }} {{ $roleInfo['color'] }} text-xs"></i>
                                 <span class="text-xs font-medium {{ $roleInfo['color'] }}">{{ $roleInfo['label'] }}</span>
@@ -246,10 +215,7 @@
                             class="top-bar__user-menu"
                             role="menu"
                         >
-                            <a href="{{ route('subscription.plans') }}" class="top-bar__user-menu-item" role="menuitem">
-                                <i class="fas fa-crown" aria-hidden="true"></i>
-                                <span>Subscription</span>
-                            </a>
+
                             
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
