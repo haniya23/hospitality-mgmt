@@ -153,28 +153,14 @@
             {{-- Desktop Actions --}}
             <div class="top-bar__desktop-actions">
                 {{-- Quick Navigation Buttons --}}
-                @if($user->user_type === 'owner')
                 <div class="flex items-center space-x-2 mr-4">
-                    <a href="{{ route('owner.staff.index') }}" 
-                       class="top-bar__nav-btn {{ request()->routeIs('owner.staff*') ? 'top-bar__nav-btn--active' : '' }}"
-                       title="Staff Management">
-                        <i class="fas fa-users"></i>
-                        <span class="hidden lg:inline">Staff</span>
-                    </a>
-                    <a href="{{ route('attendance.management.index') }}" 
-                       class="top-bar__nav-btn {{ request()->routeIs('attendance.management*') ? 'top-bar__nav-btn--active' : '' }}"
-                       title="Attendance Management">
-                        <i class="fas fa-calendar-check"></i>
-                        <span class="hidden lg:inline">Attendance</span>
-                    </a>
-                    <a href="{{ route('tasks.index') }}" 
-                       class="top-bar__nav-btn {{ request()->routeIs('tasks*') ? 'top-bar__nav-btn--active' : '' }}"
+                    <a href="{{ route('owner.tasks.index') }}" 
+                       class="top-bar__nav-btn {{ request()->routeIs('owner.tasks*') ? 'top-bar__nav-btn--active' : '' }}"
                        title="Task Management">
                         <i class="fas fa-tasks"></i>
                         <span class="hidden lg:inline">Tasks</span>
                     </a>
                 </div>
-                @endif
                 
                 {{-- Notifications --}}
                 <x-notification-center />

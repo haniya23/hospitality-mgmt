@@ -68,30 +68,9 @@ class Property extends Model
         return $this->hasMany(Role::class);
     }
 
-    // New Staff Hierarchy Relationships
-    public function staffMembers()
-    {
-        return $this->hasMany(StaffMember::class);
-    }
-
     public function tasks()
     {
         return $this->hasMany(Task::class);
-    }
-
-    // Staff relationship helpers
-    public function activeStaff()
-    {
-        return $this->staffMembers()
-                    ->where('status', 'active')
-                    ->with('user');
-    }
-
-    public function getActiveStaffCount()
-    {
-        return $this->staffMembers()
-                    ->where('status', 'active')
-                    ->count();
     }
 
     public function getTodaysTasksCount()

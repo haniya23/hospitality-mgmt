@@ -601,13 +601,9 @@
                             <i class="fas fa-plus mr-2"></i>
                             New Booking
                         </a>
-                        <a href="{{ route('owner.staff.index') }}" class="w-full bg-green-600 text-white rounded-lg p-3 hover:bg-green-700 transition-colors flex items-center justify-center" style="box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2), -4px -4px 8px rgba(255, 255, 255, 0.1), inset 2px 2px 4px rgba(255, 255, 255, 0.2), inset -2px -2px 4px rgba(0, 0, 0, 0.1);">
-                            <i class="fas fa-users mr-2"></i>
-                            Manage Staff
-                        </a>
-                        <a href="{{ route('attendance.management.index') }}" class="w-full bg-orange-600 text-white rounded-lg p-3 hover:bg-orange-700 transition-colors flex items-center justify-center" style="box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2), -4px -4px 8px rgba(255, 255, 255, 0.1), inset 2px 2px 4px rgba(255, 255, 255, 0.2), inset -2px -2px 4px rgba(0, 0, 0, 0.1);">
-                            <i class="fas fa-calendar-check mr-2"></i>
-                            Staff Attendance
+                        <a href="{{ route('owner.tasks.index') }}" class="w-full bg-indigo-600 text-white rounded-lg p-3 hover:bg-indigo-700 transition-colors flex items-center justify-center" style="box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2), -4px -4px 8px rgba(255, 255, 255, 0.1), inset 2px 2px 4px rgba(255, 255, 255, 0.2), inset -2px -2px 4px rgba(0, 0, 0, 0.1);">
+                            <i class="fas fa-tasks mr-2"></i>
+                            Property Tasks
                         </a>
                     </div>
                 </div>

@@ -22,10 +22,9 @@
                 <div class="flex items-center gap-3">
                     @php
                         $statusColors = [
-                            'assigned' => 'bg-blue-100 text-blue-800',
+                            'pending' => 'bg-gray-100 text-gray-800',
                             'in_progress' => 'bg-yellow-100 text-yellow-800',
                             'completed' => 'bg-green-100 text-green-800',
-                            'verified' => 'bg-emerald-100 text-emerald-800',
                             'cancelled' => 'bg-red-100 text-red-800',
                         ];
                         $priorityColors = [
@@ -61,10 +60,6 @@
                         <span class="font-semibold">{{ $task->property->name }}</span>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-gray-600">Department:</span>
-                        <span class="font-semibold">{{ $task->department->name ?? '-' }}</span>
-                    </div>
-                    <div class="flex justify-between">
                         <span class="text-gray-600">Type:</span>
                         <span class="font-semibold">{{ ucfirst(str_replace('_', ' ', $task->task_type)) }}</span>
                     </div>
@@ -78,18 +73,8 @@
             </div>
 
             <div class="bg-white/50 rounded-xl p-4 border border-white/30">
-                <h3 class="font-bold text-gray-900 mb-3"><i class="fas fa-user text-green-600 mr-2"></i>Assignment</h3>
+                <h3 class="font-bold text-gray-900 mb-3"><i class="fas fa-calendar-alt text-green-600 mr-2"></i>Schedule</h3>
                 <div class="space-y-2 text-sm">
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Assigned To:</span>
-                        <a href="{{ route('owner.staff.show', $task->assignedStaff) }}" class="font-semibold text-blue-600 hover:text-blue-700">
-                            {{ $task->assignedStaff->user->name }}
-                        </a>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Role:</span>
-                        <span class="font-semibold">{{ ucfirst($task->assignedStaff->staff_role) }}</span>
-                    </div>
                     <div class="flex justify-between">
                         <span class="text-gray-600">Scheduled:</span>
                         <span class="font-semibold">{{ $task->scheduled_at->format('M d, Y H:i') }}</span>
@@ -127,12 +112,6 @@
                     <span>Completed: {{ $task->completed_at->format('M d, Y H:i') }}</span>
                 </div>
                 @endif
-                @if($task->verified_at)
-                <div class="flex items-center gap-2">
-                    <i class="fas fa-check-double text-emerald-600"></i>
-                    <span>Verified: {{ $task->verified_at->format('M d, Y H:i') }}</span>
-                </div>
-                @endif
             </div>
         </div>
         @endif
@@ -152,4 +131,3 @@
         @endif
     </div>
 @endsection
-

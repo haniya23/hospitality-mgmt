@@ -176,27 +176,7 @@
                         </div>
                     @endif
 
-                    <!-- Staff Management Section -->
-                    @if(auth()->user()->isOwner())
-                        <div class="mb-6">
-                            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">Staff
-                                Management</h3>
-                            <ul class="space-y-1">
-                                <li><a href="{{ route('owner.staff.index') }}"
-                                        class="flex gap-4 p-3 font-semibold rounded-lg hover:bg-green-100 {{ request()->routeIs('owner.staff.*') ? 'bg-gradient-to-r from-green-400 to-green-600 text-white' : 'text-gray-700' }} transition-all">
-                                        <i class="fas fa-users-cog w-5"></i>Manage Staff
-                                    </a></li>
-                                <li><a href="{{ route('owner.staff.create') }}"
-                                        class="flex gap-4 p-3 font-semibold rounded-lg hover:bg-green-100 {{ request()->routeIs('owner.staff.create') ? 'bg-gradient-to-r from-green-400 to-green-600 text-white' : 'text-gray-700' }} transition-all">
-                                        <i class="fas fa-user-plus w-5"></i>Add Staff
-                                    </a></li>
-                                <li><a href="{{ route('manager.analytics') }}"
-                                        class="flex gap-4 p-3 font-semibold rounded-lg hover:bg-green-100 {{ request()->routeIs('manager.analytics') ? 'bg-gradient-to-r from-green-400 to-green-600 text-white' : 'text-gray-700' }} transition-all">
-                                        <i class="fas fa-chart-line w-5"></i>Staff Analytics
-                                    </a></li>
-                            </ul>
-                        </div>
-                    @endif
+
 
 
                 </div>
@@ -229,7 +209,6 @@
                 bookings: false,
                 guestServices: false,
                 customers: false,
-                staff: false,
                 business: false,
                 analytics: false,
                 financial: false
@@ -364,34 +343,7 @@
                 </div>
             </div>
 
-            <!-- Staff Management Section -->
-            @if(auth()->user()->isOwner())
-                <div class="space-y-1">
-                    <button @click="openSections.staff = !openSections.staff"
-                        class="w-full flex items-center justify-between p-3 text-left font-semibold text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
-                        <div class="flex items-center space-x-3">
-                            <i class="fas fa-users-cog w-5 text-gray-500"></i>
-                            <span>Staff Management</span>
-                        </div>
-                        <i class="fas fa-chevron-down w-4 text-gray-400 transition-transform"
-                            :class="openSections.staff ? 'rotate-180' : ''"></i>
-                    </button>
-                    <div x-show="openSections.staff" x-transition class="ml-8 space-y-1">
-                        <a href="{{ route('owner.staff.index') }}" @click="sidebarOpen = false"
-                            class="block p-2 text-sm text-gray-600 hover:text-green-600 hover:bg-green-50 rounded transition-colors {{ request()->routeIs('owner.staff.index') ? 'text-green-600 bg-green-50' : '' }}">
-                            Manage Staff
-                        </a>
-                        <a href="{{ route('owner.staff.create') }}" @click="sidebarOpen = false"
-                            class="block p-2 text-sm text-gray-600 hover:text-green-600 hover:bg-green-50 rounded transition-colors {{ request()->routeIs('owner.staff.create') ? 'text-green-600 bg-green-50' : '' }}">
-                            Add Staff
-                        </a>
-                        <a href="{{ route('manager.analytics') }}" @click="sidebarOpen = false"
-                            class="block p-2 text-sm text-gray-600 hover:text-green-600 hover:bg-green-50 rounded transition-colors {{ request()->routeIs('manager.analytics') ? 'text-green-600 bg-green-50' : '' }}">
-                            Staff Analytics
-                        </a>
-                    </div>
-                </div>
-            @endif
+
 
             <!-- Financial Section (Mobile) -->
             @if(auth()->user()->isOwner())

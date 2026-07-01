@@ -4,8 +4,6 @@ namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
 use App\Models\Task;
-use App\Models\StaffMember;
-use App\Models\StaffDepartment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -20,7 +18,7 @@ class TaskController extends Controller
         $propertyIds = $user->properties()->pluck('id');
 
         $tasks = Task::whereIn('property_id', $propertyIds)
-            ->with(['assignedStaff.user', 'assignedBy.user', 'department', 'property'])
+            ->with(['property'])
             ->when($request->property_id, fn($q) => $q->where('property_id', $request->property_id))
             ->when($request->status, fn($q) => $q->where('status', $request->status))
             ->when($request->priority, fn($q) => $q->where('priority', $request->priority))
@@ -39,17 +37,8 @@ class TaskController extends Controller
     {
         $user = auth()->user();
         $properties = $user->properties;
-        $departments = StaffDepartment::active()->get();
-        
-        // Get all staff from owner's properties
-        $staffMembers = StaffMember::whereIn('property_id', $properties->pluck('id'))
-            ->where('status', 'active')
-            ->with(['user', 'property', 'department'])
-            ->orderBy('property_id')
-            ->orderBy('staff_role')
-            ->get();
 
-        return view('owner.tasks.create', compact('properties', 'departments', 'staffMembers'));
+        return view('owner.tasks.create', compact('properties'));
     }
 
     /**
@@ -59,12 +48,10 @@ class TaskController extends Controller
     {
         $validated = $request->validate([
             'property_id' => 'required|exists:properties,id',
-            'department_id' => 'nullable|exists:staff_departments,id',
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'task_type' => 'required|in:cleaning,maintenance,inspection,delivery,customer_service,administrative,other',
             'priority' => 'required|in:low,medium,high,urgent',
-            'assigned_to' => 'required|exists:staff_members,id',
             'scheduled_at' => 'required|date',
             'due_at' => 'required|date|after_or_equal:scheduled_at',
             'location' => 'nullable|string|max:255',
@@ -74,23 +61,18 @@ class TaskController extends Controller
         // Verify property ownership
         $property = auth()->user()->properties()->findOrFail($validated['property_id']);
 
-        // Verify staff belongs to the property
-        $staff = StaffMember::where('id', $validated['assigned_to'])
-            ->where('property_id', $property->id)
-            ->firstOrFail();
-
         $task = Task::create([
             'uuid' => Str::uuid(),
             'property_id' => $validated['property_id'],
-            'department_id' => $validated['department_id'],
+            'department_id' => null,
             'title' => $validated['title'],
             'description' => $validated['description'],
             'task_type' => $validated['task_type'],
             'priority' => $validated['priority'],
-            'status' => 'assigned',
+            'status' => 'pending',
             'created_by' => auth()->id(),
-            'assigned_to' => $validated['assigned_to'],
-            'assigned_by' => null, // Owner directly assigned (no staff member)
+            'assigned_to' => null,
+            'assigned_by' => null,
             'scheduled_at' => $validated['scheduled_at'],
             'due_at' => $validated['due_at'],
             'location' => $validated['location'],
@@ -98,7 +80,7 @@ class TaskController extends Controller
         ]);
 
         return redirect()->route('owner.tasks.show', $task)
-            ->with('success', 'Task assigned successfully to ' . $staff->user->name);
+            ->with('success', 'Task created successfully.');
     }
 
     /**
@@ -115,12 +97,8 @@ class TaskController extends Controller
 
         $task->load([
             'property',
-            'department',
-            'assignedStaff.user',
-            'assignedBy.user',
             'creator',
             'media',
-            'logs.staffMember.user',
             'logs.user'
         ]);
 
@@ -141,14 +119,8 @@ class TaskController extends Controller
 
         $user = auth()->user();
         $properties = $user->properties;
-        $departments = StaffDepartment::active()->get();
-        
-        $staffMembers = StaffMember::where('property_id', $task->property_id)
-            ->where('status', 'active')
-            ->with(['user', 'property', 'department'])
-            ->get();
 
-        return view('owner.tasks.edit', compact('task', 'properties', 'departments', 'staffMembers'));
+        return view('owner.tasks.edit', compact('task', 'properties'));
     }
 
     /**
@@ -166,13 +138,24 @@ class TaskController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
-            'task_type' => 'required|in:cleaning,maintenance,inspection,delivery,customer_service,administrative,other',
+            'task_type' => 'required|in:cleaning,maintenance,indigo,delivery,customer_service,administrative,other', // Note: we allow task types
             'priority' => 'required|in:low,medium,high,urgent',
-            'assigned_to' => 'required|exists:staff_members,id',
             'scheduled_at' => 'required|date',
             'due_at' => 'required|date|after_or_equal:scheduled_at',
             'location' => 'nullable|string|max:255',
-            'status' => 'required|in:assigned,in_progress,completed,verified,cancelled',
+            'status' => 'required|in:pending,in_progress,completed,cancelled',
+        ]);
+
+        // Let's make sure task_type matches original task types
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'task_type' => 'required|in:cleaning,maintenance,inspection,delivery,customer_service,administrative,other',
+            'priority' => 'required|in:low,medium,high,urgent',
+            'scheduled_at' => 'required|date',
+            'due_at' => 'required|date|after_or_equal:scheduled_at',
+            'location' => 'nullable|string|max:255',
+            'status' => 'required|in:pending,in_progress,completed,cancelled',
         ]);
 
         $task->update($validated);
@@ -199,4 +182,3 @@ class TaskController extends Controller
             ->with('success', 'Task deleted successfully');
     }
 }
-

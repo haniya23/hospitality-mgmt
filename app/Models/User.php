@@ -66,28 +66,9 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(Property::class, 'owner_id');
     }
 
-    // New Staff Hierarchy Relationships
-    public function staffMember()
-    {
-        return $this->hasOne(StaffMember::class);
-    }
-
     public function createdTasks()
     {
         return $this->hasMany(Task::class, 'created_by');
-    }
-
-    /**
-     * Get all staff members across all properties owned by this user
-     */
-    public function allStaff()
-    {
-        if (!$this->isOwner()) {
-            return collect();
-        }
-
-        return StaffMember::whereIn('property_id', $this->properties()->pluck('id'))
-            ->with('user', 'property', 'department');
     }
 
     public function b2bPartnerContacts()
@@ -281,9 +262,8 @@ class User extends Authenticatable implements FilamentUser
         return $this->is_admin;
     }
 
-    // User role helpers
     public function isOwner()
     {
-        return !$this->is_admin && !$this->staffMember;
+        return !$this->is_admin;
     }
 }

@@ -24,8 +24,6 @@ return Application::configure(basePath: dirname(__DIR__))
             'subscription' => \App\Http\Middleware\CheckSubscription::class,
             'subscription.limits' => \App\Http\Middleware\CheckSubscriptionLimits::class,
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
-            'staff.role' => \App\Http\Middleware\StaffRoleMiddleware::class,
-            'staff.permission' => \App\Http\Middleware\CheckStaffPermission::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

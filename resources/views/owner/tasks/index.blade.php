@@ -29,7 +29,7 @@
             </div>
             <a href="{{ route('owner.tasks.create') }}" 
                 class="w-full sm:w-auto inline-flex justify-center items-center px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 font-semibold transition-all shadow-lg">
-                <i class="fas fa-plus mr-2"></i>Assign Task
+                <i class="fas fa-plus mr-2"></i>Create Task
             </a>
         </div>
 
@@ -53,10 +53,9 @@
                 <select name="status" onchange="this.form.submit()"
                     class="w-full border border-gray-200 rounded-xl shadow-sm py-2.5 px-3 text-sm text-gray-900 focus:ring-2 focus:ring-purple-500">
                     <option value="">All Status</option>
-                    <option value="assigned" {{ request('status') == 'assigned' ? 'selected' : '' }}>Assigned</option>
+                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
                     <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>In Progress</option>
                     <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
-                    <option value="verified" {{ request('status') == 'verified' ? 'selected' : '' }}>Verified</option>
                     <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
                 </select>
             </div>
@@ -88,10 +87,9 @@
                             
                             @php
                                 $statusColors = [
-                                    'assigned' => 'bg-blue-100 text-blue-800',
+                                    'pending' => 'bg-gray-100 text-gray-800',
                                     'in_progress' => 'bg-yellow-100 text-yellow-800',
                                     'completed' => 'bg-green-100 text-green-800',
-                                    'verified' => 'bg-emerald-100 text-emerald-800',
                                     'cancelled' => 'bg-red-100 text-red-800',
                                 ];
                                 $priorityColors = [
@@ -101,7 +99,6 @@
                                     'low' => 'bg-green-500 text-white',
                                 ];
                             @endphp
-
                             <span class="px-3 py-1 {{ $statusColors[$task->status] ?? 'bg-gray-100 text-gray-800' }} rounded-full text-xs font-semibold">
                                 {{ ucfirst(str_replace('_', ' ', $task->status)) }}
                             </span>
@@ -118,18 +115,6 @@
                                 <i class="fas fa-building text-purple-600 mr-2"></i>
                                 <span class="font-medium">{{ $task->property->name }}</span>
                             </div>
-                            
-                            <div class="flex items-center">
-                                <i class="fas fa-user text-blue-600 mr-2"></i>
-                                <span class="font-medium">{{ $task->assignedStaff->user->name }}</span>
-                            </div>
-
-                            @if($task->department)
-                            <div class="flex items-center">
-                                <i class="fas fa-layer-group text-green-600 mr-2"></i>
-                                <span>{{ $task->department->name }}</span>
-                            </div>
-                            @endif
 
                             <div class="flex items-center">
                                 <i class="fas fa-calendar text-orange-600 mr-2"></i>
@@ -161,10 +146,10 @@
             <div class="p-12 text-center">
                 <i class="fas fa-tasks text-gray-400 text-5xl mb-4"></i>
                 <h3 class="text-xl font-bold text-gray-900 mb-2">No tasks yet</h3>
-                <p class="text-gray-600 mb-6">Start by assigning tasks to your team members</p>
+                <p class="text-gray-600 mb-6">Start by creating tasks for your properties</p>
                 <a href="{{ route('owner.tasks.create') }}" 
                     class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 font-semibold transition-all shadow-lg">
-                    <i class="fas fa-plus mr-2"></i>Assign First Task
+                    <i class="fas fa-plus mr-2"></i>Create First Task
                 </a>
             </div>
         @endforelse

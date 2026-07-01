@@ -80,29 +80,9 @@ class Task extends Model
         return $this->belongsTo(Property::class);
     }
 
-    public function department()
-    {
-        return $this->belongsTo(StaffDepartment::class, 'department_id');
-    }
-
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
-    }
-
-    public function assignedStaff()
-    {
-        return $this->belongsTo(StaffMember::class, 'assigned_to');
-    }
-
-    public function assignedBy()
-    {
-        return $this->belongsTo(StaffMember::class, 'assigned_by');
-    }
-
-    public function verifiedBy()
-    {
-        return $this->belongsTo(StaffMember::class, 'verified_by');
     }
 
     public function media()
@@ -152,10 +132,7 @@ class Task extends Model
         return $query->where('property_id', $propertyId);
     }
 
-    public function scopeForStaff($query, $staffMemberId)
-    {
-        return $query->where('assigned_to', $staffMemberId);
-    }
+
 
     // Helper methods
     public function isOverdue()
@@ -180,7 +157,7 @@ class Task extends Model
         return $this->status === 'completed';
     }
 
-    public function start($staffMemberId = null)
+    public function start($userId = null)
     {
         if (!$this->canBeStarted()) {
             throw new \Exception('Task cannot be started from current status.');
@@ -194,7 +171,7 @@ class Task extends Model
 
         $this->logs()->create([
             'uuid' => Str::uuid(),
-            'staff_member_id' => $staffMemberId,
+            'user_id' => $userId ?? auth()->id(),
             'action' => 'started',
             'from_status' => $oldStatus,
             'to_status' => 'in_progress',
@@ -204,7 +181,7 @@ class Task extends Model
         return $this;
     }
 
-    public function complete($staffMemberId, $notes = null, $mediaIds = [])
+    public function complete($userId = null, $notes = null, $mediaIds = [])
     {
         if (!$this->canBeCompleted()) {
             throw new \Exception('Task cannot be completed from current status.');
@@ -219,7 +196,7 @@ class Task extends Model
 
         $this->logs()->create([
             'uuid' => Str::uuid(),
-            'staff_member_id' => $staffMemberId,
+            'user_id' => $userId ?? auth()->id(),
             'action' => 'completed',
             'from_status' => $oldStatus,
             'to_status' => 'completed',
@@ -228,24 +205,10 @@ class Task extends Model
             'performed_at' => now(),
         ]);
 
-        // Notify supervisor
-        if ($this->assignedStaff && $this->assignedStaff->supervisor) {
-            StaffNotification::create([
-                'uuid' => Str::uuid(),
-                'staff_member_id' => $this->assignedStaff->supervisor->id,
-                'from_user_id' => $this->assignedStaff->user_id,
-                'task_id' => $this->id,
-                'type' => 'task_completed',
-                'title' => 'Task Completed - Verification Needed',
-                'message' => "{$this->assignedStaff->getFullName()} has completed the task: {$this->title}",
-                'priority' => 'medium',
-            ]);
-        }
-
         return $this;
     }
 
-    public function verify($verifiedByStaffMemberId, $notes = null)
+    public function verify($userId = null, $notes = null)
     {
         if (!$this->canBeVerified()) {
             throw new \Exception('Task cannot be verified from current status.');
@@ -255,13 +218,13 @@ class Task extends Model
         $this->update([
             'status' => 'verified',
             'verified_at' => now(),
-            'verified_by' => $verifiedByStaffMemberId,
+            'verified_by' => null,
             'verification_notes' => $notes,
         ]);
 
         $this->logs()->create([
             'uuid' => Str::uuid(),
-            'staff_member_id' => $verifiedByStaffMemberId,
+            'user_id' => $userId ?? auth()->id(),
             'action' => 'verified',
             'from_status' => $oldStatus,
             'to_status' => 'verified',
@@ -269,24 +232,10 @@ class Task extends Model
             'performed_at' => now(),
         ]);
 
-        // Notify assigned staff
-        if ($this->assigned_to) {
-            StaffNotification::create([
-                'uuid' => Str::uuid(),
-                'staff_member_id' => $this->assigned_to,
-                'from_user_id' => StaffMember::find($verifiedByStaffMemberId)->user_id,
-                'task_id' => $this->id,
-                'type' => 'task_verified',
-                'title' => 'Task Verified',
-                'message' => "Your task '{$this->title}' has been verified and approved.",
-                'priority' => 'low',
-            ]);
-        }
-
         return $this;
     }
 
-    public function reject($rejectedByStaffMemberId, $reason)
+    public function reject($userId = null, $reason)
     {
         $oldStatus = $this->status;
         $this->update([
@@ -296,27 +245,13 @@ class Task extends Model
 
         $this->logs()->create([
             'uuid' => Str::uuid(),
-            'staff_member_id' => $rejectedByStaffMemberId,
+            'user_id' => $userId ?? auth()->id(),
             'action' => 'rejected',
             'from_status' => $oldStatus,
             'to_status' => 'rejected',
             'notes' => $reason,
             'performed_at' => now(),
         ]);
-
-        // Notify assigned staff
-        if ($this->assigned_to) {
-            StaffNotification::create([
-                'uuid' => Str::uuid(),
-                'staff_member_id' => $this->assigned_to,
-                'from_user_id' => StaffMember::find($rejectedByStaffMemberId)->user_id,
-                'task_id' => $this->id,
-                'type' => 'task_rejected',
-                'title' => 'Task Rejected - Rework Required',
-                'message' => "Your task '{$this->title}' requires rework. Reason: {$reason}",
-                'priority' => 'high',
-            ]);
-        }
 
         return $this;
     }
