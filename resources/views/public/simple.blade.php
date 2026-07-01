@@ -66,7 +66,6 @@
                     <a href="#properties" class="text-sm font-semibold text-slate-600 hover:text-emerald-600 transition-colors">Properties</a>
                     <a href="#partners" class="text-sm font-semibold text-slate-600 hover:text-emerald-600 transition-colors">Partners</a>
                     <a href="#stats" class="text-sm font-semibold text-slate-600 hover:text-emerald-600 transition-colors">Analytics</a>
-                    <a href="#pricing" class="text-sm font-semibold text-slate-600 hover:text-emerald-600 transition-colors">Pricing</a>
                     <a href="#faq" class="text-sm font-semibold text-slate-600 hover:text-emerald-600 transition-colors">FAQs</a>
                 </div>
 
@@ -108,7 +107,6 @@
                 <a href="#properties" @click="mobileMenuOpen = false" class="block px-4 py-3 rounded-xl text-base font-semibold text-slate-700 hover:bg-slate-50 hover:text-emerald-600 transition-colors">Properties</a>
                 <a href="#partners" @click="mobileMenuOpen = false" class="block px-4 py-3 rounded-xl text-base font-semibold text-slate-700 hover:bg-slate-50 hover:text-emerald-600 transition-colors">Partners</a>
                 <a href="#stats" @click="mobileMenuOpen = false" class="block px-4 py-3 rounded-xl text-base font-semibold text-slate-700 hover:bg-slate-50 hover:text-emerald-600 transition-colors">Analytics</a>
-                <a href="#pricing" @click="mobileMenuOpen = false" class="block px-4 py-3 rounded-xl text-base font-semibold text-slate-700 hover:bg-slate-50 hover:text-emerald-600 transition-colors">Pricing</a>
                 <a href="#faq" @click="mobileMenuOpen = false" class="block px-4 py-3 rounded-xl text-base font-semibold text-slate-700 hover:bg-slate-50 hover:text-emerald-600 transition-colors">FAQs</a>
                 <div class="border-t border-slate-100 pt-4 mt-2 flex flex-col space-y-3 px-4">
                     <a href="{{ route('login') }}" class="text-center font-semibold text-slate-700 hover:text-emerald-600 py-2.5 rounded-xl border border-slate-200">
@@ -726,132 +724,13 @@
         </div>
     </section>
 
-    <!-- Pricing Section (Emphasizing the 'Free' tier) -->
-    <section id="pricing" class="py-20 bg-slate-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-3xl mx-auto space-y-4 mb-16">
-                <h2 class="text-xs font-bold text-emerald-600 uppercase tracking-widest">Plans & Pricing</h2>
-                <p class="text-3xl sm:text-4xl font-extrabold font-display text-slate-900 tracking-tight">Flexible Plans For Every Operator</p>
-                <p class="text-slate-500 text-base">Manage your property completely free with our standard tier. Switch to advanced channels as your rooms scale.</p>
-            </div>
-
-            <!-- Pricing Grid -->
-            <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                <!-- Plan 1: Free Forever -->
-                <div class="bg-white rounded-3xl p-8 border-2 border-emerald-500 shadow-lg relative overflow-hidden flex flex-col justify-between">
-                    <!-- Ribbon -->
-                    <span class="absolute top-4 right-4 bg-emerald-500 text-white text-[10px] font-black tracking-widest uppercase px-3 py-1 rounded-full font-display">
-                        FREE FOREVER
-                    </span>
-                    
-                    <div class="space-y-6">
-                        <div class="space-y-2">
-                            <h3 class="text-xl font-bold text-slate-900 font-display">Starter Free Plan</h3>
-                            <p class="text-slate-400 text-xs font-normal">Perfect for homestays, bed-and-breakfasts, and boutique hotels.</p>
-                        </div>
-                        
-                        <div class="flex items-baseline">
-                            <span class="text-5xl font-black text-slate-900 font-display">₹0</span>
-                            <span class="text-slate-400 text-sm font-semibold ml-2">/ month</span>
-                        </div>
-                        
-                        <!-- Divider -->
-                        <div class="h-[1px] bg-slate-100"></div>
-
-                        <!-- Feature list -->
-                        <ul class="space-y-3.5 text-slate-600 text-xs font-medium">
-                            <li class="flex items-center space-x-3">
-                                <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
-                                <span>Manage up to 5 Active Properties</span>
-                            </li>
-                            <li class="flex items-center space-x-3">
-                                <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
-                                <span>Unlimited Reservations & Check-ins</span>
-                            </li>
-                            <li class="flex items-center space-x-3">
-                                <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
-                                <span>Housekeeper & Staff Task Delegation</span>
-                            </li>
-                            <li class="flex items-center space-x-3">
-                                <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
-                                <span>Weekly Net Income Reports</span>
-                            </li>
-                            <li class="flex items-center space-x-3">
-                                <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
-                                <span>Basic Travel Partner tracking</span>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div class="pt-8">
-                        <a href="{{ route('register') }}" class="block w-full text-center bg-gradient-to-tr from-emerald-600 to-teal-500 hover:from-emerald-700 hover:to-teal-600 text-white font-bold py-4 rounded-2xl shadow-md transition-all">
-                            Get Started For Free
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Plan 2: Growth Pro -->
-                <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm relative overflow-hidden flex flex-col justify-between opacity-85">
-                    <span class="absolute top-4 right-4 bg-slate-200 text-slate-700 text-[9px] font-black tracking-widest uppercase px-3 py-1 rounded-full font-display">
-                        COMING SOON
-                    </span>
-                    
-                    <div class="space-y-6">
-                        <div class="space-y-2">
-                            <h3 class="text-xl font-bold text-slate-900 font-display">Professional Scale</h3>
-                            <p class="text-slate-400 text-xs font-normal">For hotel chains, resorts, and vacation rental managers.</p>
-                        </div>
-                        
-                        <div class="flex items-baseline">
-                            <span class="text-5xl font-black text-slate-900 font-display">₹1,999</span>
-                            <span class="text-slate-400 text-sm font-semibold ml-2">/ month</span>
-                        </div>
-                        
-                        <!-- Divider -->
-                        <div class="h-[1px] bg-slate-100"></div>
-
-                        <!-- Feature list -->
-                        <ul class="space-y-3.5 text-slate-600 text-xs font-medium">
-                            <li class="flex items-center space-x-3">
-                                <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
-                                <span class="text-slate-500">Unlimited Active Properties</span>
-                            </li>
-                            <li class="flex items-center space-x-3">
-                                <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
-                                <span class="text-slate-500">Custom Role-based Access Levels</span>
-                            </li>
-                            <li class="flex items-center space-x-3">
-                                <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
-                                <span class="text-slate-500">Automated PDF Invoice Generation</span>
-                            </li>
-                            <li class="flex items-center space-x-3">
-                                <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
-                                <span class="text-slate-500">Monthly Tax Audits & Exports</span>
-                            </li>
-                            <li class="flex items-center space-x-3">
-                                <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
-                                <span class="text-slate-500">API Sync with major channel calendars</span>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div class="pt-8">
-                        <button disabled class="w-full text-center bg-slate-100 text-slate-400 font-bold py-4 rounded-2xl cursor-not-allowed">
-                            Plan Launching Soon
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- FAQ Accordion Section -->
     <section id="faq" class="py-20 bg-white" x-data="{ activeFaq: null }">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center space-y-4 mb-16">
                 <h2 class="text-xs font-bold text-emerald-600 uppercase tracking-widest">Frequently Asked Questions</h2>
                 <p class="text-3xl sm:text-4xl font-extrabold font-display text-slate-900 tracking-tight">Got Questions? We've Got Answers</p>
-                <p class="text-slate-500 text-base">Have queries regarding our property limits, pricing policies, or device syncs?</p>
+                <p class="text-slate-500 text-base">Have queries regarding our property limits, feature sets, or device syncs?</p>
             </div>
 
             <!-- Accordions Container -->
@@ -868,7 +747,7 @@
                         </svg>
                     </button>
                     <div x-show="activeFaq === 1" x-transition class="pb-4 text-sm text-slate-500 leading-relaxed" x-cloak>
-                        Yes, our Starter Plan is 100% free forever. You can manage up to 5 properties, create bookings, record transactions, and manage cleaning teams without registering a credit card. No hidden maintenance commissions.
+                        Yes, Stay loops is 100% free forever. You can manage unlimited properties, create bookings, record financial transactions, and coordinate housekeeper tasks without any subscription tiers or credit card requirements. No hidden commissions.
                     </div>
                 </div>
 
@@ -983,7 +862,6 @@
                     <ul class="space-y-2 text-xs">
                         <li><a href="#faq" class="hover:text-emerald-500 transition-colors">Help Center</a></li>
                         <li><a href="#faq" class="hover:text-emerald-500 transition-colors">FAQ Sheets</a></li>
-                        <li><a href="#pricing" class="hover:text-emerald-500 transition-colors">Premium Plans</a></li>
                     </ul>
                 </div>
 
