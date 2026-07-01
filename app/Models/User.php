@@ -8,10 +8,8 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
-use Filament\Models\Contracts\FilamentUser;
-use Filament\Panel;
 
-class User extends Authenticatable implements FilamentUser
+class User extends Authenticatable
 {
     use HasFactory, Notifiable, HasApiTokens;
 
@@ -254,13 +252,7 @@ class User extends Authenticatable implements FilamentUser
         });
     }
 
-    /**
-     * Check if user can access Filament admin panel
-     */
-    public function canAccessPanel(Panel $panel): bool
-    {
-        return $this->is_admin;
-    }
+
 
     public function isOwner()
     {

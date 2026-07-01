@@ -20,7 +20,7 @@ class CreateAdminUser extends Command
      *
      * @var string
      */
-    protected $description = 'Create an admin user for Filament admin panel';
+    protected $description = 'Create an admin user';
 
     /**
      * Execute the console command.
@@ -59,7 +59,6 @@ class CreateAdminUser extends Command
         $this->line("Name: {$name}");
         $this->line("");
         $this->warn("Please change the password after first login!");
-        $this->line("Admin panel URL: " . url('/admin'));
 
         return 0;
     }
