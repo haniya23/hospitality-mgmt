@@ -19,6 +19,7 @@
     @include('partials.dashboard.revenue-cards')
     @include('partials.dashboard.quick-stats')
     @include('partials.dashboard.quick-links')
+    @include('partials.dashboard.daily-briefing')
     @include('partials.dashboard.properties-section')
     @include('partials.dashboard.recent-activity')
 </div>
@@ -37,6 +38,11 @@ function dashboardData() {
         recentBookings: @json($recentBookings ?? []),
         pendingBookings: @json($pendingBookings ?? []),
         activeBookings: @json($activeBookings ?? []),
+        arrivalsToday: @json($arrivalsToday ?? []),
+        departuresToday: @json($departuresToday ?? []),
+        occupiedRooms: @json($occupiedRooms ?? []),
+        dailyIncomeTotal: @json($dailyIncomeTotal ?? 0),
+        dailyIncomeRecords: @json($dailyIncomeRecords ?? []),
         motivationalQuotes: @json($motivationalQuotes ?? []),
         currentQuoteIndex: 0,
 

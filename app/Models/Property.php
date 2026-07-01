@@ -36,11 +36,6 @@ class Property extends Model
                 $model->uuid = Str::uuid();
             }
         });
-        
-        static::created(function ($model) {
-            // Create default roles for the property
-            Role::createDefaultRoles($model->id);
-        });
     }
 
     public function getRouteKeyName()

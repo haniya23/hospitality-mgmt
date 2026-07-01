@@ -82,17 +82,6 @@ Route::middleware(['auth', 'subscription.limits'])->group(function () {
     Route::get('/dashboard', function () {
         $user = auth()->user();
 
-        // Redirect staff members to their role-specific dashboards
-        if ($user->staffMember) {
-            if ($user->staffMember->isManager()) {
-                return redirect()->route('manager.dashboard');
-            } elseif ($user->staffMember->isSupervisor()) {
-                return redirect()->route('supervisor.dashboard');
-            } elseif ($user->staffMember->isStaff()) {
-                return redirect()->route('staff.dashboard');
-            }
-        }
-
         $properties = $user->properties()->with(['category', 'location'])->latest()->get();
 
         // If user has no properties, redirect to onboarding wizard
@@ -141,6 +130,32 @@ Route::middleware(['auth', 'subscription.limits'])->group(function () {
             })->whereIn('status', ['confirmed', 'checked_in'])
                 ->with(['guest', 'accommodation.property'])
                 ->latest()
+                ->get(),
+            'arrivalsToday' => \App\Models\Reservation::whereHas('accommodation.property', function ($q) use ($user) {
+                $q->where('owner_id', $user->id);
+            })->whereDate('check_in_date', today())
+                ->whereIn('status', ['confirmed', 'pending'])
+                ->with(['guest', 'accommodation.property'])
+                ->get(),
+            'departuresToday' => \App\Models\Reservation::whereHas('accommodation.property', function ($q) use ($user) {
+                $q->where('owner_id', $user->id);
+            })->whereDate('check_out_date', today())
+                ->where('status', 'checked_in')
+                ->with(['guest', 'accommodation.property'])
+                ->get(),
+            'occupiedRooms' => \App\Models\Reservation::whereHas('accommodation.property', function ($q) use ($user) {
+                $q->where('owner_id', $user->id);
+            })->where('status', 'checked_in')
+                ->with(['guest', 'accommodation.property'])
+                ->get(),
+            'dailyIncomeTotal' => \App\Models\IncomeRecord::whereHas('property', function ($q) use ($user) {
+                $q->where('owner_id', $user->id);
+            })->whereDate('transaction_date', today())
+                ->sum('paid_amount'),
+            'dailyIncomeRecords' => \App\Models\IncomeRecord::whereHas('property', function ($q) use ($user) {
+                $q->where('owner_id', $user->id);
+            })->whereDate('transaction_date', today())
+                ->with(['property', 'accommodation'])
                 ->get(),
         ];
 
