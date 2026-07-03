@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             BasicDataSeeder::class,
             SouthIndiaLocationSeeder::class,
             ExpenseCategorySeeder::class,
+            AdminSeeder::class,
         ]);
     }
 }
