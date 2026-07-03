@@ -4,6 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../providers/booking_provider.dart';
+import 'checkin_form_screen.dart';
+import 'checkout_form_screen.dart';
 
 class BookingDetailsScreen extends StatefulWidget {
   final int bookingId;
@@ -85,6 +87,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                 ),
               ),
             ),
+      bottomNavigationBar: _bookingData == null ? null : _buildActionBottomBar(),
     );
   }
 
@@ -342,5 +345,69 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
        case 'checked_in': return Icons.login;
        default: return Icons.info;
     }
+  }
+
+  Widget? _buildActionBottomBar() {
+    final status = _bookingData!['status']?.toString().toLowerCase() ?? '';
+    
+    if (status != 'confirmed' && status != 'checked_in') {
+      return null;
+    }
+
+    final isConfirmed = status == 'confirmed';
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        child: Row(
+          children: [
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => isConfirmed
+                          ? CheckInFormScreen(booking: _bookingData!)
+                          : CheckOutFormScreen(booking: _bookingData!),
+                    ),
+                  ).then((_) => _fetchDetails());
+                },
+                icon: Icon(
+                  isConfirmed ? Icons.check_circle_outline_rounded : Icons.logout_rounded,
+                  color: Colors.white,
+                ),
+                label: Text(
+                  isConfirmed ? 'Check In Guest' : 'Check Out Guest',
+                  style: GoogleFonts.outfit(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isConfirmed ? const Color(0xFF2E3E2A) : Colors.deepOrange,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 2,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

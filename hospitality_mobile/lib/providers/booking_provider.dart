@@ -57,7 +57,8 @@ class BookingProvider with ChangeNotifier {
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
         if (jsonData['success'] == true) {
-          _checkIns = jsonData['data']['data'];
+          final dataList = jsonData['data']['data'] as List;
+          _checkIns = dataList.map((item) => Map<String, dynamic>.from(item as Map)).toList();
         } else {
           _error = jsonData['message'];
         }
@@ -98,7 +99,8 @@ class BookingProvider with ChangeNotifier {
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
         if (jsonData['success'] == true) {
-          _checkOuts = jsonData['data']['data'];
+          final dataList = jsonData['data']['data'] as List;
+          _checkOuts = dataList.map((item) => Map<String, dynamic>.from(item as Map)).toList();
         } else {
           _error = jsonData['message'];
         }

@@ -23,7 +23,7 @@ class DashboardController extends Controller
         $nextBooking = Reservation::whereHas('accommodation.property', function($q) use ($user) {
             $q->where('owner_id', $user->id);
         })->where('status', 'confirmed')
-        ->where('check_in_date', '>=', now())
+        ->where('check_in_date', '>=', today())
         ->orderBy('check_in_date')
         ->with(['guest', 'accommodation.property'])
         ->first();
@@ -32,13 +32,13 @@ class DashboardController extends Controller
         $upcomingBookingsThisWeek = Reservation::whereHas('accommodation.property', function($q) use ($user) {
             $q->where('owner_id', $user->id);
         })->where('status', 'confirmed')
-        ->whereBetween('check_in_date', [now(), now()->addWeek()])
+        ->whereBetween('check_in_date', [today(), today()->addWeek()])
         ->count();
         
         $upcomingBookingsThisMonth = Reservation::whereHas('accommodation.property', function($q) use ($user) {
             $q->where('owner_id', $user->id);
         })->where('status', 'confirmed')
-        ->whereBetween('check_in_date', [now(), now()->addMonth()])
+        ->whereBetween('check_in_date', [today(), today()->addMonth()])
         ->count();
         
         // Top Partner

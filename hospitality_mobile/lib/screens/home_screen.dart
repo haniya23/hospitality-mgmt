@@ -7,6 +7,7 @@ import '../providers/auth_provider.dart';
 import '../providers/dashboard_provider.dart';
 import '../providers/riverpod_providers.dart';
 import 'main_layout.dart';
+import 'checkin_form_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -411,6 +412,39 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       _buildInfoItem(Icons.bed_rounded, 'Room',
                           booking['accommodation']?['name'], Colors.white),
                     ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CheckInFormScreen(booking: booking),
+                        ),
+                      ).then((_) {
+                        ref.read(dashboardProvider).fetchDashboardData();
+                      });
+                    },
+                    icon: const Icon(Icons.check_circle_outline_rounded, size: 18),
+                    label: Text(
+                      'Check In Guest',
+                      style: GoogleFonts.outfit(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFFFE8B6),
+                      foregroundColor: const Color(0xFF2E3E2A),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      elevation: 0,
+                    ),
                   ),
                 ),
               ],
