@@ -75,7 +75,7 @@ class _MainLayoutState extends State<MainLayout> {
               _buildBottomNavItem(0, Icons.donut_large_rounded, 'Dashboard'),
               _buildBottomNavItem(1, Icons.calendar_month_rounded, 'Bookings'),
               _buildBottomNavItem(2, Icons.apartment_rounded, 'Properties'),
-              _buildBottomNavItem(6, Icons.hotel_rounded, 'Rooms'),
+              _buildBottomNavItem(9, Icons.account_balance_wallet_rounded, 'Finance'),
               _buildBottomNavItem(5, Icons.person_rounded, 'Profile'),
             ],
           ),

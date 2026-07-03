@@ -410,45 +410,37 @@ class _FinanceScreenState extends ConsumerState<FinanceScreen>
 
     return Scaffold(
       backgroundColor: backgroundColor,
-      body: NestedScrollView(
-        headerSliverBuilder: (context, _) => [
-          SliverAppBar(
-            floating: true,
-            snap: true,
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            title: Text('Finance', style: GoogleFonts.outfit(
-              fontWeight: FontWeight.bold, color: textPrimary, fontSize: 20)),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.refresh_rounded, color: textPrimary),
-                onPressed: () {
-                  fin.fetchSummary();
-                  fin.fetchFinanceData();
-                },
-              ),
-            ],
-            bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(44),
-              child: TabBar(
-                controller: _tabController,
-                labelColor: primaryColor,
-                unselectedLabelColor: textSecondary,
-                indicatorColor: primaryColor,
-                indicatorWeight: 2.5,
-                labelStyle: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 13),
-                tabs: const [Tab(text: 'Dashboard'), Tab(text: 'Transactions')],
-              ),
-            ),
+      appBar: AppBar(
+        backgroundColor: backgroundColor,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        title: Text('Finance', style: GoogleFonts.outfit(
+          fontWeight: FontWeight.bold, color: textPrimary, fontSize: 20)),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh_rounded, color: textPrimary),
+            onPressed: () {
+              fin.fetchSummary();
+              fin.fetchFinanceData();
+            },
           ),
         ],
-        body: TabBarView(
+        bottom: TabBar(
           controller: _tabController,
-          children: [
-            _buildDashboardTab(fin),
-            _buildTransactionsTab(fin, exp),
-          ],
+          labelColor: primaryColor,
+          unselectedLabelColor: textSecondary,
+          indicatorColor: primaryColor,
+          indicatorWeight: 2.5,
+          labelStyle: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 13),
+          tabs: const [Tab(text: 'Dashboard'), Tab(text: 'Transactions')],
         ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildDashboardTab(fin),
+          _buildTransactionsTab(fin, exp),
+        ],
       ),
       floatingActionButton: Column(
         mainAxisSize: MainAxisSize.min,
