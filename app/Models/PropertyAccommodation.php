@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class PropertyAccommodation extends Model
 {
+    protected $appends = [
+        'display_name',
+    ];
+
     protected $fillable = [
         'property_id',
         'predefined_accommodation_type_id',

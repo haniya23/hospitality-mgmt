@@ -76,7 +76,14 @@ Route::prefix('staff')->name('api.staff.')->group(function () {
 Route::prefix('owner')->name('api.owner.')->middleware('auth:sanctum')->group(function () {
     // Dashboard
     Route::get('/dashboard', [App\Http\Controllers\Api\Owner\DashboardController::class, 'index'])->name('dashboard');
+
+    // Finance — Income CRUD
+    Route::get('/finance/summary', [App\Http\Controllers\Api\Owner\FinanceController::class, 'summary'])->name('finance.summary');
     Route::apiResource('finance', App\Http\Controllers\Api\Owner\FinanceController::class);
+
+    // Finance — Expense CRUD
+    Route::get('/expense-categories', [App\Http\Controllers\Api\Owner\ExpenseController::class, 'categories'])->name('expense-categories');
+    Route::apiResource('expenses', App\Http\Controllers\Api\Owner\ExpenseController::class)->except(['show']);
     
     // Profile
     Route::get('/profile', [App\Http\Controllers\Api\Owner\ProfileController::class, 'show'])->name('profile');

@@ -6,6 +6,7 @@ import 'property_provider.dart';
 import 'b2b_provider.dart';
 import 'guest_provider.dart';
 import 'finance_provider.dart';
+import 'expense_provider.dart';
 
 final authProvider = ChangeNotifierProvider<AuthProvider>((ref) {
   return AuthProvider()..initAuth();
@@ -33,4 +34,8 @@ final guestProvider = ChangeNotifierProvider<GuestProvider>((ref) {
 
 final financeProvider = ChangeNotifierProvider<FinanceProvider>((ref) {
   return FinanceProvider();
+});
+
+final expenseProvider = ChangeNotifierProvider<ExpenseProvider>((ref) {
+  return ExpenseProvider();
 });

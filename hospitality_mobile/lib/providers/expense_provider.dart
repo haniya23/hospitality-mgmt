@@ -4,92 +4,63 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../config/api_config.dart';
 
-class FinanceProvider with ChangeNotifier {
+class ExpenseProvider with ChangeNotifier {
   bool _isLoading = false;
-  bool _isSummaryLoading = false;
-
-  Map<String, dynamic>? _financeData;       // Transaction list + KPIs
-  Map<String, dynamic>? _summaryData;       // Dashboard summary (period-based)
-
+  Map<String, dynamic>? _expenseData;
+  List<dynamic> _categories = [];
   String? _error;
 
-  // Filters for transaction list
+  // Filters
   String _selectedPropertyId = 'all';
+  String? _selectedCategoryId;
   DateTime? _startDate;
   DateTime? _endDate;
 
-  // Period for summary dashboard
-  String _period = 'month'; // day | week | month
-
-  // -------------------------------------------------------
-  // GETTERS
-  // -------------------------------------------------------
   bool get isLoading => _isLoading;
-  bool get isSummaryLoading => _isSummaryLoading;
-  Map<String, dynamic>? get financeData => _financeData;
-  Map<String, dynamic>? get summaryData => _summaryData;
+  List<dynamic> get expenses => (_expenseData?['data'] as List?) ?? [];
+  List<dynamic> get categories => _categories;
   String? get error => _error;
   String get selectedPropertyId => _selectedPropertyId;
+  String? get selectedCategoryId => _selectedCategoryId;
   DateTime? get startDate => _startDate;
   DateTime? get endDate => _endDate;
-  String get period => _period;
 
-  // Transaction list KPIs
-  double get totalRevenue => _financeData?['total_revenue']?.toDouble() ?? 0.0;
-  double get totalExpenses => _financeData?['total_expenses']?.toDouble() ?? 0.0;
-  double get netProfit => _financeData?['net_profit']?.toDouble() ?? 0.0;
-  double get profitMargin => _financeData?['profit_margin']?.toDouble() ?? 0.0;
-  double get pendingReceivables => _financeData?['pending_receivables']?.toDouble() ?? 0.0;
-  List<dynamic> get transactions => _financeData?['transactions']?['data'] ?? [];
-  List<dynamic> get properties => _financeData?['properties'] ?? [];
-
-  // Summary dashboard data
-  double get summaryRevenue => _summaryData?['total_revenue']?.toDouble() ?? 0.0;
-  double get summaryExpenses => _summaryData?['total_expenses']?.toDouble() ?? 0.0;
-  double get summaryNetProfit => _summaryData?['net_profit']?.toDouble() ?? 0.0;
-  double get summaryProfitMargin => _summaryData?['profit_margin']?.toDouble() ?? 0.0;
-  String get periodLabel => _summaryData?['period_label'] ?? '';
-  List<dynamic> get incomeByType => _summaryData?['income_by_type'] ?? [];
-  List<dynamic> get accommodationPerformance => _summaryData?['accommodation_performance'] ?? [];
-  List<dynamic> get recentIncome => _summaryData?['recent_income'] ?? [];
-  List<dynamic> get recentExpenses => _summaryData?['recent_expenses'] ?? [];
-  List<dynamic> get summaryProperties => _summaryData?['properties'] ?? [];
+  bool get hasActiveFilters =>
+      _selectedPropertyId != 'all' ||
+      _selectedCategoryId != null ||
+      _startDate != null;
 
   // -------------------------------------------------------
   // FILTERS
   // -------------------------------------------------------
-  void setPropertyFilter(String propertyId) {
-    _selectedPropertyId = propertyId;
-    fetchFinanceData();
+  void setPropertyFilter(String v) {
+    _selectedPropertyId = v;
+    fetchExpenses();
+  }
+
+  void setCategoryFilter(String? v) {
+    _selectedCategoryId = v;
+    fetchExpenses();
   }
 
   void setDateFilter(DateTime? start, DateTime? end) {
     _startDate = start;
     _endDate = end;
-    fetchFinanceData();
+    fetchExpenses();
   }
 
   void clearFilters() {
     _selectedPropertyId = 'all';
+    _selectedCategoryId = null;
     _startDate = null;
     _endDate = null;
-    fetchFinanceData();
-  }
-
-  void setPeriod(String p) {
-    _period = p;
-    fetchSummary();
-  }
-
-  void setSummaryProperty(String pid) {
-    _selectedPropertyId = pid;
-    fetchSummary();
+    fetchExpenses();
   }
 
   // -------------------------------------------------------
-  // FETCH TRANSACTION LIST (Income CRUD page)
+  // FETCH
   // -------------------------------------------------------
-  Future<void> fetchFinanceData() async {
+  Future<void> fetchExpenses() async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -100,21 +71,22 @@ class FinanceProvider with ChangeNotifier {
 
       final params = <String, String>{};
       if (_selectedPropertyId != 'all') params['property_id'] = _selectedPropertyId;
+      if (_selectedCategoryId != null) params['category_id'] = _selectedCategoryId!;
       if (_startDate != null) params['start_date'] = _startDate!.toIso8601String().split('T')[0];
       if (_endDate != null) params['end_date'] = _endDate!.toIso8601String().split('T')[0];
 
-      final uri = Uri.parse('${ApiConfig.baseUrl}/owner/finance').replace(queryParameters: params);
+      final uri = Uri.parse('${ApiConfig.baseUrl}/owner/expenses').replace(queryParameters: params);
       final response = await http.get(uri, headers: {
         'Authorization': 'Bearer $token',
         'Accept': 'application/json',
       });
 
       if (response.statusCode == 200) {
-        final jsonData = jsonDecode(response.body);
-        if (jsonData['success'] == true) {
-          _financeData = jsonData['data'];
+        final json = jsonDecode(response.body);
+        if (json['success'] == true) {
+          _expenseData = json['data'];
         } else {
-          _error = jsonData['message'] ?? 'Failed to load finance data';
+          _error = json['message'] ?? 'Failed to load expenses';
         }
       } else {
         _error = 'Error ${response.statusCode}';
@@ -127,49 +99,28 @@ class FinanceProvider with ChangeNotifier {
     }
   }
 
-  // -------------------------------------------------------
-  // FETCH SUMMARY (Dashboard page)
-  // -------------------------------------------------------
-  Future<void> fetchSummary() async {
-    _isSummaryLoading = true;
-    _error = null;
-    notifyListeners();
-
+  Future<void> fetchCategories() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('auth_token');
-
-      final params = <String, String>{'period': _period};
-      if (_selectedPropertyId != 'all') params['property_id'] = _selectedPropertyId;
-
-      final uri = Uri.parse('${ApiConfig.baseUrl}/owner/finance/summary').replace(queryParameters: params);
-      final response = await http.get(uri, headers: {
-        'Authorization': 'Bearer $token',
-        'Accept': 'application/json',
-      });
-
+      final response = await http.get(
+        Uri.parse('${ApiConfig.baseUrl}/owner/expense-categories'),
+        headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+      );
       if (response.statusCode == 200) {
-        final jsonData = jsonDecode(response.body);
-        if (jsonData['success'] == true) {
-          _summaryData = jsonData['data'];
-        } else {
-          _error = jsonData['message'] ?? 'Failed to load summary';
+        final json = jsonDecode(response.body);
+        if (json['success'] == true) {
+          _categories = json['data'] as List;
+          notifyListeners();
         }
-      } else {
-        _error = 'Error ${response.statusCode}';
       }
-    } catch (e) {
-      _error = 'Connection error: $e';
-    } finally {
-      _isSummaryLoading = false;
-      notifyListeners();
-    }
+    } catch (_) {}
   }
 
   // -------------------------------------------------------
-  // INCOME CRUD
+  // CRUD
   // -------------------------------------------------------
-  Future<bool> createIncomeRecord(Map<String, dynamic> data) async {
+  Future<bool> createExpense(Map<String, dynamic> data) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -177,7 +128,7 @@ class FinanceProvider with ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('auth_token');
       final response = await http.post(
-        Uri.parse('${ApiConfig.baseUrl}/owner/finance'),
+        Uri.parse('${ApiConfig.baseUrl}/owner/expenses'),
         headers: {
           'Authorization': 'Bearer $token',
           'Accept': 'application/json',
@@ -188,11 +139,10 @@ class FinanceProvider with ChangeNotifier {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final json = jsonDecode(response.body);
         if (json['success'] == true) {
-          await fetchFinanceData();
-          await fetchSummary();
+          await fetchExpenses();
           return true;
         } else {
-          _error = json['message'] ?? 'Failed to save';
+          _error = json['message'] ?? 'Failed to create expense';
         }
       } else {
         final json = jsonDecode(response.body);
@@ -207,7 +157,7 @@ class FinanceProvider with ChangeNotifier {
     return false;
   }
 
-  Future<bool> updateIncomeRecord(int id, Map<String, dynamic> data) async {
+  Future<bool> updateExpense(int id, Map<String, dynamic> data) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -215,7 +165,7 @@ class FinanceProvider with ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('auth_token');
       final response = await http.put(
-        Uri.parse('${ApiConfig.baseUrl}/owner/finance/$id'),
+        Uri.parse('${ApiConfig.baseUrl}/owner/expenses/$id'),
         headers: {
           'Authorization': 'Bearer $token',
           'Accept': 'application/json',
@@ -226,8 +176,7 @@ class FinanceProvider with ChangeNotifier {
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body);
         if (json['success'] == true) {
-          await fetchFinanceData();
-          await fetchSummary();
+          await fetchExpenses();
           return true;
         } else {
           _error = json['message'] ?? 'Failed to update';
@@ -245,7 +194,7 @@ class FinanceProvider with ChangeNotifier {
     return false;
   }
 
-  Future<bool> deleteIncomeRecord(int id) async {
+  Future<bool> deleteExpense(int id) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -253,14 +202,13 @@ class FinanceProvider with ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('auth_token');
       final response = await http.delete(
-        Uri.parse('${ApiConfig.baseUrl}/owner/finance/$id'),
+        Uri.parse('${ApiConfig.baseUrl}/owner/expenses/$id'),
         headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
       );
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body);
         if (json['success'] == true) {
-          await fetchFinanceData();
-          await fetchSummary();
+          await fetchExpenses();
           return true;
         } else {
           _error = json['message'] ?? 'Failed to delete';
