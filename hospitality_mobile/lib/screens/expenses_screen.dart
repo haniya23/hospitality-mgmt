@@ -25,15 +25,16 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
     Future.microtask(() {
       final exp = ref.read(expenseProvider);
       final fin = ref.read(financeProvider);
+      final prop = ref.read(propertyProvider);
       exp.fetchCategories();
       exp.fetchExpenses();
+      prop.fetchProperties();
       if (fin.properties.isEmpty) fin.fetchFinanceData();
     });
   }
 
   void _showExpenseForm([Map<String, dynamic>? expense]) {
     final exp = ref.read(expenseProvider);
-    final fin = ref.read(financeProvider);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -43,8 +44,6 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
       ),
       builder: (_) => _ExpenseForm(
         expense: expense,
-        properties: fin.properties,
-        categories: exp.categories,
         onSave: (data) async {
           bool success;
           if (expense != null) {
@@ -333,27 +332,23 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
 // ============================================================
 // EXPENSE FORM (Add / Edit)
 // ============================================================
-class _ExpenseForm extends StatefulWidget {
+class _ExpenseForm extends ConsumerStatefulWidget {
   final Map<String, dynamic>? expense;
-  final List<dynamic> properties;
-  final List<dynamic> categories;
   final Function(Map<String, dynamic>) onSave;
   final VoidCallback? onDelete;
 
   const _ExpenseForm({
     super.key,
     this.expense,
-    required this.properties,
-    required this.categories,
     required this.onSave,
     this.onDelete,
   });
 
   @override
-  State<_ExpenseForm> createState() => _ExpenseFormState();
+  ConsumerState<_ExpenseForm> createState() => _ExpenseFormState();
 }
 
-class _ExpenseFormState extends State<_ExpenseForm> {
+class _ExpenseFormState extends ConsumerState<_ExpenseForm> {
   static const Color primaryColor = Color(0xFF2E3E2A);
   static const Color textPrimary = Color(0xFF191D19);
   static const Color textSecondary = Color(0xFF5A7251);
@@ -380,11 +375,9 @@ class _ExpenseFormState extends State<_ExpenseForm> {
   void initState() {
     super.initState();
     final e = widget.expense;
-    _selectedPropertyId = e?['property_id']?.toString() ??
-        (widget.properties.isNotEmpty ? widget.properties.first['id'].toString() : null);
+    _selectedPropertyId = e?['property_id']?.toString();
     _selectedAccommodationId = e?['accommodation_id']?.toString();
-    _selectedCategoryId = e?['expense_category_id']?.toString() ??
-        (widget.categories.isNotEmpty ? widget.categories.first['id'].toString() : null);
+    _selectedCategoryId = e?['expense_category_id']?.toString();
     _paymentMethod = e?['payment_method'] ?? 'cash';
     _paymentStatus = e?['payment_status'] ?? 'paid';
     _isRecurring = e?['is_recurring'] == true;
@@ -401,6 +394,17 @@ class _ExpenseFormState extends State<_ExpenseForm> {
     if (dateStr != null) {
       try { _selectedDate = DateTime.parse(dateStr.split('T')[0]); } catch (_) {}
     }
+
+    Future.microtask(() {
+      final prop = ref.read(propertyProvider);
+      final exp = ref.read(expenseProvider);
+      if (prop.properties.isEmpty) {
+        prop.fetchProperties();
+      }
+      if (exp.categories.isEmpty) {
+        exp.fetchCategories();
+      }
+    });
   }
 
   @override
@@ -417,9 +421,10 @@ class _ExpenseFormState extends State<_ExpenseForm> {
   List<dynamic> get _accommodations {
     if (_selectedPropertyId == null) return [];
     try {
-      final prop = widget.properties.firstWhere(
+      final properties = ref.read(propertyProvider).properties;
+      final prop = properties.firstWhere(
         (p) => p['id'].toString() == _selectedPropertyId, orElse: () => null);
-      return prop?['accommodations'] as List? ?? [];
+      return prop?['property_accommodations'] as List? ?? [];
     } catch (_) { return []; }
   }
 
@@ -463,6 +468,16 @@ class _ExpenseFormState extends State<_ExpenseForm> {
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.expense != null;
+    final properties = ref.watch(propertyProvider).properties;
+    final categories = ref.watch(expenseProvider).categories;
+
+    if (_selectedPropertyId == null && properties.isNotEmpty) {
+      _selectedPropertyId = properties.first['id'].toString();
+    }
+    if (_selectedCategoryId == null && categories.isNotEmpty) {
+      _selectedCategoryId = categories.first['id'].toString();
+    }
+
     return Padding(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -504,8 +519,13 @@ class _ExpenseFormState extends State<_ExpenseForm> {
               _buildDropdown(
                 label: 'Property *',
                 value: _selectedPropertyId,
-                items: widget.properties.map((p) =>
-                  DropdownMenuItem<String>(value: p['id'].toString(), child: Text(p['name'] ?? ''))).toList(),
+                items: [
+                  for (final p in properties)
+                    DropdownMenuItem<String>(
+                      value: p['id'].toString(),
+                      child: Text(p['name'] ?? ''),
+                    ),
+                ],
                 onChanged: (v) => setState(() {
                   _selectedPropertyId = v;
                   _selectedAccommodationId = null;
@@ -519,8 +539,11 @@ class _ExpenseFormState extends State<_ExpenseForm> {
                 value: _selectedAccommodationId,
                 items: [
                   const DropdownMenuItem<String>(value: null, child: Text('General (No Room)')),
-                  ..._accommodations.map((a) =>
-                    DropdownMenuItem<String>(value: a['id'].toString(), child: Text(a['display_name'] ?? ''))),
+                  for (final a in _accommodations)
+                    DropdownMenuItem<String>(
+                      value: a['id'].toString(),
+                      child: Text(a['display_name'] ?? ''),
+                    ),
                 ],
                 onChanged: (v) => setState(() => _selectedAccommodationId = v),
               ),
@@ -530,8 +553,13 @@ class _ExpenseFormState extends State<_ExpenseForm> {
               _buildDropdown(
                 label: 'Category *',
                 value: _selectedCategoryId,
-                items: widget.categories.map((c) =>
-                  DropdownMenuItem<String>(value: c['id'].toString(), child: Text(c['name'] ?? ''))).toList(),
+                items: [
+                  for (final c in categories)
+                    DropdownMenuItem<String>(
+                      value: c['id'].toString(),
+                      child: Text(c['name'] ?? ''),
+                    ),
+                ],
                 onChanged: (v) => setState(() => _selectedCategoryId = v),
                 validator: (v) => v == null ? 'Category is required' : null,
               ),
