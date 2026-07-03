@@ -84,19 +84,29 @@
             </div>
 
             <!-- Amount Information -->
-            <div class="flex items-center justify-between mb-4">
-                <div class="text-sm text-gray-500">
-                    <span>Total Amount: </span>
-                    <span class="font-medium text-gray-900" x-text="'₹' + booking.reservation.total_amount"></span>
+            <div class="grid grid-cols-3 gap-2 text-center bg-gray-50 rounded-xl p-3 mb-4 text-xs">
+                <div>
+                    <span class="block text-gray-500 mb-0.5">Total Amount</span>
+                    <span class="font-bold text-gray-900" x-text="'₹' + parseFloat(booking.reservation.total_amount).toFixed(2)"></span>
                 </div>
-                <div class="text-sm text-gray-500">
-                    <span>Refund Amount: </span>
-                    <span class="font-medium text-green-600" x-text="'₹' + (booking.refund_amount || 0)"></span>
+                <div>
+                    <span class="block text-gray-500 mb-0.5">Money Collected</span>
+                    <span class="font-bold text-blue-600" x-text="'₹' + parseFloat(booking.reservation.advance_paid).toFixed(2)"></span>
+                </div>
+                <div>
+                    <span class="block text-gray-500 mb-0.5">Refunded</span>
+                    <span class="font-bold text-red-600" x-text="'₹' + parseFloat(booking.refund_amount || 0).toFixed(2)"></span>
                 </div>
             </div>
 
             <!-- Action Buttons -->
             <div class="flex flex-col sm:flex-row gap-3">
+                <button x-show="parseFloat(booking.reservation.advance_paid) > 0 && parseFloat(booking.refund_amount || 0) < parseFloat(booking.reservation.advance_paid)"
+                        @click="openRefundModal(booking)" 
+                        class="flex-1 bg-gradient-to-r from-red-600 to-rose-600 text-white py-3 px-6 rounded-xl font-semibold text-sm hover:from-red-700 hover:to-rose-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center space-x-2">
+                    <i class="fas fa-undo"></i>
+                    <span>Record Refund</span>
+                </button>
                 <button @click="reactivateBooking(booking.reservation.uuid, 'pending')" 
                         class="flex-1 bg-gradient-to-r from-yellow-500 to-amber-500 text-white py-3 px-6 rounded-xl font-semibold text-sm hover:from-yellow-600 hover:to-amber-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center space-x-2">
                     <i class="fas fa-clock"></i>

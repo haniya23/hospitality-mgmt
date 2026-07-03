@@ -7,7 +7,13 @@ import '../config/api_config.dart';
 class BookingProvider with ChangeNotifier {
   bool _isLoading = false;
   List<Map<String, dynamic>> _bookings = [];
-  Map<String, int> _counts = {'all': 0, 'pending': 0, 'confirmed': 0, 'cancelled': 0, 'completed': 0};
+  Map<String, int> _counts = {
+    'all': 0,
+    'pending': 0,
+    'confirmed': 0,
+    'cancelled': 0,
+    'completed': 0,
+  };
   String? _error;
   String _currentStatus = 'all';
   List<Map<String, dynamic>> _checkIns = [];
@@ -23,7 +29,7 @@ class BookingProvider with ChangeNotifier {
   Map<String, int> get counts => _counts;
   String? get error => _error;
   String get currentStatus => _currentStatus;
-  
+
   List<Map<String, dynamic>> get checkIns => _checkIns;
   List<Map<String, dynamic>> get checkOuts => _checkOuts;
   List<Map<String, dynamic>> get recentCheckIns => _recentCheckIns;
@@ -58,7 +64,9 @@ class BookingProvider with ChangeNotifier {
         final jsonData = jsonDecode(response.body);
         if (jsonData['success'] == true) {
           final dataList = jsonData['data']['data'] as List;
-          _checkIns = dataList.map((item) => Map<String, dynamic>.from(item as Map)).toList();
+          _checkIns = dataList
+              .map((item) => Map<String, dynamic>.from(item as Map))
+              .toList();
         } else {
           _error = jsonData['message'];
         }
@@ -100,7 +108,9 @@ class BookingProvider with ChangeNotifier {
         final jsonData = jsonDecode(response.body);
         if (jsonData['success'] == true) {
           final dataList = jsonData['data']['data'] as List;
-          _checkOuts = dataList.map((item) => Map<String, dynamic>.from(item as Map)).toList();
+          _checkOuts = dataList
+              .map((item) => Map<String, dynamic>.from(item as Map))
+              .toList();
         } else {
           _error = jsonData['message'];
         }
@@ -130,7 +140,9 @@ class BookingProvider with ChangeNotifier {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['success'] == true) {
-          _recentCheckIns = List<Map<String, dynamic>>.from(data['data']['data']);
+          _recentCheckIns = List<Map<String, dynamic>>.from(
+            data['data']['data'],
+          );
         }
       }
     } catch (_) {
@@ -157,7 +169,9 @@ class BookingProvider with ChangeNotifier {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['success'] == true) {
-          _recentCheckOuts = List<Map<String, dynamic>>.from(data['data']['data']);
+          _recentCheckOuts = List<Map<String, dynamic>>.from(
+            data['data']['data'],
+          );
         }
       }
     } catch (_) {
@@ -235,7 +249,9 @@ class BookingProvider with ChangeNotifier {
         final jsonData = jsonDecode(response.body);
         if (jsonData['success'] == true) {
           final List<dynamic> data = jsonData['data']['data'];
-          _bookings = data.map((item) => Map<String, dynamic>.from(item as Map)).toList();
+          _bookings = data
+              .map((item) => Map<String, dynamic>.from(item as Map))
+              .toList();
           fetchCounts(); // Refresh counts
         } else {
           _error = jsonData['message'] ?? 'Failed to load bookings';
@@ -271,7 +287,7 @@ class BookingProvider with ChangeNotifier {
         if (jsonData['success'] == true) {
           return jsonData['data'];
         } else {
-             _error = jsonData['message'];
+          _error = jsonData['message'];
         }
       } else {
         _error = 'Failed to load booking details';
@@ -347,7 +363,12 @@ class BookingProvider with ChangeNotifier {
       notifyListeners();
     }
   }
-  Future<bool> updateBookingStatus(int id, String status, {String? reason}) async {
+
+  Future<bool> updateBookingStatus(
+    int id,
+    String status, {
+    String? reason,
+  }) async {
     _isLoading = true;
     notifyListeners();
     try {
@@ -374,7 +395,7 @@ class BookingProvider with ChangeNotifier {
         await fetchCounts();
         return true;
       } else {
-         final errorData = jsonDecode(response.body);
+        final errorData = jsonDecode(response.body);
         _error = errorData['message'] ?? 'Failed to update status';
         return false;
       }
@@ -391,7 +412,7 @@ class BookingProvider with ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
     // Note: Append token to query if PDF download needs auth in browser
-    return '${ApiConfig.bookingsEndpoint}/$bookingId/invoice?token=$token'; 
+    return '${ApiConfig.bookingsEndpoint}/$bookingId/invoice?token=$token';
   }
 
   Future<bool> editBooking(int id, Map<String, dynamic> data) async {
@@ -503,7 +524,11 @@ class BookingProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> updateBookingPayment(String uuid, double amountPaid, String notes) async {
+  Future<bool> updateBookingPayment(
+    String uuid,
+    double amountPaid,
+    String notes,
+  ) async {
     _isLoading = true;
     notifyListeners();
     try {
@@ -519,10 +544,7 @@ class BookingProvider with ChangeNotifier {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: jsonEncode({
-          'amount_paid': amountPaid,
-          'payment_notes': notes,
-        }),
+        body: jsonEncode({'amount_paid': amountPaid, 'payment_notes': notes}),
       );
 
       if (response.statusCode == 200) {
@@ -538,6 +560,58 @@ class BookingProvider with ChangeNotifier {
       } else {
         final errorData = jsonDecode(response.body);
         _error = errorData['message'] ?? 'Failed to update payment';
+        return false;
+      }
+    } catch (e) {
+      _error = 'Connection error: $e';
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> recordBookingRefund(
+    String uuid,
+    double amount,
+    String reason,
+  ) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+
+      final url = '${ApiConfig.bookingsEndpoint}/$uuid/refund';
+
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({'amount': amount, 'reason': reason}),
+      );
+
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body);
+        if (result['success'] == true) {
+          await fetchBookings(status: 'all');
+          await fetchCounts();
+          return true;
+        } else {
+          _error = result['message'] ?? 'Failed to record refund';
+          return false;
+        }
+      } else {
+        final errorData = response.body.isNotEmpty
+            ? jsonDecode(response.body)
+            : null;
+        _error = errorData is Map<String, dynamic>
+            ? (errorData['message'] ?? 'Failed to record refund')
+            : 'Failed to record refund';
         return false;
       }
     } catch (e) {

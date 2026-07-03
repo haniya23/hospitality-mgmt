@@ -12,6 +12,61 @@
 <div x-data="cancelledBookingData()" x-init="init()" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
     @include('partials.bookings.cancelled-filters')
     @include('partials.bookings.cancelled-list')
+
+    <!-- Refund Modal -->
+    <template x-if="showRefundModal">
+        <div class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4">
+            <div class="fixed inset-0 bg-gray-900/50 transition-opacity" @click="showRefundModal = false"></div>
+            
+            <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl relative z-10 transform transition-all">
+                <div class="flex items-center justify-between mb-4 border-b pb-3">
+                    <h3 class="text-lg font-bold text-gray-900 flex items-center">
+                        <i class="fas fa-undo text-red-600 mr-2"></i>
+                        <span>Record Booking Refund</span>
+                    </h3>
+                    <button @click="showRefundModal = false" class="text-gray-400 hover:text-gray-500">
+                        <i class="fas fa-times text-lg"></i>
+                    </button>
+                </div>
+                
+                <form @submit.prevent="submitRefund" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Max Refundable Amount</label>
+                        <div class="text-lg font-bold text-gray-900" x-text="'₹' + maxRefundAmount"></div>
+                    </div>
+
+                    <div>
+                        <label for="refund_amount" class="block text-sm font-medium text-gray-700 mb-1">Refund Amount *</label>
+                        <div class="relative rounded-lg shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500 sm:text-sm">₹</span>
+                            </div>
+                            <input type="number" id="refund_amount" x-model="refundAmount" step="0.01" min="0.01" :max="maxRefundAmount"
+                                   class="focus:ring-red-500 focus:border-red-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-lg" required>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="refund_reason" class="block text-sm font-medium text-gray-700 mb-1">Reason / Notes</label>
+                        <textarea id="refund_reason" x-model="refundReason" rows="3"
+                                  class="focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-gray-300 rounded-lg"
+                                  placeholder="e.g. Booking cancelled by guest, full refund approved"></textarea>
+                    </div>
+
+                    <div class="flex space-x-3 pt-4">
+                        <button type="button" @click="showRefundModal = false"
+                                class="flex-1 px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50">
+                            Cancel
+                        </button>
+                        <button type="submit"
+                                class="flex-1 px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-red-600 hover:bg-red-700">
+                            Record Refund
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </template>
 </div>
 @endsection
 
@@ -30,10 +85,58 @@ function cancelledBookingData() {
         perPage: {{ $cancelledBookings->perPage() }},
         from: {{ $cancelledBookings->firstItem() ?? 0 }},
         to: {{ $cancelledBookings->lastItem() ?? 0 }},
+        showRefundModal: false,
+        selectedBookingForRefund: null,
+        refundAmount: 0,
+        refundReason: '',
+        maxRefundAmount: 0,
 
         init() {
             this.filteredBookings = this.cancelledBookings;
             this.loadProperties();
+        },
+
+        openRefundModal(booking) {
+            this.selectedBookingForRefund = booking;
+            this.maxRefundAmount = Math.max(
+                0,
+                parseFloat(booking.reservation.advance_paid || 0) - parseFloat(booking.refund_amount || 0)
+            );
+            this.refundAmount = this.maxRefundAmount;
+            this.refundReason = '';
+            this.showRefundModal = true;
+        },
+
+        async submitRefund() {
+            if (this.refundAmount <= 0 || this.refundAmount > this.maxRefundAmount) {
+                alert(`Please enter a valid refund amount up to ₹${this.maxRefundAmount}`);
+                return;
+            }
+            try {
+                const response = await fetch(`/api/bookings/${this.selectedBookingForRefund.reservation.uuid}/refund`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        amount: this.refundAmount,
+                        reason: this.refundReason
+                    })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    this.selectedBookingForRefund.refund_amount = parseFloat(data.refund_amount || 0);
+                    this.maxRefundAmount = parseFloat(data.remaining_refundable_amount || 0);
+                    this.showRefundModal = false;
+                    this.showMessage('Refund recorded successfully!', 'success');
+                } else {
+                    this.showMessage(data.message || 'Error recording refund', 'error');
+                }
+            } catch (error) {
+                this.showMessage('Error recording refund', 'error');
+            }
         },
 
         async loadProperties() {

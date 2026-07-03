@@ -651,4 +651,59 @@ class BookingController extends Controller
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
+
+    public function refund(Request $request, Reservation $booking)
+    {
+        try {
+            $booking->load(['accommodation.property', 'bookingFinance', 'cancelledBooking']);
+            
+            if ($booking->accommodation->property->owner_id !== auth()->id()) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+            }
+            
+            if ($booking->status !== 'cancelled') {
+                return response()->json(['success' => false, 'message' => 'Booking is not cancelled'], 400);
+            }
+
+            $existingRefund = (float) ($booking->bookingFinance?->refund_amount
+                ?? $booking->cancelledBooking?->refund_amount
+                ?? 0);
+            $remainingRefundable = max(0, (float) $booking->advance_paid - $existingRefund);
+
+            if ($remainingRefundable <= 0) {
+                return response()->json(['success' => false, 'message' => 'No refundable collected amount remaining'], 422);
+            }
+            
+            $request->validate([
+                'amount' => 'required|numeric|min:0.01|max:' . $remainingRefundable,
+                'reason' => 'nullable|string|max:255'
+            ]);
+            
+            $amount = $request->amount;
+            $reason = $request->reason;
+            
+            $bookingFinance = $booking->bookingFinance;
+            if (!$bookingFinance) {
+                $bookingFinance = \App\Models\BookingFinance::createFromReservation($booking);
+            }
+            
+            $bookingFinance->recordRefund($amount, $reason);
+            
+            $cancelledBooking = $booking->cancelledBooking;
+            if ($cancelledBooking) {
+                $cancelledBooking->update([
+                    'refund_amount' => $bookingFinance->refund_amount
+                ]);
+            }
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Refund recorded successfully',
+                'refund_amount' => $bookingFinance->refund_amount,
+                'remaining_refundable_amount' => max(0, $bookingFinance->advance_received - $bookingFinance->refund_amount),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
 }

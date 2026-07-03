@@ -360,9 +360,30 @@ class BookingFinance extends Model
      */
     public function recordRefund(float $amount, ?string $reason = null): void
     {
+        $remainingRefundable = max(0, $this->advance_received - $this->refund_amount);
+
+        if ($amount <= 0) {
+            throw new \InvalidArgumentException('Refund amount must be greater than zero.');
+        }
+
+        if ($amount > $remainingRefundable) {
+            throw new \InvalidArgumentException('Refund amount exceeds collected amount available for refund.');
+        }
+
         $newRefund = $this->refund_amount + $amount;
         $newFinal = $this->total_amount + $this->additional_charges - $newRefund;
         $newBalance = max(0, $newFinal - $this->advance_received);
+        $paymentStatus = $this->payment_status;
+
+        if ($newRefund >= $this->advance_received && $this->advance_received > 0) {
+            $paymentStatus = 'refunded';
+        } elseif ($this->advance_received >= $newFinal && $newFinal > 0) {
+            $paymentStatus = 'paid';
+        } elseif ($this->advance_received > 0) {
+            $paymentStatus = 'partial';
+        } else {
+            $paymentStatus = 'unpaid';
+        }
 
         $note = $reason ? "Refund: ₹{$amount} - {$reason}" : "Refund: ₹{$amount}";
 
@@ -370,8 +391,25 @@ class BookingFinance extends Model
             'refund_amount' => $newRefund,
             'final_amount' => $newFinal,
             'balance_pending' => $newBalance,
-            'payment_status' => $newBalance <= 0 ? 'refunded' : $this->payment_status,
+            'payment_status' => $paymentStatus,
             'notes' => $this->notes ? $this->notes . "\n" . $note : $note,
+        ]);
+
+        $category = \App\Models\ExpenseCategory::where('slug', 'operational')->first() 
+            ?? \App\Models\ExpenseCategory::first();
+
+        \App\Models\ExpenseRecord::create([
+            'property_id' => $this->property_id,
+            'accommodation_id' => $this->accommodation_id,
+            'expense_category_id' => $category ? $category->id : 1,
+            'title' => "Booking Refund - " . ($this->reservation && $this->reservation->guest ? $this->reservation->guest->name : $this->finance_number),
+            'amount' => $amount,
+            'transaction_date' => now()->toDateString(),
+            'payment_method' => 'cash',
+            'payment_status' => 'paid',
+            'paid_amount' => $amount,
+            'notes' => $note,
+            'created_by' => auth()->id() ?? $this->created_by,
         ]);
     }
 

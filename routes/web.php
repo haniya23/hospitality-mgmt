@@ -257,6 +257,7 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('/bookings/{booking}/confirm', [App\Http\Controllers\BookingController::class, 'confirm']);
         Route::patch('/bookings/{booking}/cancel', [App\Http\Controllers\BookingController::class, 'cancel']);
         Route::patch('/bookings/{booking}/reactivate', [App\Http\Controllers\BookingController::class, 'reactivate']);
+        Route::post('/bookings/{booking}/refund', [App\Http\Controllers\BookingController::class, 'refund']);
 
         // Property Delete Request Routes
         Route::post('/property-delete-requests', [App\Http\Controllers\PropertyDeleteRequestController::class, 'store']);
