@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/auth_provider.dart';
 import 'main_layout.dart';
+import 'edit_profile_screen.dart';
 
 class ProfileTab extends StatelessWidget {
   const ProfileTab({super.key});
@@ -83,14 +84,19 @@ class ProfileTab extends StatelessWidget {
                 CircleAvatar(
                   radius: 36,
                   backgroundColor: const Color(0xFFFFE8B6), // Accent cream/yellow
-                  child: Text(
-                    initials,
-                    style: GoogleFonts.outfit(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF2E3E2A),
-                    ),
-                  ),
+                  backgroundImage: auth.profilePhotoUrl != null && auth.profilePhotoUrl!.isNotEmpty
+                      ? NetworkImage(auth.profilePhotoUrl!)
+                      : null,
+                  child: auth.profilePhotoUrl != null && auth.profilePhotoUrl!.isNotEmpty
+                      ? null
+                      : Text(
+                          initials,
+                          style: GoogleFonts.outfit(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF2E3E2A),
+                          ),
+                        ),
                 ),
                 const SizedBox(width: 20),
                 Expanded(
@@ -142,7 +148,12 @@ class ProfileTab extends StatelessWidget {
           _buildMenuOption(
             icon: Icons.person_outline_rounded,
             title: 'My Profile',
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const EditProfileScreen()),
+              );
+            },
           ),
           const SizedBox(height: 12),
           _buildMenuOption(

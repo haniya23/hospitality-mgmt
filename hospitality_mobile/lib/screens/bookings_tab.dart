@@ -7,6 +7,7 @@ import 'main_layout.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'booking_details_screen.dart';
+import 'create_booking_screen.dart';
 
 class BookingsTab extends StatefulWidget {
   final VoidCallback? onAddBooking;
@@ -70,6 +71,18 @@ class _BookingsTabState extends State<BookingsTab> {
           ),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.add_rounded, color: Color(0xFF191D19)),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const CreateBookingScreen()),
+              ).then((_) {
+                provider.fetchCounts();
+                _fetchBookingsForCurrentTab();
+              });
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.refresh_rounded, color: Color(0xFF191D19)),
             onPressed: () {

@@ -77,6 +77,10 @@ Route::prefix('owner')->name('api.owner.')->middleware('auth:sanctum')->group(fu
     // Dashboard
     Route::get('/dashboard', [App\Http\Controllers\Api\Owner\DashboardController::class, 'index'])->name('dashboard');
     
+    // Profile
+    Route::get('/profile', [App\Http\Controllers\Api\Owner\ProfileController::class, 'show'])->name('profile');
+    Route::post('/profile', [App\Http\Controllers\Api\Owner\ProfileController::class, 'update'])->name('profile.update');
+    
     // Bookings
     // Bookings
     Route::get('/bookings/counts', [App\Http\Controllers\Api\Owner\BookingController::class, 'counts'])->name('bookings.counts');

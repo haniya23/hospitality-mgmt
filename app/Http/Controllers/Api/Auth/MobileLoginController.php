@@ -42,10 +42,12 @@ class MobileLoginController extends Controller
                 'token_type' => 'Bearer',
                 'user' => [
                     'id' => $user->id,
-                    'uuid' => $user->uuid, // Assuming uuid exists based on other controllers
+                    'uuid' => $user->uuid,
                     'name' => $user->name,
                     'mobile_number' => $user->mobile_number,
-                    'user_type' => $user->user_type,
+                    'email' => $user->email,
+                    'profile_photo_url' => $user->profile_photo_url,
+                    'user_type' => $user->is_admin ? 'admin' : 'owner',
                 ],
             ],
         ], 200);

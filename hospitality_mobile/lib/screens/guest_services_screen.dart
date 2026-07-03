@@ -21,7 +21,7 @@ class _GuestServicesScreenState extends ConsumerState<GuestServicesScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final DateTime _today = DateTime.now();
-  bool _showAll = false;
+  bool _showAll = true;
 
   @override
   void initState() {

@@ -19,10 +19,15 @@ class User extends Authenticatable
         'pin_hash',
         'password',
         'email',
+        'profile_photo_path',
         'is_active',
         'is_admin',
         'referred_by',
         'user_id',
+    ];
+
+    protected $appends = [
+        'profile_photo_url',
     ];
 
     protected $hidden = [
@@ -172,6 +177,14 @@ class User extends Authenticatable
     {
         return true;
     }
+
+    public function getProfilePhotoUrlAttribute()
+    {
+        return $this->profile_photo_path
+            ? asset('storage/' . $this->profile_photo_path)
+            : 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=2E3E2A&color=fff';
+    }
+
 
     protected static function boot()
     {

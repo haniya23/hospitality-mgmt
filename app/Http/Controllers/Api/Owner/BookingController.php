@@ -15,7 +15,7 @@ class BookingController extends Controller
         $user = $request->user();
         $status = $request->input('status'); // all, confirmed, pending, cancelled
 
-        $query = $user->reservations()
+        $query = $this->getOwnerReservationsQuery($user)
             ->with(['guest', 'accommodation.property'])
             ->latest();
 
@@ -51,18 +51,34 @@ class BookingController extends Controller
     public function counts(Request $request) 
     {
         $user = $request->user();
+        $ownerQuery = $this->getOwnerReservationsQuery($user);
         
         $counts = [
-            'all' => $user->reservations()->count(),
-            'pending' => $user->reservations()->where('status', 'pending')->count(),
-            'confirmed' => $user->reservations()->where('status', 'confirmed')->count(),
-            'cancelled' => $user->reservations()->where('status', 'cancelled')->count(),
-            'completed' => $user->reservations()->where('status', 'checked_out')->count(),
+            'all' => (clone $ownerQuery)->count(),
+            'pending' => (clone $ownerQuery)->where('status', 'pending')->count(),
+            'confirmed' => (clone $ownerQuery)->where('status', 'confirmed')->count(),
+            'cancelled' => (clone $ownerQuery)->where('status', 'cancelled')->count(),
+            'completed' => (clone $ownerQuery)->where('status', 'checked_out')->count(),
         ];
 
         return response()->json([
             'success' => true,
             'data' => $counts
+        ]);
+    }
+
+    /**
+     * Get booking details
+     */
+    public function show(Request $request, $id)
+    {
+        $booking = $this->getOwnerReservationsQuery($request->user())
+            ->with(['guest', 'accommodation.property'])
+            ->findOrFail($id);
+
+        return response()->json([
+            'success' => true,
+            'data' => $booking
         ]);
     }
 
@@ -142,7 +158,7 @@ class BookingController extends Controller
             'reason' => 'nullable|string|required_if:status,cancelled',
         ]);
 
-        $booking = $request->user()->reservations()->findOrFail($id);
+        $booking = $this->getOwnerReservationsQuery($request->user())->findOrFail($id);
         $booking->update(['status' => $validated['status']]);
 
         // Handle Cancellation Reason
@@ -168,7 +184,7 @@ class BookingController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $booking = $request->user()->reservations()->findOrFail($id);
+        $booking = $this->getOwnerReservationsQuery($request->user())->findOrFail($id);
         
         $validated = $request->validate([
             'check_in_date' => 'required|date',
@@ -186,10 +202,10 @@ class BookingController extends Controller
         // Update Guest if exists (optional logic, maybe just update booking snapshot)
         if ($booking->guest) {
              $booking->guest->update([
-                 'name' => $validated['guest_name'] ?? $booking->guest->name,
-                 'mobile_number' => $validated['guest_mobile'] ?? $booking->guest->mobile_number,
-                 'email' => $validated['guest_email'] ?? $booking->guest->email,
-             ]);
+                  'name' => $validated['guest_name'] ?? $booking->guest->name,
+                  'mobile_number' => $validated['guest_mobile'] ?? $booking->guest->mobile_number,
+                  'email' => $validated['guest_email'] ?? $booking->guest->email,
+              ]);
         }
         
         $booking->update([
@@ -215,7 +231,7 @@ class BookingController extends Controller
      */
     public function downloadInvoice(Request $request, $id)
     {
-        $booking = $request->user()->reservations()->findOrFail($id);
+        $booking = $this->getOwnerReservationsQuery($request->user())->findOrFail($id);
         return app(\App\Http\Controllers\InvoiceController::class)->download($booking);
     }
 
@@ -225,7 +241,8 @@ class BookingController extends Controller
     public function updatePayment(Request $request, $id)
     {
         try {
-            $booking = $request->user()->reservations()
+            $booking = $this->getOwnerReservationsQuery($request->user())
+                ->with(['accommodation.property'])
                 ->where(function ($query) use ($id) {
                     if (is_numeric($id)) {
                         $query->where('id', $id);
@@ -247,6 +264,31 @@ class BookingController extends Controller
                 'balance_pending' => $newBalance,
                 'advance_paid' => $booking->advance_paid + $amountPaid
             ]);
+
+            // Sync/Create Income Record
+            $incomeType = $booking->b2b_partner_id ? 'b2b_booking' : 'booking';
+            $paidAmount = $booking->total_amount - $newBalance;
+            $paymentStatus = $newBalance > 0 ? 'partial' : 'paid';
+
+            if ($newBalance >= $booking->total_amount) {
+                $paymentStatus = 'unpaid';
+            }
+
+            \App\Models\IncomeRecord::updateOrCreate(
+                ['reservation_id' => $booking->id],
+                [
+                    'property_id' => $booking->accommodation->property->id,
+                    'accommodation_id' => $booking->accommodation->id,
+                    'b2b_partner_id' => $booking->b2b_partner_id,
+                    'income_type' => $incomeType,
+                    'amount' => $booking->total_amount,
+                    'paid_amount' => $paidAmount,
+                    'payment_status' => $paymentStatus,
+                    'transaction_date' => now(),
+                    'reference_number' => $booking->confirmation_number,
+                    'notes' => $request->payment_notes ?? "Payment update - {$booking->confirmation_number}",
+                ]
+            );
             
             // Update checkout record payment status if fully paid
             if ($newBalance == 0 && $booking->checkOutRecord) {
@@ -264,5 +306,12 @@ class BookingController extends Controller
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
+    }
+
+    private function getOwnerReservationsQuery($user)
+    {
+        return \App\Models\Reservation::whereHas('accommodation.property', function ($query) use ($user) {
+            $query->where('owner_id', $user->id);
+        });
     }
 }
