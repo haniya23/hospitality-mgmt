@@ -4,10 +4,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../providers/booking_provider.dart';
 import 'main_layout.dart';
-import 'create_booking_screen.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'booking_details_screen.dart';
+
 class BookingsTab extends StatefulWidget {
   final VoidCallback? onAddBooking;
   
@@ -18,7 +18,7 @@ class BookingsTab extends StatefulWidget {
 }
 
 class _BookingsTabState extends State<BookingsTab> {
-  int _selectedIndex = 0; // 0: Pending, 1: Confirmed, 2: Completed
+  int _selectedIndex = 0; // 0: Pending, 1: Confirmed, 2: Completed, 3: Cancelled
 
   @override
   void initState() {
@@ -34,36 +34,6 @@ class _BookingsTabState extends State<BookingsTab> {
     _fetchBookingsForCurrentTab();
   }
 
-  // ... imports
-
-  // ... inside _BookingsTabState
-  
-  // NOTE: index 3 is now Cancelled
-  @override
-  Widget build(BuildContext context) {
-    final provider = Provider.of<BookingProvider>(context);
-    final bookings = provider.bookings;
-    final counts = provider.counts;
-
-    return Column(
-      children: [
-        _buildStatusCards(counts),
-        const SizedBox(height: 8),
-        Expanded(
-          child: provider.isLoading 
-              ? const Center(child: CircularProgressIndicator())
-              : RefreshIndicator(
-                  onRefresh: () async {
-                    provider.fetchCounts();
-                    _fetchBookingsForCurrentTab();
-                  },
-                  child: _buildBookingList(bookings),
-                ),
-        ),
-      ],
-    );
-  }
-
   void _fetchBookingsForCurrentTab() {
     final provider = Provider.of<BookingProvider>(context, listen: false);
     String status;
@@ -77,10 +47,62 @@ class _BookingsTabState extends State<BookingsTab> {
     provider.fetchBookings(status: status);
   }
 
+  @override
+  Widget build(BuildContext context) {
+    final provider = Provider.of<BookingProvider>(context);
+    final bookings = provider.bookings;
+    final counts = provider.counts;
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF2F5F0), // Organic warm cream background
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.menu_rounded, color: Color(0xFF191D19)),
+          onPressed: () => MainLayout.scaffoldKey.currentState?.openDrawer(),
+        ),
+        title: Text(
+          'Bookings',
+          style: GoogleFonts.outfit(
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF191D19),
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh_rounded, color: Color(0xFF191D19)),
+            onPressed: () {
+              provider.fetchCounts();
+              _fetchBookingsForCurrentTab();
+            },
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          _buildStatusCards(counts),
+          const SizedBox(height: 8),
+          Expanded(
+            child: provider.isLoading 
+                ? const Center(child: CircularProgressIndicator())
+                : RefreshIndicator(
+                    onRefresh: () async {
+                      provider.fetchCounts();
+                      _fetchBookingsForCurrentTab();
+                    },
+                    child: _buildBookingList(bookings),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildStatusCards(Map<String, int> counts) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      color: Colors.white,
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      color: Colors.transparent,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
@@ -100,7 +122,7 @@ class _BookingsTabState extends State<BookingsTab> {
 
   Widget _buildStatusCardWrapper(int index, String title, int count, Color color, IconData icon) {
     return SizedBox(
-      width: 110, // Fixed width for horizontal scrolling consistency
+      width: 104,
       child: _buildSingleStatusCard(
         index: index,
         title: title,
@@ -129,77 +151,47 @@ class _BookingsTabState extends State<BookingsTab> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
         decoration: BoxDecoration(
-          color: isSelected ? primaryColor.withOpacity(0.1) : Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          color: isSelected ? const Color(0xFF2E3E2A) : Colors.white,
+          borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: isSelected ? primaryColor : Colors.grey.shade200,
-            width: isSelected ? 1.5 : 1,
+            color: isSelected ? const Color(0xFF2E3E2A) : const Color(0xFF2E3E2A).withOpacity(0.08),
+            width: 1.5,
           ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF2E3E2A).withOpacity(isSelected ? 0.06 : 0.02),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           children: [
-            Icon(icon, color: isSelected ? primaryColor : Colors.grey, size: 24),
-            const SizedBox(height: 8),
+            Icon(
+              icon,
+              color: isSelected ? const Color(0xFFFFE8B6) : primaryColor,
+              size: 22,
+            ),
+            const SizedBox(height: 6),
             Text(
               count.toString(),
               style: GoogleFonts.outfit(
-                fontSize: 20,
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: isSelected ? primaryColor : Colors.black87,
+                color: isSelected ? Colors.white : const Color(0xFF191D19),
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 2),
             Text(
               title,
               style: GoogleFonts.outfit(
-                fontSize: 12,
-                color: isSelected ? primaryColor : Colors.grey,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                fontSize: 11,
+                color: isSelected ? Colors.white.withOpacity(0.8) : Colors.grey[600],
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildPendingCard(BuildContext context, Map<String, dynamic> booking) {
-    return _buildBaseCard(
-      context,
-      booking,
-      actions: Row(
-        children: [
-          Expanded(
-            child: _buildActionButton(Icons.visibility, 'View Details', Colors.grey, () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => BookingDetailsScreen(bookingId: booking['id'], initialData: booking)),
-              );
-            }),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: _buildActionButton(Icons.check_circle, 'Approve', const Color(0xFF10B981), () {
-              _showConfirmDialog(context, booking);
-            }),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildConfirmedCard(BuildContext context, Map<String, dynamic> booking) {
-    return _buildBaseCard(
-      context,
-      booking,
-      actions: SizedBox(
-        width: double.infinity,
-        child: _buildActionButton(Icons.visibility, 'View Details', Colors.blue, () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => BookingDetailsScreen(bookingId: booking['id'], initialData: booking)),
-          );
-        }),
       ),
     );
   }
@@ -210,7 +202,7 @@ class _BookingsTabState extends State<BookingsTab> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.inbox, size: 64, color: Colors.grey[300]),
+            const Icon(Icons.inbox_rounded, size: 64, color: Color(0xFF5A7251)),
             const SizedBox(height: 16),
             Text('No bookings found', style: GoogleFonts.outfit(color: Colors.grey[500], fontSize: 16)),
           ],
@@ -218,7 +210,7 @@ class _BookingsTabState extends State<BookingsTab> {
       );
     }
     return ListView.separated(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 100), // padding for bottom navigation
       itemCount: bookings.length,
       separatorBuilder: (_, __) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
@@ -236,7 +228,7 @@ class _BookingsTabState extends State<BookingsTab> {
       booking,
       actions: SizedBox(
         width: double.infinity,
-        child: _buildActionButton(Icons.visibility, 'View Details', Colors.grey, () {
+        child: _buildActionButton(Icons.visibility_rounded, 'View Details', Colors.grey.shade700, () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => BookingDetailsScreen(bookingId: booking['id'], initialData: booking)),
@@ -246,18 +238,16 @@ class _BookingsTabState extends State<BookingsTab> {
     );
   }
 
-  // Update Completed Card to link to Details
   Widget _buildCompletedCard(BuildContext context, Map<String, dynamic> booking) {
     final balancePending = double.tryParse(booking['balance_pending']?.toString() ?? '0') ?? 0;
-    
     return _buildBaseCard(
       context,
       booking,
       actions: Row(
         children: [
           Expanded(
-            child: _buildActionButton(Icons.visibility, 'Details', Colors.blue, () {
-               Navigator.push(
+            child: _buildActionButton(Icons.visibility_rounded, 'View Details', Colors.grey.shade700, () {
+              Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => BookingDetailsScreen(bookingId: booking['id'], initialData: booking)),
               );
@@ -266,13 +256,98 @@ class _BookingsTabState extends State<BookingsTab> {
           if (balancePending > 0) ...[
             const SizedBox(width: 8),
             Expanded(
-              flex: 2,
-              child: _buildActionButton(
-                Icons.payment, 
-                'Collect Payment', 
-                Colors.orange, 
-                () => _showPaymentCollectionDialog(context, booking)
+              child: _buildActionButton(Icons.payments_rounded, 'Collect Payment', Colors.green, () {
+                _showPaymentCollectionDialog(context, booking);
+              }),
+            ),
+          ]
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPendingCard(BuildContext context, Map<String, dynamic> booking) {
+    return _buildBaseCard(
+      context,
+      booking,
+      actions: Row(
+        children: [
+          Expanded(
+            child: _buildActionButton(Icons.visibility_rounded, 'View Details', Colors.grey.shade700, () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => BookingDetailsScreen(bookingId: booking['id'], initialData: booking)),
+              );
+            }),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: _buildActionButton(Icons.check_circle_rounded, 'Approve', const Color(0xFF2E3E2A), () {
+              _showConfirmDialog(context, booking);
+            }),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildConfirmedCard(BuildContext context, Map<String, dynamic> booking) {
+    final balancePending = double.tryParse(booking['balance_pending']?.toString() ?? '0') ?? 0;
+    return _buildBaseCard(
+      context,
+      booking,
+      actions: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: _buildActionButton(Icons.visibility_rounded, 'View Details', Colors.grey.shade700, () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => BookingDetailsScreen(bookingId: booking['id'], initialData: booking)),
+                  );
+                }),
               ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildActionButton(Icons.share_rounded, 'Share Booking', const Color(0xFF5A7251), () {
+                  _shareBooking(booking);
+                }),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: _buildActionButton(Icons.download_rounded, 'Invoice', Colors.blue.shade800, () {
+                  _downloadInvoice(context, booking['id']);
+                }),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildActionButton(
+                  balancePending > 0 ? Icons.payments_rounded : Icons.cancel_rounded,
+                  balancePending > 0 ? 'Collect Payment' : 'Cancel Booking',
+                  balancePending > 0 ? Colors.green.shade700 : Colors.red.shade700,
+                  () {
+                    if (balancePending > 0) {
+                      _showPaymentCollectionDialog(context, booking);
+                    } else {
+                      _showCancelDialog(context, booking['id']);
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+          if (balancePending > 0) ...[
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: _buildActionButton(Icons.cancel_rounded, 'Cancel Booking', Colors.red.shade700, () {
+                _showCancelDialog(context, booking['id']);
+              }),
             ),
           ]
         ],
@@ -281,7 +356,6 @@ class _BookingsTabState extends State<BookingsTab> {
   }
 
   Widget _buildBaseCard(BuildContext context, Map<String, dynamic> booking, {required Widget actions}) {
-    // Try multiple sources for guest name
     String guestName = 'Guest';
     if (booking['guest'] != null && booking['guest']['name'] != null) {
       guestName = booking['guest']['name'];
@@ -297,29 +371,30 @@ class _BookingsTabState extends State<BookingsTab> {
     final checkOut = DateTime.parse(booking['check_out_date']);
     final nights = checkOut.difference(checkIn).inDays;
     
-    // Parse amounts
     final total = double.tryParse(booking['total_amount']?.toString() ?? '0') ?? 0;
     final pending = double.tryParse(booking['balance_pending']?.toString() ?? '0') ?? 0;
-    
     final isB2B = booking['b2b_partner_id'] != null;
     final status = booking['status'].toString();
 
-    // Try to get an image
     String? imageUrl;
     final photos = booking['accommodation']?['photos'] as List?;
     if (photos != null && photos.isNotEmpty) {
-      imageUrl = photos[0]['url']; // Assuming photo object has url
+      imageUrl = photos[0]['url'];
     }
 
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: const Color(0xFF2E3E2A).withOpacity(0.08),
+          width: 1.5,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04), // Softer shadow
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: const Color(0xFF2E3E2A).withOpacity(0.02),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -335,14 +410,14 @@ class _BookingsTabState extends State<BookingsTab> {
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    color: Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(18),
+                    color: const Color(0xFFF2F5F0),
                     image: imageUrl != null 
                        ? DecorationImage(image: NetworkImage(imageUrl), fit: BoxFit.cover)
                        : null,
                   ),
                   child: imageUrl == null 
-                     ? Icon(Icons.apartment, color: Colors.grey.shade400, size: 40)
+                     ? const Icon(Icons.apartment_rounded, color: Color(0xFF5A7251), size: 36)
                      : null,
                 ),
                 const SizedBox(width: 16),
@@ -358,7 +433,7 @@ class _BookingsTabState extends State<BookingsTab> {
                           Expanded(
                             child: Text(
                               propertyName,
-                              style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16, color: const Color(0xFF1E293B)),
+                              style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16, color: const Color(0xFF191D19)),
                               maxLines: 1, overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -378,41 +453,22 @@ class _BookingsTabState extends State<BookingsTab> {
                           Container(
                             padding: const EdgeInsets.all(4),
                             decoration: BoxDecoration(
-                              color: Colors.blue.shade50,
-                              shape: BoxShape.circle,
+                              color: isB2B ? const Color(0xFFB8B8FF).withOpacity(0.2) : const Color(0xFFFFE8B6),
+                              borderRadius: BorderRadius.circular(6),
                             ),
-                            child: Icon(Icons.person, size: 12, color: Colors.blue.shade700),
+                            child: Icon(
+                              isB2B ? Icons.business_rounded : Icons.person_rounded,
+                              size: 14,
+                              color: const Color(0xFF2E3E2A),
+                            ),
                           ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              guestName + (isB2B ? ' (B2B)' : ''),
-                              style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.w600, color: const Color(0xFF334155)),
+                              guestName,
+                              style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 14, color: const Color(0xFF191D19)),
                               maxLines: 1, overflow: TextOverflow.ellipsis,
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      // Date Row
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: Colors.orange.shade50,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(Icons.calendar_today, size: 12, color: Colors.orange.shade700),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            '${DateFormat('d MMM').format(checkIn)} - ${DateFormat('d MMM').format(checkOut)}',
-                            style: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.w500, color: const Color(0xFF0F172A)),
-                          ),
-                          Text(
-                            ' • $nights nights',
-                            style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey[500]),
                           ),
                         ],
                       ),
@@ -423,62 +479,81 @@ class _BookingsTabState extends State<BookingsTab> {
             ),
           ),
           
-          // Price and Actions Footer
-          Container(
-             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-             decoration: BoxDecoration(
-               color: const Color(0xFFF8FAFC),
-               borderRadius: const BorderRadius.only(
-                 bottomLeft: Radius.circular(12),
-                 bottomRight: Radius.circular(12)
-               ),
-               border: Border(top: BorderSide(color: Colors.grey.shade100)),
-             ),
-             child: Column(
-                children: [
-                  Row(
-                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                     children: [
-                       Column(
-                         crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Total Amount',
-                              style: GoogleFonts.outfit(fontSize: 11, color: Colors.grey[500], fontWeight: FontWeight.w500),
-                            ),
-                            Text(
-                              '₹$total',
-                              style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w800, color: const Color(0xFF0F172A)),
-                            ),
-                          ],
-                       ),
-                       if (pending > 0)
-                         Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: Colors.red.shade50, 
-                              borderRadius: BorderRadius.circular(6),
-                              border: Border.all(color: Colors.red.shade100),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(Icons.warning_amber_rounded, size: 14, color: Colors.red[700]),
-                                const SizedBox(width: 4),
-                                Text(
-                                  '₹$pending Pending',
-                                  style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.red[700]),
-                                ),
-                              ],
-                            ),
-                         ),
-                     ],
-                  ),
-                  if (actions is! SizedBox) ...[
-                    const SizedBox(height: 12),
-                    actions,
-                  ]
-                ],
-              ),
+          const Divider(height: 1, color: Color(0xFFEBF0E6)),
+          
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                // Dates Row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('CHECK IN', style: GoogleFonts.outfit(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 2),
+                        Text(DateFormat('dd MMM yyyy').format(checkIn), style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 13, color: const Color(0xFF191D19))),
+                      ],
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF2F5F0),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        '$nights ${nights == 1 ? "Night" : "Nights"}',
+                        style: GoogleFonts.outfit(fontSize: 11, fontWeight: FontWeight.bold, color: const Color(0xFF2E3E2A)),
+                      ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text('CHECK OUT', style: GoogleFonts.outfit(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 2),
+                        Text(DateFormat('dd MMM yyyy').format(checkOut), style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 13, color: const Color(0xFF191D19))),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                
+                // Finance Row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('TOTAL AMOUNT', style: GoogleFonts.outfit(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 2),
+                        Text('₹${total.toStringAsFixed(2)}', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 15, color: const Color(0xFF191D19))),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text('BALANCE PENDING', style: GoogleFonts.outfit(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 2),
+                        Text(
+                          '₹${pending.toStringAsFixed(2)}',
+                          style: GoogleFonts.outfit(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            color: pending > 0 ? Colors.red.shade700 : Colors.green.shade700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                
+                const SizedBox(height: 16),
+                actions,
+              ],
+            ),
           ),
         ],
       ),
@@ -490,16 +565,16 @@ class _BookingsTabState extends State<BookingsTab> {
     Color text;
     switch (status.toLowerCase()) {
       case 'confirmed':
-        bg = const Color(0xFFDCFCE7); // Green 100
-        text = const Color(0xFF166534); // Green 800
+        bg = const Color(0xFFD4EED8); // Soft green
+        text = const Color(0xFF166534);
         break;
       case 'pending':
-        bg = const Color(0xFFFEF9C3); // Yellow 100
-        text = const Color(0xFF854D0E); // Yellow 800
+        bg = const Color(0xFFFFE8B6); // Soft yellow
+        text = const Color(0xFF854D0E);
         break;
       case 'cancelled':
-        bg = const Color(0xFFFEE2E2); // Red 100
-        text = const Color(0xFF991B1B); // Red 800
+        bg = const Color(0xFFFEE2E2); // Soft red
+        text = const Color(0xFF991B1B);
         break;
       case 'checked_out':
         bg = Colors.grey.shade200;
@@ -510,11 +585,11 @@ class _BookingsTabState extends State<BookingsTab> {
         text = Colors.grey.shade700;
     }
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(4)),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(8)),
       child: Text(
         status.toUpperCase(),
-        style: GoogleFonts.outfit(fontSize: 10, fontWeight: FontWeight.bold, color: text),
+        style: GoogleFonts.outfit(fontSize: 9, fontWeight: FontWeight.bold, color: text),
       ),
     );
   }
@@ -525,16 +600,17 @@ class _BookingsTabState extends State<BookingsTab> {
       style: ElevatedButton.styleFrom(
         backgroundColor: color,
         foregroundColor: Colors.white,
-        padding: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         elevation: 0,
-        textStyle: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.w600),
+        textStyle: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold),
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 16),
-          const SizedBox(width: 4),
+          const SizedBox(width: 6),
           Text(label),
         ],
       ),
@@ -548,10 +624,11 @@ class _BookingsTabState extends State<BookingsTab> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor: const Color(0xFFF2F5F0),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Row(
           children: [
-            const Icon(Icons.check_circle, color: Color(0xFF10B981), size: 28),
+            const Icon(Icons.check_circle_rounded, color: Color(0xFF2E3E2A), size: 28),
             const SizedBox(width: 12),
             Text('Confirm Request?', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
           ],
@@ -560,14 +637,14 @@ class _BookingsTabState extends State<BookingsTab> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Are you sure you want to approve this booking?', style: GoogleFonts.outfit(fontSize: 16)),
+            Text('Are you sure you want to approve this booking?', style: GoogleFonts.outfit(fontSize: 15)),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey.shade200),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFF2E3E2A).withOpacity(0.08)),
               ),
               child: Column(
                 children: [
@@ -576,8 +653,8 @@ class _BookingsTabState extends State<BookingsTab> {
                   _buildDialogRow('Dates:', dates),
                   const SizedBox(height: 8),
                   _buildDialogRow('Total:', '₹${booking['total_amount']}'),
-                  const SizedBox(height: 16),
-                  const Text('Note: This will mark the booking as confirmed.', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                  const SizedBox(height: 12),
+                  const Text('Note: This will mark the booking as confirmed.', style: TextStyle(fontSize: 11, color: Colors.grey)),
                 ],
               ),
             ),
@@ -594,9 +671,9 @@ class _BookingsTabState extends State<BookingsTab> {
               _updateStatus(context, booking['id'], 'confirmed');
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF10B981),
+              backgroundColor: const Color(0xFF2E3E2A),
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             ),
             child: Text('Confirm Approval', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
@@ -615,7 +692,7 @@ class _BookingsTabState extends State<BookingsTab> {
           child: Text(label, style: GoogleFonts.outfit(color: Colors.grey[500], fontSize: 13)),
         ),
         Expanded(
-          child: Text(value, style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 13, color: Colors.blueGrey[800])),
+          child: Text(value, style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 13, color: const Color(0xFF191D19))),
         ),
       ],
     );
@@ -633,7 +710,7 @@ class _BookingsTabState extends State<BookingsTab> {
             behavior: SnackBarBehavior.floating,
           ),
         );
-        _loadData(); // Refresh list/counts
+        _loadData();
       }
   }
 
@@ -642,6 +719,8 @@ class _BookingsTabState extends State<BookingsTab> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFFF2F5F0),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Text('Cancel Booking', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -650,9 +729,11 @@ class _BookingsTabState extends State<BookingsTab> {
             const SizedBox(height: 12),
             TextField(
               controller: reasonController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: 'Reason (e.g. Guest request, No show)',
-                border: OutlineInputBorder(),
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
               ),
               maxLines: 2,
             ),
@@ -669,7 +750,7 @@ class _BookingsTabState extends State<BookingsTab> {
                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Reason is required')));
                  return;
               }
-              Navigator.pop(context); // Close dialog
+              Navigator.pop(context);
               final success = await Provider.of<BookingProvider>(context, listen: false)
                   .updateBookingStatus(bookingId, 'cancelled', reason: reasonController.text);
               if (success && mounted) {
@@ -677,8 +758,11 @@ class _BookingsTabState extends State<BookingsTab> {
                  _loadData();
               }
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: Text('Confirm Cancel', style: GoogleFonts.outfit(color: Colors.white)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.shade700,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: Text('Confirm Cancel', style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -724,6 +808,8 @@ class _BookingsTabState extends State<BookingsTab> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFFF2F5F0),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -739,23 +825,44 @@ class _BookingsTabState extends State<BookingsTab> {
             children: [
               Container(
                 padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(color: Colors.red.shade50, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.red.shade200)),
+                decoration: BoxDecoration(color: Colors.red.shade50, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.red.shade200)),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Current Balance:', style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 13)),
+                    Text('Current Balance:', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.red.shade900)),
                     Text('₹${balancePending.toStringAsFixed(2)}', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: Colors.red.shade700, fontSize: 18)),
                   ],
                 ),
               ),
               const SizedBox(height: 16),
-              Text('Amount to Collect *', style: GoogleFonts.outfit(fontWeight: FontWeight.w500, fontSize: 13)),
+              Text('Amount to Collect *', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 13, color: const Color(0xFF2E3E2A))),
               const SizedBox(height: 8),
-              TextField(controller: amountController, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(hintText: 'Enter amount', prefixText: '₹ ', border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)), contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14))),
+              TextField(
+                controller: amountController, 
+                keyboardType: const TextInputType.numberWithOptions(decimal: true), 
+                decoration: InputDecoration(
+                  hintText: 'Enter amount', 
+                  prefixText: '₹ ', 
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)), 
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                ),
+              ),
               const SizedBox(height: 16),
-              Text('Payment Notes (Optional)', style: GoogleFonts.outfit(fontWeight: FontWeight.w500, fontSize: 13)),
+              Text('Payment Notes (Optional)', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 13, color: const Color(0xFF2E3E2A))),
               const SizedBox(height: 8),
-              TextField(controller: notesController, decoration: InputDecoration(hintText: 'Add any notes...', border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)), contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14)), maxLines: 2),
+              TextField(
+                controller: notesController, 
+                decoration: InputDecoration(
+                  hintText: 'Add any notes...', 
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)), 
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                ), 
+                maxLines: 2,
+              ),
             ],
           ),
         ),
@@ -777,9 +884,13 @@ class _BookingsTabState extends State<BookingsTab> {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(Provider.of<BookingProvider>(context, listen: false).error ?? 'Failed'), backgroundColor: Colors.red));
               }
             },
-            icon: const Icon(Icons.check),
+            icon: const Icon(Icons.check, size: 16),
             label: Text('Collect Payment', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF2E3E2A), 
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
           ),
         ],
       ),

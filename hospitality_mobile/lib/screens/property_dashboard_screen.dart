@@ -185,10 +185,10 @@ class _PropertyDashboardScreenState extends State<PropertyDashboardScreen> {
           Colors.orange,
         ),
         _buildStatCard(
-          'Staff On Duty',
-          '${(stats['staffOnDuty'] as List).length}',
-          '${(stats['pendingTasks'] as List).length} Pending Tasks',
-          Icons.badge,
+          'Pending Tasks',
+          '${(stats['pendingTasks'] as List).length}',
+          'Requires attention',
+          Icons.assignment_outlined,
           Colors.purple,
         ),
       ],
@@ -348,7 +348,12 @@ class _PropertyDashboardScreenState extends State<PropertyDashboardScreen> {
               child: Icon(Icons.task, color: Colors.purple, size: 18),
             ),
             title: Text(task['task_name'], style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 13)),
-            subtitle: Text(task['assigned_staff']?['user']?['name'] ?? 'Unassigned', style: GoogleFonts.poppins(fontSize: 11)),
+            subtitle: Text(
+              task['scheduled_at'] != null 
+                  ? 'Scheduled: ${DateFormat('MMM d, y h:mm a').format(DateTime.parse(task['scheduled_at']))}' 
+                  : 'Not scheduled',
+              style: GoogleFonts.poppins(fontSize: 11),
+            ),
             trailing: Chip(
                label: Text(task['priority'], style: GoogleFonts.poppins(fontSize: 10, color: Colors.white)),
                backgroundColor: _getPriorityColor(task['priority']),

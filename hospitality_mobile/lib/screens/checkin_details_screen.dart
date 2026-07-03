@@ -75,15 +75,15 @@ class CheckInDetailsScreen extends StatelessWidget {
             ],
 
             const Divider(height: 32),
-            _buildSectionHeader('Staff Information'),
+            _buildSectionHeader('Processed By'),
             const SizedBox(height: 8),
             ListTile(
                contentPadding: EdgeInsets.zero,
                leading: CircleAvatar(
                  backgroundColor: Colors.blue.shade100,
-                 child: Text((staff['name'] ?? 'S')[0], style: TextStyle(color: Colors.blue.shade800)),
+                 child: Text((staff['name'] ?? 'U')[0], style: TextStyle(color: Colors.blue.shade800)),
                ),
-               title: Text(staff['name'] ?? 'Unknown Staff', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+               title: Text(staff['name'] ?? 'Unknown User', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
                subtitle: Text(
                  'Processed check-in on ${processedAt != null ? DateFormat('MMM d, y h:mm a').format(processedAt) : 'N/A'}',
                  style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey),

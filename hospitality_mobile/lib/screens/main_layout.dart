@@ -7,7 +7,6 @@ import 'b2b_tab.dart';
 import 'guests_tab.dart';
 import 'profile_tab.dart';
 import 'accommodations_tab.dart';
-import 'create_booking_screen.dart';
 import 'guest_services_screen.dart';
 import 'calendar_screen.dart';
 import '../widgets/app_drawer.dart';
@@ -39,7 +38,7 @@ class _MainLayoutState extends State<MainLayout> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: MainLayout.scaffoldKey,
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: const Color(0xFFF2F5F0), // Organic warm cream background
       drawer: AppDrawer(
         currentIndex: _currentIndex,
         onItemSelected: (index) {
@@ -53,59 +52,68 @@ class _MainLayoutState extends State<MainLayout> {
         ),
       ),
       bottomNavigationBar: Container(
+        margin: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+        height: 68,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: const Color(0xFF191D19), // Dark organic charcoal
+          borderRadius: BorderRadius.circular(34),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, -5),
+              color: const Color(0xFF2E3E2A).withOpacity(0.12),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
             ),
           ],
         ),
-        child: BottomNavigationBar(
-          // If index is > 2 (Properties), we don't have a tab for it.
-          // We show Dashboard (0) as fallback or maybe allow unselected state?
-          // BottomNavigationBarType.fixed requires valid index.
-          // We will fallback to 0 but maybe we can make UnselectedItemColor same as Selected?
-          currentIndex: _currentIndex > 2 ? 0 : _currentIndex,
-          onTap: (index) {
-            if (index == 3) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => CreateBookingScreen()),
-              );
-            } else {
-              setState(() => _currentIndex = index);
-            }
-          },
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.white,
-          selectedItemColor: const Color(0xFF2563EB),
-          unselectedItemColor: Colors.grey[400],
-          selectedLabelStyle: GoogleFonts.poppins(
-              fontWeight: FontWeight.w600, fontSize: 12),
-          unselectedLabelStyle: GoogleFonts.poppins(fontSize: 12),
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.dashboard_outlined),
-              activeIcon: Icon(Icons.dashboard),
-              label: 'Dashboard',
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildBottomNavItem(0, Icons.donut_large_rounded, 'Dashboard'),
+              _buildBottomNavItem(1, Icons.calendar_month_rounded, 'Bookings'),
+              _buildBottomNavItem(2, Icons.apartment_rounded, 'Properties'),
+              _buildBottomNavItem(6, Icons.hotel_rounded, 'Rooms'),
+              _buildBottomNavItem(5, Icons.person_rounded, 'Profile'),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomNavItem(int targetIndex, IconData icon, String label) {
+    final isSelected = _currentIndex == targetIndex;
+    
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _currentIndex = targetIndex;
+        });
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF2E3E2A) : Colors.transparent, // Deep green highlight
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: isSelected ? const Color(0xFFFFE8B6) : Colors.grey[500], // Yellow active from screenshot
+              size: 22,
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.calendar_month_outlined),
-              activeIcon: Icon(Icons.calendar_month),
-              label: 'Bookings',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.apartment_outlined),
-              activeIcon: Icon(Icons.apartment),
-              label: 'Properties',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.add_circle_outline, size: 30),
-              activeIcon: Icon(Icons.add_circle, size: 30),
-              label: 'New Booking',
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: GoogleFonts.outfit(
+                color: isSelected ? Colors.white : Colors.grey[500],
+                fontSize: 10,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+              ),
             ),
           ],
         ),

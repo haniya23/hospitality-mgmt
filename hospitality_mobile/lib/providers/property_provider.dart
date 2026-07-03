@@ -12,6 +12,14 @@ class PropertyProvider with ChangeNotifier {
   Map<String, dynamic>? _dashboardData;
   Map<String, dynamic>? get dashboardData => _dashboardData;
 
+  List<dynamic> _categories = [];
+  List<dynamic> _predefinedTypes = [];
+  List<dynamic> _amenities = [];
+
+  List<dynamic> get categories => _categories;
+  List<dynamic> get predefinedTypes => _predefinedTypes;
+  List<dynamic> get amenities => _amenities;
+
   bool get isLoading => _isLoading;
   List<dynamic> get properties => _properties;
   String? get error => _error;
@@ -317,6 +325,175 @@ class PropertyProvider with ChangeNotifier {
       } else {
         final jsonData = jsonDecode(response.body);
         _error = jsonData['message'] ?? 'Failed to delete photo';
+        return false;
+      }
+    } catch (e) {
+      _error = 'Connection error: $e';
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchCategories() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+      final response = await http.get(
+        Uri.parse('${ApiConfig.baseUrl}/owner/property-categories'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          _categories = data['data'];
+          notifyListeners();
+        }
+      }
+    } catch (_) {}
+  }
+
+  Future<void> fetchPredefinedTypes() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+      final response = await http.get(
+        Uri.parse('${ApiConfig.baseUrl}/owner/predefined-accommodation-types'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          _predefinedTypes = data['data'];
+          notifyListeners();
+        }
+      }
+    } catch (_) {}
+  }
+
+  Future<void> fetchAmenities() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+      final response = await http.get(
+        Uri.parse('${ApiConfig.baseUrl}/owner/amenities'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          _amenities = data['data'];
+          notifyListeners();
+        }
+      }
+    } catch (_) {}
+  }
+
+  Future<bool> addProperty(String name, int categoryId, String description) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+      final response = await http.post(
+        Uri.parse('${ApiConfig.baseUrl}/owner/properties'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({
+          'name': name,
+          'property_category_id': categoryId,
+          'description': description,
+        }),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          await fetchProperties();
+          return true;
+        } else {
+          _error = data['message'] ?? 'Failed to create property';
+          return false;
+        }
+      } else {
+        final data = jsonDecode(response.body);
+        _error = data['message'] ?? 'Server error: ${response.statusCode}';
+        return false;
+      }
+    } catch (e) {
+      _error = 'Connection error: $e';
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> addAccommodation({
+    required int propertyId,
+    required String customName,
+    required int predefinedTypeId,
+    required double basePrice,
+    required int maxOccupancy,
+    required double size,
+    required String description,
+    required List<int> amenityIds,
+  }) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+      final response = await http.post(
+        Uri.parse('${ApiConfig.baseUrl}/owner/properties/$propertyId/accommodations'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({
+          'custom_name': customName,
+          'predefined_type_id': predefinedTypeId,
+          'base_price': basePrice,
+          'max_occupancy': maxOccupancy,
+          'size': size,
+          'description': description,
+          'amenities': amenityIds,
+        }),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          await fetchProperties();
+          return true;
+        } else {
+          _error = data['message'] ?? 'Failed to create accommodation';
+          return false;
+        }
+      } else {
+        final data = jsonDecode(response.body);
+        _error = data['message'] ?? 'Server error: ${response.statusCode}';
         return false;
       }
     } catch (e) {

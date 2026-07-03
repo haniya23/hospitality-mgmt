@@ -22,9 +22,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 // PUBLIC API ROUTES
 // ============================================
 
-// Cashfree Webhook (must be public)
-Route::post('/cashfree/webhook', [App\Http\Controllers\CashfreeController::class, 'webhook'])->name('cashfree.webhook');
-
 // Mobile Login (Public)
 Route::post('/mobile-login', [App\Http\Controllers\Api\Auth\MobileLoginController::class, 'login'])->name('api.mobile.login');
 
@@ -96,6 +93,11 @@ Route::prefix('owner')->name('api.owner.')->middleware('auth:sanctum')->group(fu
     Route::patch('/properties/{id}/status', [App\Http\Controllers\Api\Owner\PropertyController::class, 'toggleStatus'])->name('properties.status');
     Route::post('/properties/{id}/photos', [App\Http\Controllers\Api\Owner\PropertyController::class, 'storePhotos'])->name('properties.photos.store');
     Route::delete('/properties/{id}/photos/{photoId}', [App\Http\Controllers\Api\Owner\PropertyController::class, 'deletePhoto'])->name('properties.photos.delete');
+    Route::post('/properties', [App\Http\Controllers\Api\Owner\PropertyController::class, 'store'])->name('properties.store');
+    Route::post('/properties/{id}/accommodations', [App\Http\Controllers\Api\Owner\PropertyController::class, 'storeAccommodation'])->name('properties.accommodations.store');
+    Route::get('/property-categories', [App\Http\Controllers\Api\Owner\PropertyController::class, 'categories'])->name('properties.categories');
+    Route::get('/predefined-accommodation-types', [App\Http\Controllers\Api\Owner\PropertyController::class, 'predefinedTypes'])->name('properties.predefinedTypes');
+    Route::get('/amenities', [App\Http\Controllers\Api\Owner\PropertyController::class, 'amenities'])->name('properties.amenities');
 
     // Accommodation Photos
     Route::post('/properties/{id}/accommodations/{accommodationId}/photos', [App\Http\Controllers\Api\Owner\PropertyController::class, 'storeAccommodationPhotos'])->name('properties.accommodations.photos.store');
@@ -137,12 +139,7 @@ Route::prefix('owner')->name('api.owner.')->middleware('auth:sanctum')->group(fu
 // LEGACY WEB API ROUTES (Session Authentication)
 // ============================================
 
-// Subscription API routes
 Route::middleware('auth:web')->group(function () {
-    Route::post('/subscription/create-order', [App\Http\Controllers\SubscriptionController::class, 'createOrder']);
-    Route::post('/subscription/addons', [App\Http\Controllers\SubscriptionController::class, 'addAccommodations']);
-    Route::get('/subscription/status', [App\Http\Controllers\SubscriptionController::class, 'status']);
-    
     // Properties API routes
     Route::get('/properties', function () {
         return auth()->user()->properties()

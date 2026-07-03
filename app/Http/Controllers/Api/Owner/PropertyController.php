@@ -189,8 +189,6 @@ class PropertyController extends Controller
             'propertyAccommodations.photos',
             'propertyAccommodations.reservations.guest',
             'propertyAccommodations.reservations.b2bPartner',
-            'staffMembers.user',
-            'staffMembers.department',
             'tasks' => function($query) {
                 $query->whereDate('scheduled_at', today())->orWhere('status', 'pending');
             }
@@ -241,15 +239,11 @@ class PropertyController extends Controller
             ->count();
 
         // Staff on duty today
-        $staffOnDuty = $property->staffMembers()
-            ->where('status', 'active')
-            ->with(['user', 'department'])
-            ->get();
+        $staffOnDuty = [];
 
         // Pending tasks
         $pendingTasks = $property->tasks()
             ->whereIn('status', ['pending', 'in_progress'])
-            ->with(['assignedStaff.user'])
             ->orderBy('scheduled_at')
             ->get();
 
@@ -257,7 +251,6 @@ class PropertyController extends Controller
         $overdueTasks = $property->tasks()
             ->where('scheduled_at', '<', now())
             ->whereIn('status', ['pending', 'in_progress'])
-            ->with(['assignedStaff.user'])
             ->get();
 
         // Maintenance tickets
@@ -345,5 +338,105 @@ class PropertyController extends Controller
         });
         
         return round($totalNights / $bookings->count(), 1);
+    }
+
+    /**
+     * Store new property
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'property_category_id' => 'required|exists:property_categories,id',
+            'description' => 'nullable|string',
+        ]);
+
+        $property = \App\Models\Property::create([
+            'owner_id' => $request->user()->id,
+            'name' => $validated['name'],
+            'property_category_id' => $validated['property_category_id'],
+            'description' => $validated['description'] ?? null,
+            'status' => 'active',
+            'wizard_step_completed' => 1,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Property created successfully',
+            'data' => $property->load('category')
+        ]);
+    }
+
+    /**
+     * Store new accommodation
+     */
+    public function storeAccommodation(Request $request, $propertyId)
+    {
+        $property = $request->user()->properties()->findOrFail($propertyId);
+
+        $validated = $request->validate([
+            'custom_name' => 'required|string|max:255',
+            'predefined_type_id' => 'nullable|exists:predefined_accommodation_types,id',
+            'base_price' => 'required|numeric|min:0',
+            'max_occupancy' => 'required|integer|min:1',
+            'size' => 'nullable|numeric|min:0',
+            'description' => 'nullable|string',
+            'is_active' => 'boolean',
+            'amenities' => 'nullable|array',
+            'amenities.*' => 'exists:amenities,id',
+        ]);
+
+        $accommodation = $property->propertyAccommodations()->create([
+            'predefined_accommodation_type_id' => $validated['predefined_type_id'] ?? 3, // Custom
+            'custom_name' => $validated['custom_name'],
+            'max_occupancy' => $validated['max_occupancy'],
+            'base_price' => $validated['base_price'],
+            'size' => $validated['size'] ?? null,
+            'description' => $validated['description'] ?? null,
+            'is_active' => $validated['is_active'] ?? true,
+        ]);
+
+        if (!empty($validated['amenities'])) {
+            $accommodation->amenities()->attach($validated['amenities']);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Accommodation created successfully',
+            'data' => $accommodation->load(['amenities', 'photos'])
+        ]);
+    }
+
+    /**
+     * Get property categories list
+     */
+    public function categories()
+    {
+        return response()->json([
+            'success' => true,
+            'data' => \App\Models\PropertyCategory::all()
+        ]);
+    }
+
+    /**
+     * Get predefined accommodation types list
+     */
+    public function predefinedTypes()
+    {
+        return response()->json([
+            'success' => true,
+            'data' => \App\Models\PredefinedAccommodationType::all()
+        ]);
+    }
+
+    /**
+     * Get amenities list
+     */
+    public function amenities()
+    {
+        return response()->json([
+            'success' => true,
+            'data' => \App\Models\Amenity::all()
+        ]);
     }
 }

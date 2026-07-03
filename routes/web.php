@@ -15,7 +15,6 @@ Route::post('/login', [MobileAuthController::class, 'login'])->middleware('guest
 Route::get('/register', [MobileAuthController::class, 'showRegistrationForm'])->name('register')->middleware('guest');
 Route::post('/register', [MobileAuthController::class, 'register'])->middleware('guest');
 Route::post('/logout', [MobileAuthController::class, 'logout'])->name('logout');
-Route::get('/cashfree/success', [App\Http\Controllers\CashfreeController::class, 'success'])->name('cashfree.success');
 
 // ============================================
 // STAFF HIERARCHY ROUTES

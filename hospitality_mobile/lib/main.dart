@@ -43,12 +43,20 @@ class MyApp extends ConsumerWidget {
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           useMaterial3: true,
+          scaffoldBackgroundColor: const Color(0xFFF2F5F0), // Organic warm cream background
           colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.blue,
-            primary: Colors.blue,
-            secondary: Colors.blueAccent,
+            seedColor: const Color(0xFF2E3E2A), // Organic green seed
+            primary: const Color(0xFF2E3E2A),
+            secondary: const Color(0xFF5A7251),
+            background: const Color(0xFFF2F5F0),
           ),
-          textTheme: GoogleFonts.poppinsTextTheme(),
+          textTheme: GoogleFonts.outfitTextTheme(), // Outfit font matching screenshot design
+          appBarTheme: const AppBarTheme(
+            backgroundColor: Color(0xFFF2F5F0),
+            elevation: 0,
+            iconTheme: IconThemeData(color: Color(0xFF1C1E1C)),
+            centerTitle: false,
+          ),
         ),
         home: const SplashScreen(),
       ),

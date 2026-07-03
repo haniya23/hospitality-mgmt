@@ -16,13 +16,13 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  // Professional Color Palette
-  static const Color primaryColor = Color(0xFF4F46E5); // Indigo 600
-  static const Color secondaryColor = Color(0xFF0F172A); // Slate 900
-  static const Color backgroundColor = Color(0xFFF8FAFC); // Slate 50
+  // Organic Modern Color Palette
+  static const Color primaryColor = Color(0xFF2E3E2A); // Deep organic green
+  static const Color secondaryColor = Color(0xFF191D19); // Dark organic charcoal
+  static const Color backgroundColor = Color(0xFFF2F5F0); // Organic warm cream background
   static const Color cardColor = Colors.white;
-  static const Color textPrimary = Color(0xFF1E293B); // Slate 800
-  static const Color textSecondary = Color(0xFF64748B); // Slate 500
+  static const Color textPrimary = Color(0xFF191D19); // Charcoal
+  static const Color textSecondary = Color(0xFF5A7251); // Soft green
 
   @override
   void initState() {
