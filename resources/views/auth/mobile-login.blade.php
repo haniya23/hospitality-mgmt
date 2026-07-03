@@ -91,14 +91,14 @@
                 @csrf
                 <div class="space-y-5">
                     <div>
-                        <label for="mobile_number" class="block text-sm font-medium text-gray-700 mb-2">Mobile Number</label>
+                        <label for="mobile_number" class="block text-sm font-medium text-gray-700 mb-2">Mobile Number or Email</label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="fas fa-phone text-gray-400"></i>
+                                <i class="fas fa-envelope text-gray-400"></i>
                             </div>
-                            <input id="mobile_number" name="mobile_number" type="tel" required 
+                            <input id="mobile_number" name="mobile_number" type="text" required 
                                    class="block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all" 
-                                   placeholder="Enter your mobile number" value="{{ old('mobile_number') }}">
+                                   placeholder="Enter your mobile number or email" value="{{ old('mobile_number') }}">
                         </div>
                     </div>
                     

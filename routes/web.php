@@ -73,7 +73,7 @@ Route::middleware(['auth'])->prefix('owner')->name('owner.')->group(function () 
 
 
 // Protected Routes
-Route::middleware(['auth', 'subscription.limits'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     // Test route for modal scroll lock
     Route::get('/test-modal-scroll', function () {
         return view('test-modal-scroll');
@@ -81,6 +81,10 @@ Route::middleware(['auth', 'subscription.limits'])->group(function () {
 
     Route::get('/dashboard', function () {
         $user = auth()->user();
+
+        if ($user->is_admin) {
+            return redirect()->route('admin.dashboard');
+        }
 
         $properties = $user->properties()->with(['category', 'location'])->latest()->get();
 
@@ -270,14 +274,14 @@ Route::middleware(['auth', 'subscription.limits'])->group(function () {
     Route::put('/customers/{customer}', [App\Http\Controllers\CustomerController::class, 'update'])->name('customers.update');
 
     // B2B Management Routes
-    Route::get('/b2b', [App\Http\Controllers\B2bController::class, 'index'])->name('b2b.index')->middleware('subscription:b2b');
-    Route::get('/b2b/create', [App\Http\Controllers\B2bController::class, 'create'])->name('b2b.create')->middleware('subscription:b2b');
-    Route::post('/b2b', [App\Http\Controllers\B2bController::class, 'store'])->name('b2b.store')->middleware('subscription:b2b');
-    Route::get('/b2b/{b2b}', [App\Http\Controllers\B2bController::class, 'show'])->name('b2b.show')->middleware('subscription:b2b');
-    Route::get('/b2b/{b2b}/edit', [App\Http\Controllers\B2bController::class, 'edit'])->name('b2b.edit')->middleware('subscription:b2b');
-    Route::put('/b2b/{b2b}', [App\Http\Controllers\B2bController::class, 'update'])->name('b2b.update')->middleware('subscription:b2b');
-    Route::delete('/b2b/{b2b}', [App\Http\Controllers\B2bController::class, 'destroy'])->name('b2b.destroy')->middleware('subscription:b2b');
-    Route::patch('/b2b/{b2b}/toggle-status', [App\Http\Controllers\B2bController::class, 'toggleStatus'])->name('b2b.toggle-status')->middleware('subscription:b2b');
+    Route::get('/b2b', [App\Http\Controllers\B2bController::class, 'index'])->name('b2b.index');
+    Route::get('/b2b/create', [App\Http\Controllers\B2bController::class, 'create'])->name('b2b.create');
+    Route::post('/b2b', [App\Http\Controllers\B2bController::class, 'store'])->name('b2b.store');
+    Route::get('/b2b/{b2b}', [App\Http\Controllers\B2bController::class, 'show'])->name('b2b.show');
+    Route::get('/b2b/{b2b}/edit', [App\Http\Controllers\B2bController::class, 'edit'])->name('b2b.edit');
+    Route::put('/b2b/{b2b}', [App\Http\Controllers\B2bController::class, 'update'])->name('b2b.update');
+    Route::delete('/b2b/{b2b}', [App\Http\Controllers\B2bController::class, 'destroy'])->name('b2b.destroy');
+    Route::patch('/b2b/{b2b}/toggle-status', [App\Http\Controllers\B2bController::class, 'toggleStatus'])->name('b2b.toggle-status');
 
 
 
@@ -334,62 +338,7 @@ Route::middleware(['auth', 'subscription.limits'])->group(function () {
 
         return view('bookings.enhanced-create', compact('properties', 'b2bPartners'));
     })->name('bookings.enhanced-create');
-    Route::get('/subscription/plans', [App\Http\Controllers\SubscriptionController::class, 'plans'])->name('subscription.plans');
     Route::get('/contact', [App\Http\Controllers\ContactController::class, 'index'])->name('contact.index');
-    Route::get('/subscription/limit-exceeded', function () {
-        $user = auth()->user();
-        $usage = $user->getUsagePercentage();
-        $subscriptionStatus = $user->subscription_status ?? 'trial';
-        $subscriptionEndsAt = $user->subscription_ends_at;
-        $activeSubscription = $user->activeSubscription;
-
-        // Get real plan details based on subscription status
-        $planDetails = [
-            'name' => ucfirst($subscriptionStatus),
-            'accommodations_allowed' => $usage['accommodations']['max'] ?? 0,
-            'accommodations_used' => $usage['accommodations']['used'] ?? 0,
-            'accommodations_exceeded' => ($usage['accommodations']['used'] ?? 0) - ($usage['accommodations']['max'] ?? 0),
-            'subscription_ends_at' => $subscriptionEndsAt,
-            'is_trial' => $subscriptionStatus === 'trial',
-            'billing_cycle' => $user->billing_cycle,
-            'properties_limit' => $usage['properties']['max'] ?? 0,
-            'properties_used' => $usage['properties']['used'] ?? 0,
-            'active_subscription' => $activeSubscription,
-            'addon_count' => $activeSubscription ? $activeSubscription->addons()->where('cycle_end', '>', now())->sum('qty') : 0,
-            'base_accommodation_limit' => $activeSubscription ? $activeSubscription->base_accommodation_limit : $usage['accommodations']['max'],
-            'addon_price_per_month' => 99 // Real pricing from the app
-        ];
-
-        return view('subscription.limit-exceeded', compact('planDetails'));
-    })->name('subscription.limit-exceeded');
-    Route::get('/welcome-trial', function () {
-        return view('welcome-trial');
-    })->name('welcome.trial');
-
-    // Cashfree Payment Routes
-    Route::post('/cashfree/create-order', [App\Http\Controllers\CashfreeController::class, 'createOrder'])->name('cashfree.create-order');
-
-
-
-    // Test payment success endpoint
-    Route::get('/test-payment-success', function () {
-        $user = auth()->user();
-        if (!$user) {
-            return redirect()->route('login');
-        }
-
-        // Simulate successful payment
-        $user->update([
-            'subscription_status' => 'professional',
-            'subscription_ends_at' => now()->addMonth(),
-            'is_trial_active' => false,
-            'properties_limit' => 5,
-            'billing_cycle' => 'monthly',
-        ]);
-
-        return redirect()->route('subscription.plans', ['payment' => 'success'])
-            ->with('success', 'Test payment successful! Your subscription has been activated.');
-    })->name('test.payment.success');
 
     // Admin sample download route
     Route::get('/admin/download-sample-locations', function () {
@@ -445,6 +394,34 @@ Route::middleware(['auth', 'subscription.limits'])->group(function () {
             'Content-Disposition' => 'attachment; filename="sample-locations.json"'
         ]);
     })->name('admin.download-sample-locations');
+
+    // Admin Routes
+    Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/', [App\Http\Controllers\AdminController::class, 'dashboard'])->name('dashboard');
+        
+        // Property Approvals
+        Route::get('/property-approvals', [App\Http\Controllers\AdminController::class, 'propertyApprovals'])->name('property-approvals');
+        Route::patch('/properties/{property}/approve', [App\Http\Controllers\AdminController::class, 'approveProperty'])->name('properties.approve');
+        Route::patch('/properties/{property}/reject', [App\Http\Controllers\AdminController::class, 'rejectProperty'])->name('properties.reject');
+        Route::get('/create-property', [App\Http\Controllers\AdminController::class, 'createPropertyForUser'])->name('create-property');
+        Route::post('/create-property', [App\Http\Controllers\AdminController::class, 'storePropertyForUser'])->name('store-property');
+        
+        // User Management
+        Route::get('/user-management', [App\Http\Controllers\AdminController::class, 'userManagement'])->name('user-management');
+        Route::get('/users/create', [App\Http\Controllers\AdminController::class, 'createUser'])->name('users.create');
+        Route::post('/users', [App\Http\Controllers\AdminController::class, 'storeUser'])->name('users.store');
+        Route::get('/users/{user}/edit', [App\Http\Controllers\AdminController::class, 'editUser'])->name('users.edit');
+        Route::put('/users/{user}', [App\Http\Controllers\AdminController::class, 'updateUser'])->name('users.update');
+        
+        // Customer Data
+        Route::get('/customer-data', [App\Http\Controllers\AdminController::class, 'customerData'])->name('customer-data');
+        
+        // B2B Management
+        Route::get('/b2b-management', [App\Http\Controllers\AdminController::class, 'b2bManagement'])->name('b2b-management');
+        
+        // Location Analytics
+        Route::get('/location-analytics', [App\Http\Controllers\AdminController::class, 'locationAnalytics'])->name('location-analytics');
+    });
 });
 
 // Public API Routes

@@ -87,6 +87,11 @@ class B2bPartner extends Model
         return $this->hasMany(B2bRequest::class, 'from_partner_id', 'contact_user_id');
     }
 
+    public function requests()
+    {
+        return $this->hasMany(B2bRequest::class, 'from_partner_id', 'contact_user_id');
+    }
+
     // Partnership management methods
     public function acceptPartnership()
     {

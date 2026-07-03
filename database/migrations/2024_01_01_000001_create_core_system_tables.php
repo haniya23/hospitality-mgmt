@@ -80,14 +80,6 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->boolean('is_admin')->default(false);
             
-            // Subscription fields
-            $table->enum('subscription_status', ['trial', 'starter', 'professional', 'expired', 'cancelled', 'free'])->default('free');
-            $table->enum('trial_plan', ['starter', 'professional'])->nullable()->default('starter');
-            $table->timestamp('trial_ends_at')->nullable();
-            $table->timestamp('subscription_ends_at')->nullable();
-            $table->integer('properties_limit')->default(999999);
-            $table->boolean('is_trial_active')->default(false);
-            
             // Referral fields
             $table->string('referral_code', 10)->unique()->nullable();
             $table->unsignedBigInteger('referred_by')->nullable();

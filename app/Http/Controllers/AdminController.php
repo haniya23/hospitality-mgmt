@@ -27,11 +27,65 @@ class AdminController extends Controller
             'pending_properties' => Property::where('status', 'pending')->count(),
             'total_users' => User::where('is_admin', false)->count(),
             'total_properties' => Property::count(),
-            'pending_subscriptions' => SubscriptionRequest::where('status', 'pending')->count(),
             'total_customers' => Guest::count(),
             'b2b_partners' => B2bPartner::count(),
         ];
-        return view('admin.dashboard', compact('stats'));
+
+        // Fetch recent owners
+        $recentUsers = User::where('is_admin', false)
+            ->withCount('properties')
+            ->latest()
+            ->limit(5)
+            ->get();
+
+        // Fetch pending property approvals
+        $pendingPropertiesList = Property::where('status', 'pending')
+            ->with(['owner', 'category', 'location'])
+            ->latest()
+            ->limit(5)
+            ->get();
+
+        // Fetch location analytics summary (Top 5 locations)
+        $properties = Property::with(['location.city.district.state.country'])
+            ->whereHas('location')
+            ->get();
+            
+        $locationStats = collect();
+        $grouped = $properties->groupBy(function ($property) {
+            if ($property->location && $property->location->city) {
+                return $property->location->city->name . ', ' . 
+                       $property->location->city->district->name;
+            }
+            return 'Unknown Location';
+        });
+        
+        foreach ($grouped as $location => $props) {
+            $totalCount = $props->count();
+            $activeCount = $props->where('status', 'active')->count();
+            $approvalRate = $totalCount > 0 ? round(($activeCount / $totalCount) * 100, 1) : 0;
+            
+            $locationStats->push([
+                'location' => $location,
+                'property_count' => $totalCount,
+                'approval_rate' => $approvalRate
+            ]);
+        }
+        $locationStats = $locationStats->sortByDesc('property_count')->take(5);
+
+        // Fetch recent B2B Partners
+        $recentB2bPartners = B2bPartner::with(['contactUser'])
+            ->withCount('requests')
+            ->latest()
+            ->limit(5)
+            ->get();
+
+        return view('admin.dashboard', compact(
+            'stats',
+            'recentUsers',
+            'pendingPropertiesList',
+            'locationStats',
+            'recentB2bPartners'
+        ));
     }
 
     // Property Approval Section
@@ -66,62 +120,6 @@ class AdminController extends Controller
         return back()->with('success', 'Property rejected.');
     }
 
-    // Subscription Management
-    public function subscriptions()
-    {
-        $this->checkAdmin();
-        $subscriptionRequests = SubscriptionRequest::with('user')
-            ->latest()
-            ->paginate(15);
-        $activeSubscriptions = User::where('subscription_status', '!=', 'trial')
-            ->where('is_admin', false)
-            ->with('properties')
-            ->paginate(15);
-        return view('admin.subscriptions', compact('subscriptionRequests', 'activeSubscriptions'));
-    }
-
-    public function approveSubscription(SubscriptionRequest $request, Request $httpRequest)
-    {
-        $this->checkAdmin();
-        $months = $httpRequest->input('months', 1);
-        $user = $request->user;
-        $duration = $request->billing_cycle === 'yearly' ? 12 : $months;
-        
-        $user->update([
-            'subscription_status' => $request->requested_plan,
-            'properties_limit' => $request->requested_plan === 'professional' ? 5 : 1,
-            'subscription_ends_at' => now()->addMonths($duration),
-            'is_trial_active' => false,
-            'billing_cycle' => $request->billing_cycle,
-        ]);
-        
-        $request->update([
-            'status' => 'approved',
-            'admin_notes' => 'Approved for ' . $duration . ' months (' . $request->billing_cycle . ')'
-        ]);
-        
-        return back()->with('success', 'Subscription approved successfully!');
-    }
-
-    public function updateSubscriptionStatus(User $user, Request $request)
-    {
-        $this->checkAdmin();
-        $request->validate([
-            'subscription_status' => 'required|in:trial,starter,professional',
-            'subscription_ends_at' => 'nullable|date',
-            'properties_limit' => 'required|integer|min:1|max:10'
-        ]);
-
-        $user->update([
-            'subscription_status' => $request->subscription_status,
-            'subscription_ends_at' => $request->subscription_ends_at,
-            'properties_limit' => $request->properties_limit,
-            'is_trial_active' => $request->subscription_status === 'trial'
-        ]);
-
-        return back()->with('success', 'Subscription updated successfully!');
-    }
-
     // User Management
     public function userManagement()
     {
@@ -147,8 +145,6 @@ class AdminController extends Controller
             'mobile_number' => 'required|string|unique:users,mobile_number|max:15',
             'email' => 'nullable|email|unique:users,email',
             'pin' => 'required|string|min:4|max:6',
-            'subscription_status' => 'required|in:trial,starter,professional',
-            'properties_limit' => 'required|integer|min:1|max:10'
         ]);
 
         User::create([
@@ -156,10 +152,6 @@ class AdminController extends Controller
             'mobile_number' => $request->mobile_number,
             'email' => $request->email,
             'pin_hash' => Hash::make($request->pin),
-            'subscription_status' => $request->subscription_status,
-            'properties_limit' => $request->properties_limit,
-            'is_trial_active' => $request->subscription_status === 'trial',
-            'subscription_ends_at' => $request->subscription_status !== 'trial' ? now()->addYear() : null,
             'user_type' => 'owner',
             'is_staff' => false,
         ]);
@@ -180,17 +172,12 @@ class AdminController extends Controller
             'name' => 'required|string|max:255',
             'mobile_number' => 'required|string|max:15|unique:users,mobile_number,' . $user->id,
             'email' => 'nullable|email|unique:users,email,' . $user->id,
-            'subscription_status' => 'required|in:trial,starter,professional',
-            'properties_limit' => 'required|integer|min:1|max:10'
         ]);
 
         $user->update([
             'name' => $request->name,
             'mobile_number' => $request->mobile_number,
             'email' => $request->email,
-            'subscription_status' => $request->subscription_status,
-            'properties_limit' => $request->properties_limit,
-            'is_trial_active' => $request->subscription_status === 'trial',
         ]);
 
         return redirect()->route('admin.user-management')->with('success', 'User updated successfully!');

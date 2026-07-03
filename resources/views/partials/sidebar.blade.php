@@ -40,7 +40,7 @@
 
                     @php
                         $user = auth()->user();
-                        $canAccessAdvanced = ($user->subscription_status === 'trial' && $user->trial_plan === 'professional') || in_array($user->subscription_status, ['starter', 'professional']);
+                        $canAccessAdvanced = true;
                         
                         // Active and Inactive classes
                         $act = 'flex items-center gap-3 pl-2 pr-4 py-2 border-l-4 border-emerald-600 bg-emerald-50/50 text-emerald-800 font-bold rounded-r-xl transition-all duration-200 text-sm';
@@ -48,6 +48,39 @@
                     @endphp
 
                     <div class="flex-1 overflow-y-auto space-y-6">
+                        @if(auth()->user()->is_admin)
+                            <!-- Admin Panel Section -->
+                            <div>
+                                <h4 class="text-[10px] font-bold text-red-500 uppercase tracking-widest mb-2 px-3">Admin Panel</h4>
+                                <ul class="space-y-0.5">
+                                    <li>
+                                        <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? $act : $inact }}">
+                                            <i class="fas fa-chart-line w-5 text-center text-xs"></i>
+                                            <span>Dashboard</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('admin.user-management') }}" class="{{ request()->routeIs('admin.user-management') || request()->routeIs('admin.users.*') || request()->routeIs('admin.customer-data') ? $act : $inact }}">
+                                            <i class="fas fa-users w-5 text-center text-xs"></i>
+                                            <span>Users</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('admin.location-analytics') }}" class="{{ request()->routeIs('admin.location-analytics') || request()->routeIs('admin.b2b-management') ? $act : $inact }}">
+                                            <i class="fas fa-chart-pie w-5 text-center text-xs"></i>
+                                            <span>Analytics</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('admin.property-approvals') }}" class="{{ request()->routeIs('admin.property-approvals') ? $act : $inact }}">
+                                            <i class="fas fa-tasks w-5 text-center text-xs"></i>
+                                            <span>Actions</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        @endif
+
                         <!-- Main Section -->
                         <div>
                             <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 px-3">Main</h4>
@@ -269,6 +302,27 @@
                     $mobileAct = 'block p-2 text-sm text-emerald-800 font-bold border-l-2 border-emerald-600 bg-emerald-50/40 rounded-r-lg transition-colors';
                     $mobileInact = 'block p-2 text-sm text-gray-500 hover:text-gray-900 hover:bg-gray-50/50 rounded-r-lg transition-colors pl-3';
                 @endphp
+
+                @if(auth()->user()->is_admin)
+                    <!-- Admin Panel (Mobile) -->
+                    <div class="space-y-1 pb-4 mb-4 border-b border-gray-100">
+                        <div class="px-2.5 mb-2">
+                            <span class="text-[10px] font-bold text-red-500 uppercase tracking-widest">Admin Panel</span>
+                        </div>
+                        <a href="{{ route('admin.dashboard') }}" @click="sidebarOpen = false" class="{{ request()->routeIs('admin.dashboard') ? $mobileAct : $mobileInact }}">
+                            <i class="fas fa-chart-line mr-2 text-xs"></i> Dashboard
+                        </a>
+                        <a href="{{ route('admin.user-management') }}" @click="sidebarOpen = false" class="{{ request()->routeIs('admin.user-management') || request()->routeIs('admin.users.*') || request()->routeIs('admin.customer-data') ? $mobileAct : $mobileInact }}">
+                            <i class="fas fa-users mr-2 text-xs"></i> Users
+                        </a>
+                        <a href="{{ route('admin.location-analytics') }}" @click="sidebarOpen = false" class="{{ request()->routeIs('admin.location-analytics') || request()->routeIs('admin.b2b-management') ? $mobileAct : $mobileInact }}">
+                            <i class="fas fa-chart-pie mr-2 text-xs"></i> Analytics
+                        </a>
+                        <a href="{{ route('admin.property-approvals') }}" @click="sidebarOpen = false" class="{{ request()->routeIs('admin.property-approvals') ? $mobileAct : $mobileInact }}">
+                            <i class="fas fa-tasks mr-2 text-xs"></i> Actions
+                        </a>
+                    </div>
+                @endif
 
                 <!-- Overview Section -->
                 <div class="space-y-1">

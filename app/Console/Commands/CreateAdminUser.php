@@ -45,8 +45,6 @@ class CreateAdminUser extends Command
             'password' => Hash::make($password),
             'is_admin' => true,
             'is_active' => true,
-            'subscription_status' => 'professional',
-            'properties_limit' => 999, // Unlimited for admin
             'mobile_number' => '0000000000', // Placeholder
             'pin_hash' => Hash::make('0000'), // Placeholder PIN
             'user_type' => 'admin',

@@ -21,15 +21,8 @@ class User extends Authenticatable
         'email',
         'is_active',
         'is_admin',
-        'subscription_status',
-        'trial_plan',
-        'trial_ends_at',
-        'subscription_ends_at',
-        'properties_limit',
-        'is_trial_active',
         'referred_by',
         'user_id',
-        'billing_cycle',
     ];
 
     protected $hidden = [
@@ -45,9 +38,6 @@ class User extends Authenticatable
             'mobile_verified_at' => 'datetime',
             'is_active' => 'boolean',
             'is_admin' => 'boolean',
-            'trial_ends_at' => 'datetime',
-            'subscription_ends_at' => 'datetime',
-            'is_trial_active' => 'boolean',
             'password' => 'hashed',
         ];
     }
@@ -84,47 +74,10 @@ class User extends Authenticatable
         return $this->hasMany(Reservation::class, 'created_by');
     }
 
-    public function subscriptions()
-    {
-        return $this->hasMany(Subscription::class);
-    }
-
-    public function activeSubscription()
-    {
-        return $this->hasOne(Subscription::class)->where('status', 'active')->where('current_period_end', '>', now());
-    }
-
-    public function subscriptionRequests()
-    {
-        return $this->hasMany(SubscriptionRequest::class);
-    }
-
-    public function hasPendingRequest()
-    {
-        return $this->subscriptionRequests()->where('status', 'pending')->exists();
-    }
-
     public function approvedProperties()
     {
         return $this->hasMany(Property::class, 'approved_by');
     }
-
-    public function getRemainingTrialDaysAttribute()
-    {
-        if (!$this->is_trial_active || !$this->trial_ends_at) {
-            return 0;
-        }
-        return max(0, (int) now()->diffInDays($this->trial_ends_at, false));
-    }
-
-    public function getRemainingSubscriptionDaysAttribute()
-    {
-        if (!$this->subscription_ends_at) {
-            return 0;
-        }
-        return max(0, (int) now()->diffInDays($this->subscription_ends_at, false));
-    }
-
     public function isTrialExpired()
     {
         return false;
@@ -240,19 +193,8 @@ class User extends Authenticatable
             if (empty($model->pin_hash)) {
                 $model->pin_hash = Hash::make('0000');
             }
-            // Set default values for new users (only if not already set)
-            if (empty($model->subscription_status)) {
-                $model->subscription_status = 'free';
-                $model->trial_plan = null;
-                $model->trial_ends_at = null;
-                $model->is_trial_active = false;
-                $model->properties_limit = 999999;
-            }
-            // Set new users as owners by default
         });
     }
-
-
 
     public function isOwner()
     {

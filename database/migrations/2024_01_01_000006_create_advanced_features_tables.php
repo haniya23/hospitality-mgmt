@@ -113,17 +113,6 @@ return new class extends Migration
             $table->index(['action', 'created_at']);
         });
 
-        // Subscription requests
-        Schema::create('subscription_requests', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->enum('requested_plan', ['starter', 'professional']);
-            $table->enum('billing_cycle', ['monthly', 'yearly'])->default('monthly');
-            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
-            $table->text('admin_notes')->nullable();
-            $table->timestamps();
-        });
-
         // Referral program
         Schema::create('referrals', function (Blueprint $table) {
             $table->id();
@@ -157,7 +146,6 @@ return new class extends Migration
     {
         Schema::dropIfExists('referral_withdrawals');
         Schema::dropIfExists('referrals');
-        Schema::dropIfExists('subscription_requests');
         Schema::dropIfExists('audit_logs');
         Schema::dropIfExists('commissions');
         Schema::dropIfExists('pricing_rules');

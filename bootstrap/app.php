@@ -21,8 +21,6 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         
         $middleware->alias([
-            'subscription' => \App\Http\Middleware\CheckSubscription::class,
-            'subscription.limits' => \App\Http\Middleware\CheckSubscriptionLimits::class,
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
         ]);
     })
