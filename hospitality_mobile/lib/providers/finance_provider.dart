@@ -91,4 +91,121 @@ class FinanceProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<bool> createIncomeRecord(Map<String, dynamic> data) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+
+      final response = await http.post(
+        Uri.parse('${ApiConfig.baseUrl}/owner/finance'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(data),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final jsonData = jsonDecode(response.body);
+        if (jsonData['success'] == true) {
+          await fetchFinanceData();
+          return true;
+        } else {
+          _error = jsonData['message'] ?? 'Failed to save transaction';
+        }
+      } else {
+        final jsonData = jsonDecode(response.body);
+        _error = jsonData['message'] ?? 'Error ${response.statusCode}: Failed to save';
+      }
+    } catch (e) {
+      _error = 'Connection error: $e';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+    return false;
+  }
+
+  Future<bool> updateIncomeRecord(int id, Map<String, dynamic> data) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+
+      final response = await http.put(
+        Uri.parse('${ApiConfig.baseUrl}/owner/finance/$id'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(data),
+      );
+
+      if (response.statusCode == 200) {
+        final jsonData = jsonDecode(response.body);
+        if (jsonData['success'] == true) {
+          await fetchFinanceData();
+          return true;
+        } else {
+          _error = jsonData['message'] ?? 'Failed to update transaction';
+        }
+      } else {
+        final jsonData = jsonDecode(response.body);
+        _error = jsonData['message'] ?? 'Error ${response.statusCode}: Failed to update';
+      }
+    } catch (e) {
+      _error = 'Connection error: $e';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+    return false;
+  }
+
+  Future<bool> deleteIncomeRecord(int id) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+
+      final response = await http.delete(
+        Uri.parse('${ApiConfig.baseUrl}/owner/finance/$id'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final jsonData = jsonDecode(response.body);
+        if (jsonData['success'] == true) {
+          await fetchFinanceData();
+          return true;
+        } else {
+          _error = jsonData['message'] ?? 'Failed to delete transaction';
+        }
+      } else {
+        _error = 'Error ${response.statusCode}: Failed to delete';
+      }
+    } catch (e) {
+      _error = 'Connection error: $e';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+    return false;
+  }
 }

@@ -56,6 +56,79 @@ class _FinanceScreenState extends ConsumerState<FinanceScreen> {
     }
   }
 
+  void _showTransactionForm([Map<String, dynamic>? transaction]) {
+    final finance = ref.read(financeProvider);
+    final isEditing = transaction != null;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: backgroundColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => _TransactionForm(
+        transaction: transaction,
+        financeProperties: finance.properties,
+        onSave: (data) async {
+          bool success;
+          if (isEditing) {
+            success = await finance.updateIncomeRecord(transaction['id'], data);
+          } else {
+            success = await finance.createIncomeRecord(data);
+          }
+          if (success && mounted) {
+            Navigator.pop(context);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(isEditing ? 'Transaction updated' : 'Transaction created'),
+                backgroundColor: Colors.green,
+              ),
+            );
+          } else if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(finance.error ?? 'An error occurred'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        },
+        onDelete: isEditing
+            ? () async {
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text('Delete Transaction', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+                    content: const Text('Are you sure you want to delete this transaction record?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: Text('Cancel', style: GoogleFonts.outfit(color: textSecondary)),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        child: Text('Delete', style: GoogleFonts.outfit(color: Colors.red, fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  ),
+                );
+
+                if (confirm == true) {
+                  final success = await finance.deleteIncomeRecord(transaction['id']);
+                  if (success && mounted) {
+                    Navigator.pop(context); // Close bottom sheet
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Transaction deleted'), backgroundColor: Colors.red),
+                    );
+                  }
+                }
+              }
+            : null,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final finance = ref.watch(financeProvider);
@@ -207,13 +280,24 @@ class _FinanceScreenState extends ConsumerState<FinanceScreen> {
                   const SizedBox(height: 32),
 
                   // Recent Transactions Header
-                  Text(
-                    'Recent Transactions',
-                    style: GoogleFonts.outfit(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: textPrimary,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Recent Transactions',
+                        style: GoogleFonts.outfit(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: textPrimary,
+                        ),
+                      ),
+                      if (finance.properties.isNotEmpty)
+                        IconButton(
+                          icon: const Icon(Icons.add_circle_rounded, color: primaryColor, size: 28),
+                          onPressed: () => _showTransactionForm(),
+                          tooltip: 'Add Transaction',
+                        ),
+                    ],
                   ),
                   const SizedBox(height: 16),
 
@@ -234,11 +318,14 @@ class _FinanceScreenState extends ConsumerState<FinanceScreen> {
                       itemCount: finance.transactions.length,
                       separatorBuilder: (_, __) => const SizedBox(height: 12),
                       itemBuilder: (context, index) {
-                        final tx = finance.transactions[index];
-                        return _buildTransactionTile(tx);
+                        final tx = Map<String, dynamic>.from(finance.transactions[index] as Map);
+                        return GestureDetector(
+                          onTap: () => _showTransactionForm(tx),
+                          child: _buildTransactionTile(tx),
+                        );
                       },
                     ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 80),
                 ],
               ),
             ),
@@ -444,6 +531,393 @@ class _FinanceScreenState extends ConsumerState<FinanceScreen> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _TransactionForm extends StatefulWidget {
+  final Map<String, dynamic>? transaction;
+  final List<dynamic> financeProperties;
+  final Function(Map<String, dynamic>) onSave;
+  final VoidCallback? onDelete;
+
+  const _TransactionForm({
+    super.key,
+    this.transaction,
+    required this.financeProperties,
+    required this.onSave,
+    this.onDelete,
+  });
+
+  @override
+  State<_TransactionForm> createState() => _TransactionFormState();
+}
+
+class _TransactionFormState extends State<_TransactionForm> {
+  final _formKey = GlobalKey<FormState>();
+
+  String? _selectedPropertyId;
+  String? _selectedAccommodationId;
+  String? _selectedIncomeType;
+  String? _selectedPaymentStatus;
+  
+  late TextEditingController _amountController;
+  late TextEditingController _paidAmountController;
+  late TextEditingController _referenceController;
+  late TextEditingController _notesController;
+  late DateTime _selectedDate;
+
+  @override
+  void initState() {
+    super.initState();
+    final tx = widget.transaction;
+    _selectedPropertyId = tx?['property_id']?.toString() ?? 
+        (widget.financeProperties.isNotEmpty ? widget.financeProperties.first['id'].toString() : null);
+    _selectedAccommodationId = tx?['accommodation_id']?.toString();
+    _selectedIncomeType = tx?['income_type'] ?? 'booking';
+    _selectedPaymentStatus = tx?['payment_status'] ?? 'paid';
+    
+    _amountController = TextEditingController(text: tx?['amount']?.toString() ?? '');
+    _paidAmountController = TextEditingController(text: tx?['paid_amount']?.toString() ?? '');
+    _referenceController = TextEditingController(text: tx?['reference_number'] ?? '');
+    _notesController = TextEditingController(text: tx?['notes'] ?? '');
+    
+    final dateStr = tx?['transaction_date'];
+    _selectedDate = dateStr != null ? DateTime.parse(dateStr) : DateTime.now();
+  }
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    _paidAmountController.dispose();
+    _referenceController.dispose();
+    _notesController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+    if (picked != null) {
+      setState(() {
+        _selectedDate = picked;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isEditing = widget.transaction != null;
+    final selectedProp = widget.financeProperties.firstWhere(
+      (p) => p['id'].toString() == _selectedPropertyId,
+      orElse: () => null,
+    );
+    final accommodations = selectedProp != null ? selectedProp['accommodations'] as List : [];
+
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+        left: 24,
+        right: 24,
+        top: 24,
+      ),
+      child: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    isEditing ? 'Edit Transaction' : 'Add Transaction',
+                    style: GoogleFonts.outfit(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF191D19),
+                    ),
+                  ),
+                  if (isEditing && widget.onDelete != null)
+                    IconButton(
+                      icon: const Icon(Icons.delete_forever_rounded, color: Colors.red),
+                      onPressed: widget.onDelete,
+                    ),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // Property Dropdown
+              _buildDropdown(
+                label: 'Property *',
+                value: _selectedPropertyId,
+                items: widget.financeProperties.map((p) {
+                  return DropdownMenuItem<String>(
+                    value: p['id'].toString(),
+                    child: Text(p['name'] ?? ''),
+                  );
+                }).toList(),
+                onChanged: (val) {
+                  setState(() {
+                    _selectedPropertyId = val;
+                    _selectedAccommodationId = null;
+                  });
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Accommodation Dropdown
+              _buildDropdown(
+                label: 'Accommodation / Room',
+                value: _selectedAccommodationId,
+                items: [
+                  const DropdownMenuItem<String>(value: null, child: Text('General (No room)')),
+                  ...accommodations.map((a) {
+                    return DropdownMenuItem<String>(
+                      value: a['id'].toString(),
+                      child: Text(a['display_name'] ?? ''),
+                    );
+                  }),
+                ],
+                onChanged: (val) => setState(() => _selectedAccommodationId = val),
+              ),
+              const SizedBox(height: 16),
+
+              // Income Type
+              _buildDropdown(
+                label: 'Income Type *',
+                value: _selectedIncomeType,
+                items: const [
+                  DropdownMenuItem(value: 'booking', child: Text('Booking Revenue')),
+                  DropdownMenuItem(value: 'rental', child: Text('Rental Income')),
+                  DropdownMenuItem(value: 'service', child: Text('Service Charge')),
+                  DropdownMenuItem(value: 'deposit', child: Text('Security Deposit')),
+                  DropdownMenuItem(value: 'penalty', child: Text('Penalty/Late Fee')),
+                  DropdownMenuItem(value: 'commission', child: Text('Commission')),
+                  DropdownMenuItem(value: 'other', child: Text('Other Income')),
+                ],
+                onChanged: (val) => setState(() => _selectedIncomeType = val),
+              ),
+              const SizedBox(height: 16),
+
+              // Amount
+              _buildTextField(
+                label: 'Amount *',
+                controller: _amountController,
+                keyboardType: TextInputType.number,
+                validator: (val) {
+                  if (val == null || val.isEmpty) return 'Amount is required';
+                  if (double.tryParse(val) == null || double.parse(val) <= 0) {
+                    return 'Please enter a valid amount';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Payment Status
+              _buildDropdown(
+                label: 'Payment Status *',
+                value: _selectedPaymentStatus,
+                items: const [
+                  DropdownMenuItem(value: 'paid', child: Text('Fully Paid')),
+                  DropdownMenuItem(value: 'partial', child: Text('Partially Paid')),
+                  DropdownMenuItem(value: 'unpaid', child: Text('Unpaid')),
+                ],
+                onChanged: (val) => setState(() => _selectedPaymentStatus = val),
+              ),
+              const SizedBox(height: 16),
+
+              // Paid Amount (for partial payment status)
+              if (_selectedPaymentStatus == 'partial') ...[
+                _buildTextField(
+                  label: 'Paid Amount *',
+                  controller: _paidAmountController,
+                  keyboardType: TextInputType.number,
+                  validator: (val) {
+                    if (val == null || val.isEmpty) return 'Paid Amount is required';
+                    final parsedPaid = double.tryParse(val);
+                    final parsedTotal = double.tryParse(_amountController.text);
+                    if (parsedPaid == null || parsedPaid < 0) {
+                      return 'Please enter a valid paid amount';
+                    }
+                    if (parsedTotal != null && parsedPaid >= parsedTotal) {
+                      return 'Paid amount must be less than total amount';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+              ],
+
+              // Transaction Date
+              GestureDetector(
+                onTap: _pickDate,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFF2E3E2A).withOpacity(0.08)),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Date: ${DateFormat('yyyy-MM-dd').format(_selectedDate)}',
+                        style: GoogleFonts.outfit(fontWeight: FontWeight.w600, color: const Color(0xFF191D19)),
+                      ),
+                      const Icon(Icons.calendar_today_rounded, color: Color(0xFF5A7251), size: 18),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Reference Number
+              _buildTextField(
+                label: 'Reference Number / TxID',
+                controller: _referenceController,
+              ),
+              const SizedBox(height: 16),
+
+              // Notes
+              _buildTextField(
+                label: 'Notes',
+                controller: _notesController,
+                maxLines: 2,
+              ),
+              const SizedBox(height: 24),
+
+              // Action Buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text('Cancel', style: GoogleFonts.outfit(color: const Color(0xFF5A7251), fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          final data = {
+                            'property_id': int.parse(_selectedPropertyId!),
+                            'accommodation_id': _selectedAccommodationId != null ? int.parse(_selectedAccommodationId!) : null,
+                            'income_type': _selectedIncomeType,
+                            'amount': double.parse(_amountController.text),
+                            'payment_status': _selectedPaymentStatus,
+                            'paid_amount': _selectedPaymentStatus == 'paid'
+                                ? double.parse(_amountController.text)
+                                : (_selectedPaymentStatus == 'unpaid' ? 0.0 : double.parse(_paidAmountController.text)),
+                            'transaction_date': DateFormat('yyyy-MM-dd').format(_selectedDate),
+                            'reference_number': _referenceController.text.trim(),
+                            'notes': _notesController.text.trim(),
+                          };
+                          widget.onSave(data);
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2E3E2A),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      ),
+                      child: Text('Save', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 32),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDropdown({
+    required String label,
+    required dynamic value,
+    required List<DropdownMenuItem<dynamic>> items,
+    required ValueChanged<dynamic> onChanged,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: const Color(0xFF5A7251)),
+        ),
+        const SizedBox(height: 6),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFF2E3E2A).withOpacity(0.08)),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<dynamic>(
+              value: value,
+              isExpanded: true,
+              style: GoogleFonts.outfit(color: const Color(0xFF191D19), fontWeight: FontWeight.w600),
+              icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF5A7251)),
+              items: items,
+              onChanged: onChanged,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTextField({
+    required String label,
+    required TextEditingController controller,
+    TextInputType? keyboardType,
+    int maxLines = 1,
+    String? Function(String?)? validator,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: const Color(0xFF5A7251)),
+        ),
+        const SizedBox(height: 6),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          maxLines: maxLines,
+          validator: validator,
+          style: GoogleFonts.outfit(color: const Color(0xFF191D19), fontWeight: FontWeight.w600),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: const Color(0xFF2E3E2A).withOpacity(0.08)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: const Color(0xFF2E3E2A).withOpacity(0.08)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFF2E3E2A), width: 1.5),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
