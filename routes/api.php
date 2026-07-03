@@ -84,6 +84,7 @@ Route::prefix('owner')->name('api.owner.')->middleware('auth:sanctum')->group(fu
     Route::post('bookings/{id}/check-out', [\App\Http\Controllers\Api\Owner\CheckOutController::class, 'store']);
     Route::patch('/bookings/{id}/status', [App\Http\Controllers\Api\Owner\BookingController::class, 'updateStatus'])->name('bookings.status');
     Route::get('/bookings/{id}/invoice', [App\Http\Controllers\Api\Owner\BookingController::class, 'downloadInvoice'])->name('bookings.invoice');
+    Route::patch('/bookings/{id}/payment', [App\Http\Controllers\Api\Owner\BookingController::class, 'updatePayment'])->name('bookings.payment');
     Route::apiResource('bookings', \App\Http\Controllers\Api\Owner\BookingController::class);
     
     // Properties

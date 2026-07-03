@@ -508,7 +508,7 @@ class BookingProvider with ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('auth_token');
 
-      final url = '${ApiConfig.baseUrl}/api/bookings/$uuid/payment';
+      final url = '${ApiConfig.bookingsEndpoint}/$uuid/payment';
 
       final response = await http.patch(
         Uri.parse(url),

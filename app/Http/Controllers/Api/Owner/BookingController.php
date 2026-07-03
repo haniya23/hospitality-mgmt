@@ -218,4 +218,51 @@ class BookingController extends Controller
         $booking = $request->user()->reservations()->findOrFail($id);
         return app(\App\Http\Controllers\InvoiceController::class)->download($booking);
     }
+
+    /**
+     * Update Booking Payment
+     */
+    public function updatePayment(Request $request, $id)
+    {
+        try {
+            $booking = $request->user()->reservations()
+                ->where(function ($query) use ($id) {
+                    if (is_numeric($id)) {
+                        $query->where('id', $id);
+                    } else {
+                        $query->where('uuid', $id);
+                    }
+                })
+                ->firstOrFail();
+            
+            $request->validate([
+                'amount_paid' => 'required|numeric|min:0',
+                'payment_notes' => 'nullable|string|max:500'
+            ]);
+            
+            $amountPaid = $request->amount_paid;
+            $newBalance = max(0, $booking->balance_pending - $amountPaid);
+            
+            $booking->update([
+                'balance_pending' => $newBalance,
+                'advance_paid' => $booking->advance_paid + $amountPaid
+            ]);
+            
+            // Update checkout record payment status if fully paid
+            if ($newBalance == 0 && $booking->checkOutRecord) {
+                $booking->checkOutRecord->update([
+                    'payment_status' => 'completed',
+                    'payment_notes' => $request->payment_notes
+                ]);
+            }
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Payment updated successfully',
+                'new_balance' => $newBalance
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
 }
