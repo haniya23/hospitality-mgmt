@@ -9,6 +9,7 @@ import 'profile_tab.dart';
 import 'accommodations_tab.dart';
 import 'guest_services_screen.dart';
 import 'calendar_screen.dart';
+import 'finance_screen.dart';
 import '../widgets/app_drawer.dart';
 
 class MainLayout extends StatefulWidget {
@@ -32,6 +33,7 @@ class _MainLayoutState extends State<MainLayout> {
     const AccommodationsTab(),
     const GuestServicesScreen(),
     const CalendarScreen(),
+    const FinanceScreen(),
   ];
 
   @override

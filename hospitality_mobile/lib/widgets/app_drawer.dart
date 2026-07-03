@@ -82,6 +82,7 @@ class AppDrawer extends StatelessWidget {
                 _buildDrawerItem(6, Icons.hotel_rounded, 'Accommodations', context),
                 _buildDrawerItem(3, Icons.handshake_rounded, 'B2B Partners', context),
                 _buildDrawerItem(4, Icons.people_rounded, 'Guests', context),
+                _buildDrawerItem(9, Icons.payments_rounded, 'Finance', context),
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Divider(color: Color(0xFFEBF0E6), thickness: 1.5),

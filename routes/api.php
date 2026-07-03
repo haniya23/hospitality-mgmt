@@ -76,6 +76,7 @@ Route::prefix('staff')->name('api.staff.')->group(function () {
 Route::prefix('owner')->name('api.owner.')->middleware('auth:sanctum')->group(function () {
     // Dashboard
     Route::get('/dashboard', [App\Http\Controllers\Api\Owner\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/finance', [App\Http\Controllers\Api\Owner\FinanceController::class, 'index'])->name('finance');
     
     // Profile
     Route::get('/profile', [App\Http\Controllers\Api\Owner\ProfileController::class, 'show'])->name('profile');
