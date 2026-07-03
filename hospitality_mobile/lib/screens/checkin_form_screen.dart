@@ -54,7 +54,16 @@ class _CheckInFormScreenState extends ConsumerState<CheckInFormScreen> {
         text: DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now()));
     
     final checkoutStr = widget.booking['check_out_date'];
-    _expectedCheckOutController = TextEditingController(text: checkoutStr ?? '');
+    String formattedCheckout = '';
+    if (checkoutStr != null) {
+      try {
+        final parsed = DateTime.parse(checkoutStr.toString());
+        formattedCheckout = DateFormat('yyyy-MM-dd').format(parsed);
+      } catch (_) {
+        formattedCheckout = checkoutStr.toString();
+      }
+    }
+    _expectedCheckOutController = TextEditingController(text: formattedCheckout);
     
     _requestsController = TextEditingController(text: widget.booking['special_requests']);
     _notesController = TextEditingController();

@@ -8,6 +8,7 @@ import '../providers/dashboard_provider.dart';
 import '../providers/riverpod_providers.dart';
 import 'main_layout.dart';
 import 'checkin_form_screen.dart';
+import 'package:intl/intl.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -180,7 +181,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final stats = data['stats'];
     final properties = data['properties'] as List;
-    final nextBooking = data['nextBooking'];
+    final nextBookings = data['nextBookings'] as List?;
     final recentBookings = data['recentBookings'] as List;
 
     return RefreshIndicator(
@@ -194,12 +195,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               .fadeIn(duration: 600.ms)
               .slideY(begin: -0.2, end: 0),
           const SizedBox(height: 20),
-          if (nextBooking != null)
-            _buildNextBookingCard(nextBooking, isTablet)
+          if (nextBookings != null && nextBookings.isNotEmpty)
+            _buildNextArrivalsSection(nextBookings, isTablet)
                 .animate()
                 .fadeIn(delay: 200.ms, duration: 600.ms)
                 .slideX(begin: 0.1, end: 0),
-          if (nextBooking != null) const SizedBox(height: 32),
+          if (nextBookings != null && nextBookings.isNotEmpty) const SizedBox(height: 32),
           Text(
             'Overview',
             style: GoogleFonts.outfit(
@@ -235,6 +236,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Widget _buildHeader(AuthProvider auth) {
+    ImageProvider avatarImage;
+    if (auth.profilePhotoUrl != null && auth.profilePhotoUrl!.isNotEmpty) {
+      avatarImage = NetworkImage(auth.profilePhotoUrl!);
+    } else {
+      avatarImage = NetworkImage('https://ui-avatars.com/api/?name=${Uri.encodeComponent(auth.userName ?? "User")}&background=2E3E2A&color=fff');
+    }
+
     return Row(
       children: [
         GestureDetector(
@@ -254,12 +262,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             child: CircleAvatar(
               radius: 26,
-              backgroundImage: const NetworkImage(
-                  'https://ui-avatars.com/api/?name=Owner&background=0F172A&color=fff'),
-              onBackgroundImageError: (_, __) {},
-              child: auth.userName != null
-                  ? null
-                  : Text(auth.userName?.substring(0, 1) ?? 'U'),
+              backgroundColor: const Color(0xFF2E3E2A),
+              backgroundImage: avatarImage,
             ),
           ),
         ),
@@ -402,7 +406,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: Row(
                     children: [
                       _buildInfoItem(Icons.calendar_today_rounded, 'Check-in',
-                          booking['check_in_date'], Colors.white),
+                          _formatCleanDate(booking['check_in_date']), Colors.white),
                       Container(
                         height: 40,
                         width: 1,
@@ -771,7 +775,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
               Text(
-                booking['check_in_date'] ?? '',
+                _formatCleanDate(booking['check_in_date']),
                 style: GoogleFonts.outfit(
                   fontSize: 11,
                   color: textSecondary,
@@ -800,5 +804,46 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildNextArrivalsSection(List bookings, bool isTablet) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          height: 250, // Height to fit card and padding
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            itemCount: bookings.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 16),
+            itemBuilder: (context, index) {
+              final booking = Map<String, dynamic>.from(bookings[index] as Map);
+              return Container(
+                width: MediaQuery.of(context).size.width * 0.85,
+                constraints: const BoxConstraints(maxWidth: 400),
+                child: _buildNextBookingCard(booking, isTablet),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _formatCleanDate(dynamic dateValue) {
+    if (dateValue == null) return 'N/A';
+    try {
+      final cleanStr = dateValue.toString().split('T')[0];
+      final parsed = DateFormat('yyyy-MM-dd').parse(cleanStr);
+      return DateFormat('d MMM').format(parsed);
+    } catch (_) {
+      try {
+        final parsed = DateTime.parse(dateValue.toString());
+        return DateFormat('d MMM').format(parsed);
+      } catch (_) {
+        return dateValue.toString();
+      }
+    }
   }
 }

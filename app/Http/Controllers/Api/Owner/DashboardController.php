@@ -19,14 +19,15 @@ class DashboardController extends Controller
         // Properties
         $properties = $user->properties()->with(['category', 'location.city.district.state'])->latest()->get();
         
-        // Next Booking
-        $nextBooking = Reservation::whereHas('accommodation.property', function($q) use ($user) {
+        // Next Bookings
+        $nextBookings = Reservation::whereHas('accommodation.property', function($q) use ($user) {
             $q->where('owner_id', $user->id);
         })->where('status', 'confirmed')
         ->where('check_in_date', '>=', today())
         ->orderBy('check_in_date')
         ->with(['guest', 'accommodation.property'])
-        ->first();
+        ->limit(5)
+        ->get();
         
         // Counts
         $upcomingBookingsThisWeek = Reservation::whereHas('accommodation.property', function($q) use ($user) {
@@ -76,7 +77,8 @@ class DashboardController extends Controller
             'success' => true,
             'data' => [
                 'properties' => $properties,
-                'nextBooking' => $nextBooking,
+                'nextBooking' => $nextBookings->first(),
+                'nextBookings' => $nextBookings,
                 'stats' => [
                     'upcoming_week' => $upcomingBookingsThisWeek,
                     'upcoming_month' => $upcomingBookingsThisMonth,
