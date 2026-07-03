@@ -72,6 +72,10 @@ class DashboardController extends Controller
         ->with(['guest', 'accommodation.property'])
         ->latest()
         ->get();
+
+        $totalProperties = $properties->count();
+        $pendingBookingsCount = $pendingBookings->count();
+        $activeBookingsCount = $activeBookings->count();
         
         return response()->json([
             'success' => true,
@@ -82,6 +86,9 @@ class DashboardController extends Controller
                 'stats' => [
                     'upcoming_week' => $upcomingBookingsThisWeek,
                     'upcoming_month' => $upcomingBookingsThisMonth,
+                    'pending_bookings' => $pendingBookingsCount,
+                    'active_bookings' => $activeBookingsCount,
+                    'total_properties' => $totalProperties,
                 ],
                 'topB2bPartner' => $topB2bPartner,
                 'recentBookings' => $recentBookings,

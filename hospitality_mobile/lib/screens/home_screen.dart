@@ -20,8 +20,12 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   // Organic Modern Color Palette
   static const Color primaryColor = Color(0xFF2E3E2A); // Deep organic green
-  static const Color secondaryColor = Color(0xFF191D19); // Dark organic charcoal
-  static const Color backgroundColor = Color(0xFFF2F5F0); // Organic warm cream background
+  static const Color secondaryColor = Color(
+    0xFF191D19,
+  ); // Dark organic charcoal
+  static const Color backgroundColor = Color(
+    0xFFF2F5F0,
+  ); // Organic warm cream background
   static const Color cardColor = Colors.white;
   static const Color textPrimary = Color(0xFF191D19); // Charcoal
   static const Color textSecondary = Color(0xFF5A7251); // Soft green
@@ -29,8 +33,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(
-        () => ref.read(dashboardProvider).fetchDashboardData());
+    Future.microtask(() => ref.read(dashboardProvider).fetchDashboardData());
   }
 
   @override
@@ -47,8 +50,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           body: dashboard.isLoading
               ? _buildShimmerLoading(isTablet)
               : dashboard.error != null
-                  ? _buildErrorState(dashboard)
-                  : _buildDashboardContent(context, auth, dashboard, isTablet),
+              ? _buildErrorState(dashboard)
+              : _buildDashboardContent(context, auth, dashboard, isTablet),
         );
       },
     );
@@ -106,13 +109,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                    child: Container(
-                  height: 120,
-                  decoration: BoxDecoration(
-                    color: cardColor,
-                    borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    height: 120,
+                    decoration: BoxDecoration(
+                      color: cardColor,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
                   ),
-                )),
+                ),
               ],
             ),
           ],
@@ -135,8 +139,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               color: Colors.red.shade50,
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.cloud_off_rounded,
-                size: 48, color: Colors.blue.shade400),
+            child: Icon(
+              Icons.cloud_off_rounded,
+              size: 48,
+              color: Colors.blue.shade400,
+            ),
           ).animate().fadeIn().scale(),
           const SizedBox(height: 24),
           Text(
@@ -174,8 +181,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   // ---------------------------------------------------------------------------
   // MAIN CONTENT
   // ---------------------------------------------------------------------------
-  Widget _buildDashboardContent(BuildContext context, AuthProvider auth,
-      DashboardProvider dashboard, bool isTablet) {
+  Widget _buildDashboardContent(
+    BuildContext context,
+    AuthProvider auth,
+    DashboardProvider dashboard,
+    bool isTablet,
+  ) {
     final data = dashboard.data;
     if (data == null) return const SizedBox.shrink();
 
@@ -190,17 +201,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       child: ListView(
         padding: EdgeInsets.all(isTablet ? 32.0 : 20.0),
         children: [
-          _buildHeader(auth)
-              .animate()
-              .fadeIn(duration: 600.ms)
-              .slideY(begin: -0.2, end: 0),
+          _buildHeader(
+            auth,
+          ).animate().fadeIn(duration: 600.ms).slideY(begin: -0.2, end: 0),
           const SizedBox(height: 20),
           if (nextBookings != null && nextBookings.isNotEmpty)
             _buildNextArrivalsSection(nextBookings, isTablet)
                 .animate()
                 .fadeIn(delay: 200.ms, duration: 600.ms)
                 .slideX(begin: 0.1, end: 0),
-          if (nextBookings != null && nextBookings.isNotEmpty) const SizedBox(height: 32),
+          if (nextBookings != null && nextBookings.isNotEmpty)
+            const SizedBox(height: 32),
           Text(
             'Overview',
             style: GoogleFonts.outfit(
@@ -212,23 +223,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           const SizedBox(height: 16),
           _buildStatsGrid(stats, isTablet).animate().fadeIn(delay: 400.ms),
           const SizedBox(height: 32),
-          _buildSectionHeader('Your Properties', properties.length.toString())
-              .animate()
-              .fadeIn(delay: 500.ms),
+          _buildSectionHeader(
+            'Your Properties',
+            properties.length.toString(),
+          ).animate().fadeIn(delay: 500.ms),
           const SizedBox(height: 16),
-          _buildPropertiesList(properties, isTablet)
-              .animate()
-              .fadeIn(delay: 600.ms)
-              .slideX(begin: 0.1, end: 0),
+          _buildPropertiesList(
+            properties,
+            isTablet,
+          ).animate().fadeIn(delay: 600.ms).slideX(begin: 0.1, end: 0),
           const SizedBox(height: 32),
-          _buildSectionHeader('Recent Bookings', '')
-              .animate()
-              .fadeIn(delay: 700.ms),
+          _buildSectionHeader(
+            'Recent Bookings',
+            '',
+          ).animate().fadeIn(delay: 700.ms),
           const SizedBox(height: 16),
-          _buildRecentBookingsList(recentBookings)
-              .animate()
-              .fadeIn(delay: 800.ms)
-              .slideY(begin: 0.1, end: 0),
+          _buildRecentBookingsList(
+            recentBookings,
+          ).animate().fadeIn(delay: 800.ms).slideY(begin: 0.1, end: 0),
           const SizedBox(height: 80),
         ],
       ),
@@ -240,7 +252,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (auth.profilePhotoUrl != null && auth.profilePhotoUrl!.isNotEmpty) {
       avatarImage = NetworkImage(auth.profilePhotoUrl!);
     } else {
-      avatarImage = NetworkImage('https://ui-avatars.com/api/?name=${Uri.encodeComponent(auth.userName ?? "User")}&background=2E3E2A&color=fff');
+      avatarImage = NetworkImage(
+        'https://ui-avatars.com/api/?name=${Uri.encodeComponent(auth.userName ?? "User")}&background=2E3E2A&color=fff',
+      );
     }
 
     return Row(
@@ -341,7 +355,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(18),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -350,17 +364,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                            color: Colors.white.withOpacity(0.1)),
+                          color: Colors.white.withOpacity(0.1),
+                        ),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.flight_land_rounded,
-                              color: Color(0xFF818CF8), size: 16),
+                          const Icon(
+                            Icons.flight_land_rounded,
+                            color: Color(0xFF818CF8),
+                            size: 16,
+                          ),
                           const SizedBox(width: 6),
                           Text(
                             'NEXT ARRIVAL',
@@ -376,11 +396,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
                 Text(
                   booking['guest']?['name'] ?? 'Guest Name',
                   style: GoogleFonts.outfit(
-                    fontSize: isTablet ? 36 : 28,
+                    fontSize: isTablet ? 28 : 22,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                     height: 1.1,
@@ -391,13 +411,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   booking['accommodation']?['property']?['name'] ??
                       'Property Name',
                   style: GoogleFonts.outfit(
-                    fontSize: 14,
+                    fontSize: 12,
                     color: Colors.blueGrey.shade200,
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 14),
                 Container(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.08),
                     borderRadius: BorderRadius.circular(16),
@@ -405,20 +425,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                   child: Row(
                     children: [
-                      _buildInfoItem(Icons.calendar_today_rounded, 'Check-in',
-                          _formatCleanDate(booking['check_in_date']), Colors.white),
+                      _buildInfoItem(
+                        Icons.calendar_today_rounded,
+                        'Check-in',
+                        _formatCleanDate(booking['check_in_date']),
+                        Colors.white,
+                      ),
                       Container(
                         height: 40,
                         width: 1,
                         color: Colors.white10,
-                        margin: const EdgeInsets.symmetric(horizontal: 24),
+                        margin: const EdgeInsets.symmetric(horizontal: 16),
                       ),
-                      _buildInfoItem(Icons.bed_rounded, 'Room',
-                          booking['accommodation']?['name'], Colors.white),
+                      _buildInfoItem(
+                        Icons.bed_rounded,
+                        'Room',
+                        booking['accommodation']?['name'],
+                        Colors.white,
+                      ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
@@ -426,13 +454,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => CheckInFormScreen(booking: booking),
+                          builder: (context) =>
+                              CheckInFormScreen(booking: booking),
                         ),
                       ).then((_) {
                         ref.read(dashboardProvider).fetchDashboardData();
                       });
                     },
-                    icon: const Icon(Icons.check_circle_outline_rounded, size: 18),
+                    icon: const Icon(
+                      Icons.check_circle_outline_rounded,
+                      size: 18,
+                    ),
                     label: Text(
                       'Check In Guest',
                       style: GoogleFonts.outfit(
@@ -443,7 +475,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFFFE8B6),
                       foregroundColor: const Color(0xFF2E3E2A),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),
@@ -460,7 +492,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Widget _buildInfoItem(
-      IconData icon, String label, String? value, Color textColor) {
+    IconData icon,
+    String label,
+    String? value,
+    Color textColor,
+  ) {
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -497,12 +533,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildStatsGrid(Map<String, dynamic> stats, bool isTablet) {
     return GridView.count(
-      crossAxisCount: isTablet ? 4 : 2,
+      crossAxisCount: 4,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
-      childAspectRatio: 1.2, // increased height ratio to prevent overflow
+      crossAxisSpacing: 10,
+      mainAxisSpacing: 10,
+      childAspectRatio: isTablet ? 1.1 : 0.72,
       children: [
         _buildStatCard(
           'This Week',
@@ -516,17 +552,33 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           Icons.calendar_month_rounded,
           const Color(0xFF3B82F6), // Blue
         ),
+        _buildStatCard(
+          'Pending',
+          (stats['pending_bookings'] ?? 0).toString(),
+          Icons.pending_actions_rounded,
+          const Color(0xFFF59E0B),
+        ),
+        _buildStatCard(
+          'Active',
+          (stats['active_bookings'] ?? 0).toString(),
+          Icons.hotel_rounded,
+          const Color(0xFF8B5CF6),
+        ),
       ],
     );
   }
 
   Widget _buildStatCard(
-      String label, String value, IconData icon, Color color) {
+    String label,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
-      padding: const EdgeInsets.all(16), // reduced padding
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
       decoration: BoxDecoration(
         color: cardColor,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.04),
@@ -540,28 +592,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(7),
             decoration: BoxDecoration(
               color: color.withOpacity(0.1),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: color, size: 20),
+            child: Icon(icon, color: color, size: 16),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 value,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.outfit(
-                  fontSize: 28,
+                  fontSize: 18,
                   fontWeight: FontWeight.w700,
                   color: textPrimary,
                 ),
               ),
               Text(
                 label,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.outfit(
-                  fontSize: 13,
+                  fontSize: 10,
                   color: textSecondary,
                   fontWeight: FontWeight.w500,
                 ),
@@ -611,25 +667,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       return _buildEmptyState('No properties found');
     }
 
-    return SizedBox(
-      height: 160,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: properties.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 16),
-        itemBuilder: (context, index) =>
-            _buildPropertyCard(properties[index], isTablet),
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: properties.length,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: isTablet ? 4 : 2,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: isTablet ? 1.15 : 1.05,
       ),
+      itemBuilder: (context, index) =>
+          _buildPropertyCard(properties[index], isTablet),
     );
   }
 
   Widget _buildPropertyCard(Map<String, dynamic> property, bool isTablet) {
     return Container(
-      width: isTablet ? 280 : 220,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: cardColor,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.grey.shade100),
       ),
       child: Column(
@@ -644,7 +702,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.outfit(
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: textPrimary,
                   ),
@@ -652,21 +710,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               const SizedBox(width: 12),
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(7),
                 decoration: BoxDecoration(
                   color: backgroundColor,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.business_rounded,
-                    color: primaryColor, size: 18),
+                child: const Icon(
+                  Icons.business_rounded,
+                  color: primaryColor,
+                  size: 18,
+                ),
               ),
             ],
           ),
           const Spacer(),
           Row(
             children: [
-              Icon(Icons.location_on_rounded,
-                  size: 14, color: textSecondary.withOpacity(0.7)),
+              Icon(
+                Icons.location_on_rounded,
+                size: 14,
+                color: textSecondary.withOpacity(0.7),
+              ),
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
@@ -674,13 +738,53 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.outfit(
-                    fontSize: 12,
+                    fontSize: 11,
                     fontWeight: FontWeight.w500,
                     color: textSecondary,
                   ),
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              _buildPropertyMiniChip(
+                Icons.home_work_rounded,
+                '${property['property_accommodations_count'] ?? 0} units',
+              ),
+              _buildPropertyMiniChip(
+                Icons.verified_rounded,
+                (property['status'] ?? 'active').toString(),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPropertyMiniChip(IconData icon, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: primaryColor),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: GoogleFonts.outfit(
+              fontSize: 9.5,
+              fontWeight: FontWeight.w700,
+              color: primaryColor,
+            ),
           ),
         ],
       ),
@@ -755,10 +859,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   booking['accommodation']?['property']?['name'] ?? 'Property',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.outfit(
-                    fontSize: 12,
-                    color: textSecondary,
-                  ),
+                  style: GoogleFonts.outfit(fontSize: 12, color: textSecondary),
                 ),
               ],
             ),
@@ -776,10 +877,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               Text(
                 _formatCleanDate(booking['check_in_date']),
-                style: GoogleFonts.outfit(
-                  fontSize: 11,
-                  color: textSecondary,
-                ),
+                style: GoogleFonts.outfit(fontSize: 11, color: textSecondary),
               ),
             ],
           ),
@@ -796,10 +894,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           children: [
             Icon(Icons.inbox_rounded, size: 48, color: Colors.grey[200]),
             const SizedBox(height: 8),
-            Text(
-              message,
-              style: GoogleFonts.outfit(color: textSecondary),
-            ),
+            Text(message, style: GoogleFonts.outfit(color: textSecondary)),
           ],
         ),
       ),
@@ -811,7 +906,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          height: 250, // Height to fit card and padding
+          height: isTablet ? 208 : 186,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
@@ -820,8 +915,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             itemBuilder: (context, index) {
               final booking = Map<String, dynamic>.from(bookings[index] as Map);
               return Container(
-                width: MediaQuery.of(context).size.width * 0.85,
-                constraints: const BoxConstraints(maxWidth: 400),
+                width:
+                    MediaQuery.of(context).size.width *
+                    (isTablet ? 0.52 : 0.78),
+                constraints: const BoxConstraints(maxWidth: 340),
                 child: _buildNextBookingCard(booking, isTablet),
               );
             },

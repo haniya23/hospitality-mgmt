@@ -9,6 +9,7 @@ use App\Models\Property;
 use App\Models\PropertyAccommodation;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Validation\Rule;
 
 class FinanceController extends Controller
@@ -67,7 +68,9 @@ class FinanceController extends Controller
             ->with(['property', 'accommodation', 'reservation.guest', 'b2bPartner'])
             ->latest('transaction_date')->latest('id');
 
-        $expenseQ = ExpenseRecord::whereIn('property_id', $propertyIds);
+        $expenseQ = ExpenseRecord::whereIn('property_id', $propertyIds)
+            ->with(['property', 'accommodation', 'category'])
+            ->latest('transaction_date')->latest('id');
 
         if ($request->filled('property_id') && $request->input('property_id') !== 'all') {
             $incomeQ->where('property_id', $request->input('property_id'));
@@ -89,7 +92,89 @@ class FinanceController extends Controller
         $pendingReceivables = (double) (clone $incomeQ)
             ->selectRaw('SUM(amount - paid_amount) as pending')->value('pending') ?? 0;
 
-        $transactions = $incomeQ->paginate(20);
+        $incomeTransactions = (clone $incomeQ)->get()->map(function ($income) {
+            return [
+                'id' => $income->id,
+                'transaction_kind' => 'income',
+                'property_id' => $income->property_id,
+                'accommodation_id' => $income->accommodation_id,
+                'income_type' => $income->income_type,
+                'amount' => (double) $income->amount,
+                'paid_amount' => (double) $income->paid_amount,
+                'payment_status' => $income->payment_status,
+                'transaction_date' => $income->transaction_date?->toDateString(),
+                'reference_number' => $income->reference_number,
+                'notes' => $income->notes,
+                'title' => $income->reservation?->guest?->name ?: ucfirst(str_replace('_', ' ', $income->income_type ?? 'income')),
+                'subtitle' => $income->property?->name,
+                'property' => $income->property ? [
+                    'id' => $income->property->id,
+                    'name' => $income->property->name,
+                ] : null,
+                'accommodation' => $income->accommodation ? [
+                    'id' => $income->accommodation->id,
+                    'display_name' => $income->accommodation->display_name,
+                ] : null,
+                'reservation' => $income->reservation ? [
+                    'id' => $income->reservation->id,
+                    'guest' => $income->reservation->guest ? [
+                        'name' => $income->reservation->guest->name,
+                    ] : null,
+                ] : null,
+            ];
+        });
+
+        $expenseTransactions = (clone $expenseQ)->get()->map(function ($expense) {
+            return [
+                'id' => $expense->id,
+                'transaction_kind' => 'expense',
+                'property_id' => $expense->property_id,
+                'accommodation_id' => $expense->accommodation_id,
+                'amount' => (double) $expense->amount,
+                'paid_amount' => (double) $expense->paid_amount,
+                'payment_status' => $expense->payment_status,
+                'transaction_date' => $expense->transaction_date?->toDateString(),
+                'reference_number' => $expense->receipt_number,
+                'notes' => $expense->notes,
+                'title' => $expense->title,
+                'subtitle' => $expense->category?->name ?? 'Expense',
+                'category' => $expense->category ? [
+                    'name' => $expense->category->name,
+                    'color' => $expense->category->color,
+                ] : null,
+                'property' => $expense->property ? [
+                    'id' => $expense->property->id,
+                    'name' => $expense->property->name,
+                ] : null,
+                'accommodation' => $expense->accommodation ? [
+                    'id' => $expense->accommodation->id,
+                    'display_name' => $expense->accommodation->display_name,
+                ] : null,
+            ];
+        });
+
+        $mergedTransactions = $incomeTransactions
+            ->concat($expenseTransactions)
+            ->sort(function (array $a, array $b) {
+                $dateCompare = strcmp((string) ($b['transaction_date'] ?? ''), (string) ($a['transaction_date'] ?? ''));
+
+                if ($dateCompare !== 0) {
+                    return $dateCompare;
+                }
+
+                return ($b['id'] ?? 0) <=> ($a['id'] ?? 0);
+            })
+            ->values();
+
+        $perPage = 20;
+        $currentPage = max(1, (int) $request->input('page', 1));
+        $transactions = new LengthAwarePaginator(
+            $mergedTransactions->forPage($currentPage, $perPage)->values(),
+            $mergedTransactions->count(),
+            $perPage,
+            $currentPage,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
 
         return response()->json([
             'success' => true,

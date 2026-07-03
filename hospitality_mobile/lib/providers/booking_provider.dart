@@ -6,6 +6,7 @@ import '../config/api_config.dart';
 
 class BookingProvider with ChangeNotifier {
   bool _isLoading = false;
+  String _loadingMessage = 'Loading bookings...';
   List<Map<String, dynamic>> _bookings = [];
   Map<String, int> _counts = {
     'all': 0,
@@ -24,6 +25,7 @@ class BookingProvider with ChangeNotifier {
   bool _isCountsLoading = false;
 
   bool get isLoading => _isLoading;
+  String get loadingMessage => _loadingMessage;
   bool get isCountsLoading => _isCountsLoading;
   List<Map<String, dynamic>> get bookings => _bookings;
   Map<String, int> get counts => _counts;
@@ -35,8 +37,13 @@ class BookingProvider with ChangeNotifier {
   List<Map<String, dynamic>> get recentCheckIns => _recentCheckIns;
   List<Map<String, dynamic>> get recentCheckOuts => _recentCheckOuts;
 
+  Future<void> _refreshCurrentBookings() async {
+    await fetchBookings(status: _currentStatus);
+  }
+
   Future<void> fetchCheckIns(String date, {bool showAll = false}) async {
     _isLoading = true;
+    _loadingMessage = 'Loading check-ins...';
     _error = null;
     notifyListeners();
 
@@ -81,6 +88,7 @@ class BookingProvider with ChangeNotifier {
 
   Future<void> fetchCheckOuts(String date, {bool showAll = false}) async {
     _isLoading = true;
+    _loadingMessage = 'Loading check-outs...';
     _error = null;
     notifyListeners();
 
@@ -125,6 +133,7 @@ class BookingProvider with ChangeNotifier {
 
   Future<void> fetchCheckInHistory() async {
     _isLoading = true;
+    _loadingMessage = 'Loading check-in history...';
     notifyListeners();
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -154,6 +163,7 @@ class BookingProvider with ChangeNotifier {
 
   Future<void> fetchCheckOutHistory() async {
     _isLoading = true;
+    _loadingMessage = 'Loading check-out history...';
     notifyListeners();
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -227,6 +237,7 @@ class BookingProvider with ChangeNotifier {
 
   Future<void> fetchBookings({String status = 'all'}) async {
     _isLoading = true;
+    _loadingMessage = 'Loading bookings...';
     _currentStatus = status;
     _error = null;
     notifyListeners();
@@ -269,6 +280,7 @@ class BookingProvider with ChangeNotifier {
 
   Future<Map<String, dynamic>?> fetchBookingDetails(int id) async {
     _isLoading = true;
+    _loadingMessage = 'Loading booking details...';
     notifyListeners();
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -332,6 +344,7 @@ class BookingProvider with ChangeNotifier {
 
   Future<bool> createBooking(Map<String, dynamic> data) async {
     _isLoading = true;
+    _loadingMessage = 'Creating booking...';
     notifyListeners();
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -348,7 +361,7 @@ class BookingProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        await fetchBookings(status: 'all');
+        await _refreshCurrentBookings();
         return true;
       } else {
         final errorData = jsonDecode(response.body);
@@ -370,6 +383,7 @@ class BookingProvider with ChangeNotifier {
     String? reason,
   }) async {
     _isLoading = true;
+    _loadingMessage = 'Updating booking status...';
     notifyListeners();
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -391,7 +405,7 @@ class BookingProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        await fetchBookings(status: _currentStatus);
+        await _refreshCurrentBookings();
         await fetchCounts();
         return true;
       } else {
@@ -417,6 +431,7 @@ class BookingProvider with ChangeNotifier {
 
   Future<bool> editBooking(int id, Map<String, dynamic> data) async {
     _isLoading = true;
+    _loadingMessage = 'Updating booking...';
     notifyListeners();
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -433,7 +448,7 @@ class BookingProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        await fetchBookings(status: 'all');
+        await _refreshCurrentBookings();
         await fetchCounts();
         return true;
       } else {
@@ -452,6 +467,7 @@ class BookingProvider with ChangeNotifier {
 
   Future<bool> performCheckIn(int id, Map<String, dynamic> data) async {
     _isLoading = true;
+    _loadingMessage = 'Checking in guest...';
     notifyListeners();
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -470,7 +486,7 @@ class BookingProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        await fetchBookings(status: 'all');
+        await _refreshCurrentBookings();
         await fetchCounts();
         return true;
       } else {
@@ -489,6 +505,7 @@ class BookingProvider with ChangeNotifier {
 
   Future<bool> performCheckOut(int id, Map<String, dynamic> data) async {
     _isLoading = true;
+    _loadingMessage = 'Checking out guest...';
     notifyListeners();
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -507,7 +524,7 @@ class BookingProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        await fetchBookings(status: 'all');
+        await _refreshCurrentBookings();
         await fetchCounts();
         return true;
       } else {
@@ -530,6 +547,7 @@ class BookingProvider with ChangeNotifier {
     String notes,
   ) async {
     _isLoading = true;
+    _loadingMessage = 'Updating payment...';
     notifyListeners();
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -550,7 +568,7 @@ class BookingProvider with ChangeNotifier {
       if (response.statusCode == 200) {
         final result = jsonDecode(response.body);
         if (result['success'] == true) {
-          await fetchBookings(status: 'all');
+          await _refreshCurrentBookings();
           await fetchCounts();
           return true;
         } else {
@@ -577,6 +595,7 @@ class BookingProvider with ChangeNotifier {
     String reason,
   ) async {
     _isLoading = true;
+    _loadingMessage = 'Recording refund...';
     _error = null;
     notifyListeners();
     try {
@@ -598,7 +617,7 @@ class BookingProvider with ChangeNotifier {
       if (response.statusCode == 200) {
         final result = jsonDecode(response.body);
         if (result['success'] == true) {
-          await fetchBookings(status: 'all');
+          await _refreshCurrentBookings();
           await fetchCounts();
           return true;
         } else {

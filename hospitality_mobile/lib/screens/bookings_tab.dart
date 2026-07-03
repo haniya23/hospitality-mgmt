@@ -21,6 +21,7 @@ class BookingsTab extends StatefulWidget {
 class _BookingsTabState extends State<BookingsTab> {
   int _selectedIndex =
       0; // 0: Pending, 1: Confirmed, 2: Completed, 3: Cancelled
+  bool _isRefundSubmitting = false;
 
   @override
   void initState() {
@@ -104,22 +105,76 @@ class _BookingsTabState extends State<BookingsTab> {
           ),
         ],
       ),
-      body: Column(
+      body: Stack(
         children: [
-          _buildStatusCards(counts),
-          const SizedBox(height: 8),
-          Expanded(
-            child: provider.isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : RefreshIndicator(
-                    onRefresh: () async {
-                      provider.fetchCounts();
-                      _fetchBookingsForCurrentTab();
-                    },
-                    child: _buildBookingList(bookings),
-                  ),
+          Column(
+            children: [
+              _buildStatusCards(counts),
+              const SizedBox(height: 8),
+              Expanded(
+                child: provider.isLoading && bookings.isEmpty
+                    ? const Center(child: CircularProgressIndicator())
+                    : RefreshIndicator(
+                        onRefresh: () async {
+                          provider.fetchCounts();
+                          _fetchBookingsForCurrentTab();
+                        },
+                        child: _buildBookingList(bookings),
+                      ),
+              ),
+            ],
           ),
+          if (provider.isLoading && bookings.isNotEmpty)
+            Positioned(
+              top: 0,
+              left: 16,
+              right: 16,
+              child: _buildLoadingBanner(provider.loadingMessage),
+            ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingBanner(String message) {
+    return IgnorePointer(
+      ignoring: true,
+      child: Container(
+        margin: const EdgeInsets.only(top: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: const Color(0xFF2E3E2A),
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.2,
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFFE8B6)),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                message,
+                style: GoogleFonts.outfit(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -176,8 +231,9 @@ class _BookingsTabState extends State<BookingsTab> {
     Color color,
     IconData icon,
   ) {
+    final isSelected = _selectedIndex == index;
     return SizedBox(
-      width: 104,
+      width: isSelected ? 132 : 84,
       child: _buildSingleStatusCard(
         index: index,
         title: title,
@@ -204,15 +260,18 @@ class _BookingsTabState extends State<BookingsTab> {
         _fetchBookingsForCurrentTab();
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        padding: EdgeInsets.symmetric(
+          vertical: isSelected ? 12 : 10,
+          horizontal: isSelected ? 12 : 8,
+        ),
         decoration: BoxDecoration(
           color: isSelected ? const Color(0xFF2E3E2A) : Colors.white,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(22),
           border: Border.all(
             color: isSelected
                 ? const Color(0xFF2E3E2A)
                 : const Color(0xFF2E3E2A).withOpacity(0.08),
-            width: 1.5,
+            width: isSelected ? 1.5 : 1,
           ),
           boxShadow: [
             BoxShadow(
@@ -225,26 +284,31 @@ class _BookingsTabState extends State<BookingsTab> {
           ],
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               icon,
-              color: isSelected ? const Color(0xFFFFE8B6) : primaryColor,
-              size: 22,
+              color: isSelected
+                  ? const Color(0xFFFFE8B6)
+                  : primaryColor.withOpacity(0.9),
+              size: isSelected ? 20 : 18,
             ),
-            const SizedBox(height: 6),
+            SizedBox(height: isSelected ? 6 : 4),
             Text(
               count.toString(),
               style: GoogleFonts.outfit(
-                fontSize: 18,
+                fontSize: isSelected ? 18 : 15,
                 fontWeight: FontWeight.bold,
                 color: isSelected ? Colors.white : const Color(0xFF191D19),
               ),
             ),
-            const SizedBox(height: 2),
             Text(
               title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
               style: GoogleFonts.outfit(
-                fontSize: 11,
+                fontSize: isSelected ? 11 : 10,
                 color: isSelected
                     ? Colors.white.withOpacity(0.8)
                     : Colors.grey[600],
@@ -368,128 +432,178 @@ class _BookingsTabState extends State<BookingsTab> {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            Icon(Icons.undo_rounded, color: Colors.red.shade700),
-            const SizedBox(width: 8),
-            Text(
-              'Record Refund',
-              style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-        content: Form(
-          key: formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+      barrierDismissible: !_isRefundSubmitting,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Row(
             children: [
+              Icon(Icons.undo_rounded, color: Colors.red.shade700),
+              const SizedBox(width: 8),
               Text(
-                'Max Refundable: ₹${maxRefund.toStringAsFixed(2)}',
-                style: GoogleFonts.outfit(
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey.shade700,
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: amountController,
-                keyboardType: TextInputType.number,
-                style: GoogleFonts.outfit(fontWeight: FontWeight.w600),
-                decoration: InputDecoration(
-                  labelText: 'Refund Amount *',
-                  labelStyle: GoogleFonts.outfit(fontSize: 12),
-                  prefixText: '₹ ',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                validator: (v) {
-                  if (v == null || v.isEmpty) return 'Required';
-                  final amt = double.tryParse(v);
-                  if (amt == null || amt <= 0) return 'Enter a valid amount';
-                  if (amt > maxRefund) return 'Cannot exceed max refundable';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: reasonController,
-                maxLines: 2,
-                style: GoogleFonts.outfit(fontSize: 13),
-                decoration: InputDecoration(
-                  labelText: 'Reason / Notes',
-                  labelStyle: GoogleFonts.outfit(fontSize: 12),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
+                'Record Refund',
+                style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
               ),
             ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancel',
-              style: GoogleFonts.outfit(
-                color: Colors.grey.shade700,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red.shade700,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            onPressed: () async {
-              if (!formKey.currentState!.validate()) return;
-              final amt = double.parse(amountController.text);
-              final reason = reasonController.text.trim();
-
-              final bookingProv = Provider.of<BookingProvider>(
-                context,
-                listen: false,
-              );
-              final success = await bookingProv.recordBookingRefund(
-                booking['uuid'],
-                amt,
-                reason,
-              );
-              if (!context.mounted) return;
-              Navigator.pop(context);
-
-              if (success) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Refund recorded successfully!'),
-                    backgroundColor: Colors.green,
+          content: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Max Refundable: ₹${maxRefund.toStringAsFixed(2)}',
+                  style: GoogleFonts.outfit(
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade700,
                   ),
-                );
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      bookingProv.error ?? 'Failed to record refund',
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: amountController,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  enabled: !_isRefundSubmitting,
+                  autofocus: true,
+                  style: GoogleFonts.outfit(fontWeight: FontWeight.w600),
+                  decoration: InputDecoration(
+                    labelText: 'Refund Amount *',
+                    labelStyle: GoogleFonts.outfit(fontSize: 12),
+                    prefixText: '₹ ',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    backgroundColor: Colors.red,
                   ),
-                );
-              }
-            },
-            child: Text(
-              'Record Refund',
-              style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return 'Required';
+                    final amt = double.tryParse(v);
+                    if (amt == null || amt <= 0) return 'Enter a valid amount';
+                    if (amt > maxRefund) return 'Cannot exceed max refundable';
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: reasonController,
+                  maxLines: 2,
+                  enabled: !_isRefundSubmitting,
+                  style: GoogleFonts.outfit(fontSize: 13),
+                  decoration: InputDecoration(
+                    labelText: 'Reason / Notes',
+                    labelStyle: GoogleFonts.outfit(fontSize: 12),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+                if (_isRefundSubmitting) ...[
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.red.shade700,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Recording refund and updating finance...',
+                          style: GoogleFonts.outfit(
+                            fontSize: 12,
+                            color: Colors.grey.shade700,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
             ),
           ),
-        ],
+          actions: [
+            TextButton(
+              onPressed: _isRefundSubmitting
+                  ? null
+                  : () => Navigator.pop(dialogContext),
+              child: Text(
+                'Cancel',
+                style: GoogleFonts.outfit(
+                  color: Colors.grey.shade700,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red.shade700,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              onPressed: _isRefundSubmitting
+                  ? null
+                  : () async {
+                      if (!formKey.currentState!.validate()) return;
+                      final amt = double.parse(amountController.text);
+                      final reason = reasonController.text.trim();
+                      final scaffoldMessenger = ScaffoldMessenger.of(context);
+                      final bookingProv = Provider.of<BookingProvider>(
+                        dialogContext,
+                        listen: false,
+                      );
+
+                      setState(() {
+                        _isRefundSubmitting = true;
+                      });
+                      setDialogState(() {});
+
+                      final success = await bookingProv.recordBookingRefund(
+                        booking['uuid'],
+                        amt,
+                        reason,
+                      );
+
+                      if (!mounted) return;
+
+                      setState(() {
+                        _isRefundSubmitting = false;
+                      });
+
+                      if (dialogContext.mounted) {
+                        Navigator.pop(dialogContext);
+                      }
+
+                      scaffoldMessenger.showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            success
+                                ? 'Refund recorded successfully!'
+                                : (bookingProv.error ??
+                                      'Failed to record refund'),
+                          ),
+                          backgroundColor: success ? Colors.green : Colors.red,
+                        ),
+                      );
+                    },
+              child: Text(
+                _isRefundSubmitting ? 'Recording...' : 'Record Refund',
+                style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
